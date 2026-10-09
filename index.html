@@ -182,7 +182,6 @@
     </div>
 
     <script>
-        // Konfiguracja Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -198,7 +197,7 @@
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
         } catch(e) {
-            console.warn("Tryb awaryjny offline aktywowany:", e);
+            console.error("Błąd inicjalizacji Firebase:", e);
         }
 
         let userId = 'user_' + Math.random().toString(36).substring(2, 9);
@@ -235,7 +234,6 @@
         const ARENA_HEIGHT = 2000;
         let camera = { x: 0, y: 0 };
         let gameLoopId = null;
-        let hostLogicInterval = null;
         let syncInterval = null;
         const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
 
@@ -256,8 +254,10 @@
             }
         }
 
-        // Zawsze gwarantowane przejście do lobby (nawet przy braku internetu)
         async function createRoom() {
+            const errBox = document.getElementById('menuError');
+            errBox.classList.add('hidden');
+
             localState.name = document.getElementById('playerName').value.trim() || "Paweł Pyka";
             localState.color = document.getElementById('playerColor').value || "#00e5ff";
 
@@ -270,11 +270,10 @@
                         hostId: userId,
                         status: 'lobby',
                         mode: 'lms',
-                        timer: 60,
-                        stateData: "{}"
+                        timer: 60
                     });
                     db.ref(`rooms/${currentRoomId}`).onDisconnect().remove();
-                } catch(e) { console.warn("DB offline mode"); }
+                } catch(e) {}
             }
             await joinPlayerToRoom();
             showLobby();
@@ -282,42 +281,50 @@
 
         async function joinRoomBtn() {
             const errBox = document.getElementById('menuError');
+            errBox.classList.add('hidden');
             const code = document.getElementById('joinCode').value.toUpperCase().trim();
             
             if(code.length !== 6) {
-                errBox.innerText = "Kod pokoju musi mieć 6 znaków!"; 
+                errBox.innerText = "Kod pokoju musi mieć dokładnie 6 znaków!"; 
                 errBox.classList.remove('hidden');
                 return;
             }
 
-            localState.name = document.getElementById('playerName').value.trim() || "Gracz";
-            localState.color = document.getElementById('playerColor').value || "#ff3366";
-
-            currentRoomId = code;
-            isHost = false;
-
-            if (db) {
-                try {
-                    const snap = await db.ref(`rooms/${code}`).once('value');
-                    if (!snap.exists()) {
-                        errBox.innerText = "Pokój nie istnieje, ale łączę lokalnie...";
-                        errBox.classList.remove('hidden');
-                    }
-                } catch(e) {}
+            if (!db) {
+                errBox.innerText = "Brak połączenia z bazą danych!";
+                errBox.classList.remove('hidden');
+                return;
             }
-            await joinPlayerToRoom();
-            showLobby();
+
+            try {
+                const snap = await db.ref(`rooms/${code}`).once('value');
+                if (snap.exists()) {
+                    currentRoomId = code;
+                    isHost = false;
+                    localState.name = document.getElementById('playerName').value.trim() || "Gracz";
+                    localState.color = document.getElementById('playerColor').value || "#ff3366";
+                    await joinPlayerToRoom();
+                    showLobby();
+                } else {
+                    errBox.innerText = "Pokój o takim kodzie nie istnieje!";
+                    errBox.classList.remove('hidden');
+                }
+            } catch(e) {
+                errBox.innerText = "Błąd sprawdzania pokoju: " + e.message;
+                errBox.classList.remove('hidden');
+            }
         }
 
         async function joinPlayerToRoom() {
-            if (db) {
+            if (db && currentRoomId) {
                 try {
                     const pRef = db.ref(`room_players/${currentRoomId}/${userId}`);
                     await pRef.set({
                         id: userId,
                         name: localState.name,
                         color: localState.color,
-                        x: localState.x, y: localState.y,
+                        x: 500 + Math.random() * 1000, 
+                        y: 500 + Math.random() * 1000,
                         score: 0,
                         isDead: false
                     });
@@ -333,11 +340,11 @@
             if (roomRefListener) roomRefListener.off();
             roomRefListener = db.ref(`rooms/${currentRoomId}`);
             roomRefListener.on('value', (snapshot) => {
-                if (!snapshot.exists()) return;
-                const data = snapshot.val();
-                if (data.stateData) {
-                    try { Object.assign(globalGameState, JSON.parse(data.stateData)); } catch(e){}
+                if (!snapshot.exists()) {
+                    leaveRoom();
+                    return;
                 }
+                const data = snapshot.val();
                 globalGameState.timer = data.timer || 60;
                 globalGameState.mode = data.mode || 'lms';
 
@@ -346,6 +353,11 @@
                     if (data.status === 'playing') startGameClient();
                     else if (data.status === 'ended') showEndScreen();
                     else if (data.status === 'lobby') showLobby();
+                }
+
+                if (globalGameState.status === 'lobby' && !isHost) {
+                    const select = document.getElementById('gameModeSelect');
+                    if(select) select.value = data.mode;
                 }
             });
         }
@@ -369,17 +381,29 @@
 
         function showLobby() {
             switchScreen('screen-lobby');
-            document.getElementById('lobbyCode').innerText = currentRoomId || "TEST";
+            document.getElementById('lobbyCode').innerText = currentRoomId || "------";
             document.getElementById('chatBox').style.display = 'flex';
             canvas.style.display = 'none';
             document.getElementById('hud').style.display = 'none';
 
+            const modeSelect = document.getElementById('gameModeSelect');
             const startBtn = document.getElementById('btnStartGame');
             const hostWarn = document.getElementById('hostWarning');
+
             if (isHost) {
+                if(modeSelect) modeSelect.disabled = false;
                 if(startBtn) startBtn.style.display = 'block';
                 if(hostWarn) hostWarn.style.display = 'none';
+                
+                if(modeSelect) {
+                    modeSelect.onchange = async (e) => {
+                        if(db && currentRoomId) {
+                            await db.ref(`rooms/${currentRoomId}`).update({ mode: e.target.value });
+                        }
+                    };
+                }
             } else {
+                if(modeSelect) modeSelect.disabled = true;
                 if(startBtn) startBtn.style.display = 'none';
                 if(hostWarn) hostWarn.style.display = 'block';
             }
@@ -394,7 +418,7 @@
             if(!list || !hudLeader) return;
 
             const allP = players.length > 0 ? players : [localState];
-            allP.sort((a,b) => b.score - a.score);
+            allP.sort((a,b) => (b.score || 0) - (a.score || 0));
 
             list.innerHTML = allP.map(p => `
                 <li class="flex items-center gap-2 p-1 ${p.id===userId?'bg-white/10':''}">
@@ -422,7 +446,6 @@
             if (roomRefListener) roomRefListener.off();
             if (playersRefListener) playersRefListener.off();
             clearInterval(syncInterval);
-            clearInterval(hostLogicInterval);
             cancelAnimationFrame(gameLoopId);
             
             currentRoomId = null; isHost = false; remotePlayers = {};
@@ -432,22 +455,21 @@
             switchScreen('screen-menu');
         }
 
-        // Uruchomienie gry przez Hosta lub w trybie lokalnym
+        // Host uruchamia grę dla wszystkich przez bazę danych
         const startBtn = document.getElementById('btnStartGame');
         if(startBtn) {
             startBtn.onclick = async () => {
+                if (!isHost || !db || !currentRoomId) return;
                 const modeSelect = document.getElementById('gameModeSelect');
                 const mode = modeSelect ? modeSelect.value : 'lms';
-                globalGameState.mode = mode;
-                globalGameState.status = 'playing';
-                globalGameState.timer = 60;
-
-                if (db && currentRoomId) {
-                    try {
-                        await db.ref(`rooms/${currentRoomId}`).update({ status: 'playing', mode: mode, timer: 60 });
-                    } catch(e){}
-                }
-                startGameClient();
+                
+                try {
+                    await db.ref(`rooms/${currentRoomId}`).update({
+                        status: 'playing',
+                        mode: mode,
+                        timer: 60
+                    });
+                } catch(e) {}
             };
         }
 
@@ -462,6 +484,12 @@
 
             localState.isDead = false;
             localState.score = 0;
+            if (globalGameState.mode === 'race') {
+                localState.x = 100; localState.y = Math.random() * ARENA_HEIGHT;
+            } else {
+                localState.x = 500 + Math.random() * 1000;
+                localState.y = 500 + Math.random() * 1000;
+            }
 
             if (syncInterval) clearInterval(syncInterval);
             syncInterval = setInterval(async () => {
@@ -474,7 +502,7 @@
                         isDead: localState.isDead
                     });
                 } catch(e){}
-            }, 100);
+            }, 60);
 
             let lastTime = performance.now();
             if(gameLoopId) cancelAnimationFrame(gameLoopId);
@@ -497,17 +525,34 @@
             canvas.style.display = 'none';
             document.getElementById('hud').style.display = 'none';
             switchScreen('screen-end');
+            
             const winnerElem = document.getElementById('winnerName');
-            if(winnerElem) winnerElem.innerText = "Koniec Rozgrywki!";
+            if(winnerElem) winnerElem.innerText = "Koniec Rundy!";
+            
+            const allP = Object.values(remotePlayers);
+            allP.push(localState);
+            allP.sort((a,b) => (b.score||0) - (a.score||0));
+            
+            const endL = document.getElementById('endLeaderboard');
+            if(endL) {
+                endL.innerHTML = allP.map((p, index) => `
+                    <li class="flex justify-between items-center bg-black/40 p-2 border border-gray-600">
+                        <span>#${index+1} <span style="color:${p.color}">■</span> ${p.name}</span>
+                        <span class="text-yellow-400">${p.score || 0} pkt</span>
+                    </li>
+                `).join('');
+            }
         }
 
         function updatePhysics(dt) {
             const timeElem = document.getElementById('hudTime');
             if(timeElem) timeElem.innerText = `00:${Math.max(0, Math.floor(globalGameState.timer)).toString().padStart(2,'0')}`;
-            globalGameState.timer -= dt;
-            if(globalGameState.timer <= 0) {
-                showEndScreen();
-                return;
+            
+            if (isHost) {
+                globalGameState.timer -= dt;
+                if (globalGameState.timer <= 0 && db && currentRoomId) {
+                    db.ref(`rooms/${currentRoomId}`).update({ status: 'ended' });
+                }
             }
 
             if (localState.isDead) return;
@@ -529,6 +574,12 @@
 
             localState.x = Math.max(20, Math.min(ARENA_WIDTH - 20, localState.x));
             localState.y = Math.max(20, Math.min(ARENA_HEIGHT - 20, localState.y));
+
+            // Logika trybów gry
+            if (globalGameState.mode === 'race' && localState.x > 1900) {
+                localState.score += 100;
+                localState.isDead = true;
+            }
 
             camera.x += (localState.x - canvas.width / 2 - camera.x) * 5 * dt;
             camera.y += (localState.y - canvas.height / 2 - camera.y) * 5 * dt;
@@ -557,7 +608,13 @@
             ctx.strokeStyle = '#fff'; ctx.lineWidth = 10;
             ctx.strokeRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
 
-            // Rysowanie graczy
+            if (globalGameState.mode === 'race') {
+                ctx.fillStyle = 'rgba(0, 204, 68, 0.3)';
+                ctx.fillRect(1900, 0, 100, ARENA_HEIGHT);
+                ctx.fillStyle = '#fff'; ctx.font = '20px "Press Start 2P"';
+                ctx.fillText("META", 1910, ARENA_HEIGHT/2);
+            }
+
             const drawPlayer = (p) => {
                 if (p.isDead) return;
                 ctx.save(); ctx.translate(p.x || 1000, p.y || 1000);
@@ -576,7 +633,6 @@
             ctx.restore();
         }
 
-        // Obsługa klawiszy
         window.addEventListener('keydown', e => { 
             if (keys.hasOwnProperty(e.key) && document.activeElement !== document.getElementById('chatInput')) {
                 keys[e.key] = true; 
@@ -592,14 +648,12 @@
             canvas.height = window.innerHeight; 
         });
 
-        // Eventy przycisków menu
         document.getElementById('btnCreateRoom').onclick = createRoom;
         document.getElementById('btnJoinRoom').onclick = joinRoomBtn;
         document.getElementById('btnLeaveLobby').onclick = leaveRoom;
         document.getElementById('btnLeaveGame').onclick = leaveRoom;
         document.getElementById('btnReturnLobby').onclick = leaveRoom;
 
-        // Chat
         const chatForm = document.getElementById('chatForm');
         if(chatForm) {
             chatForm.addEventListener('submit', (e) => {
