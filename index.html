@@ -197,21 +197,20 @@
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
         } catch(e) {
-            console.error("Błąd inicjalizacji Firebase:", e);
+            console.error("Firebase init error:", e);
         }
 
         let userId = 'user_' + Math.random().toString(36).substring(2, 9);
         let currentRoomId = null;
         let isHost = false;
         
-        let roomRefListener = null;
-        let playersRefListener = null;
+        let roomListener = null;
+        let playersListener = null;
 
         const localState = {
             name: "Paweł Pyka",
             color: "#00e5ff",
             x: 1000, y: 1000,
-            vx: 0, vy: 0,
             score: 0,
             isDead: false
         };
@@ -220,12 +219,7 @@
         let globalGameState = {
             status: 'lobby',
             mode: 'lms',
-            timer: 60,
-            safeZone: { x: 1000, y: 1000, r: 1000 },
-            zones: [],
-            kothZone: { x: 1000, y: 1000, r: 200 },
-            balls: [],
-            winner: null
+            timer: 60
         };
 
         const canvas = document.getElementById('gameCanvas');
@@ -310,7 +304,7 @@
                     errBox.classList.remove('hidden');
                 }
             } catch(e) {
-                errBox.innerText = "Błąd sprawdzania pokoju: " + e.message;
+                errBox.innerText = "Błąd dołączania: " + e.message;
                 errBox.classList.remove('hidden');
             }
         }
@@ -323,8 +317,8 @@
                         id: userId,
                         name: localState.name,
                         color: localState.color,
-                        x: 500 + Math.random() * 1000, 
-                        y: 500 + Math.random() * 1000,
+                        x: 1000 + (Math.random() * 200 - 100), 
+                        y: 1000 + (Math.random() * 200 - 100),
                         score: 0,
                         isDead: false
                     });
@@ -337,9 +331,9 @@
 
         function listenToRoom() {
             if (!db) return;
-            if (roomRefListener) roomRefListener.off();
-            roomRefListener = db.ref(`rooms/${currentRoomId}`);
-            roomRefListener.on('value', (snapshot) => {
+            if (roomListener) roomListener.off();
+            roomListener = db.ref(`rooms/${currentRoomId}`);
+            roomListener.on('value', (snapshot) => {
                 if (!snapshot.exists()) {
                     leaveRoom();
                     return;
@@ -364,9 +358,9 @@
 
         function listenToPlayers() {
             if (!db) return;
-            if (playersRefListener) playersRefListener.off();
-            playersRefListener = db.ref(`room_players/${currentRoomId}`);
-            playersRefListener.on('value', (snapshot) => {
+            if (playersListener) playersListener.off();
+            playersListener = db.ref(`room_players/${currentRoomId}`);
+            playersListener.on('value', (snapshot) => {
                 const playersData = snapshot.val() || {};
                 const activeInRoom = [];
                 Object.values(playersData).forEach(data => {
@@ -443,8 +437,8 @@
                     if(isHost) await db.ref(`rooms/${currentRoomId}`).remove();
                 } catch(e){}
             }
-            if (roomRefListener) roomRefListener.off();
-            if (playersRefListener) playersRefListener.off();
+            if (roomListener) roomListener.off();
+            if (playersListener) playersListener.off();
             clearInterval(syncInterval);
             cancelAnimationFrame(gameLoopId);
             
@@ -455,21 +449,27 @@
             switchScreen('screen-menu');
         }
 
-        // Host uruchamia grę dla wszystkich przez bazę danych
         const startBtn = document.getElementById('btnStartGame');
         if(startBtn) {
             startBtn.onclick = async () => {
-                if (!isHost || !db || !currentRoomId) return;
                 const modeSelect = document.getElementById('gameModeSelect');
                 const mode = modeSelect ? modeSelect.value : 'lms';
                 
-                try {
-                    await db.ref(`rooms/${currentRoomId}`).update({
-                        status: 'playing',
-                        mode: mode,
-                        timer: 60
-                    });
-                } catch(e) {}
+                // Jeśli jesteśmy w bazie, zmieniamy status dla wszystkich
+                if (db && currentRoomId) {
+                    try {
+                        await db.ref(`rooms/${currentRoomId}`).update({
+                            status: 'playing',
+                            mode: mode,
+                            timer: 60
+                        });
+                    } catch(e) {}
+                }
+                
+                // Natychmiastowe uruchomienie lokalne dla pewności
+                globalGameState.status = 'playing';
+                globalGameState.mode = mode;
+                startGameClient();
             };
         }
 
@@ -484,12 +484,6 @@
 
             localState.isDead = false;
             localState.score = 0;
-            if (globalGameState.mode === 'race') {
-                localState.x = 100; localState.y = Math.random() * ARENA_HEIGHT;
-            } else {
-                localState.x = 500 + Math.random() * 1000;
-                localState.y = 500 + Math.random() * 1000;
-            }
 
             if (syncInterval) clearInterval(syncInterval);
             syncInterval = setInterval(async () => {
@@ -548,11 +542,10 @@
             const timeElem = document.getElementById('hudTime');
             if(timeElem) timeElem.innerText = `00:${Math.max(0, Math.floor(globalGameState.timer)).toString().padStart(2,'0')}`;
             
-            if (isHost) {
-                globalGameState.timer -= dt;
-                if (globalGameState.timer <= 0 && db && currentRoomId) {
-                    db.ref(`rooms/${currentRoomId}`).update({ status: 'ended' });
-                }
+            globalGameState.timer -= dt;
+            if (globalGameState.timer <= 0) {
+                showEndScreen();
+                return;
             }
 
             if (localState.isDead) return;
@@ -574,12 +567,6 @@
 
             localState.x = Math.max(20, Math.min(ARENA_WIDTH - 20, localState.x));
             localState.y = Math.max(20, Math.min(ARENA_HEIGHT - 20, localState.y));
-
-            // Logika trybów gry
-            if (globalGameState.mode === 'race' && localState.x > 1900) {
-                localState.score += 100;
-                localState.isDead = true;
-            }
 
             camera.x += (localState.x - canvas.width / 2 - camera.x) * 5 * dt;
             camera.y += (localState.y - canvas.height / 2 - camera.y) * 5 * dt;
@@ -607,13 +594,6 @@
 
             ctx.strokeStyle = '#fff'; ctx.lineWidth = 10;
             ctx.strokeRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
-
-            if (globalGameState.mode === 'race') {
-                ctx.fillStyle = 'rgba(0, 204, 68, 0.3)';
-                ctx.fillRect(1900, 0, 100, ARENA_HEIGHT);
-                ctx.fillStyle = '#fff'; ctx.font = '20px "Press Start 2P"';
-                ctx.fillText("META", 1910, ARENA_HEIGHT/2);
-            }
 
             const drawPlayer = (p) => {
                 if (p.isDead) return;
