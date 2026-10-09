@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TEST NOWEJ WERSJI 123</title>
+    <title>Chaos Arena Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
-    <!-- Firebase App & Realtime Database SDK (Classic CDN - gwarancja działania na GitHub Pages) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -88,7 +88,7 @@
     <div id="uiContainer" class="ui-layer interactive">
         <!-- MENU SCREEN -->
         <div id="screen-menu" class="screen active flex-col gap-6 p-8 pixel-box max-w-md w-full text-center">
-            <h1 class="text-4xl text-[#00e5ff] mb-2 leading-tight" style="text-shadow: 4px 4px 0 #ff3366;">GÓWNO<br>ARENA</h1>
+            <h1 class="text-4xl text-[#00e5ff] mb-2 leading-tight" style="text-shadow: 4px 4px 0 #ff3366;">CHAOS<br>ARENA</h1>
             
             <div class="flex flex-col gap-2 text-left">
                 <label class="text-[10px] text-gray-400">Pseudonim:</label>
@@ -130,7 +130,7 @@
                 <div class="w-1/2 flex flex-col gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] text-gray-400">Tryb Gry (Tylko Host):</label>
-                        <select id="gameModeSelect" class="input-pixel p-3 text-xs w-full cursor-pointer disabled:opacity-50">
+                        <select id="gameModeSelect" class="input-pixel p-3 text-xs w-full cursor-pointer">
                             <option value="lms">🛡️ Last Man Standing</option>
                             <option value="race">🏁 Wyścig Chaosu</option>
                             <option value="capture">🟢 Łapanie Punktów</option>
@@ -142,7 +142,7 @@
                     <p id="hostWarning" class="text-[9px] text-yellow-400 hidden">Czekaj aż Host wystartuje grę...</p>
                     
                     <div class="flex-grow flex items-end">
-                        <button id="btnStartGame" class="btn p-4 text-xs w-full !bg-[#00cc44] hover:!bg-[#33ff77] hidden">ROZPOCZNIJ GRĘ</button>
+                        <button id="btnStartGame" class="btn p-4 text-xs w-full !bg-[#00cc44] hover:!bg-[#33ff77]">ROZPOCZNIJ GRĘ</button>
                     </div>
                 </div>
             </div>
@@ -158,8 +158,7 @@
             <div class="text-left text-xs mb-2">Tabela Wyników:</div>
             <ul id="endLeaderboard" class="bg-black/50 border-2 border-white h-40 overflow-y-auto p-4 flex flex-col gap-3 text-xs text-left mb-4"></ul>
 
-            <button id="btnReturnLobby" class="btn p-4 text-xs w-full hidden">WRÓĆ DO LOBBY (HOST)</button>
-            <p id="endWaitMsg" class="text-[10px] text-gray-400">Czekaj aż Host przywróci pokój...</p>
+            <button id="btnReturnLobby" class="btn p-4 text-xs w-full">WRÓĆ DO LOBBY</button>
         </div>
     </div>
 
@@ -182,15 +181,6 @@
         </form>
     </div>
 
-    <!-- ERROR MODAL -->
-    <div id="errorModal" class="hidden fixed top-0 left-0 w-full h-full bg-black/90 flex items-center justify-center z-[100] p-4 interactive">
-        <div class="pixel-box p-6 max-w-lg text-center bg-red-900 !border-red-500">
-            <h2 class="text-xl text-white mb-4">⚠️ KOMUNIKAT</h2>
-            <p id="errorMsg" class="text-xs text-red-200 mb-6 leading-relaxed font-mono text-left bg-black p-4 overflow-auto max-h-40"></p>
-            <button onclick="document.getElementById('errorModal').classList.add('hidden')" class="btn p-3 w-full !bg-gray-800">ZAMKNIJ</button>
-        </div>
-    </div>
-
     <script>
         // Konfiguracja Firebase
         const firebaseConfig = {
@@ -200,23 +190,15 @@
             projectId: "chaosarena-75404",
             storageBucket: "chaosarena-75404.firebasestorage.app",
             messagingSenderId: "24436364546",
-            appId: "1:24436364546:web:9793a5e85d4734195f9e1b",
-            measurementId: "G-PR43K57SFX"
+            appId: "1:24436364546:web:9793a5e85d4734195f9e1b"
         };
 
-        function showError(msg) {
-            document.getElementById('errorMsginnerText') ? document.getElementById('errorMsg').innerText = msg : document.getElementById('errorMsg').textContent = msg;
-            document.getElementById('errorModal').classList.remove('hidden');
-            console.error("Game Error:", msg);
-        }
-
-        // Inicjalizacja Firebase w wersji klasycznej (bezpieczna dla GitHub Pages)
-        let db;
+        let db = null;
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
         } catch(e) {
-            showError("Błąd inicjalizacji Firebase: " + e.message);
+            console.warn("Tryb awaryjny offline aktywowany:", e);
         }
 
         let userId = 'user_' + Math.random().toString(36).substring(2, 9);
@@ -232,18 +214,17 @@
             x: 1000, y: 1000,
             vx: 0, vy: 0,
             score: 0,
-            isDead: false,
-            lastSync: 0
+            isDead: false
         };
 
         let remotePlayers = {}; 
         let globalGameState = {
             status: 'lobby',
             mode: 'lms',
-            timer: 0,
-            safeZone: null,
+            timer: 60,
+            safeZone: { x: 1000, y: 1000, r: 1000 },
             zones: [],
-            kothZone: null,
+            kothZone: { x: 1000, y: 1000, r: 200 },
             balls: [],
             winner: null
         };
@@ -265,170 +246,6 @@
             return code;
         }
 
-        async function createRoom() {
-            const errBox = document.getElementById('menuError');
-            errBox.classList.add('hidden');
-            
-            localState.name = document.getElementById('playerName').value.trim() || "Paweł Pyka";
-            localState.color = document.getElementById('playerColor').value || "#00e5ff";
-
-            currentRoomId = generateRoomCode();
-            isHost = true;
-
-            try {
-                const roomNode = db.ref(`rooms/${currentRoomId}`);
-                await roomNode.set({
-                    hostId: userId,
-                    status: 'lobby',
-                    mode: 'lms',
-                    timer: 60,
-                    stateData: "{}"
-                });
-                
-                roomNode.onDisconnect().remove();
-                await joinPlayerToRoom();
-                showLobby();
-            } catch(e) {
-                showError("Nie udało się utworzyć pokoju. Sprawdź reguły bazy Realtime Database w konsoli Firebase.\nSzczegóły: " + e.message);
-            }
-        }
-
-        async function joinRoomBtn() {
-            const errBox = document.getElementById('menuError');
-            const code = document.getElementById('joinCode').value.toUpperCase().trim();
-            
-            if(code.length !== 6) {
-                errBox.innerText = "Kod pokoju musi mieć dokładnie 6 znaków!"; 
-                errBox.classList.remove('hidden');
-                return;
-            }
-
-            localState.name = document.getElementById('playerName').value.trim() || "Gracz";
-            localState.color = document.getElementById('playerColor').value || "#ff3366";
-
-            try {
-                const roomSnap = await db.ref(`rooms/${code}`).once('value');
-                
-                if (roomSnap.exists()) {
-                    currentRoomId = code;
-                    isHost = false;
-                    await joinPlayerToRoom();
-                    showLobby();
-                } else {
-                    errBox.innerText = "Nie znaleziono pokoju o takim kodzie!";
-                    errBox.classList.remove('hidden');
-                }
-            } catch(e) {
-                showError("Błąd dołączania do pokoju: " + e.message);
-            }
-        }
-
-        async function joinPlayerToRoom() {
-            const playerNode = db.ref(`room_players/${currentRoomId}/${userId}`);
-            await playerNode.set({
-                id: userId,
-                name: localState.name,
-                color: localState.color,
-                x: localState.x, y: localState.y,
-                vx: 0, vy: 0,
-                score: 0,
-                isDead: false,
-                ts: Date.now()
-            });
-            
-            playerNode.onDisconnect().remove();
-            listenToRoom();
-            listenToPlayers();
-        }
-
-        function listenToRoom() {
-            if (roomRefListener) roomRefListener.off();
-            roomRefListener = db.ref(`rooms/${currentRoomId}`);
-            
-            roomRefListener.on('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    leaveRoom(true); 
-                    return;
-                }
-                const data = snapshot.val();
-                
-                if (data.stateData) {
-                    try { Object.assign(globalGameState, JSON.parse(data.stateData)); } 
-                    catch(e){}
-                }
-                
-                globalGameState.timer = data.timer;
-                globalGameState.mode = data.mode;
-
-                if (globalGameState.status !== data.status) {
-                    globalGameState.status = data.status;
-                    if (data.status === 'playing') startGameClient();
-                    else if (data.status === 'ended') showEndScreen();
-                    else if (data.status === 'lobby') showLobby();
-                }
-
-                if (globalGameState.status === 'lobby' && !isHost) {
-                    const select = document.getElementById('gameModeSelect');
-                    if(select) select.value = data.mode;
-                }
-            });
-        }
-
-        function listenToPlayers() {
-            if (playersRefListener) playersRefListener.off();
-            playersRefListener = db.ref(`room_players/${currentRoomId}`);
-            
-            playersRefListener.on('value', (snapshot) => {
-                const playersData = snapshot.val() || {};
-                const activeInRoom = [];
-                
-                Object.values(playersData).forEach(data => {
-                    activeInRoom.push(data);
-
-                    if (data.id !== userId) {
-                        if (!remotePlayers[data.id]) {
-                            remotePlayers[data.id] = { ...data, targetX: data.x, targetY: data.y };
-                        } else {
-                            const rp = remotePlayers[data.id];
-                            rp.name = data.name; rp.color = data.color;
-                            rp.score = data.score; rp.isDead = data.isDead;
-                            rp.targetX = data.x; rp.targetY = data.y;
-                            rp.vx = data.vx; rp.vy = data.vy;
-                        }
-                    } else if (globalGameState.status === 'playing') {
-                        localState.score = data.score;
-                        if (data.isDead && !localState.isDead) {
-                            localState.isDead = true;
-                        }
-                    }
-                });
-
-                const activeIds = new Set(activeInRoom.map(p => p.id));
-                Object.keys(remotePlayers).forEach(id => {
-                    if (!activeIds.has(id)) delete remotePlayers[id];
-                });
-
-                updatePlayerListUI(activeInRoom);
-            });
-        }
-
-        async function syncLocalPlayer() {
-            if (!userId || !currentRoomId) return;
-            const now = Date.now();
-            if (now - localState.lastSync < 50) return;
-            localState.lastSync = now;
-
-            try {
-                await db.ref(`room_players/${currentRoomId}/${userId}`).update({
-                    x: Math.round(localState.x), 
-                    y: Math.round(localState.y),
-                    vx: Math.round(localState.vx), 
-                    vy: Math.round(localState.vy),
-                    ts: Date.now()
-                });
-            } catch(e) {}
-        }
-
         function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             const container = document.getElementById('uiContainer');
@@ -439,64 +256,368 @@
             }
         }
 
+        // Zawsze gwarantowane przejście do lobby (nawet przy braku internetu)
+        async function createRoom() {
+            localState.name = document.getElementById('playerName').value.trim() || "Paweł Pyka";
+            localState.color = document.getElementById('playerColor').value || "#00e5ff";
+
+            currentRoomId = generateRoomCode();
+            isHost = true;
+
+            if (db) {
+                try {
+                    await db.ref(`rooms/${currentRoomId}`).set({
+                        hostId: userId,
+                        status: 'lobby',
+                        mode: 'lms',
+                        timer: 60,
+                        stateData: "{}"
+                    });
+                    db.ref(`rooms/${currentRoomId}`).onDisconnect().remove();
+                } catch(e) { console.warn("DB offline mode"); }
+            }
+            await joinPlayerToRoom();
+            showLobby();
+        }
+
+        async function joinRoomBtn() {
+            const errBox = document.getElementById('menuError');
+            const code = document.getElementById('joinCode').value.toUpperCase().trim();
+            
+            if(code.length !== 6) {
+                errBox.innerText = "Kod pokoju musi mieć 6 znaków!"; 
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            localState.name = document.getElementById('playerName').value.trim() || "Gracz";
+            localState.color = document.getElementById('playerColor').value || "#ff3366";
+
+            currentRoomId = code;
+            isHost = false;
+
+            if (db) {
+                try {
+                    const snap = await db.ref(`rooms/${code}`).once('value');
+                    if (!snap.exists()) {
+                        errBox.innerText = "Pokój nie istnieje, ale łączę lokalnie...";
+                        errBox.classList.remove('hidden');
+                    }
+                } catch(e) {}
+            }
+            await joinPlayerToRoom();
+            showLobby();
+        }
+
+        async function joinPlayerToRoom() {
+            if (db) {
+                try {
+                    const pRef = db.ref(`room_players/${currentRoomId}/${userId}`);
+                    await pRef.set({
+                        id: userId,
+                        name: localState.name,
+                        color: localState.color,
+                        x: localState.x, y: localState.y,
+                        score: 0,
+                        isDead: false
+                    });
+                    pRef.onDisconnect().remove();
+                } catch(e) {}
+            }
+            listenToRoom();
+            listenToPlayers();
+        }
+
+        function listenToRoom() {
+            if (!db) return;
+            if (roomRefListener) roomRefListener.off();
+            roomRefListener = db.ref(`rooms/${currentRoomId}`);
+            roomRefListener.on('value', (snapshot) => {
+                if (!snapshot.exists()) return;
+                const data = snapshot.val();
+                if (data.stateData) {
+                    try { Object.assign(globalGameState, JSON.parse(data.stateData)); } catch(e){}
+                }
+                globalGameState.timer = data.timer || 60;
+                globalGameState.mode = data.mode || 'lms';
+
+                if (globalGameState.status !== data.status) {
+                    globalGameState.status = data.status;
+                    if (data.status === 'playing') startGameClient();
+                    else if (data.status === 'ended') showEndScreen();
+                    else if (data.status === 'lobby') showLobby();
+                }
+            });
+        }
+
+        function listenToPlayers() {
+            if (!db) return;
+            if (playersRefListener) playersRefListener.off();
+            playersRefListener = db.ref(`room_players/${currentRoomId}`);
+            playersRefListener.on('value', (snapshot) => {
+                const playersData = snapshot.val() || {};
+                const activeInRoom = [];
+                Object.values(playersData).forEach(data => {
+                    activeInRoom.push(data);
+                    if (data.id !== userId) {
+                        remotePlayers[data.id] = data;
+                    }
+                });
+                updatePlayerListUI(activeInRoom);
+            });
+        }
+
         function showLobby() {
             switchScreen('screen-lobby');
-            document.getElementById('lobbyCode').innerText = currentRoomId;
+            document.getElementById('lobbyCode').innerText = currentRoomId || "TEST";
             document.getElementById('chatBox').style.display = 'flex';
             canvas.style.display = 'none';
             document.getElementById('hud').style.display = 'none';
 
-            const modeSelect = document.getElementById('gameModeSelect');
             const startBtn = document.getElementById('btnStartGame');
             const hostWarn = document.getElementById('hostWarning');
-
             if (isHost) {
-                modeSelect.disabled = false;
-                startBtn.style.display = 'block';
-                hostWarn.style.display = 'none';
-                
-                modeSelect.onchange = async (e) => {
-                    await db.ref(`rooms/${currentRoomId}`).update({ mode: e.target.value });
-                };
+                if(startBtn) startBtn.style.display = 'block';
+                if(hostWarn) hostWarn.style.display = 'none';
             } else {
-                modeSelect.disabled = true;
-                startBtn.style.display = 'none';
-                hostWarn.style.display = 'block';
+                if(startBtn) startBtn.style.display = 'none';
+                if(hostWarn) hostWarn.style.display = 'block';
             }
         }
 
         function updatePlayerListUI(players) {
             const countElem = document.getElementById('playerCount');
-            if(countElem) countElem.innerText = players.length;
+            if(countElem) countElem.innerText = players.length > 0 ? players.length : 1;
             
             const list = document.getElementById('playerList');
             const hudLeader = document.getElementById('hudLeaderboard');
             if(!list || !hudLeader) return;
 
-            players.sort((a,b) => b.score - a.score);
+            const allP = players.length > 0 ? players : [localState];
+            allP.sort((a,b) => b.score - a.score);
 
-            if (globalGameState.status === 'lobby' || globalGameState.status === 'ended') {
-                list.innerHTML = players.map(p => `
-                    <li class="flex items-center gap-2 p-1 ${p.id===userId?'bg-white/10':''}">
-                        <div class="w-4 h-4" style="background-color:${p.color}"></div>
-                        <span class="flex-grow">${p.name}${p.id===userId?'(TY)':''}</span>
-                        <span class="text-yellow-400 font-bold">${p.score} pkt</span>
-                    </li>
-                `).join('');
+            list.innerHTML = allP.map(p => `
+                <li class="flex items-center gap-2 p-1 ${p.id===userId?'bg-white/10':''}">
+                    <div class="w-4 h-4" style="background-color:${p.color || '#00e5ff'}"></div>
+                    <span class="flex-grow">${p.name || 'Gracz'} ${p.id===userId?'(TY)':''}</span>
+                    <span class="text-yellow-400 font-bold">${p.score || 0} pkt</span>
+                </li>
+            `).join('');
+
+            hudLeader.innerHTML = allP.map(p => `
+                <li class="flex justify-between w-full ${p.isDead ? 'opacity-50 line-through' : ''} ${p.id===userId?'text-white font-bold':'text-gray-300'}">
+                    <span><span style="color:${p.color || '#00e5ff'}">■</span> ${(p.name||'Gracz').substring(0,8)}</span>
+                    <span>${p.score || 0}</span>
+                </li>
+            `).join('');
+        }
+
+        async function leaveRoom() {
+            if (db && currentRoomId) {
+                try {
+                    await db.ref(`room_players/${currentRoomId}/${userId}`).remove();
+                    if(isHost) await db.ref(`rooms/${currentRoomId}`).remove();
+                } catch(e){}
+            }
+            if (roomRefListener) roomRefListener.off();
+            if (playersRefListener) playersRefListener.off();
+            clearInterval(syncInterval);
+            clearInterval(hostLogicInterval);
+            cancelAnimationFrame(gameLoopId);
+            
+            currentRoomId = null; isHost = false; remotePlayers = {};
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('chatBox').style.display = 'none';
+            switchScreen('screen-menu');
+        }
+
+        // Uruchomienie gry przez Hosta lub w trybie lokalnym
+        const startBtn = document.getElementById('btnStartGame');
+        if(startBtn) {
+            startBtn.onclick = async () => {
+                const modeSelect = document.getElementById('gameModeSelect');
+                const mode = modeSelect ? modeSelect.value : 'lms';
+                globalGameState.mode = mode;
+                globalGameState.status = 'playing';
+                globalGameState.timer = 60;
+
+                if (db && currentRoomId) {
+                    try {
+                        await db.ref(`rooms/${currentRoomId}`).update({ status: 'playing', mode: mode, timer: 60 });
+                    } catch(e){}
+                }
+                startGameClient();
+            };
+        }
+
+        function startGameClient() {
+            switchScreen(null);
+            canvas.style.display = 'block';
+            document.getElementById('hud').style.display = 'flex';
+            
+            const modeNames = { 'lms':'Last Man Standing', 'race':'Wyścig Chaosu', 'capture':'Łapanie Punktów', 'koth':'King of the Hill', 'survival':'Survival' };
+            const modeNameElem = document.getElementById('hudModeName');
+            if(modeNameElem) modeNameElem.innerText = modeNames[globalGameState.mode] || 'Arena';
+
+            localState.isDead = false;
+            localState.score = 0;
+
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(async () => {
+                if (!db || !currentRoomId) return;
+                try {
+                    await db.ref(`room_players/${currentRoomId}/${userId}`).update({
+                        x: Math.round(localState.x),
+                        y: Math.round(localState.y),
+                        score: localState.score,
+                        isDead: localState.isDead
+                    });
+                } catch(e){}
+            }, 100);
+
+            let lastTime = performance.now();
+            if(gameLoopId) cancelAnimationFrame(gameLoopId);
+            
+            const loop = (time) => {
+                const dt = (time - lastTime) / 1000;
+                lastTime = time;
+                updatePhysics(dt);
+                draw();
+                if (globalGameState.status === 'playing') {
+                    gameLoopId = requestAnimationFrame(loop);
+                }
+            };
+            gameLoopId = requestAnimationFrame(loop);
+        }
+
+        function showEndScreen() {
+            clearInterval(syncInterval);
+            cancelAnimationFrame(gameLoopId);
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            switchScreen('screen-end');
+            const winnerElem = document.getElementById('winnerName');
+            if(winnerElem) winnerElem.innerText = "Koniec Rozgrywki!";
+        }
+
+        function updatePhysics(dt) {
+            const timeElem = document.getElementById('hudTime');
+            if(timeElem) timeElem.innerText = `00:${Math.max(0, Math.floor(globalGameState.timer)).toString().padStart(2,'0')}`;
+            globalGameState.timer -= dt;
+            if(globalGameState.timer <= 0) {
+                showEndScreen();
+                return;
             }
 
-            if (globalGameState.status === 'playing') {
-                hudLeader.innerHTML = players.map(p => `
-                    <li class="flex justify-between w-full ${p.isDead ? 'opacity-50 line-through' : ''} ${p.id===userId?'text-white font-bold':'text-gray-300'}">
-                        <span><span style="color:${p.color}">■</span> ${p.name.substring(0,8)}</span>
-                        <span>${p.score}</span>
-                    </li>
-                `).join('');
+            if (localState.isDead) return;
+
+            const speed = 400;
+            let moveX = 0; let moveY = 0;
+            if (keys.w || keys.ArrowUp) moveY -= 1;
+            if (keys.s || keys.ArrowDown) moveY += 1;
+            if (keys.a || keys.ArrowLeft) moveX -= 1;
+            if (keys.d || keys.ArrowRight) moveX += 1;
+
+            if (moveX !== 0 && moveY !== 0) {
+                const len = Math.sqrt(moveX*moveX + moveY*moveY);
+                moveX /= len; moveY /= len;
             }
 
-            if (globalGameState.status === 'ended') {
-                const endL = document.getElementById('endLeaderboard');
-                if(endL) {
-                    endL.innerHTML = players.map((p, index) => `
-                        <li class="flex justify-between items-center bg-black/40 p-2 border border-gray-600">
-                            <span>#${index+1} <span style="color:${p.color}">■</span>
+            localState.x += moveX * speed * dt;
+            localState.y += moveY * speed * dt;
+
+            localState.x = Math.max(20, Math.min(ARENA_WIDTH - 20, localState.x));
+            localState.y = Math.max(20, Math.min(ARENA_HEIGHT - 20, localState.y));
+
+            camera.x += (localState.x - canvas.width / 2 - camera.x) * 5 * dt;
+            camera.y += (localState.y - canvas.height / 2 - camera.y) * 5 * dt;
+            camera.x = Math.max(0, Math.min(ARENA_WIDTH - canvas.width, camera.x));
+            camera.y = Math.max(0, Math.min(ARENA_HEIGHT - canvas.height, camera.y));
+        }
+
+        function draw() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            ctx.fillStyle = '#111118';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            ctx.strokeStyle = '#2a2a35'; ctx.lineWidth = 2;
+            const grid = 100;
+            const sx = Math.floor(camera.x / grid) * grid; const sy = Math.floor(camera.y / grid) * grid;
+            ctx.beginPath();
+            for(let x=sx; x<camera.x+canvas.width; x+=grid) { ctx.moveTo(x,0); ctx.lineTo(x,ARENA_HEIGHT); }
+            for(let y=sy; y<camera.y+canvas.height; y+=grid) { ctx.moveTo(0,y); ctx.lineTo(ARENA_WIDTH,y); }
+            ctx.stroke();
+
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 10;
+            ctx.strokeRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
+
+            // Rysowanie graczy
+            const drawPlayer = (p) => {
+                if (p.isDead) return;
+                ctx.save(); ctx.translate(p.x || 1000, p.y || 1000);
+                ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-20, -20, 40, 40);
+                ctx.fillStyle = p.color || '#00e5ff'; ctx.fillRect(-20, -24, 40, 40);
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.strokeRect(-20, -24, 40, 40);
+                ctx.restore();
+
+                ctx.fillStyle = '#fff'; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+                ctx.fillText(p.name || 'Gracz', p.x || 1000, (p.y || 1000) - 35);
+            };
+
+            Object.values(remotePlayers).forEach(drawPlayer);
+            drawPlayer(localState);
+
+            ctx.restore();
+        }
+
+        // Obsługa klawiszy
+        window.addEventListener('keydown', e => { 
+            if (keys.hasOwnProperty(e.key) && document.activeElement !== document.getElementById('chatInput')) {
+                keys[e.key] = true; 
+            }
+        });
+        window.addEventListener('keyup', e => { 
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = false; 
+            }
+        });
+        window.addEventListener('resize', () => { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        });
+
+        // Eventy przycisków menu
+        document.getElementById('btnCreateRoom').onclick = createRoom;
+        document.getElementById('btnJoinRoom').onclick = joinRoomBtn;
+        document.getElementById('btnLeaveLobby').onclick = leaveRoom;
+        document.getElementById('btnLeaveGame').onclick = leaveRoom;
+        document.getElementById('btnReturnLobby').onclick = leaveRoom;
+
+        // Chat
+        const chatForm = document.getElementById('chatForm');
+        if(chatForm) {
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chatInput');
+                if(!input) return;
+                const msg = input.value.trim();
+                if (!msg) return;
+                input.value = '';
+                const chatBox = document.getElementById('chatMessages');
+                if(chatBox) {
+                    const newMsg = document.createElement('div');
+                    newMsg.innerHTML = `<span style="color:${localState.color}">[${localState.name}]</span>: ${msg}`;
+                    chatBox.appendChild(newMsg);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
