@@ -7,78 +7,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK -->
+    <!-- Klasyczne, bezproblemowe skrypty Firebase v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #0f0f13; overflow: hidden;
-            font-family: 'Press Start 2P', cursive; color: #fff;
-            user-select: none; -webkit-user-select: none;
-        }
-        
-        #gameCanvas {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%; display: none;
-            z-index: 10;
-        }
-
-        .crt::before {
-            content: " "; display: block; position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
-
-        .ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 50; display: flex; align-items: center; justify-content: center;
-            pointer-events: none;
-        }
-
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #0f0f13; overflow: hidden; font-family: 'Press Start 2P', cursive; color: #fff; user-select: none; }
+        #gameCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 10; }
+        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
         .interactive { pointer-events: auto; }
-        .screen { display: none; }
-        .screen.active { display: flex; }
-
-        .pixel-box {
-            background-color: #1a1a24; border: 4px solid #fff;
-            box-shadow: 8px 8px 0px 0px rgba(0,0,0,0.8);
-            pointer-events: auto;
-        }
-
-        .btn {
-            background-color: #ff3366; border: 4px solid #fff;
-            box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4);
-            color: white; text-transform: uppercase; cursor: pointer;
-            transition: transform 0.1s;
-        }
-        .btn:hover { background-color: #ff5c85; }
-        .btn:active { box-shadow: inset 4px 4px 0px 0px rgba(0,0,0,0.4); transform: translateY(4px); }
-        .btn:disabled { background-color: #555; color: #888; cursor: not-allowed; }
-
-        .input-pixel {
-            background-color: #2a2a35; border: 4px solid #fff;
-            color: #fff; outline: none; font-family: inherit;
-        }
+        .screen { display: none; } .screen.active { display: flex; }
+        .pixel-box { background-color: #1a1a24; border: 4px solid #fff; box-shadow: 8px 8px 0px 0px rgba(0,0,0,0.8); pointer-events: auto; }
+        .btn { background-color: #ff3366; border: 4px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4); color: white; text-transform: uppercase; cursor: pointer; transition: transform 0.1s; }
+        .btn:hover { background-color: #ff5c85; } .btn:active { box-shadow: inset 4px 4px 0px 0px rgba(0,0,0,0.4); transform: translateY(4px); } .btn:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+        .input-pixel { background-color: #2a2a35; border: 4px solid #fff; color: #fff; outline: none; font-family: inherit; }
         .input-pixel:focus { border-color: #00e5ff; }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1a1a24; border-left: 2px solid #fff; }
-        ::-webkit-scrollbar-thumb { background: #fff; }
-
-        #chatBox {
-            position: absolute; bottom: 20px; left: 20px; width: 350px;
-            z-index: 60; pointer-events: auto; display: none;
-            background: rgba(0,0,0,0.7); border: 2px solid #fff;
-        }
-        
-        #hud {
-            position: absolute; top: 20px; right: 20px;
-            z-index: 60; pointer-events: none; display: none;
-            text-shadow: 2px 2px 0 #000;
-        }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #1a1a24; border-left: 2px solid #fff; } ::-webkit-scrollbar-thumb { background: #fff; }
+        #chatBox { position: absolute; bottom: 20px; left: 20px; width: 350px; z-index: 60; pointer-events: auto; display: none; background: rgba(0,0,0,0.7); border: 2px solid #fff; }
+        #hud { position: absolute; top: 20px; right: 20px; z-index: 60; pointer-events: none; display: none; text-shadow: 2px 2px 0 #000; }
     </style>
 </head>
 <body class="crt">
@@ -86,20 +34,17 @@
     <canvas id="gameCanvas"></canvas>
 
     <div id="uiContainer" class="ui-layer interactive">
-        <!-- MENU SCREEN -->
+        <!-- MENU -->
         <div id="screen-menu" class="screen active flex-col gap-6 p-8 pixel-box max-w-md w-full text-center">
             <h1 class="text-4xl text-[#00e5ff] mb-2 leading-tight" style="text-shadow: 4px 4px 0 #ff3366;">CHAOS<br>ARENA</h1>
-            
             <div class="flex flex-col gap-2 text-left">
-                <label class="text-[10px] text-gray-400">Pseudonim:</label>
+                <label class="text-[10px] text-gray-400">Twój Nick:</label>
                 <input type="text" id="playerName" value="Paweł Pyka" class="input-pixel p-3 text-sm w-full text-center" maxlength="15">
             </div>
-
             <div class="flex flex-col gap-2 text-left">
-                <label class="text-[10px] text-gray-400">Kolor postaci:</label>
+                <label class="text-[10px] text-gray-400">Twój Kolor:</label>
                 <input type="color" id="playerColor" value="#00e5ff" class="w-full h-10 cursor-pointer border-4 border-white bg-black">
             </div>
-
             <div class="flex flex-col gap-4 mt-4">
                 <button id="btnCreateRoom" class="btn p-4 text-xs w-full">STWÓRZ POKÓJ</button>
                 <div class="flex gap-2">
@@ -107,11 +52,10 @@
                     <button id="btnJoinRoom" class="btn p-4 text-xs w-1/2 !bg-[#00e5ff] hover:!bg-[#66edff] !text-black">DOŁĄCZ</button>
                 </div>
             </div>
-            
-            <p id="menuError" class="text-xs text-red-500 mt-2 hidden"></p>
+            <p id="menuError" class="text-[10px] text-red-500 mt-2 font-bold hidden"></p>
         </div>
 
-        <!-- LOBBY SCREEN -->
+        <!-- LOBBY -->
         <div id="screen-lobby" class="screen flex-col gap-6 p-8 pixel-box max-w-2xl w-full">
             <div class="flex justify-between items-center border-b-4 border-white pb-4">
                 <h2 class="text-2xl text-[#00e5ff]">LOBBY</h2>
@@ -120,68 +64,63 @@
                     <span id="lobbyCode" class="text-3xl text-[#ff3366] tracking-widest font-bold">------</span>
                 </div>
             </div>
-
             <div class="flex gap-6">
                 <div class="w-1/2 flex flex-col gap-2">
-                    <label class="text-[10px] text-gray-400">Gracze (<span id="playerCount">1</span>/12):</label>
+                    <label class="text-[10px] text-gray-400">Gracze:</label>
                     <ul id="playerList" class="bg-black/50 border-2 border-gray-600 h-48 overflow-y-auto p-2 flex flex-col gap-2 text-xs"></ul>
                 </div>
-                
                 <div class="w-1/2 flex flex-col gap-4">
                     <div class="flex flex-col gap-2">
-                        <label class="text-[10px] text-gray-400">Tryb Gry (Tylko Host):</label>
-                        <select id="gameModeSelect" class="input-pixel p-3 text-xs w-full cursor-pointer">
+                        <label class="text-[10px] text-gray-400">Wybierz Tryb Gry:</label>
+                        <select id="gameModeSelect" class="input-pixel p-3 text-[10px] w-full cursor-pointer">
                             <option value="lms">🛡️ Last Man Standing</option>
                             <option value="race">🏁 Wyścig Chaosu</option>
                             <option value="capture">🟢 Łapanie Punktów</option>
                             <option value="koth">👑 King of the Hill</option>
-                            <option value="survival">🔴 Mini Games Party (Survival)</option>
+                            <option value="survival">🔴 Survival (Omijaj piłki)</option>
                         </select>
                     </div>
-                    
                     <p id="hostWarning" class="text-[9px] text-yellow-400 hidden">Czekaj aż Host wystartuje grę...</p>
-                    
                     <div class="flex-grow flex items-end">
-                        <button id="btnStartGame" class="btn p-4 text-xs w-full !bg-[#00cc44] hover:!bg-[#33ff77]">ROZPOCZNIJ GRĘ</button>
+                        <button id="btnStartGame" class="btn p-4 text-xs w-full !bg-[#00cc44] hover:!bg-[#33ff77]">START</button>
                     </div>
                 </div>
             </div>
-            
-            <button id="btnLeaveLobby" class="btn p-3 text-[10px] w-1/3 !bg-gray-600 mt-2">Wyjdź</button>
+            <button id="btnLeaveLobby" class="btn p-3 text-[10px] w-1/3 !bg-gray-600 mt-2">Wyjdź z Lobby</button>
         </div>
 
-        <!-- END SCREEN -->
+        <!-- KONIEC GRY -->
         <div id="screen-end" class="screen flex-col gap-6 p-8 pixel-box max-w-md w-full text-center">
             <h2 class="text-3xl text-yellow-400 mb-4">KONIEC GRY</h2>
             <div id="winnerName" class="text-xl text-white mb-6"></div>
-            
             <div class="text-left text-xs mb-2">Tabela Wyników:</div>
             <ul id="endLeaderboard" class="bg-black/50 border-2 border-white h-40 overflow-y-auto p-4 flex flex-col gap-3 text-xs text-left mb-4"></ul>
-
-            <button id="btnReturnLobby" class="btn p-4 text-xs w-full">WRÓĆ DO LOBBY</button>
+            <button id="btnReturnLobby" class="btn p-4 text-xs w-full hidden">WRÓĆ DO LOBBY</button>
+            <p id="endWaitMsg" class="text-[10px] text-gray-400 hidden">Czekaj aż Host wróci do lobby...</p>
         </div>
     </div>
 
-    <!-- IN-GAME HUD -->
+    <!-- HUD W GRZE -->
     <div id="hud" class="flex flex-col items-end gap-4">
-        <div class="bg-black/60 border-2 border-white p-4 min-w-[200px]">
-            <div id="hudTime" class="text-2xl text-center text-yellow-400 mb-2">00:00</div>
+        <div class="bg-black/80 border-2 border-white p-4 min-w-[200px]">
+            <div id="hudTime" class="text-2xl text-center text-yellow-400 mb-2 font-bold">00:60</div>
             <div id="hudModeName" class="text-[10px] text-gray-300 text-center border-b border-gray-600 pb-2 mb-2">Tryb</div>
             <ul id="hudLeaderboard" class="flex flex-col gap-1 text-[10px]"></ul>
         </div>
         <button id="btnLeaveGame" class="btn p-2 text-[10px] !bg-red-700 interactive">OPUŚĆ GRĘ</button>
     </div>
 
-    <!-- CHAT BOX -->
+    <!-- CHAT -->
     <div id="chatBox" class="flex flex-col h-48">
         <div id="chatMessages" class="flex-grow overflow-y-auto p-2 text-[9px] flex flex-col gap-1 bg-black/80"></div>
         <form id="chatForm" class="flex border-t-2 border-white">
-            <input type="text" id="chatInput" placeholder="Napisz..." class="bg-transparent text-white p-2 text-[10px] flex-grow outline-none font-mono">
+            <input type="text" id="chatInput" placeholder="Czat..." class="bg-transparent text-white p-2 text-[10px] flex-grow outline-none font-mono">
             <button type="submit" class="bg-white text-black p-2 text-[10px] cursor-pointer">WYŚLIJ</button>
         </form>
     </div>
 
     <script>
+        // Konfiguracja Firebase (Twoja baza)
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -192,466 +131,473 @@
             appId: "1:24436364546:web:9793a5e85d4734195f9e1b"
         };
 
-        let db = null;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch(e) {
-            console.error("Firebase init error:", e);
-        }
+        // Inicjalizacja
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
 
-        let userId = 'user_' + Math.random().toString(36).substring(2, 9);
+        let userId = null;
         let currentRoomId = null;
         let isHost = false;
         
-        let roomListener = null;
-        let playersListener = null;
+        let roomRef = null;
+        let playersRef = null;
 
-        const localState = {
-            name: "Paweł Pyka",
-            color: "#00e5ff",
-            x: 1000, y: 1000,
-            score: 0,
-            isDead: false
-        };
-
+        // Stan lokalnego gracza
+        const localState = { name: "Gracz", color: "#ffffff", x: 1000, y: 1000, score: 0, isDead: false };
         let remotePlayers = {}; 
-        let globalGameState = {
-            status: 'lobby',
-            mode: 'lms',
-            timer: 60
-        };
+        
+        // Stan globalny pokoju
+        let globalGameState = { status: 'lobby', mode: 'lms', timer: 60 };
+        // Logika renderowana u klientów z bazy
+        let hostStateData = { zones: [], balls: [], safeZone: null, kothZone: null };
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const ARENA_WIDTH = 2000;
-        const ARENA_HEIGHT = 2000;
+        const ARENA_WIDTH = 2000; const ARENA_HEIGHT = 2000;
         let camera = { x: 0, y: 0 };
-        let gameLoopId = null;
-        let syncInterval = null;
+        let syncInterval = null, hostInterval = null, renderLoopId = null;
         const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
 
-        function generateRoomCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-            return code;
+        // Autoryzacja Anonimowa (żeby nikt nie był blokowany)
+        async function authenticate() {
+            if (userId) return;
+            try {
+                const cred = await auth.signInAnonymously();
+                userId = cred.user.uid;
+            } catch (err) {
+                console.error("Błąd Auth (Używam fallbacka):", err);
+                userId = 'u_' + Math.random().toString(36).substr(2, 9);
+            }
+        }
+
+        function showErr(msg) {
+            const el = document.getElementById('menuError');
+            el.innerText = msg;
+            el.classList.remove('hidden');
         }
 
         function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-            const container = document.getElementById('uiContainer');
-            if(container) container.classList.add('interactive');
             if(id) {
-                const target = document.getElementById(id);
-                if(target) target.classList.add('active');
+                document.getElementById('uiContainer').classList.add('interactive');
+                document.getElementById(id).classList.add('active');
+            } else {
+                document.getElementById('uiContainer').classList.remove('interactive');
             }
         }
 
-        async function createRoom() {
-            const errBox = document.getElementById('menuError');
-            errBox.classList.add('hidden');
-
+        // TWORZENIE POKOJU
+        document.getElementById('btnCreateRoom').onclick = async () => {
             localState.name = document.getElementById('playerName').value.trim() || "Paweł Pyka";
             localState.color = document.getElementById('playerColor').value || "#00e5ff";
+            document.getElementById('menuError').classList.add('hidden');
 
-            currentRoomId = generateRoomCode();
+            await authenticate();
+            currentRoomId = Math.random().toString(36).substr(2, 6).toUpperCase();
             isHost = true;
 
-            if (db) {
-                try {
-                    await db.ref(`rooms/${currentRoomId}`).set({
-                        hostId: userId,
-                        status: 'lobby',
-                        mode: 'lms',
-                        timer: 60
-                    });
-                    db.ref(`rooms/${currentRoomId}`).onDisconnect().remove();
-                } catch(e) {}
+            try {
+                await db.ref(`rooms/${currentRoomId}`).set({
+                    hostId: userId,
+                    status: 'lobby',
+                    mode: 'lms',
+                    timer: 60,
+                    stateData: "{}"
+                });
+                db.ref(`rooms/${currentRoomId}`).onDisconnect().remove();
+                await joinRoomLogic();
+            } catch(e) {
+                showErr("Błąd bazy danych! Upewnij się że zmieniłeś Reguły na true/true.");
             }
-            await joinPlayerToRoom();
-            showLobby();
-        }
+        };
 
-        async function joinRoomBtn() {
-            const errBox = document.getElementById('menuError');
-            errBox.classList.add('hidden');
+        // DOŁĄCZANIE DO POKOJU
+        document.getElementById('btnJoinRoom').onclick = async () => {
+            document.getElementById('menuError').classList.add('hidden');
             const code = document.getElementById('joinCode').value.toUpperCase().trim();
+            if(code.length !== 6) return showErr("Kod musi mieć 6 znaków!");
+
+            localState.name = document.getElementById('playerName').value.trim() || "Ziomek";
+            localState.color = document.getElementById('playerColor').value || "#ff3366";
+
+            await authenticate();
             
-            if(code.length !== 6) {
-                errBox.innerText = "Kod pokoju musi mieć dokładnie 6 znaków!"; 
-                errBox.classList.remove('hidden');
-                return;
-            }
-
-            if (!db) {
-                errBox.innerText = "Brak połączenia z bazą danych!";
-                errBox.classList.remove('hidden');
-                return;
-            }
-
             try {
                 const snap = await db.ref(`rooms/${code}`).once('value');
                 if (snap.exists()) {
                     currentRoomId = code;
                     isHost = false;
-                    localState.name = document.getElementById('playerName').value.trim() || "Gracz";
-                    localState.color = document.getElementById('playerColor').value || "#ff3366";
-                    await joinPlayerToRoom();
-                    showLobby();
+                    await joinRoomLogic();
                 } else {
-                    errBox.innerText = "Pokój o takim kodzie nie istnieje!";
-                    errBox.classList.remove('hidden');
+                    showErr("Taki pokój nie istnieje!");
                 }
-            } catch(e) {
-                errBox.innerText = "Błąd dołączania: " + e.message;
-                errBox.classList.remove('hidden');
-            }
-        }
+            } catch(e) { showErr("Błąd sieci. Sprawdź reguły bazy."); }
+        };
 
-        async function joinPlayerToRoom() {
-            if (db && currentRoomId) {
-                try {
-                    const pRef = db.ref(`room_players/${currentRoomId}/${userId}`);
-                    await pRef.set({
-                        id: userId,
-                        name: localState.name,
-                        color: localState.color,
-                        x: 1000 + (Math.random() * 200 - 100), 
-                        y: 1000 + (Math.random() * 200 - 100),
-                        score: 0,
-                        isDead: false
-                    });
-                    pRef.onDisconnect().remove();
-                } catch(e) {}
-            }
-            listenToRoom();
-            listenToPlayers();
-        }
+        async function joinRoomLogic() {
+            // Dodaj siebie do bazy
+            const myRef = db.ref(`room_players/${currentRoomId}/${userId}`);
+            await myRef.set({
+                id: userId, name: localState.name, color: localState.color, 
+                x: 1000, y: 1000, score: 0, isDead: false
+            });
+            myRef.onDisconnect().remove();
 
-        function listenToRoom() {
-            if (!db) return;
-            if (roomListener) roomListener.off();
-            roomListener = db.ref(`rooms/${currentRoomId}`);
-            roomListener.on('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    leaveRoom();
-                    return;
+            // Nasłuchiwanie stanu pokoju (START GRY)
+            roomRef = db.ref(`rooms/${currentRoomId}`);
+            roomRef.on('value', snap => {
+                if(!snap.exists()) { leaveToMenu(); return; }
+                const data = snap.val();
+                
+                // Parsuj dane dla mapy (strefy, piłki)
+                if(data.stateData) {
+                    try { hostStateData = JSON.parse(data.stateData); } catch(e){}
                 }
-                const data = snapshot.val();
-                globalGameState.timer = data.timer || 60;
-                globalGameState.mode = data.mode || 'lms';
 
-                if (globalGameState.status !== data.status) {
+                globalGameState.timer = data.timer;
+                globalGameState.mode = data.mode;
+                
+                if(!isHost) {
+                    document.getElementById('gameModeSelect').value = data.mode;
+                }
+
+                // ZMIANA EKRANU
+                if(globalGameState.status !== data.status) {
                     globalGameState.status = data.status;
-                    if (data.status === 'playing') startGameClient();
-                    else if (data.status === 'ended') showEndScreen();
-                    else if (data.status === 'lobby') showLobby();
-                }
-
-                if (globalGameState.status === 'lobby' && !isHost) {
-                    const select = document.getElementById('gameModeSelect');
-                    if(select) select.value = data.mode;
+                    if(data.status === 'playing') startGameMap();
+                    else if(data.status === 'ended') showEndScreen();
+                    else if(data.status === 'lobby') showLobby();
                 }
             });
-        }
 
-        function listenToPlayers() {
-            if (!db) return;
-            if (playersListener) playersListener.off();
-            playersListener = db.ref(`room_players/${currentRoomId}`);
-            playersListener.on('value', (snapshot) => {
-                const playersData = snapshot.val() || {};
-                const activeInRoom = [];
-                Object.values(playersData).forEach(data => {
-                    activeInRoom.push(data);
-                    if (data.id !== userId) {
-                        remotePlayers[data.id] = data;
+            // Nasłuchiwanie innych graczy
+            playersRef = db.ref(`room_players/${currentRoomId}`);
+            playersRef.on('value', snap => {
+                const data = snap.val() || {};
+                const active = [];
+                remotePlayers = {}; // reset
+                Object.values(data).forEach(p => {
+                    active.push(p);
+                    if(p.id !== userId) remotePlayers[p.id] = p;
+                    else {
+                        // Aktualizacja mojego wyniku/śmierci jeśli zmienione przez Hosta
+                        localState.score = p.score;
+                        if(p.isDead && !localState.isDead) localState.isDead = true;
                     }
                 });
-                updatePlayerListUI(activeInRoom);
+                updateUIList(active);
             });
+
+            showLobby();
         }
 
         function showLobby() {
             switchScreen('screen-lobby');
-            document.getElementById('lobbyCode').innerText = currentRoomId || "------";
+            document.getElementById('lobbyCode').innerText = currentRoomId;
             document.getElementById('chatBox').style.display = 'flex';
             canvas.style.display = 'none';
             document.getElementById('hud').style.display = 'none';
 
-            const modeSelect = document.getElementById('gameModeSelect');
-            const startBtn = document.getElementById('btnStartGame');
-            const hostWarn = document.getElementById('hostWarning');
-
-            if (isHost) {
-                if(modeSelect) modeSelect.disabled = false;
-                if(startBtn) startBtn.style.display = 'block';
-                if(hostWarn) hostWarn.style.display = 'none';
-                
-                if(modeSelect) {
-                    modeSelect.onchange = async (e) => {
-                        if(db && currentRoomId) {
-                            await db.ref(`rooms/${currentRoomId}`).update({ mode: e.target.value });
-                        }
-                    };
-                }
-            } else {
-                if(modeSelect) modeSelect.disabled = true;
-                if(startBtn) startBtn.style.display = 'none';
-                if(hostWarn) hostWarn.style.display = 'block';
-            }
-        }
-
-        function updatePlayerListUI(players) {
-            const countElem = document.getElementById('playerCount');
-            if(countElem) countElem.innerText = players.length > 0 ? players.length : 1;
+            document.getElementById('btnStartGame').style.display = isHost ? 'block' : 'none';
+            document.getElementById('gameModeSelect').disabled = !isHost;
+            document.getElementById('hostWarning').style.display = isHost ? 'none' : 'block';
             
-            const list = document.getElementById('playerList');
-            const hudLeader = document.getElementById('hudLeaderboard');
-            if(!list || !hudLeader) return;
-
-            const allP = players.length > 0 ? players : [localState];
-            allP.sort((a,b) => (b.score || 0) - (a.score || 0));
-
-            list.innerHTML = allP.map(p => `
-                <li class="flex items-center gap-2 p-1 ${p.id===userId?'bg-white/10':''}">
-                    <div class="w-4 h-4" style="background-color:${p.color || '#00e5ff'}"></div>
-                    <span class="flex-grow">${p.name || 'Gracz'} ${p.id===userId?'(TY)':''}</span>
-                    <span class="text-yellow-400 font-bold">${p.score || 0} pkt</span>
-                </li>
-            `).join('');
-
-            hudLeader.innerHTML = allP.map(p => `
-                <li class="flex justify-between w-full ${p.isDead ? 'opacity-50 line-through' : ''} ${p.id===userId?'text-white font-bold':'text-gray-300'}">
-                    <span><span style="color:${p.color || '#00e5ff'}">■</span> ${(p.name||'Gracz').substring(0,8)}</span>
-                    <span>${p.score || 0}</span>
-                </li>
-            `).join('');
-        }
-
-        async function leaveRoom() {
-            if (db && currentRoomId) {
-                try {
-                    await db.ref(`room_players/${currentRoomId}/${userId}`).remove();
-                    if(isHost) await db.ref(`rooms/${currentRoomId}`).remove();
-                } catch(e){}
-            }
-            if (roomListener) roomListener.off();
-            if (playersListener) playersListener.off();
-            clearInterval(syncInterval);
-            cancelAnimationFrame(gameLoopId);
-            
-            currentRoomId = null; isHost = false; remotePlayers = {};
-            canvas.style.display = 'none';
-            document.getElementById('hud').style.display = 'none';
-            document.getElementById('chatBox').style.display = 'none';
-            switchScreen('screen-menu');
-        }
-
-        const startBtn = document.getElementById('btnStartGame');
-        if(startBtn) {
-            startBtn.onclick = async () => {
-                const modeSelect = document.getElementById('gameModeSelect');
-                const mode = modeSelect ? modeSelect.value : 'lms';
-                
-                // Jeśli jesteśmy w bazie, zmieniamy status dla wszystkich
-                if (db && currentRoomId) {
-                    try {
-                        await db.ref(`rooms/${currentRoomId}`).update({
-                            status: 'playing',
-                            mode: mode,
-                            timer: 60
-                        });
-                    } catch(e) {}
-                }
-                
-                // Natychmiastowe uruchomienie lokalne dla pewności
-                globalGameState.status = 'playing';
-                globalGameState.mode = mode;
-                startGameClient();
+            // Host zmienia tryb w bazie na żywo
+            document.getElementById('gameModeSelect').onchange = (e) => {
+                if(isHost) db.ref(`rooms/${currentRoomId}`).update({ mode: e.target.value });
             };
         }
 
-        function startGameClient() {
-            switchScreen(null);
+        // WYSTARTOWANIE GRY PRZEZ HOSTA
+        document.getElementById('btnStartGame').onclick = async () => {
+            if(!isHost) return;
+            const mode = document.getElementById('gameModeSelect').value;
+            
+            // Host losuje strefy itp przed startem
+            const initHostData = { zones: [], balls: [], safeZone: null, kothZone: null };
+            if(mode === 'lms') initHostData.safeZone = {x: 1000, y: 1000, r: 1200};
+            if(mode === 'koth') initHostData.kothZone = {x: 1000, y: 1000, r: 250};
+            if(mode === 'capture') {
+                for(let i=0; i<3; i++) initHostData.zones.push({x: 200+Math.random()*1600, y: 200+Math.random()*1600, r: 80});
+            }
+            if(mode === 'survival') {
+                for(let i=0; i<15; i++) initHostData.balls.push({x: 1000, y: 1000, vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20, r: 30});
+            }
+
+            // Reset wszystkich graczy do punktu startu
+            const snap = await db.ref(`room_players/${currentRoomId}`).once('value');
+            const players = snap.val() || {};
+            const updates = {};
+            Object.keys(players).forEach(pId => {
+                updates[`${pId}/score`] = 0;
+                updates[`${pId}/isDead`] = false;
+                if(mode === 'race') { updates[`${pId}/x`] = 100; updates[`${pId}/y`] = 1000 + (Math.random()*500-250); }
+                else { updates[`${pId}/x`] = 1000 + (Math.random()*400-200); updates[`${pId}/y`] = 1000 + (Math.random()*400-200); }
+            });
+            
+            await db.ref(`room_players/${currentRoomId}`).update(updates);
+            
+            // Wysłanie sygnału startu do wszystkich
+            await db.ref(`rooms/${currentRoomId}`).update({
+                status: 'playing', mode: mode, timer: mode==='race'?45:60,
+                stateData: JSON.stringify(initHostData)
+            });
+        };
+
+        // KLIENCI WCHODZĄ NA PLANSZĘ
+        function startGameMap() {
+            switchScreen(null); // ukryj menu
             canvas.style.display = 'block';
             document.getElementById('hud').style.display = 'flex';
-            
-            const modeNames = { 'lms':'Last Man Standing', 'race':'Wyścig Chaosu', 'capture':'Łapanie Punktów', 'koth':'King of the Hill', 'survival':'Survival' };
-            const modeNameElem = document.getElementById('hudModeName');
-            if(modeNameElem) modeNameElem.innerText = modeNames[globalGameState.mode] || 'Arena';
+            const mNames = { 'lms':'Last Man Standing', 'race':'Wyścig Chaosu', 'capture':'Łapanie Punktów', 'koth':'King of the Hill', 'survival':'Survival' };
+            document.getElementById('hudModeName').innerText = mNames[globalGameState.mode];
 
             localState.isDead = false;
-            localState.score = 0;
-
-            if (syncInterval) clearInterval(syncInterval);
-            syncInterval = setInterval(async () => {
-                if (!db || !currentRoomId) return;
-                try {
-                    await db.ref(`room_players/${currentRoomId}/${userId}`).update({
-                        x: Math.round(localState.x),
-                        y: Math.round(localState.y),
-                        score: localState.score,
-                        isDead: localState.isDead
-                    });
-                } catch(e){}
-            }, 60);
-
-            let lastTime = performance.now();
-            if(gameLoopId) cancelAnimationFrame(gameLoopId);
             
-            const loop = (time) => {
-                const dt = (time - lastTime) / 1000;
-                lastTime = time;
-                updatePhysics(dt);
-                draw();
-                if (globalGameState.status === 'playing') {
-                    gameLoopId = requestAnimationFrame(loop);
+            // Pętla wysyłania ruchu (Klient -> Baza) co 50ms
+            if(syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(() => {
+                if(currentRoomId && !localState.isDead) {
+                    db.ref(`room_players/${currentRoomId}/${userId}`).update({ x: Math.round(localState.x), y: Math.round(localState.y) });
                 }
+            }, 50);
+
+            // TYLKO HOST OBLICZA ZASADY I WYSYŁA DO BAZY
+            if(isHost) {
+                if(hostInterval) clearInterval(hostInterval);
+                hostInterval = setInterval(hostGameLogicTick, 100);
+            }
+
+            // Pętla Rysowania 60FPS
+            let lastTime = performance.now();
+            if(renderLoopId) cancelAnimationFrame(renderLoopId);
+            const loop = (time) => {
+                const dt = (time - lastTime) / 1000; lastTime = time;
+                updatePhysics(dt);
+                drawMapAndPlayers();
+                if(globalGameState.status === 'playing') renderLoopId = requestAnimationFrame(loop);
             };
-            gameLoopId = requestAnimationFrame(loop);
+            renderLoopId = requestAnimationFrame(loop);
         }
 
-        function showEndScreen() {
-            clearInterval(syncInterval);
-            cancelAnimationFrame(gameLoopId);
-            canvas.style.display = 'none';
-            document.getElementById('hud').style.display = 'none';
-            switchScreen('screen-end');
-            
-            const winnerElem = document.getElementById('winnerName');
-            if(winnerElem) winnerElem.innerText = "Koniec Rundy!";
-            
-            const allP = Object.values(remotePlayers);
-            allP.push(localState);
-            allP.sort((a,b) => (b.score||0) - (a.score||0));
-            
-            const endL = document.getElementById('endLeaderboard');
-            if(endL) {
-                endL.innerHTML = allP.map((p, index) => `
-                    <li class="flex justify-between items-center bg-black/40 p-2 border border-gray-600">
-                        <span>#${index+1} <span style="color:${p.color}">■</span> ${p.name}</span>
-                        <span class="text-yellow-400">${p.score || 0} pkt</span>
-                    </li>
-                `).join('');
+        // LOGIKA HOSTA (Kto punktuje, kto umiera, ruch piłek)
+        async function hostGameLogicTick() {
+            if(globalGameState.status !== 'playing') return;
+            let time = globalGameState.timer - 0.1;
+            let updates = {}; // gracze do zmiany (punkty/smierc)
+            let hState = hostStateData; // skrót
+
+            // Pobierz aktualne pozycje ze zmiennej w pamięci
+            const allP = [{id: userId, ...localState}];
+            Object.values(remotePlayers).forEach(p => allP.push(p));
+
+            if(globalGameState.mode === 'lms') {
+                if(hState.safeZone) hState.safeZone.r = Math.max(50, hState.safeZone.r - 2);
+                allP.forEach(p => {
+                    if(!p.isDead && Math.hypot(p.x - hState.safeZone.x, p.y - hState.safeZone.y) > hState.safeZone.r) {
+                        updates[`${p.id}/isDead`] = true;
+                    }
+                });
+            }
+            if(globalGameState.mode === 'race') {
+                allP.forEach(p => {
+                    if(!p.isDead && p.x > 1900) { updates[`${p.id}/score`] = p.score + 100; updates[`${p.id}/isDead`] = true; time = 0; }
+                });
+            }
+            if(globalGameState.mode === 'capture') {
+                allP.forEach(p => {
+                    if(p.isDead) return;
+                    for(let i=hState.zones.length-1; i>=0; i--) {
+                        let z = hState.zones[i];
+                        if(Math.hypot(p.x - z.x, p.y - z.y) < z.r + 20) {
+                            updates[`${p.id}/score`] = p.score + 10;
+                            hState.zones.splice(i, 1);
+                            hState.zones.push({x: 200+Math.random()*1600, y: 200+Math.random()*1600, r: 80});
+                        }
+                    }
+                });
+            }
+            if(globalGameState.mode === 'koth') {
+                allP.forEach(p => {
+                    if(!p.isDead && Math.hypot(p.x - hState.kothZone.x, p.y - hState.kothZone.y) < hState.kothZone.r) {
+                        updates[`${p.id}/score`] = p.score + 1;
+                    }
+                });
+            }
+            if(globalGameState.mode === 'survival') {
+                hState.balls.forEach(b => {
+                    b.x += b.vx; b.y += b.vy;
+                    if(b.x < b.r || b.x > ARENA_WIDTH-b.r) b.vx *= -1;
+                    if(b.y < b.r || b.y > ARENA_HEIGHT-b.r) b.vy *= -1;
+                });
+                allP.forEach(p => {
+                    if(p.isDead) return;
+                    hState.balls.forEach(b => {
+                        if(Math.hypot(p.x - b.x, p.y - b.y) < b.r + 20) updates[`${p.id}/isDead`] = true;
+                    });
+                });
+            }
+
+            // Wysyłka zaktualizowanych punktów graczy
+            if(Object.keys(updates).length > 0) db.ref(`room_players/${currentRoomId}`).update(updates);
+
+            // Wysyłka globalnego czasu i stref
+            if (time <= 0) {
+                db.ref(`rooms/${currentRoomId}`).update({ status: 'ended' });
+            } else {
+                db.ref(`rooms/${currentRoomId}`).update({ timer: time, stateData: JSON.stringify(hState) });
             }
         }
 
+        // RUCH LOKALNY KLIENTA
         function updatePhysics(dt) {
-            const timeElem = document.getElementById('hudTime');
-            if(timeElem) timeElem.innerText = `00:${Math.max(0, Math.floor(globalGameState.timer)).toString().padStart(2,'0')}`;
-            
-            globalGameState.timer -= dt;
-            if (globalGameState.timer <= 0) {
-                showEndScreen();
-                return;
-            }
+            document.getElementById('hudTime').innerText = `00:${Math.max(0, Math.floor(globalGameState.timer)).toString().padStart(2,'0')}`;
+            if(localState.isDead) return;
 
-            if (localState.isDead) return;
+            let moveX = 0, moveY = 0;
+            if(keys.w || keys.ArrowUp) moveY -= 1;
+            if(keys.s || keys.ArrowDown) moveY += 1;
+            if(keys.a || keys.ArrowLeft) moveX -= 1;
+            if(keys.d || keys.ArrowRight) moveX += 1;
 
-            const speed = 400;
-            let moveX = 0; let moveY = 0;
-            if (keys.w || keys.ArrowUp) moveY -= 1;
-            if (keys.s || keys.ArrowDown) moveY += 1;
-            if (keys.a || keys.ArrowLeft) moveX -= 1;
-            if (keys.d || keys.ArrowRight) moveX += 1;
+            if(moveX !== 0 && moveY !== 0) { const len = Math.sqrt(moveX*moveX + moveY*moveY); moveX /= len; moveY /= len; }
+            localState.x = Math.max(20, Math.min(ARENA_WIDTH - 20, localState.x + moveX * 450 * dt));
+            localState.y = Math.max(20, Math.min(ARENA_HEIGHT - 20, localState.y + moveY * 450 * dt));
 
-            if (moveX !== 0 && moveY !== 0) {
-                const len = Math.sqrt(moveX*moveX + moveY*moveY);
-                moveX /= len; moveY /= len;
-            }
-
-            localState.x += moveX * speed * dt;
-            localState.y += moveY * speed * dt;
-
-            localState.x = Math.max(20, Math.min(ARENA_WIDTH - 20, localState.x));
-            localState.y = Math.max(20, Math.min(ARENA_HEIGHT - 20, localState.y));
-
-            camera.x += (localState.x - canvas.width / 2 - camera.x) * 5 * dt;
-            camera.y += (localState.y - canvas.height / 2 - camera.y) * 5 * dt;
-            camera.x = Math.max(0, Math.min(ARENA_WIDTH - canvas.width, camera.x));
-            camera.y = Math.max(0, Math.min(ARENA_HEIGHT - canvas.height, camera.y));
+            camera.x += (localState.x - canvas.width/2 - camera.x) * 5 * dt;
+            camera.y += (localState.y - canvas.height/2 - camera.y) * 5 * dt;
         }
 
-        function draw() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            ctx.fillStyle = '#111118';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // RYSOWANIE PLANSZY, MAPY I GRACZY
+        function drawMapAndPlayers() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            ctx.fillStyle = '#111118'; ctx.fillRect(0,0, canvas.width, canvas.height);
+            ctx.save(); ctx.translate(-camera.x, -camera.y);
 
-            ctx.save();
-            ctx.translate(-camera.x, -camera.y);
-
-            ctx.strokeStyle = '#2a2a35'; ctx.lineWidth = 2;
-            const grid = 100;
-            const sx = Math.floor(camera.x / grid) * grid; const sy = Math.floor(camera.y / grid) * grid;
+            // Siatka
+            ctx.strokeStyle = '#2a2a35'; ctx.lineWidth = 2; const grid = 100;
+            const sx = Math.floor(camera.x/grid)*grid, sy = Math.floor(camera.y/grid)*grid;
             ctx.beginPath();
             for(let x=sx; x<camera.x+canvas.width; x+=grid) { ctx.moveTo(x,0); ctx.lineTo(x,ARENA_HEIGHT); }
             for(let y=sy; y<camera.y+canvas.height; y+=grid) { ctx.moveTo(0,y); ctx.lineTo(ARENA_WIDTH,y); }
             ctx.stroke();
 
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 10;
-            ctx.strokeRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
+            // Granice areny
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 10; ctx.strokeRect(0,0, ARENA_WIDTH, ARENA_HEIGHT);
 
-            const drawPlayer = (p) => {
-                if (p.isDead) return;
-                ctx.save(); ctx.translate(p.x || 1000, p.y || 1000);
+            // Rysowanie zaleznie od trybu (hostStateData)
+            const h = hostStateData;
+            if(globalGameState.mode === 'lms' && h.safeZone) {
+                ctx.fillStyle = 'rgba(255, 51, 102, 0.2)'; ctx.fillRect(0,0, ARENA_WIDTH, ARENA_HEIGHT);
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath(); ctx.arc(h.safeZone.x, h.safeZone.y, h.safeZone.r, 0, Math.PI*2); ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 5; ctx.stroke();
+            }
+            if(globalGameState.mode === 'race') {
+                ctx.fillStyle = 'rgba(0, 204, 68, 0.3)'; ctx.fillRect(1900, 0, 100, ARENA_HEIGHT);
+                ctx.fillStyle = '#fff'; ctx.font = '20px "Press Start 2P"'; ctx.fillText("META", 1910, ARENA_HEIGHT/2);
+            }
+            if(globalGameState.mode === 'capture' && h.zones) {
+                h.zones.forEach(z => {
+                    ctx.fillStyle = 'rgba(0, 229, 255, 0.4)'; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI*2); ctx.fill();
+                    ctx.strokeStyle = '#00e5ff'; ctx.lineWidth=3; ctx.stroke();
+                });
+            }
+            if(globalGameState.mode === 'koth' && h.kothZone) {
+                ctx.fillStyle = 'rgba(255, 204, 0, 0.3)'; ctx.beginPath(); ctx.arc(h.kothZone.x, h.kothZone.y, h.kothZone.r, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#ffcc00'; ctx.lineWidth=5; ctx.stroke();
+            }
+            if(globalGameState.mode === 'survival' && h.balls) {
+                h.balls.forEach(b => {
+                    ctx.fillStyle = '#ff3366'; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
+                });
+            }
+
+            // Gracze
+            const drawP = (p) => {
+                if(p.isDead) return;
+                ctx.save(); ctx.translate(p.x, p.y);
                 ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-20, -20, 40, 40);
-                ctx.fillStyle = p.color || '#00e5ff'; ctx.fillRect(-20, -24, 40, 40);
-                ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.strokeRect(-20, -24, 40, 40);
+                ctx.fillStyle = p.color; ctx.fillRect(-20, -24, 40, 40);
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(-20, -24, 40, 40);
+                ctx.fillStyle = '#fff'; ctx.fillRect(-10, -18, 6, 6); ctx.fillRect(4, -18, 6, 6);
+                ctx.fillStyle = '#000'; ctx.fillRect(-8, -16, 2, 2); ctx.fillRect(6, -16, 2, 2);
                 ctx.restore();
-
-                ctx.fillStyle = '#fff'; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-                ctx.fillText(p.name || 'Gracz', p.x || 1000, (p.y || 1000) - 35);
+                ctx.fillStyle = '#fff'; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText(p.name, p.x, p.y - 35);
             };
+            Object.values(remotePlayers).forEach(drawP);
+            drawP(localState);
 
-            Object.values(remotePlayers).forEach(drawPlayer);
-            drawPlayer(localState);
-
+            if(localState.isDead) {
+                ctx.restore();
+                ctx.fillStyle = 'rgba(255,0,0,0.3)'; ctx.fillRect(0,0,canvas.width, canvas.height);
+                ctx.fillStyle = '#fff'; ctx.font = '30px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText("ELIMINACJA!", canvas.width/2, canvas.height/2);
+                ctx.save(); ctx.translate(-camera.x, -camera.y);
+            }
             ctx.restore();
         }
 
-        window.addEventListener('keydown', e => { 
-            if (keys.hasOwnProperty(e.key) && document.activeElement !== document.getElementById('chatInput')) {
-                keys[e.key] = true; 
-            }
-        });
-        window.addEventListener('keyup', e => { 
-            if (keys.hasOwnProperty(e.key)) {
-                keys[e.key] = false; 
-            }
-        });
-        window.addEventListener('resize', () => { 
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight; 
-        });
+        function showEndScreen() {
+            if(syncInterval) clearInterval(syncInterval);
+            if(hostInterval) clearInterval(hostInterval);
+            if(renderLoopId) cancelAnimationFrame(renderLoopId);
+            
+            switchScreen('screen-end');
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
 
-        document.getElementById('btnCreateRoom').onclick = createRoom;
-        document.getElementById('btnJoinRoom').onclick = joinRoomBtn;
-        document.getElementById('btnLeaveLobby').onclick = leaveRoom;
-        document.getElementById('btnLeaveGame').onclick = leaveRoom;
-        document.getElementById('btnReturnLobby').onclick = leaveRoom;
+            const allP = Object.values(remotePlayers); allP.push(localState);
+            allP.sort((a,b) => b.score - a.score);
+            
+            document.getElementById('winnerName').innerText = allP.length > 0 ? `Zwycięzca: ${allP[0].name}` : "Koniec!";
+            document.getElementById('endLeaderboard').innerHTML = allP.map((p,i) => `<li class="flex justify-between bg-black/40 p-2 border border-gray-600"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">${p.score} pkt</span></li>`).join('');
 
-        const chatForm = document.getElementById('chatForm');
-        if(chatForm) {
-            chatForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const input = document.getElementById('chatInput');
-                if(!input) return;
-                const msg = input.value.trim();
-                if (!msg) return;
-                input.value = '';
-                const chatBox = document.getElementById('chatMessages');
-                if(chatBox) {
-                    const newMsg = document.createElement('div');
-                    newMsg.innerHTML = `<span style="color:${localState.color}">[${localState.name}]</span>: ${msg}`;
-                    chatBox.appendChild(newMsg);
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }
-            });
+            document.getElementById('btnReturnLobby').style.display = isHost ? 'block' : 'none';
+            document.getElementById('endWaitMsg').style.display = isHost ? 'none' : 'block';
+            
+            document.getElementById('btnReturnLobby').onclick = () => { if(isHost) db.ref(`rooms/${currentRoomId}`).update({status: 'lobby'}); };
         }
+
+        function updateUIList(activeArr) {
+            document.getElementById('playerCount').innerText = activeArr.length;
+            const arr = [...activeArr].sort((a,b)=>b.score - a.score);
+            document.getElementById('playerList').innerHTML = arr.map(p => `<li class="flex justify-between p-1"><span style="color:${p.color}">■ ${p.name} ${p.id===userId?'(TY)':''}</span><span class="text-yellow-400">${p.score} pkt</span></li>`).join('');
+            document.getElementById('hudLeaderboard').innerHTML = arr.map(p => `<li class="flex justify-between ${p.isDead?'opacity-50 line-through':''}"><span style="color:${p.color}">■ ${p.name.substring(0,8)}</span><span>${p.score}</span></li>`).join('');
+        }
+
+        function leaveToMenu() {
+            if(db && currentRoomId) {
+                db.ref(`room_players/${currentRoomId}/${userId}`).remove();
+                if(isHost) db.ref(`rooms/${currentRoomId}`).remove();
+            }
+            if(roomRef) roomRef.off();
+            if(playersRef) playersRef.off();
+            if(syncInterval) clearInterval(syncInterval);
+            if(hostInterval) clearInterval(hostInterval);
+            if(renderLoopId) cancelAnimationFrame(renderLoopId);
+            currentRoomId = null; isHost = false; remotePlayers = {};
+            canvas.style.display = 'none'; document.getElementById('hud').style.display = 'none'; document.getElementById('chatBox').style.display='none';
+            switchScreen('screen-menu');
+        }
+
+        document.getElementById('btnLeaveLobby').onclick = leaveToMenu;
+        document.getElementById('btnLeaveGame').onclick = leaveToMenu;
+
+        document.getElementById('chatForm').onsubmit = (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('chatInput').value.trim();
+            if(msg && currentRoomId) {
+                const div = document.createElement('div'); div.innerHTML = `<span style="color:${localState.color}">[${localState.name}]</span>: ${msg}`;
+                document.getElementById('chatMessages').appendChild(div);
+                document.getElementById('chatInput').value = '';
+                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+            }
+        };
+
+        window.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.key) && document.activeElement.id !== 'chatInput') keys[e.key] = true; });
+        window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key)) keys[e.key] = false; });
     </script>
 </body>
 </html>
