@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paweł Pyka: ULTIMATE SURVIVAL</title>
+    <title>Paweł Pyka: ZOMBIE SURVIVAL CO-OP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDK v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -15,25 +16,25 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: crosshair; }
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.85); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(4px); }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.88); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(5px); }
         .screen.active { display: flex; }
-        .panel { background-color: #1a1a24; border: 4px solid #fff; box-shadow: 8px 8px 0px 0px rgba(0,0,0,1); padding: 2rem; max-width: 600px; width: 90%; text-align: center; position: relative;}
-        .btn { background-color: #ff3366; border: 4px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4); color: white; padding: 1rem 2rem; text-transform: uppercase; cursor: pointer; transition: transform 0.1s; font-family: inherit; font-size: 14px; margin-top: 1rem;}
+        .panel { background-color: #1a1a24; border: 4px solid #fff; box-shadow: 8px 8px 0px 0px rgba(0,0,0,1); padding: 2rem; max-width: 650px; width: 92%; text-align: center; position: relative;}
+        .btn { background-color: #ff3366; border: 4px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4); color: white; padding: 1rem 1.5rem; text-transform: uppercase; cursor: pointer; transition: transform 0.1s; font-family: inherit; font-size: 13px; margin-top: 0.8rem;}
         .btn:hover { background-color: #ff5c85; } .btn:active { transform: translateY(4px); }
-        .input-pixel { background-color: #2a2a35; border: 4px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.5rem; width: 100%; text-align: center;}
+        .input-pixel { background-color: #2a2a35; border: 4px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.6rem; width: 100%; text-align: center;}
         
-        .upgrade-card { background: #222; border: 2px solid #555; padding: 1rem; margin: 0.5rem; cursor: pointer; transition: all 0.2s; width: 30%; }
+        .upgrade-card { background: #222; border: 3px solid #555; padding: 1.2rem; margin: 0.4rem; cursor: pointer; transition: all 0.2s; width: 31%; }
         .upgrade-card:hover { border-color: #00e5ff; transform: translateY(-5px); background: #2a2a35; }
         
         #hud { position: absolute; top: 20px; left: 20px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
-        .bar-container { width: 250px; height: 20px; border: 2px solid #fff; background: #333; margin-top: 5px; }
-        #healthBar { height: 100%; background: #ff3366; width: 100%; transition: width 0.2s; }
+        .bar-container { width: 250px; height: 18px; border: 2px solid #fff; background: #333; margin-top: 6px; }
+        #healthBar { height: 100%; background: #ff3366; width: 100%; transition: width 0.15s; }
         
-        #bossHpContainer { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 600px; z-index: 40; display: none; text-align: center;}
-        #bossBarBg { width: 100%; height: 30px; border: 4px solid #fff; background: #333; }
+        #bossHpContainer { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); width: 550px; z-index: 40; display: none; text-align: center;}
+        #bossBarBg { width: 100%; height: 26px; border: 4px solid #fff; background: #222; margin-top: 4px; }
         #bossBar { height: 100%; background: #9900cc; width: 100%; transition: width 0.1s; }
         
-        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 100; pointer-events: none; opacity: 0.4; }
+        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.06)); z-index: 100; pointer-events: none; opacity: 0.35; }
     </style>
 </head>
 <body class="crt">
@@ -42,16 +43,16 @@
 
     <!-- IN-GAME HUD -->
     <div id="hud">
-        <div id="waveText" class="text-2xl mb-2 text-[#00e5ff] font-bold">FALA 1</div>
-        <div id="scoreText" class="text-sm text-yellow-400">Punkty Ekipy: 0</div>
+        <div id="waveText" class="text-2xl mb-1 text-[#00e5ff] font-bold">FALA 1</div>
+        <div id="scoreText" class="text-xs text-yellow-400">PUNKTY: 0</div>
         <div class="bar-container"><div id="healthBar"></div></div>
-        <div id="weaponName" class="text-xs text-gray-300 mt-2">Broń: Pistolet</div>
+        <div id="weaponName" class="text-[11px] text-gray-300 mt-2">BROŃ: Pistolet</div>
         <ul id="teamList" class="mt-4 text-[10px] space-y-2"></ul>
     </div>
 
     <!-- BOSS HUD -->
     <div id="bossHpContainer">
-        <div class="text-xl text-[#9900cc] text-shadow-md mb-2 font-bold animate-pulse">FIOLETOWY MUTATOR</div>
+        <div class="text-lg text-[#cc33ff] mb-1 font-bold tracking-widest animate-pulse">MUTANT ALFA (BOSS)</div>
         <div id="bossBarBg"><div id="bossBar"></div></div>
     </div>
 
@@ -61,49 +62,54 @@
         <div id="screen-menu" class="screen active">
             <div class="panel">
                 <h1 class="text-3xl text-white mb-2 leading-tight">PAWEŁ PYKA</h1>
-                <h2 class="text-xl text-[#00e5ff] mb-8">ULTIMATE CO-OP</h2>
+                <h2 class="text-lg text-[#00e5ff] mb-6">ZOMBIE SURVIVAL CO-OP</h2>
                 
                 <div class="flex gap-4 mb-4">
                     <div class="w-1/2 text-left">
                         <label class="text-[10px] text-gray-400">Twój Nick:</label>
-                        <input type="text" id="playerName" value="Paweł" class="input-pixel text-sm" maxlength="10">
+                        <input type="text" id="playerName" value="Paweł" class="input-pixel text-xs interactive" maxlength="10">
                     </div>
                     <div class="w-1/2 text-left">
-                        <label class="text-[10px] text-gray-400">Kolor postaci:</label>
-                        <input type="color" id="playerColor" value="#00e5ff" class="w-full h-10 border-4 border-white cursor-pointer bg-black">
+                        <label class="text-[10px] text-gray-400">Kolor gracza:</label>
+                        <input type="color" id="playerColor" value="#00e5ff" class="w-full h-10 border-4 border-white cursor-pointer bg-black interactive">
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-3">
                     <button class="btn w-full interactive" id="btnCreateRoom">STWÓRZ POKÓJ (HOST)</button>
                     <div class="flex gap-2">
-                        <input type="text" id="joinCode" placeholder="KOD" class="input-pixel interactive uppercase w-1/2" maxlength="6">
+                        <input type="text" id="joinCode" placeholder="KOD POKOJU" class="input-pixel interactive uppercase w-1/2 text-xs" maxlength="6">
                         <button class="btn !bg-[#00e5ff] !text-black hover:!bg-[#66edff] w-1/2 interactive !mt-0" id="btnJoinRoom">DOŁĄCZ</button>
                     </div>
                 </div>
-                <div id="menuError" class="bg-black/80 border-2 border-red-500 p-2 text-[10px] text-yellow-400 font-bold mt-4 hidden"></div>
+                <div id="menuError" class="bg-black/90 border-2 border-red-500 p-2 text-[10px] text-yellow-400 font-bold mt-4 hidden"></div>
             </div>
         </div>
 
         <!-- LOBBY -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
-                <h2 class="text-2xl text-[#00e5ff] mb-4">BAZA WYPADOWA</h2>
-                <div class="text-xs text-gray-400 mb-6">ZAPROŚ ZIOMKÓW KODEM: <br><span id="lobbyCode" class="text-4xl text-[#ff3366] font-bold tracking-widest mt-2 block"></span></div>
+                <h2 class="text-2xl text-[#00e5ff] mb-3">LOBBY DRUŻYNY</h2>
+                <div class="text-xs text-gray-400 mb-2">KOD POKOJU:</div>
+                <div id="lobbyCode" class="text-3xl text-[#ff3366] font-bold tracking-widest mb-3"></div>
                 
-                <ul id="lobbyPlayers" class="bg-black/50 border-2 border-gray-600 h-32 overflow-y-auto p-2 mb-6 text-xs text-left space-y-2"></ul>
+                <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 text-[10px] w-full mb-4 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK DLA KOLEGI</button>
+                <div id="copySuccess" class="text-[9px] text-green-400 mb-3 hidden font-bold">SKOPIOWANO LINK DO SCHOWKA!</div>
+
+                <div class="text-[10px] text-gray-400 text-left mb-1">GRACZE W POKOJU:</div>
+                <ul id="lobbyPlayers" class="bg-black/50 border-2 border-gray-600 h-28 overflow-y-auto p-2 mb-4 text-xs text-left space-y-2"></ul>
                 
-                <button id="btnStartGame" class="btn w-full !bg-[#00cc44] hover:!bg-[#33ff77] interactive hidden">ROZPOCZNIJ RZEŹ</button>
-                <p id="hostWarning" class="text-[10px] text-yellow-400 hidden">Czekaj aż Host kliknie start...</p>
-                <button class="btn !bg-gray-600 w-full mt-4 interactive" onclick="location.reload()">OPUŚĆ BAZĘ</button>
+                <button id="btnStartGame" class="btn w-full !bg-[#00cc44] hover:!bg-[#33ff77] interactive hidden">ROZPOCZNIJ ROZGRYWKĘ</button>
+                <p id="hostWarning" class="text-[10px] text-yellow-400 hidden animate-pulse">Czekaj aż Host wystartuje grę...</p>
+                <button class="btn !bg-gray-600 w-full mt-3 interactive text-[11px] !p-2" onclick="location.reload()">WYJDŹ</button>
             </div>
         </div>
 
-        <!-- ULEPSZENIA -->
+        <!-- ULEPSZENIA (MIĘDZY FALAMI) -->
         <div id="screen-upgrades" class="screen">
             <div class="panel !max-w-4xl">
                 <h2 class="text-2xl text-[#00e5ff] mb-2">FALA ODPARTA!</h2>
-                <p class="text-xs text-gray-300 mb-6">Wszyscy gracze zostali uleczeni. Wybierz darmowy atut:</p>
+                <p class="text-xs text-gray-300 mb-6">Wszyscy gracze uleczeni i postawieni na nogi. Wybierz atut:</p>
                 <div class="flex justify-between" id="upgradeOptions"></div>
             </div>
         </div>
@@ -111,21 +117,33 @@
         <!-- KONIEC GRY -->
         <div id="screen-gameover" class="screen">
             <div class="panel">
-                <h2 class="text-4xl text-red-600 mb-4 animate-pulse">WSZYSCY MARTWI</h2>
-                <p class="text-sm text-gray-300 mb-2">Dotarliście do fali: <span id="finalWave" class="text-white text-xl"></span></p>
-                <button class="btn interactive mt-6" onclick="location.reload()">WRÓĆ DO BAZY</button>
+                <h2 class="text-3xl text-red-600 mb-4 animate-pulse">WSZYSCY ZGINĘLIŚCIE</h2>
+                <p class="text-sm text-gray-300 mb-2">Przetrwano fal: <span id="finalWave" class="text-white text-xl"></span></p>
+                <button class="btn interactive mt-4" onclick="location.reload()">ZAGRAJ PONOWNIE</button>
             </div>
         </div>
     </div>
 
     <script>
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            const container = document.getElementById('uiContainer');
+            if(id) {
+                container.classList.add('interactive');
+                const target = document.getElementById(id);
+                if(target) target.classList.add('active');
+            } else {
+                container.classList.remove('interactive');
+            }
+        }
+
         function showErr(msg, isWarn = false) {
             const el = document.getElementById('menuError');
             el.innerText = msg; el.classList.remove('hidden');
-            el.className = `bg-black/80 border-2 p-2 text-[10px] font-bold mt-4 ${isWarn ? 'border-yellow-500 text-yellow-400' : 'border-red-500 text-red-500'}`;
+            el.className = `bg-black/90 border-2 p-2 text-[10px] font-bold mt-4 ${isWarn ? 'border-yellow-500 text-yellow-400' : 'border-red-500 text-red-500'}`;
         }
 
-        // --- FIREBASE INIT ---
+        // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -138,28 +156,34 @@
         
         let db = null, auth = null;
         try { firebase.initializeApp(firebaseConfig); db = firebase.database(); auth = firebase.auth(); } 
-        catch(e) { showErr("Błąd inicjalizacji bazy danych!"); }
+        catch(e) { showErr("Błąd inicjalizacji Firebase!"); }
 
         let myId = null, currentRoom = null, isHost = false;
         let networkPlayers = {}, networkZombies = {}, networkItems = {}; 
         const State = { wave: 1, score: 0, status: 'lobby' };
 
-        // --- AUDIO SYS (SYNTH) ---
+        // Audio System (Syntezator Web Audio)
         const AudioSys = {
             ctx: null,
-            init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            init() { 
+                if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+                if(this.ctx.state === 'suspended') this.ctx.resume();
+            },
             play(type) {
-                if(!this.ctx || this.ctx.state === 'suspended') return;
+                if(!this.ctx) return;
                 const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
                 o.connect(g); g.connect(this.ctx.destination);
                 const t = this.ctx.currentTime;
                 
-                if (type === 'pistol') { o.type = 'square'; o.frequency.setValueAtTime(400, t); o.frequency.exponentialRampToValueAtTime(40, t+0.1); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.1); o.start(t); o.stop(t+0.1); }
-                else if (type === 'shotgun') { o.type = 'sawtooth'; o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(20, t+0.2); g.gain.setValueAtTime(0.1, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.2); o.start(t); o.stop(t+0.2); }
-                else if (type === 'sniper') { o.type = 'square'; o.frequency.setValueAtTime(800, t); o.frequency.exponentialRampToValueAtTime(50, t+0.3); g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.3); o.start(t); o.stop(t+0.3); }
-                else if (type === 'hit') { o.type = 'sawtooth'; o.frequency.setValueAtTime(100, t); o.frequency.exponentialRampToValueAtTime(20, t+0.1); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.1); o.start(t); o.stop(t+0.1); }
-                else if (type === 'item') { o.type = 'sine'; o.frequency.setValueAtTime(400, t); o.frequency.linearRampToValueAtTime(800, t+0.2); g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0.01, t+0.2); o.start(t); o.stop(t+0.2); }
-                else if (type === 'revive') { o.type = 'triangle'; o.frequency.setValueAtTime(300, t); o.frequency.linearRampToValueAtTime(600, t+0.5); g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0, t+0.5); o.start(t); o.stop(t+0.5); }
+                if (type === 'pistol') { o.type = 'square'; o.frequency.setValueAtTime(450, t); o.frequency.exponentialRampToValueAtTime(50, t+0.09); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.09); o.start(t); o.stop(t+0.09); }
+                else if (type === 'shotgun') { o.type = 'sawtooth'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(25, t+0.18); g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.18); o.start(t); o.stop(t+0.18); }
+                else if (type === 'minigun') { o.type = 'triangle'; o.frequency.setValueAtTime(320, t); o.frequency.exponentialRampToValueAtTime(70, t+0.06); g.gain.setValueAtTime(0.03, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.06); o.start(t); o.stop(t+0.06); }
+                else if (type === 'sniper') { o.type = 'square'; o.frequency.setValueAtTime(800, t); o.frequency.exponentialRampToValueAtTime(40, t+0.28); g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.28); o.start(t); o.stop(t+0.28); }
+                else if (type === 'hit') { o.type = 'sawtooth'; o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(30, t+0.1); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.1); o.start(t); o.stop(t+0.1); }
+                else if (type === 'item') { o.type = 'sine'; o.frequency.setValueAtTime(350, t); o.frequency.linearRampToValueAtTime(750, t+0.15); g.gain.setValueAtTime(0.08, t); g.gain.linearRampToValueAtTime(0.01, t+0.15); o.start(t); o.stop(t+0.15); }
+                else if (type === 'revive') { o.type = 'triangle'; o.frequency.setValueAtTime(250, t); o.frequency.linearRampToValueAtTime(550, t+0.35); g.gain.setValueAtTime(0.08, t); g.gain.linearRampToValueAtTime(0, t+0.35); o.start(t); o.stop(t+0.35); }
+                else if (type === 'nuke') { o.type = 'sawtooth'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(15, t+0.7); g.gain.setValueAtTime(0.2, t); g.gain.linearRampToValueAtTime(0, t+0.7); o.start(t); o.stop(t+0.7); }
+                else if (type === 'boss') { o.type = 'sawtooth'; o.frequency.setValueAtTime(90, t); o.frequency.linearRampToValueAtTime(140, t+0.4); o.frequency.linearRampToValueAtTime(90, t+0.8); g.gain.setValueAtTime(0.12, t); g.gain.linearRampToValueAtTime(0, t+0.8); o.start(t); o.stop(t+0.8); }
             }
         };
 
@@ -180,8 +204,9 @@
 
         const Camera = {
             x: 0, y: 0, shkT: 0, shkI: 0,
-            update(dt, t) {
-                this.x += ((t.x - width/2) - this.x) * 5 * dt; this.y += ((t.y - height/2) - this.y) * 5 * dt;
+            update(dt, target) {
+                this.x += ((target.x - width/2) - this.x) * 6 * dt; 
+                this.y += ((target.y - height/2) - this.y) * 6 * dt;
                 Input.wx = Input.mx + this.x; Input.wy = Input.my + this.y;
                 if(this.shkT > 0) this.shkT -= dt;
             },
@@ -192,39 +217,58 @@
 
         const FX = {
             p: [], t: [], b: [],
-            blood(x, y, isGreen=false) { for(let i=0; i<6; i++) { let a=Math.random()*Math.PI*2; let v=Math.random()*150+50; this.p.push({ x:x, y:y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, l:0.3, m:0.3, s:Math.random()*4+2, c:isGreen?'#33cc33':'#cc0000' }); } },
+            blood(x, y, isGreen=false) { 
+                for(let i=0; i<6; i++) { 
+                    let a=Math.random()*Math.PI*2; let v=Math.random()*160+40; 
+                    this.p.push({ x:x, y:y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, l:0.35, m:0.35, s:Math.random()*4+2, c:isGreen?'#33cc33':'#cc0000' }); 
+                } 
+            },
             casing(x, y) { let a=Math.random()*Math.PI*2; this.p.push({ x:x, y:y, vx:Math.cos(a)*100, vy:Math.sin(a)*100, l:0.5, m:0.5, s:2, c:'#e6b800' }); },
-            text(x, y, txt, c='#fff', sz=10) { this.t.push({ x:x+(Math.random()*20-10), y:y-20, txt:txt, c:c, l:0.8, m:0.8, vy:-50, s:sz }); },
+            text(x, y, txt, c='#fff', sz=10) { this.t.push({ x:x+(Math.random()*20-10), y:y-20, txt:txt, c:c, l:0.8, m:0.8, vy:-45, s:sz }); },
             update(dt) {
-                for(let i=this.p.length-1; i>=0; i--) { let e=this.p[i]; e.x+=e.vx*dt; e.y+=e.vy*dt; e.vx*=0.9; e.vy*=0.9; e.l-=dt; if(e.l<=0) { if(e.c==='#cc0000'||e.c==='#33cc33') { this.b.push({x:e.x, y:e.y, s:e.s, c:e.c}); if(this.b.length>500) this.b.shift(); } this.p.splice(i,1); } }
+                for(let i=this.p.length-1; i>=0; i--) { 
+                    let e=this.p[i]; e.x+=e.vx*dt; e.y+=e.vy*dt; e.vx*=0.92; e.vy*=0.92; e.l-=dt; 
+                    if(e.l<=0) { 
+                        if(e.c==='#cc0000'||e.c==='#33cc33') { this.b.push({x:e.x, y:e.y, s:e.s, c:e.c}); if(this.b.length>400) this.b.shift(); } 
+                        this.p.splice(i,1); 
+                    } 
+                }
                 for(let i=this.t.length-1; i>=0; i--) { let e=this.t[i]; e.y+=e.vy*dt; e.l-=dt; if(e.l<=0) this.t.splice(i,1); }
             },
             drawGround() { this.b.forEach(e => { ctx.fillStyle = e.c; ctx.fillRect(e.x-e.s/2, e.y-e.s/2, e.s, e.s); }); },
             draw() {
                 this.p.forEach(e => { ctx.fillStyle=e.c; ctx.globalAlpha=e.l/e.m; ctx.fillRect(e.x-e.s/2, e.y-e.s/2, e.s, e.s); });
                 ctx.globalAlpha=1; ctx.textAlign='center';
-                this.t.forEach(e => { ctx.fillStyle=e.c; ctx.globalAlpha=e.l/e.m; ctx.font=`${e.s}px "Press Start 2P"`; ctx.fillText(e.txt, e.x, e.y); }); ctx.globalAlpha=1;
+                this.t.forEach(e => { ctx.fillStyle=e.c; ctx.globalAlpha=e.l/e.m; ctx.font=`${e.s}px "Press Start 2P"`; ctx.fillText(e.txt, e.x, e.y); }); 
+                ctx.globalAlpha=1;
             }
         };
 
-        // --- BRONIE ---
         const WEAPONS = {
-            pistol: { name: 'Pistolet', rate: 0.2, dmg: 30, proj: 1, spread: 0.05, sound: 'pistol', shake: 2 },
-            shotgun: { name: 'Strzelba', rate: 0.8, dmg: 25, proj: 6, spread: 0.3, sound: 'shotgun', shake: 6 },
-            minigun: { name: 'Minigun', rate: 0.08, dmg: 15, proj: 1, spread: 0.15, sound: 'pistol', shake: 1 },
-            sniper: { name: 'Snajperka', rate: 1.2, dmg: 150, proj: 1, spread: 0.01, sound: 'sniper', shake: 8 }
+            pistol: { name: 'Pistolet', rate: 0.22, dmg: 32, proj: 1, spread: 0.04, sound: 'pistol', shake: 2 },
+            shotgun: { name: 'Strzelba', rate: 0.75, dmg: 24, proj: 6, spread: 0.28, sound: 'shotgun', shake: 6 },
+            minigun: { name: 'Minigun', rate: 0.08, dmg: 16, proj: 1, spread: 0.14, sound: 'minigun', shake: 1.5 },
+            sniper: { name: 'Snajperka', rate: 1.15, dmg: 160, proj: 1, spread: 0.01, sound: 'sniper', shake: 7 }
         };
 
         class Player {
             constructor(n, c) {
                 this.name=n; this.color=c; this.x=1000; this.y=1000; this.hp=100; this.maxHp=100; this.speed=250; this.angle=0;
-                this.isDead=false; this.reviveTimer=0; this.wep = 'pistol'; this.fT = 0; this.muzzle = 0; this.isShooting = false;
-                
-                // Ulepszenia bazowe
-                this.dmgMult = 1; this.speedMult = 1;
+                this.isDead=false; this.wep='pistol'; this.fT=0; this.muzzle=0; this.isShooting=false;
+                this.dmgMult=1; this.speedMult=1;
+                this.revivingPartnerId=null; this.reviveHoldTime=0;
             }
             update(dt) {
-                if(this.isDead) return; // Gracz leży
+                if(this.isDead) {
+                    // Powalony gracz może czołgać się wolno (50 px/s)
+                    let cx=0, cy=0;
+                    if(Input.keys['KeyW'] || Input.keys['ArrowUp']) cy-=1; if(Input.keys['KeyS'] || Input.keys['ArrowDown']) cy+=1;
+                    if(Input.keys['KeyA'] || Input.keys['ArrowLeft']) cx-=1; if(Input.keys['KeyD'] || Input.keys['ArrowRight']) cx+=1;
+                    if(cx!==0 && cy!==0) { let l=Math.hypot(cx,cy); cx/=l; cy/=l; }
+                    this.x += cx*45*dt; this.y += cy*45*dt;
+                    this.x = Math.max(50, Math.min(1950, this.x)); this.y = Math.max(50, Math.min(1950, this.y));
+                    return;
+                }
 
                 let mx=0, my=0;
                 if(Input.keys['KeyW'] || Input.keys['ArrowUp']) my-=1; if(Input.keys['KeyS'] || Input.keys['ArrowDown']) my+=1;
@@ -244,46 +288,84 @@
                     let w = WEAPONS[this.wep];
                     this.fT = w.rate; this.muzzle = 0.05;
                     Camera.shake(w.shake, 0.1); AudioSys.play(w.sound); FX.casing(this.x, this.y);
-                    this.x -= Math.cos(this.angle)*w.shake; this.y -= Math.sin(this.angle)*w.shake; // Odrzut
+                    this.x -= Math.cos(this.angle)*w.shake; this.y -= Math.sin(this.angle)*w.shake; 
                     for(let i=0; i<w.proj; i++) {
                         let a = this.angle; if(w.proj>1) a += (Math.random()-0.5)*w.spread;
                         Game.bullets.push(new Bullet(this.x, this.y, a, w.dmg * this.dmgMult, true));
                     }
                 }
 
-                // Podnoszenie ziomków
+                // Sprawdzanie reanimacji sojusznika (2 sekundy stania obok)
+                let partnerToRevive = null;
                 Object.values(networkPlayers).forEach(p => {
-                    if(p.isDead && Math.hypot(this.x - p.x, this.y - p.y) < 50) {
-                        Game.revivePlayer(p.id);
+                    if(p.isDead && Math.hypot(this.x - p.x, this.y - p.y) < 60) {
+                        partnerToRevive = p.id;
                     }
                 });
 
+                if(partnerToRevive) {
+                    if(this.revivingPartnerId === partnerToRevive) {
+                        this.reviveHoldTime += dt;
+                        if(this.reviveHoldTime >= 2.0) {
+                            Game.revivePlayer(partnerToRevive);
+                            this.revivingPartnerId = null;
+                            this.reviveHoldTime = 0;
+                        }
+                    } else {
+                        this.revivingPartnerId = partnerToRevive;
+                        this.reviveHoldTime = 0;
+                    }
+                } else {
+                    this.revivingPartnerId = null;
+                    this.reviveHoldTime = 0;
+                }
+
                 // Zbieranie Itemów
                 Object.values(networkItems).forEach(item => {
-                    if(Math.hypot(this.x - item.x, this.y - item.y) < 30) {
-                        if(item.t === 'medkit' && this.hp < this.maxHp) { this.hp = Math.min(this.maxHp, this.hp+50); Game.takeItem(item.i); FX.text(this.x, this.y, "+HP", '#00ff00'); AudioSys.play('item'); }
-                        else if(item.t === 'weapon') { this.wep = ['shotgun','minigun','sniper'][Math.floor(Math.random()*3)]; Game.takeItem(item.i); FX.text(this.x, this.y, WEAPONS[this.wep].name, '#00e5ff'); AudioSys.play('item'); document.getElementById('weaponName').innerText = `Broń: ${WEAPONS[this.wep].name}`;}
+                    if(Math.hypot(this.x - item.x, this.y - item.y) < 32) {
+                        if(item.t === 'medkit' && this.hp < this.maxHp) { 
+                            this.hp = Math.min(this.maxHp, this.hp+50); 
+                            Game.takeItem(item.i); FX.text(this.x, this.y, "+50 HP", '#00ff66', 11); AudioSys.play('item'); 
+                        }
+                        else if(item.t === 'weapon') { 
+                            const pool = ['shotgun','minigun','sniper'].filter(k => k !== this.wep);
+                            this.wep = pool[Math.floor(Math.random()*pool.length)]; 
+                            Game.takeItem(item.i); FX.text(this.x, this.y, WEAPONS[this.wep].name, '#00e5ff', 12); 
+                            AudioSys.play('item'); document.getElementById('weaponName').innerText = `BROŃ: ${WEAPONS[this.wep].name}`;
+                        }
+                        else if(item.t === 'nuke') {
+                            Game.triggerNuke(item.i);
+                        }
                     }
                 });
             }
             draw(ctx) {
                 ctx.save(); ctx.translate(this.x, this.y); 
-                if(this.isDead) { // Gracz leży powalony
-                    ctx.fillStyle = 'rgba(200,0,0,0.5)'; ctx.fillRect(-20, -10, 40, 20);
-                    ctx.fillStyle = '#fff'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText("POMÓŻ!", 0, -20);
-                    // Pasek revive
-                    if(this.reviveTimer > 0) { ctx.fillStyle='#333'; ctx.fillRect(-15, 15, 30, 4); ctx.fillStyle='#00e5ff'; ctx.fillRect(-15, 15, 30*(this.reviveTimer/3), 4); }
+                if(this.isDead) {
+                    ctx.fillStyle = 'rgba(200, 0, 0, 0.6)'; ctx.fillRect(-18, -12, 36, 24);
+                    ctx.fillStyle = '#ff3366'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText("RATUNKU!", 0, -22);
                 } else {
                     ctx.rotate(this.angle);
                     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-15, -15, 30, 30);
-                    if(this.muzzle > 0) { ctx.fillStyle = 'rgba(255,255,100,0.8)'; ctx.beginPath(); ctx.arc(35, 8, 15, 0, Math.PI*2); ctx.fill(); }
+                    if(this.muzzle > 0) { ctx.fillStyle = 'rgba(255,255,100,0.85)'; ctx.beginPath(); ctx.arc(35, 8, 16, 0, Math.PI*2); ctx.fill(); }
                     ctx.fillStyle = '#ffccaa'; ctx.fillRect(5, -14, 10, 8); ctx.fillRect(15, 4, 10, 8);
-                    ctx.fillStyle = '#333'; ctx.fillRect(10, 6, 25, 6);
+                    ctx.fillStyle = '#2b2b2b'; ctx.fillRect(10, 6, 26, 6);
                     ctx.fillStyle = this.color; ctx.fillRect(-12, -12, 24, 24);
-                    ctx.fillStyle = '#222'; ctx.fillRect(0, -6, 16, 12); ctx.fillStyle = '#333'; ctx.fillRect(-8, -8, 16, 16);
+                    ctx.fillStyle = '#111'; ctx.fillRect(0, -6, 16, 12);
+                    ctx.fillStyle = '#222'; ctx.fillRect(-8, -8, 16, 16);
                 }
                 ctx.restore();
-                if(!this.isDead) { ctx.fillStyle = '#fff'; ctx.font = '10px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText(this.name, this.x, this.y-30); }
+
+                // Pasek postępu reanimacji partnera
+                if(this.revivingPartnerId && this.reviveHoldTime > 0) {
+                    ctx.fillStyle = '#222'; ctx.fillRect(this.x - 25, this.y + 25, 50, 6);
+                    ctx.fillStyle = '#00e5ff'; ctx.fillRect(this.x - 25, this.y + 25, 50 * (this.reviveHoldTime / 2.0), 6);
+                    ctx.fillStyle = '#fff'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText("REANIMACJA...", this.x, this.y + 38);
+                }
+
+                if(!this.isDead) { 
+                    ctx.fillStyle = '#fff'; ctx.font = '9px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText(this.name, this.x, this.y-32); 
+                }
             }
         }
 
@@ -294,10 +376,10 @@
         }
 
         const Z_TYPES = {
-            0: { c: '#33cc33', r: 16, s: 90, hp: 40, dmg: 10, n: "Zombie" }, 
-            1: { c: '#ff3300', r: 12, s: 180, hp: 20, dmg: 5, n: "Biegacz" }, 
-            2: { c: '#555555', r: 24, s: 40, hp: 300, dmg: 30, n: "Tank" },
-            3: { c: '#9900cc', r: 40, s: 60, hp: 2000, dmg: 50, n: "BOSS MUTATOR" } 
+            0: { c: '#33cc33', r: 16, s: 90, hp: 40, dmg: 12 }, 
+            1: { c: '#ff3300', r: 12, s: 180, hp: 20, dmg: 8 }, 
+            2: { c: '#555555', r: 24, s: 45, hp: 320, dmg: 28 },
+            3: { c: '#9900cc', r: 42, s: 65, hp: 1800, dmg: 45 } 
         };
 
         class Zombie {
@@ -318,20 +400,22 @@
 
                 if(this.target) {
                     this.angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
-                    if(this.hitTimer <= 0 || this.type === 2 || this.type === 3) { // Tank i Boss ignorują odrzut
+                    if(this.hitTimer <= 0 || this.type >= 2) {
                         this.x += Math.cos(this.angle) * this.speed * dt; this.y += Math.sin(this.angle) * this.speed * dt;
                     } else {
                         this.x -= Math.cos(this.angle) * this.speed * 2 * dt; this.y -= Math.sin(this.angle) * this.speed * 2 * dt;
                     }
                     if(minDist < this.radius + 18) { 
                         this.target.hp -= this.dmg * dt; 
-                        if(this.target.hp <= 0 && !this.target.isDead) { this.target.isDead = true; this.target.reviveTimer = 0; } 
+                        if(this.target.hp <= 0 && !this.target.isDead) { 
+                            this.target.isDead = true; 
+                        } 
                     }
                 }
             }
             updateClient(dt, netZ) {
                 this.angle = Math.atan2(netZ.y - this.y, netZ.x - this.x);
-                this.x += (netZ.x - this.x) * 10 * dt; this.y += (netZ.y - this.y) * 10 * dt;
+                this.x += (netZ.x - this.x) * 11 * dt; this.y += (netZ.y - this.y) * 11 * dt;
                 if(this.hp > netZ.hp) { this.hitTimer = 0.1; FX.blood(this.x, this.y, this.type===3); }
                 this.hp = netZ.hp; if(this.hitTimer > 0) this.hitTimer -= dt;
             }
@@ -339,43 +423,54 @@
                 ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
                 ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.arc(0,0,this.radius,0,Math.PI*2); ctx.fill();
                 ctx.fillStyle = this.hitTimer > 0 ? '#fff' : this.color;
-                ctx.fillRect(this.radius*0.3, -this.radius*0.9, this.radius*0.8, this.radius*0.4); ctx.fillRect(this.radius*0.3, this.radius*0.5, this.radius*0.8, this.radius*0.4);
+                ctx.fillRect(this.radius*0.3, -this.radius*0.8, this.radius*0.8, this.radius*0.4); 
+                ctx.fillRect(this.radius*0.3, this.radius*0.4, this.radius*0.8, this.radius*0.4);
                 ctx.beginPath(); ctx.arc(0,0, this.radius-4, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = (this.type===3) ? '#00ff00' : '#ff0000'; ctx.fillRect(this.radius*0.4, -this.radius*0.4, 4, 4); ctx.fillRect(this.radius*0.4, this.radius*0.1, 4, 4);
+                ctx.fillStyle = (this.type===3) ? '#00ff66' : '#ff0000'; ctx.fillRect(this.radius*0.35, -this.radius*0.35, 4, 4); ctx.fillRect(this.radius*0.35, this.radius*0.1, 4, 4);
                 ctx.restore();
-                if(this.type === 2) { ctx.fillStyle='#333'; ctx.fillRect(this.x-15, this.y-30, 30, 4); ctx.fillStyle='#ff0000'; ctx.fillRect(this.x-15, this.y-30, 30*(this.hp/this.maxHp), 4); }
+                if(this.type === 2) { 
+                    ctx.fillStyle='#222'; ctx.fillRect(this.x-16, this.y-32, 32, 4); 
+                    ctx.fillStyle='#ff0000'; ctx.fillRect(this.x-16, this.y-32, 32*(this.hp/this.maxHp), 4); 
+                }
             }
         }
 
         const Game = {
-            player: null, bullets: [], zombies: {}, items: {}, lastTime: 0, loopId: null, syncId: null, hostId: null,
-            hostZombies: [], hostItems: [], zSpawnTimer: 0, zToSpawn: 0, bossActive: false,
+            player: null, bullets: [], zombies: {}, lastTime: 0, loopId: null, syncId: null, hostId: null,
+            hostZombies: [], zSpawnTimer: 0, zToSpawn: 0, bossActive: false,
             
             start() {
-                Input.init(); this.player = new Player(document.getElementById('playerName').value, document.getElementById('playerColor').value);
-                this.bullets = []; this.zombies = {}; FX.parts=[]; FX.texts=[]; FX.blood=[];
+                Input.init(); 
+                this.player = new Player(document.getElementById('playerName').value, document.getElementById('playerColor').value);
+                this.bullets = []; this.zombies = {}; FX.p=[]; FX.t=[]; FX.b=[];
                 switchScreen(null); document.getElementById('hud').style.display = 'block';
-                document.getElementById('weaponName').innerText = `Broń: Pistolet`;
+                document.getElementById('weaponName').innerText = `BROŃ: Pistolet`;
                 this.lastTime = performance.now(); this.loopId = requestAnimationFrame(t => this.loop(t));
 
                 this.syncId = setInterval(() => {
                     if(currentRoom) {
-                        db.ref(`room_players/${currentRoom}/${myId}`).update({ x: Math.round(this.player.x), y: Math.round(this.player.y), angle: this.player.angle, isShooting: this.player.isShooting, hp: Math.round(this.player.hp), isDead: this.player.isDead, reviveTimer: this.player.reviveTimer });
+                        db.ref(`room_players/${currentRoom}/${myId}`).update({ 
+                            x: Math.round(this.player.x), y: Math.round(this.player.y), 
+                            angle: this.player.angle, isShooting: this.player.isShooting, 
+                            hp: Math.round(this.player.hp), isDead: this.player.isDead,
+                            wep: this.player.wep
+                        });
                     }
                 }, 50);
 
                 if(isHost) { this.hostId = setInterval(() => this.hostTick(), 100); this.startWaveHost(); }
             },
 
-            // --- HOST ---
             startWaveHost() {
                 State.wave++; this.bossActive = (State.wave % 5 === 0);
-                this.zToSpawn = this.bossActive ? 1 : 10 + (State.wave * 3); this.zSpawnTimer = 0;
+                this.zToSpawn = this.bossActive ? 1 : 10 + (State.wave * 4); this.zSpawnTimer = 0;
                 db.ref(`rooms/${currentRoom}`).update({ wave: State.wave, status: 'playing' });
                 
-                // Leczenie i podnoszenie graczy co falę
+                if(this.bossActive) AudioSys.play('boss');
+
                 db.ref(`room_players/${currentRoom}`).once('value', snap => {
-                    let updates = {}; snap.forEach(s => { updates[`${s.key}/hp`] = 100; updates[`${s.key}/isDead`] = false; updates[`${s.key}/reviveTimer`] = 0; });
+                    let updates = {}; 
+                    snap.forEach(s => { updates[`${s.key}/hp`] = 100; updates[`${s.key}/isDead`] = false; });
                     db.ref(`room_players/${currentRoom}`).update(updates);
                 });
             },
@@ -388,19 +483,22 @@
                         let a = Math.random()*Math.PI*2; let zx = 1000 + Math.cos(a)*1200; let zy = 1000 + Math.sin(a)*1200;
                         let type = 0;
                         if(this.bossActive) type = 3;
-                        else { if(State.wave >= 3 && Math.random() < 0.3) type = 1; if(State.wave >= 4 && Math.random() < 0.15) type = 2; }
+                        else { 
+                            if(State.wave >= 3 && Math.random() < 0.3) type = 1; 
+                            if(State.wave >= 4 && Math.random() < 0.18) type = 2; 
+                        }
                         
                         let z = new Zombie('z_'+Math.random().toString(36).substr(2,5), zx, zy, type);
                         z.hp *= (1 + (State.wave * 0.15)); z.maxHp = z.hp; this.hostZombies.push(z);
-                        this.zToSpawn--; this.zSpawnTimer = this.bossActive ? 999 : Math.max(0.2, 1.5 - State.wave*0.1);
+                        this.zToSpawn--; this.zSpawnTimer = this.bossActive ? 999 : Math.max(0.2, 1.4 - State.wave*0.08);
                     }
                 } else if(this.hostZombies.length === 0) {
                     State.status = 'upgrades'; db.ref(`rooms/${currentRoom}`).update({ status: 'upgrades' });
                 }
 
-                // Boss minion logic
+                // Miniony bossa
                 this.hostZombies.forEach(z => {
-                    if(z.type === 3 && Math.random() < 0.05) { // Boss wypluwa biegaczy
+                    if(z.type === 3 && Math.random() < 0.05) { 
                         let minion = new Zombie('z_'+Math.random().toString(36).substr(2,5), z.x, z.y, 1);
                         minion.hp *= (1 + (State.wave * 0.1)); minion.maxHp = minion.hp; this.hostZombies.push(minion);
                     }
@@ -414,7 +512,11 @@
                 let zData = this.hostZombies.map(z => ({ i: z.id, x: Math.round(z.x), y: Math.round(z.y), h: Math.round(z.hp), t: z.type }));
                 db.ref(`rooms/${currentRoom}`).update({ zombies: JSON.stringify(zData), score: State.score });
 
-                if(allP.length === 0) db.ref(`rooms/${currentRoom}`).update({ status: 'gameover' }); // Wszyscy powaleni
+                // Jeśli WSZYSCY gracze są powaleni -> Koniec gry
+                let anyAlive = (!this.player.isDead) || Object.values(networkPlayers).some(p => !p.isDead);
+                if(!anyAlive) {
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'gameover' });
+                }
             },
             applyHit(zId, dmg) {
                 let z = this.hostZombies.find(x => x.id === zId);
@@ -423,9 +525,11 @@
                     if(z.hp <= 0) { 
                         this.hostZombies = this.hostZombies.filter(x => x.id !== zId); 
                         State.score += (z.type === 3 ? 500 : (z.type === 2 ? 50 : 10));
-                        // Loot drop (15% szansy)
-                        if(Math.random() < 0.15 || z.type === 3) {
-                            let itemType = Math.random() < 0.5 ? 'medkit' : 'weapon';
+                        
+                        // Drop Itemu (20% szansy lub 100% z Bossa)
+                        if(Math.random() < 0.2 || z.type === 3) {
+                            let r = Math.random();
+                            let itemType = r < 0.45 ? 'medkit' : (r < 0.85 ? 'weapon' : 'nuke');
                             let iId = 'i_'+Math.random().toString(36).substr(2,5);
                             db.ref(`room_items/${currentRoom}/${iId}`).set({ i: iId, x: Math.round(z.x), y: Math.round(z.y), t: itemType });
                         }
@@ -438,22 +542,38 @@
                 db.ref(`actions/${currentRoom}`).on('child_added', snap => { 
                     let a = snap.val(); 
                     if(a.t === 'take_item') db.ref(`room_items/${currentRoom}/${a.i}`).remove();
-                    if(a.t === 'revive') { db.ref(`room_players/${currentRoom}/${a.i}`).update({isDead: false, hp: 50, reviveTimer: 0}); AudioSys.play('revive'); }
+                    if(a.t === 'nuke') {
+                        db.ref(`room_items/${currentRoom}/${a.i}`).remove();
+                        this.hostZombies = this.hostZombies.filter(z => z.type === 3); // Zostaje tylko Boss
+                        AudioSys.play('nuke'); Camera.shake(15, 0.5);
+                    }
+                    if(a.t === 'revive') { 
+                        db.ref(`room_players/${currentRoom}/${a.i}`).update({isDead: false, hp: 50}); 
+                        AudioSys.play('revive'); 
+                    }
                     snap.ref.remove(); 
                 });
             },
 
-            // --- KLIENT ---
+            // Akcje gracza wysyłane do Hosta
             reportHit(zId, dmg) { if(!isHost) { db.ref(`hits/${currentRoom}`).push({ id: zId, dmg: dmg }); } else { this.applyHit(zId, dmg); } },
             takeItem(iId) { if(!isHost) db.ref(`actions/${currentRoom}`).push({ t: 'take_item', i: iId }); else db.ref(`room_items/${currentRoom}/${iId}`).remove(); },
+            triggerNuke(iId) {
+                if(!isHost) db.ref(`actions/${currentRoom}`).push({ t: 'nuke', i: iId });
+                else {
+                    db.ref(`room_items/${currentRoom}/${iId}`).remove();
+                    this.hostZombies = this.hostZombies.filter(z => z.type === 3);
+                    AudioSys.play('nuke'); Camera.shake(15, 0.5);
+                }
+            },
             revivePlayer(pId) {
-                let p = networkPlayers[pId]; if(!p || !p.isDead) return;
-                db.ref(`actions/${currentRoom}`).push({ t: 'revive', i: pId });
+                if(!isHost) db.ref(`actions/${currentRoom}`).push({ t: 'revive', i: pId });
+                else { db.ref(`room_players/${currentRoom}/${pId}`).update({isDead: false, hp: 50}); AudioSys.play('revive'); }
             },
 
             update(dt) {
                 this.player.update(dt);
-                if(!this.player.isDead) Camera.update(dt, this.player);
+                Camera.update(dt, this.player);
 
                 this.bullets.forEach((b, i) => { b.update(dt); if(b.l<=0) this.bullets.splice(i,1); });
 
@@ -465,10 +585,11 @@
                 });
                 Object.keys(this.zombies).forEach(k => { if(!networkZombies[k]) delete this.zombies[k]; });
 
-                // HUD Bossa
+                // Boss HUD
                 const bHud = document.getElementById('bossHpContainer');
                 if(bossHp > 0) { bHud.style.display = 'block'; document.getElementById('bossBar').style.width = (bossHp/bossMax)*100+'%'; } else bHud.style.display = 'none';
 
+                // Kolizje pocisków
                 for(let i=this.bullets.length-1; i>=0; i--) {
                     let b = this.bullets[i]; let hit = false;
                     if(!b.isMine) continue;
@@ -476,29 +597,36 @@
                         let z = this.zombies[k];
                         if(Math.hypot(b.x - z.x, b.y - z.y) < z.radius) {
                             let crit = Math.random() < 0.2; let d = crit ? b.d*2 : b.d;
-                            AudioSys.play('hit'); FX.text(z.x, z.y, Math.round(d), crit?'#ffff00':'#fff', crit?14:10);
+                            AudioSys.play('hit'); FX.text(z.x, z.y, Math.round(d), crit?'#ffff00':'#fff', crit?13:10);
                             this.reportHit(z.id, d); hit = true; break;
                         }
                     }
-                    if(hit) { FX.parts.push({x:b.x, y:b.y, vx:0, vy:0, life:0.1, max:0.1, size:10, c:'#fff'}); this.bullets.splice(i,1); }
+                    if(hit) { FX.p.push({x:b.x, y:b.y, vx:0, vy:0, l:0.08, m:0.08, s:8, c:'#fff'}); this.bullets.splice(i,1); }
                 }
 
+                // Wizualne pociski sojuszników
                 Object.values(networkPlayers).forEach(p => {
-                    if(p.isShooting && Math.random() < 0.2) { FX.casing(p.x, p.y); this.bullets.push(new Bullet(p.x, p.y, p.angle, 0, false)); }
+                    if(p.isShooting && Math.random() < 0.25) { 
+                        FX.casing(p.x, p.y); 
+                        this.bullets.push(new Bullet(p.x, p.y, p.angle, 0, false)); 
+                    }
                 });
 
                 FX.update(dt);
                 document.getElementById('healthBar').style.width = Math.max(0, (this.player.hp/this.player.maxHp)*100)+'%';
-                document.getElementById('scoreText').innerText = `Punkty Ekipy: ${State.score}`;
+                document.getElementById('scoreText').innerText = `PUNKTY: ${State.score}`;
                 
-                let arr = [this.player]; Object.values(networkPlayers).forEach(p => arr.push(p));
-                document.getElementById('teamList').innerHTML = arr.map(p => `<li class="${p.isDead?'text-red-500 animate-pulse':''}"><span style="color:${p.color||'#fff'}">■</span> ${p.name||'Gracz'} ${p.isDead?'(POWALONY)':''}</li>`).join('');
+                // Lista drużyny
+                let teamArr = [{ name: this.player.name, color: this.player.color, isDead: this.player.isDead }];
+                Object.values(networkPlayers).forEach(p => teamArr.push({ name: p.name, color: p.color, isDead: p.isDead }));
+                document.getElementById('teamList').innerHTML = teamArr.map(p => `<li class="${p.isDead?'text-red-500 animate-pulse font-bold':''}"><span style="color:${p.color||'#fff'}">■</span> ${p.name||'Gracz'} ${p.isDead?'[POWALONY]':''}</li>`).join('');
             },
 
             draw() {
                 ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0,0,width,height);
                 Camera.apply();
 
+                // Siatka
                 ctx.strokeStyle = '#15151a'; ctx.lineWidth = 2; const grid = 100;
                 const sx = Math.floor(Camera.x/grid)*grid, sy = Math.floor(Camera.y/grid)*grid;
                 ctx.beginPath();
@@ -508,32 +636,70 @@
 
                 FX.drawGround();
                 
-                // Skrzynki
+                // Skrzynki / Przedmioty na ziemi
                 Object.values(networkItems).forEach(i => {
-                    ctx.fillStyle = i.t==='medkit'?'#ff3366':'#00e5ff'; ctx.fillRect(i.x-8, i.y-8, 16, 16);
-                    ctx.fillStyle = '#fff'; ctx.font='10px Arial'; ctx.textAlign='center'; ctx.fillText(i.t==='medkit'?'+':'W', i.x, i.y+3);
+                    ctx.save(); ctx.translate(i.x, i.y);
+                    if(i.t === 'medkit') {
+                        ctx.fillStyle = '#ff3366'; ctx.fillRect(-9, -9, 18, 18);
+                        ctx.fillStyle = '#fff'; ctx.font='10px Arial'; ctx.textAlign='center'; ctx.fillText('+', 0, 4);
+                    } else if(i.t === 'weapon') {
+                        ctx.fillStyle = '#00e5ff'; ctx.fillRect(-9, -9, 18, 18);
+                        ctx.fillStyle = '#000'; ctx.font='9px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText('W', 0, 4);
+                    } else if(i.t === 'nuke') {
+                        ctx.fillStyle = '#ffcc00'; ctx.fillRect(-10, -10, 20, 20);
+                        ctx.fillStyle = '#000'; ctx.font='8px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText('💣', 0, 4);
+                    }
+                    ctx.restore();
                 });
 
                 this.bullets.forEach(b => b.draw(ctx));
                 Object.values(this.zombies).forEach(z => z.draw(ctx));
                 
+                // Rysowanie sojuszników
                 Object.values(networkPlayers).forEach(p => {
                     ctx.save(); ctx.translate(p.x, p.y); 
                     if(p.isDead) {
-                        ctx.fillStyle = 'rgba(200,0,0,0.5)'; ctx.fillRect(-20, -10, 40, 20); ctx.fillStyle = '#fff'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText("POMÓŻ!", 0, -20);
-                        if(p.reviveTimer>0){ ctx.fillStyle='#333'; ctx.fillRect(-15, 15, 30, 4); ctx.fillStyle='#00e5ff'; ctx.fillRect(-15, 15, 30*(p.reviveTimer/3), 4); }
+                        ctx.fillStyle = 'rgba(200,0,0,0.6)'; ctx.fillRect(-18, -12, 36, 24); 
+                        ctx.fillStyle = '#ff3366'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText("RATUNKU!", 0, -22);
                     } else {
-                        ctx.rotate(p.angle); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-15,-15,30,30);
-                        ctx.fillStyle='#ffccaa'; ctx.fillRect(5,-14,10,8); ctx.fillRect(15,4,10,8); ctx.fillStyle='#333'; ctx.fillRect(10,6,25,6); ctx.fillStyle=p.color||'#fff'; ctx.fillRect(-12,-12,24,24);
+                        ctx.rotate(p.angle); 
+                        ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-15,-15,30,30);
+                        ctx.fillStyle='#ffccaa'; ctx.fillRect(5,-14,10,8); ctx.fillRect(15,4,10,8); 
+                        ctx.fillStyle='#2b2b2b'; ctx.fillRect(10,6,26,6); 
+                        ctx.fillStyle=p.color||'#fff'; ctx.fillRect(-12,-12,24,24);
                     }
                     ctx.restore();
-                    if(!p.isDead) { ctx.fillStyle='#fff'; ctx.font='10px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText(p.name||'Gracz', p.x, p.y-30); }
+                    if(!p.isDead) { ctx.fillStyle='#fff'; ctx.font='9px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText(p.name||'Gracz', p.x, p.y-32); }
                 });
                 
-                this.player.draw(ctx); FX.draw(); Camera.clear();
+                this.player.draw(ctx); 
+                FX.draw(); 
 
-                const gradient = ctx.createRadialGradient(width/2, height/2, 50, width/2, height/2, 800);
-                gradient.addColorStop(0, 'rgba(0,0,0,0)'); gradient.addColorStop(1, 'rgba(0,0,0,0.9)');
+                Camera.clear();
+
+                // Strzałki wskazujące powalonych kolegów (RADAR CO-OP)
+                Object.values(networkPlayers).forEach(p => {
+                    if(p.isDead) {
+                        const scrX = p.x - Camera.x; const scrY = p.y - Camera.y;
+                        if(scrX < 40 || scrX > width - 40 || scrY < 40 || scrY > height - 40) {
+                            const angle = Math.atan2(scrY - height/2, scrX - width/2);
+                            const edgeDist = Math.min(width/2 - 50, height/2 - 50);
+                            const arrowX = width/2 + Math.cos(angle) * edgeDist;
+                            const arrowY = height/2 + Math.sin(angle) * edgeDist;
+                            
+                            ctx.save(); ctx.translate(arrowX, arrowY); ctx.rotate(angle);
+                            ctx.fillStyle = '#ff3366'; ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(-10, -10); ctx.lineTo(-10, 10); ctx.fill();
+                            ctx.restore();
+                            ctx.fillStyle = '#ff3366'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign = 'center';
+                            ctx.fillText(p.name, arrowX, arrowY + 20);
+                        }
+                    }
+                });
+
+                // Efekt Latarki
+                const gradient = ctx.createRadialGradient(width/2, height/2, 60, width/2, height/2, 750);
+                gradient.addColorStop(0, 'rgba(0,0,0,0)'); 
+                gradient.addColorStop(1, 'rgba(0,0,0,0.92)');
                 ctx.fillStyle = gradient; ctx.fillRect(0,0,width,height);
             },
 
@@ -544,24 +710,31 @@
             },
 
             showUpgrades() {
-                switchScreen('screen-upgrades'); document.getElementById('hud').style.display='none'; document.getElementById('bossHpContainer').style.display='none';
+                switchScreen('screen-upgrades'); 
+                document.getElementById('hud').style.display='none'; 
+                document.getElementById('bossHpContainer').style.display='none';
                 
                 const opts = [
-                    { n: "TYTANIUM", d: "+20 Max HP", act: () => { this.player.maxHp += 20; this.player.hp = this.player.maxHp; } },
-                    { n: "ADRENALINA", d: "+15% Obrażeń Całkowitych", act: () => this.player.dmgMult *= 1.15 },
-                    { n: "SPRINTER", d: "+15% Szybkości Ruchu", act: () => this.player.speedMult *= 1.15 },
+                    { n: "PANCERNY", d: "+25 Max HP i leczenie", act: () => { this.player.maxHp += 25; this.player.hp = this.player.maxHp; } },
+                    { n: "ADRENALINA", d: "+15% Zadawanych obrażeń", act: () => this.player.dmgMult *= 1.15 },
+                    { n: "LEKKI KROK", d: "+15% Szybkości biegu", act: () => this.player.speedMult *= 1.15 },
                 ].sort(()=>0.5-Math.random()).slice(0,3);
 
                 const c = document.getElementById('upgradeOptions'); c.innerHTML='';
                 opts.forEach(o => {
                     const d = document.createElement('div'); d.className='upgrade-card';
-                    d.innerHTML = `<h3 class="text-[10px] text-yellow-400 mb-2">${o.n}</h3><p class="text-[8px] text-gray-300">${o.d}</p>`;
+                    d.innerHTML = `<h3 class="text-[11px] text-yellow-400 mb-2">${o.n}</h3><p class="text-[9px] text-gray-300 leading-relaxed">${o.d}</p>`;
                     d.onclick = () => { o.act(); this.waitInLobby(); }; c.appendChild(d);
                 });
             },
-            waitInLobby() { switchScreen('screen-lobby'); document.getElementById('btnStartGame').innerText = "ODPAL KOLEJNĄ FALĘ"; },
+            waitInLobby() { 
+                switchScreen('screen-lobby'); 
+                document.getElementById('btnStartGame').innerText = "ODPAL KOLEJNĄ FALĘ"; 
+            },
             endGame() {
-                switchScreen('screen-gameover'); document.getElementById('hud').style.display='none'; document.getElementById('bossHpContainer').style.display='none';
+                switchScreen('screen-gameover'); 
+                document.getElementById('hud').style.display='none'; 
+                document.getElementById('bossHpContainer').style.display='none';
                 document.getElementById('finalWave').innerText = State.wave;
                 if(isHost) { clearInterval(this.hostId); db.ref(`rooms/${currentRoom}`).remove(); }
             }
@@ -574,22 +747,25 @@
                 catch(e) { myId = 'u_'+Math.random().toString(36).substr(2,6); }
             },
             async createRoom() {
-                showErr("Uruchamianie serwera sesji...", true);
+                showErr("Tworzenie pokoju...", true);
                 try {
-                    await this.auth(); currentRoom = Math.random().toString(36).substr(2,5).toUpperCase(); isHost = true;
+                    await this.auth(); 
+                    currentRoom = Math.random().toString(36).substr(2,5).toUpperCase(); 
+                    isHost = true;
+                    
                     const setPromise = db.ref(`rooms/${currentRoom}`).set({ status: 'lobby', wave: 0 });
-                    const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout (Brak połączenia)")), 4000));
+                    const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), 4000));
                     await Promise.race([setPromise, timeoutPromise]);
                     
                     document.getElementById('menuError').classList.add('hidden');
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
-                } catch(e) { showErr("BŁĄD: Firebase odrzucił połączenie. Ustaw Reguły Bazy na true/true. " + e.message); }
+                } catch(e) { showErr("Błąd: Sprawdź reguły bazy na true/true. " + e.message); }
             },
             async joinRoom(code = null) {
                 if(!code) code = document.getElementById('joinCode').value.toUpperCase().trim();
-                if(code.length < 5) return showErr("Podaj prawidłowy 5-znakowy KOD z Lobby!");
-                showErr("Dołączanie do bazy...", true);
+                if(code.length < 5) return showErr("Wpisz poprawny 5-znakowy kod!");
+                showErr("Łączenie z pokojem...", true);
                 
                 try {
                     await this.auth();
@@ -597,38 +773,73 @@
                     const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), 4000));
                     const snap = await Promise.race([snapPromise, timeoutPromise]);
                     
-                    if(!snap.exists()) return showErr("Baza nie istnieje lub ekipa zginęła.");
+                    if(!snap.exists()) return showErr("Taki pokój nie istnieje!");
                     
                     currentRoom = code;
                     const pRef = db.ref(`room_players/${currentRoom}/${myId}`);
-                    await pRef.set({ id: myId, name: document.getElementById('playerName').value||"Paweł", color: document.getElementById('playerColor').value||"#fff", isDead: false, score: 0 });
+                    await pRef.set({ 
+                        id: myId, 
+                        name: document.getElementById('playerName').value || "Paweł", 
+                        color: document.getElementById('playerColor').value || "#00e5ff", 
+                        isDead: false,
+                        wep: 'pistol'
+                    });
                     pRef.onDisconnect().remove();
 
                     document.getElementById('menuError').classList.add('hidden');
-                    this.listen(); switchScreen('screen-lobby');
+                    this.listen(); 
+                    switchScreen('screen-lobby');
                     document.getElementById('lobbyCode').innerText = currentRoom;
                     document.getElementById('btnStartGame').style.display = isHost ? 'block' : 'none';
                     document.getElementById('hostWarning').style.display = isHost ? 'none' : 'block';
-                } catch(e) { showErr("BŁĄD DOŁĄCZANIA: " + e.message); }
+                } catch(e) { showErr("BŁĄD POŁĄCZENIA: " + e.message); }
             },
             listen() {
                 db.ref(`rooms/${currentRoom}`).on('value', snap => {
                     if(!snap.exists()) return location.reload();
-                    let data = snap.val(); State.wave = data.wave; State.score = data.score || 0;
+                    let data = snap.val(); 
+                    State.wave = data.wave; State.score = data.score || 0;
                     document.getElementById('waveText').innerText = `FALA ${State.wave}`;
-                    if(data.zombies) { try { let zArr = JSON.parse(data.zombies); networkZombies = {}; zArr.forEach(z => { networkZombies[z.i] = { x: z.x, y: z.y, hp: z.h, t: z.t }; }); } catch(e){} }
+                    
+                    if(data.zombies) { 
+                        try { 
+                            let zArr = JSON.parse(data.zombies); networkZombies = {}; 
+                            zArr.forEach(z => { networkZombies[z.i] = { x: z.x, y: z.y, hp: z.h, t: z.t }; }); 
+                        } catch(e){} 
+                    }
                     if(State.status !== data.status) {
                         State.status = data.status;
-                        if(data.status === 'playing') { if(!Game.loopId) Game.start(); else { switchScreen(null); document.getElementById('hud').style.display='block'; } }
+                        if(data.status === 'playing') { 
+                            if(!Game.loopId) Game.start(); 
+                            else { switchScreen(null); document.getElementById('hud').style.display='block'; } 
+                        }
                         else if(data.status === 'upgrades') Game.showUpgrades();
                         else if(data.status === 'gameover') Game.endGame();
                     }
                 });
 
                 db.ref(`room_players/${currentRoom}`).on('value', snap => {
-                    networkPlayers = snap.val() || {}; let arr = [];
-                    Object.values(networkPlayers).forEach(p => { arr.push(p); if(p.id === myId) { localState.isDead = p.isDead; localState.hp = p.hp; } });
-                    document.getElementById('lobbyPlayers').innerHTML = arr.map(p => `<li><span style="color:${p.color||'#fff'}">■</span> ${p.name} ${p.id===myId?'(TY)':''} ${p.isDead?'[POWALONY]':''}</li>`).join('');
+                    const playersData = snap.val() || {};
+                    networkPlayers = {};
+                    let arr = [];
+                    
+                    Object.entries(playersData).forEach(([pId, p]) => {
+                        if(pId === myId) {
+                            // Synchronizacja stanu lokalnego gracza (np. reanimacja przez kolegę)
+                            if(Game.player) {
+                                if(Game.player.isDead && !p.isDead) {
+                                    Game.player.isDead = false;
+                                    Game.player.hp = p.hp || 50;
+                                    FX.text(Game.player.x, Game.player.y, "POSTAWIONY NA NOGI!", "#00ff66", 11);
+                                }
+                            }
+                        } else {
+                            networkPlayers[pId] = p;
+                        }
+                        arr.push(p);
+                    });
+
+                    document.getElementById('lobbyPlayers').innerHTML = arr.map(p => `<li><span style="color:${p.color||'#fff'}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</li>`).join('');
                 });
                 
                 db.ref(`room_items/${currentRoom}`).on('value', snap => { networkItems = snap.val() || {}; });
@@ -636,6 +847,25 @@
                 if(isHost) Game.listenHostEvents();
             }
         };
+
+        // Kopiowanie linku z parametrem ?room=
+        document.getElementById('btnCopyLink').onclick = () => {
+            const url = window.location.origin + window.location.pathname + '?room=' + currentRoom;
+            navigator.clipboard.writeText(url).then(() => {
+                const s = document.getElementById('copySuccess');
+                s.classList.remove('hidden');
+                setTimeout(() => s.classList.add('hidden'), 2500);
+            });
+        };
+
+        // Automatyczne wklejenie kodu z linku URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const rCode = params.get('room');
+            if(rCode) {
+                document.getElementById('joinCode').value = rCode.toUpperCase();
+            }
+        });
 
         document.getElementById('btnCreateRoom').onclick = () => Lobby.createRoom();
         document.getElementById('btnJoinRoom').onclick = () => Lobby.joinRoom();
