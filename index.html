@@ -93,7 +93,7 @@
                 <div class="text-xs text-gray-400 mb-2">KOD POKOJU:</div>
                 <div id="lobbyCode" class="text-3xl text-[#ff3366] font-bold tracking-widest mb-3"></div>
                 
-                <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 text-[10px] w-full mb-4 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK DLA KOLEGI</button>
+                <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 text-[10px] w-full mb-3 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK DLA KOLEGI</button>
                 <div id="copySuccess" class="text-[9px] text-green-400 mb-3 hidden font-bold">SKOPIOWANO LINK DO SCHOWKA!</div>
 
                 <div class="text-[10px] text-gray-400 text-left mb-1">GRACZE W POKOJU:</div>
@@ -143,6 +143,13 @@
             el.className = `bg-black/90 border-2 p-2 text-[10px] font-bold mt-4 ${isWarn ? 'border-yellow-500 text-yellow-400' : 'border-red-500 text-red-500'}`;
         }
 
+        function genRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for(let i = 0; i < 5; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
+        }
+
         // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
@@ -155,14 +162,19 @@
         };
         
         let db = null, auth = null;
-        try { firebase.initializeApp(firebaseConfig); db = firebase.database(); auth = firebase.auth(); } 
-        catch(e) { showErr("Błąd inicjalizacji Firebase!"); }
+        try { 
+            firebase.initializeApp(firebaseConfig); 
+            db = firebase.database(); 
+            auth = firebase.auth(); 
+        } catch(e) { 
+            showErr("Błąd inicjalizacji Firebase!"); 
+        }
 
         let myId = null, currentRoom = null, isHost = false;
         let networkPlayers = {}, networkZombies = {}, networkItems = {}; 
         const State = { wave: 1, score: 0, status: 'lobby' };
 
-        // Audio System (Syntezator Web Audio)
+        // Audio System
         const AudioSys = {
             ctx: null,
             init() { 
@@ -194,8 +206,15 @@
         const Input = {
             keys: {}, mx: 0, my: 0, wx: 0, wy: 0, isDown: false,
             init() {
-                window.onkeydown = e => this.keys[e.code] = true;
-                window.onkeyup = e => this.keys[e.code] = false;
+                window.onkeydown = e => {
+                    AudioSys.init();
+                    if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
+                    this.keys[e.code] = true;
+                };
+                window.onkeyup = e => {
+                    if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
+                    this.keys[e.code] = false;
+                };
                 window.onmousemove = e => { this.mx = e.clientX; this.my = e.clientY; };
                 window.onmousedown = () => { this.isDown = true; AudioSys.init(); };
                 window.onmouseup = () => this.isDown = false;
@@ -260,7 +279,6 @@
             }
             update(dt) {
                 if(this.isDead) {
-                    // Powalony gracz może czołgać się wolno (50 px/s)
                     let cx=0, cy=0;
                     if(Input.keys['KeyW'] || Input.keys['ArrowUp']) cy-=1; if(Input.keys['KeyS'] || Input.keys['ArrowDown']) cy+=1;
                     if(Input.keys['KeyA'] || Input.keys['ArrowLeft']) cx-=1; if(Input.keys['KeyD'] || Input.keys['ArrowRight']) cx+=1;
@@ -295,7 +313,7 @@
                     }
                 }
 
-                // Sprawdzanie reanimacji sojusznika (2 sekundy stania obok)
+                // Reanimacja sojusznika
                 let partnerToRevive = null;
                 Object.values(networkPlayers).forEach(p => {
                     if(p.isDead && Math.hypot(this.x - p.x, this.y - p.y) < 60) {
@@ -356,7 +374,7 @@
                 }
                 ctx.restore();
 
-                // Pasek postępu reanimacji partnera
+                // Pasek postępu reanimacji
                 if(this.revivingPartnerId && this.reviveHoldTime > 0) {
                     ctx.fillStyle = '#222'; ctx.fillRect(this.x - 25, this.y + 25, 50, 6);
                     ctx.fillStyle = '#00e5ff'; ctx.fillRect(this.x - 25, this.y + 25, 50 * (this.reviveHoldTime / 2.0), 6);
@@ -405,12 +423,6 @@
                     } else {
                         this.x -= Math.cos(this.angle) * this.speed * 2 * dt; this.y -= Math.sin(this.angle) * this.speed * 2 * dt;
                     }
-                    if(minDist < this.radius + 18) { 
-                        this.target.hp -= this.dmg * dt; 
-                        if(this.target.hp <= 0 && !this.target.isDead) { 
-                            this.target.isDead = true; 
-                        } 
-                    }
                 }
             }
             updateClient(dt, netZ) {
@@ -436,7 +448,7 @@
         }
 
         const Game = {
-            player: null, bullets: [], zombies: {}, lastTime: 0, loopId: null, syncId: null, hostId: null,
+            player: null, bullets: [], zombies: {}, items: {}, lastTime: 0, loopId: null, syncId: null, hostId: null,
             hostZombies: [], zSpawnTimer: 0, zToSpawn: 0, bossActive: false,
             
             start() {
@@ -447,6 +459,7 @@
                 document.getElementById('weaponName').innerText = `BROŃ: Pistolet`;
                 this.lastTime = performance.now(); this.loopId = requestAnimationFrame(t => this.loop(t));
 
+                if(this.syncId) clearInterval(this.syncId);
                 this.syncId = setInterval(() => {
                     if(currentRoom) {
                         db.ref(`room_players/${currentRoom}/${myId}`).update({ 
@@ -458,14 +471,18 @@
                     }
                 }, 50);
 
-                if(isHost) { this.hostId = setInterval(() => this.hostTick(), 100); this.startWaveHost(); }
+                if(isHost) {
+                    if(this.hostId) clearInterval(this.hostId);
+                    this.hostId = setInterval(() => this.hostTick(), 100);
+                }
             },
 
             startWaveHost() {
                 State.wave++; this.bossActive = (State.wave % 5 === 0);
                 this.zToSpawn = this.bossActive ? 1 : 10 + (State.wave * 4); this.zSpawnTimer = 0;
-                db.ref(`rooms/${currentRoom}`).update({ wave: State.wave, status: 'playing' });
+                this.hostZombies = [];
                 
+                db.ref(`rooms/${currentRoom}`).update({ wave: State.wave, status: 'playing' });
                 if(this.bossActive) AudioSys.play('boss');
 
                 db.ref(`room_players/${currentRoom}`).once('value', snap => {
@@ -512,7 +529,6 @@
                 let zData = this.hostZombies.map(z => ({ i: z.id, x: Math.round(z.x), y: Math.round(z.y), h: Math.round(z.hp), t: z.type }));
                 db.ref(`rooms/${currentRoom}`).update({ zombies: JSON.stringify(zData), score: State.score });
 
-                // Jeśli WSZYSCY gracze są powaleni -> Koniec gry
                 let anyAlive = (!this.player.isDead) || Object.values(networkPlayers).some(p => !p.isDead);
                 if(!anyAlive) {
                     db.ref(`rooms/${currentRoom}`).update({ status: 'gameover' });
@@ -526,7 +542,6 @@
                         this.hostZombies = this.hostZombies.filter(x => x.id !== zId); 
                         State.score += (z.type === 3 ? 500 : (z.type === 2 ? 50 : 10));
                         
-                        // Drop Itemu (20% szansy lub 100% z Bossa)
                         if(Math.random() < 0.2 || z.type === 3) {
                             let r = Math.random();
                             let itemType = r < 0.45 ? 'medkit' : (r < 0.85 ? 'weapon' : 'nuke');
@@ -538,26 +553,43 @@
             },
             listenHostEvents() {
                 if(!isHost) return;
-                db.ref(`hits/${currentRoom}`).on('child_added', snap => { let h = snap.val(); this.applyHit(h.id, h.dmg); snap.ref.remove(); });
+                db.ref(`hits/${currentRoom}`).off();
+                db.ref(`actions/${currentRoom}`).off();
+
+                db.ref(`hits/${currentRoom}`).on('child_added', snap => { 
+                    let h = snap.val(); 
+                    if(h) this.applyHit(h.id, h.dmg); 
+                    snap.ref.remove(); 
+                });
                 db.ref(`actions/${currentRoom}`).on('child_added', snap => { 
                     let a = snap.val(); 
-                    if(a.t === 'take_item') db.ref(`room_items/${currentRoom}/${a.i}`).remove();
-                    if(a.t === 'nuke') {
-                        db.ref(`room_items/${currentRoom}/${a.i}`).remove();
-                        this.hostZombies = this.hostZombies.filter(z => z.type === 3); // Zostaje tylko Boss
-                        AudioSys.play('nuke'); Camera.shake(15, 0.5);
-                    }
-                    if(a.t === 'revive') { 
-                        db.ref(`room_players/${currentRoom}/${a.i}`).update({isDead: false, hp: 50}); 
-                        AudioSys.play('revive'); 
+                    if(a) {
+                        if(a.t === 'take_item') db.ref(`room_items/${currentRoom}/${a.i}`).remove();
+                        if(a.t === 'nuke') {
+                            db.ref(`room_items/${currentRoom}/${a.i}`).remove();
+                            this.hostZombies = this.hostZombies.filter(z => z.type === 3);
+                            AudioSys.play('nuke'); Camera.shake(15, 0.5);
+                        }
+                        if(a.t === 'revive') { 
+                            db.ref(`room_players/${currentRoom}/${a.i}`).update({isDead: false, hp: 50}); 
+                            AudioSys.play('revive'); 
+                        }
                     }
                     snap.ref.remove(); 
                 });
             },
 
-            // Akcje gracza wysyłane do Hosta
-            reportHit(zId, dmg) { if(!isHost) { db.ref(`hits/${currentRoom}`).push({ id: zId, dmg: dmg }); } else { this.applyHit(zId, dmg); } },
-            takeItem(iId) { if(!isHost) db.ref(`actions/${currentRoom}`).push({ t: 'take_item', i: iId }); else db.ref(`room_items/${currentRoom}/${iId}`).remove(); },
+            reportHit(zId, dmg) { 
+                if(!isHost) { 
+                    db.ref(`hits/${currentRoom}`).push({ id: zId, dmg: dmg }); 
+                } else { 
+                    this.applyHit(zId, dmg); 
+                } 
+            },
+            takeItem(iId) { 
+                if(!isHost) db.ref(`actions/${currentRoom}`).push({ t: 'take_item', i: iId }); 
+                else db.ref(`room_items/${currentRoom}/${iId}`).remove(); 
+            },
             triggerNuke(iId) {
                 if(!isHost) db.ref(`actions/${currentRoom}`).push({ t: 'nuke', i: iId });
                 else {
@@ -568,12 +600,31 @@
             },
             revivePlayer(pId) {
                 if(!isHost) db.ref(`actions/${currentRoom}`).push({ t: 'revive', i: pId });
-                else { db.ref(`room_players/${currentRoom}/${pId}`).update({isDead: false, hp: 50}); AudioSys.play('revive'); }
+                else { 
+                    db.ref(`room_players/${currentRoom}/${pId}`).update({isDead: false, hp: 50}); 
+                    AudioSys.play('revive'); 
+                }
             },
 
             update(dt) {
                 this.player.update(dt);
                 Camera.update(dt, this.player);
+
+                // Lokalne obrażenia gracza od zombie
+                if(!this.player.isDead) {
+                    for(let k in this.zombies) {
+                        let z = this.zombies[k];
+                        if(Math.hypot(this.player.x - z.x, this.player.y - z.y) < z.radius + 18) {
+                            this.player.hp -= z.dmg * dt;
+                            if(this.player.hp <= 0) {
+                                this.player.hp = 0;
+                                this.player.isDead = true;
+                                FX.text(this.player.x, this.player.y, "POWALONY!", "#ff3366", 13);
+                                AudioSys.play('hit');
+                            }
+                        }
+                    }
+                }
 
                 this.bullets.forEach((b, i) => { b.update(dt); if(b.l<=0) this.bullets.splice(i,1); });
 
@@ -585,11 +636,9 @@
                 });
                 Object.keys(this.zombies).forEach(k => { if(!networkZombies[k]) delete this.zombies[k]; });
 
-                // Boss HUD
                 const bHud = document.getElementById('bossHpContainer');
                 if(bossHp > 0) { bHud.style.display = 'block'; document.getElementById('bossBar').style.width = (bossHp/bossMax)*100+'%'; } else bHud.style.display = 'none';
 
-                // Kolizje pocisków
                 for(let i=this.bullets.length-1; i>=0; i--) {
                     let b = this.bullets[i]; let hit = false;
                     if(!b.isMine) continue;
@@ -604,7 +653,6 @@
                     if(hit) { FX.p.push({x:b.x, y:b.y, vx:0, vy:0, l:0.08, m:0.08, s:8, c:'#fff'}); this.bullets.splice(i,1); }
                 }
 
-                // Wizualne pociski sojuszników
                 Object.values(networkPlayers).forEach(p => {
                     if(p.isShooting && Math.random() < 0.25) { 
                         FX.casing(p.x, p.y); 
@@ -616,7 +664,6 @@
                 document.getElementById('healthBar').style.width = Math.max(0, (this.player.hp/this.player.maxHp)*100)+'%';
                 document.getElementById('scoreText').innerText = `PUNKTY: ${State.score}`;
                 
-                // Lista drużyny
                 let teamArr = [{ name: this.player.name, color: this.player.color, isDead: this.player.isDead }];
                 Object.values(networkPlayers).forEach(p => teamArr.push({ name: p.name, color: p.color, isDead: p.isDead }));
                 document.getElementById('teamList').innerHTML = teamArr.map(p => `<li class="${p.isDead?'text-red-500 animate-pulse font-bold':''}"><span style="color:${p.color||'#fff'}">■</span> ${p.name||'Gracz'} ${p.isDead?'[POWALONY]':''}</li>`).join('');
@@ -626,7 +673,6 @@
                 ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0,0,width,height);
                 Camera.apply();
 
-                // Siatka
                 ctx.strokeStyle = '#15151a'; ctx.lineWidth = 2; const grid = 100;
                 const sx = Math.floor(Camera.x/grid)*grid, sy = Math.floor(Camera.y/grid)*grid;
                 ctx.beginPath();
@@ -634,9 +680,13 @@
                 for(let y=sy; y<Camera.y+height+grid; y+=grid) { ctx.moveTo(sx, y); ctx.lineTo(sx+width+grid*2, y); }
                 ctx.stroke();
 
+                // Ściany areny
+                ctx.strokeStyle = '#333'; ctx.lineWidth = 10;
+                ctx.strokeRect(0, 0, 2000, 2000);
+
                 FX.drawGround();
                 
-                // Skrzynki / Przedmioty na ziemi
+                // Przedmioty na ziemi
                 Object.values(networkItems).forEach(i => {
                     ctx.save(); ctx.translate(i.x, i.y);
                     if(i.t === 'medkit') {
@@ -655,7 +705,7 @@
                 this.bullets.forEach(b => b.draw(ctx));
                 Object.values(this.zombies).forEach(z => z.draw(ctx));
                 
-                // Rysowanie sojuszników
+                // Inni gracze
                 Object.values(networkPlayers).forEach(p => {
                     ctx.save(); ctx.translate(p.x, p.y); 
                     if(p.isDead) {
@@ -674,10 +724,9 @@
                 
                 this.player.draw(ctx); 
                 FX.draw(); 
-
                 Camera.clear();
 
-                // Strzałki wskazujące powalonych kolegów (RADAR CO-OP)
+                // Strzałki wskazujące powalonych kolegów (RADAR)
                 Object.values(networkPlayers).forEach(p => {
                     if(p.isDead) {
                         const scrX = p.x - Camera.x; const scrY = p.y - Camera.y;
@@ -718,6 +767,7 @@
                     { n: "PANCERNY", d: "+25 Max HP i leczenie", act: () => { this.player.maxHp += 25; this.player.hp = this.player.maxHp; } },
                     { n: "ADRENALINA", d: "+15% Zadawanych obrażeń", act: () => this.player.dmgMult *= 1.15 },
                     { n: "LEKKI KROK", d: "+15% Szybkości biegu", act: () => this.player.speedMult *= 1.15 },
+                    { n: "SZYBKIE PALCE", d: "-20% Czasu przeładowania", act: () => this.player.fireRate *= 0.8 }
                 ].sort(()=>0.5-Math.random()).slice(0,3);
 
                 const c = document.getElementById('upgradeOptions'); c.innerHTML='';
@@ -743,46 +793,57 @@
         const Lobby = {
             async auth() {
                 if(myId) return;
-                try { const c = await auth.signInAnonymously(); myId = c.user.uid; } 
-                catch(e) { myId = 'u_'+Math.random().toString(36).substr(2,6); }
+                try { 
+                    const c = await auth.signInAnonymously(); 
+                    myId = c.user.uid; 
+                } catch(e) { 
+                    myId = 'u_'+Math.random().toString(36).substr(2,6); 
+                }
             },
             async createRoom() {
+                AudioSys.init();
                 showErr("Tworzenie pokoju...", true);
                 try {
                     await this.auth(); 
-                    currentRoom = Math.random().toString(36).substr(2,5).toUpperCase(); 
+                    currentRoom = genRoomCode(); 
                     isHost = true;
                     
                     const setPromise = db.ref(`rooms/${currentRoom}`).set({ status: 'lobby', wave: 0 });
-                    const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), 4000));
+                    const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout (brak odpowiedzi z Firebase - sprawdź reguły bazy)")), 5000));
                     await Promise.race([setPromise, timeoutPromise]);
                     
                     document.getElementById('menuError').classList.add('hidden');
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
-                } catch(e) { showErr("Błąd: Sprawdź reguły bazy na true/true. " + e.message); }
+                } catch(e) { 
+                    showErr("BŁĄD: Firebase odrzucił połączenie. Upewnij się, że reguły bazy to .read: true, .write: true. " + e.message); 
+                }
             },
             async joinRoom(code = null) {
+                AudioSys.init();
                 if(!code) code = document.getElementById('joinCode').value.toUpperCase().trim();
-                if(code.length < 5) return showErr("Wpisz poprawny 5-znakowy kod!");
-                showErr("Łączenie z pokojem...", true);
+                if(!code || code.length < 4) return showErr("Wpisz poprawny kod pokoju!");
+                showErr("Łączenie z bazą...", true);
                 
                 try {
                     await this.auth();
                     const snapPromise = db.ref(`rooms/${code}`).once('value');
-                    const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), 4000));
+                    const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), 5000));
                     const snap = await Promise.race([snapPromise, timeoutPromise]);
                     
-                    if(!snap.exists()) return showErr("Taki pokój nie istnieje!");
+                    if(!snap.exists()) return showErr("Pokój o kodzie " + code + " nie istnieje!");
                     
                     currentRoom = code;
                     const pRef = db.ref(`room_players/${currentRoom}/${myId}`);
                     await pRef.set({ 
                         id: myId, 
-                        name: document.getElementById('playerName').value || "Paweł", 
+                        name: document.getElementById('playerName').value.trim() || "Paweł", 
                         color: document.getElementById('playerColor').value || "#00e5ff", 
                         isDead: false,
-                        wep: 'pistol'
+                        wep: 'pistol',
+                        hp: 100,
+                        x: 1000,
+                        y: 1000
                     });
                     pRef.onDisconnect().remove();
 
@@ -792,21 +853,33 @@
                     document.getElementById('lobbyCode').innerText = currentRoom;
                     document.getElementById('btnStartGame').style.display = isHost ? 'block' : 'none';
                     document.getElementById('hostWarning').style.display = isHost ? 'none' : 'block';
-                } catch(e) { showErr("BŁĄD POŁĄCZENIA: " + e.message); }
+                } catch(e) { 
+                    showErr("BŁĄD DOŁĄCZANIA: " + e.message); 
+                }
             },
             listen() {
+                db.ref(`rooms/${currentRoom}`).off();
+                db.ref(`room_players/${currentRoom}`).off();
+                db.ref(`room_items/${currentRoom}`).off();
+
                 db.ref(`rooms/${currentRoom}`).on('value', snap => {
-                    if(!snap.exists()) return location.reload();
+                    if(!snap.exists()) {
+                        alert("Host opuścił sesję lub pokój został zamknięty.");
+                        location.reload();
+                        return;
+                    }
                     let data = snap.val(); 
                     State.wave = data.wave; State.score = data.score || 0;
                     document.getElementById('waveText').innerText = `FALA ${State.wave}`;
                     
                     if(data.zombies) { 
                         try { 
-                            let zArr = JSON.parse(data.zombies); networkZombies = {}; 
+                            let zArr = JSON.parse(data.zombies); 
+                            networkZombies = {}; 
                             zArr.forEach(z => { networkZombies[z.i] = { x: z.x, y: z.y, hp: z.h, t: z.t }; }); 
                         } catch(e){} 
                     }
+                    
                     if(State.status !== data.status) {
                         State.status = data.status;
                         if(data.status === 'playing') { 
@@ -825,13 +898,11 @@
                     
                     Object.entries(playersData).forEach(([pId, p]) => {
                         if(pId === myId) {
-                            // Synchronizacja stanu lokalnego gracza (np. reanimacja przez kolegę)
-                            if(Game.player) {
-                                if(Game.player.isDead && !p.isDead) {
-                                    Game.player.isDead = false;
-                                    Game.player.hp = p.hp || 50;
-                                    FX.text(Game.player.x, Game.player.y, "POSTAWIONY NA NOGI!", "#00ff66", 11);
-                                }
+                            if(Game.player && Game.player.isDead && !p.isDead) {
+                                Game.player.isDead = false;
+                                Game.player.hp = p.hp || 50;
+                                FX.text(Game.player.x, Game.player.y, "POSTAWIONY NA NOGI!", "#00ff66", 11);
+                                AudioSys.play('revive');
                             }
                         } else {
                             networkPlayers[pId] = p;
@@ -839,7 +910,7 @@
                         arr.push(p);
                     });
 
-                    document.getElementById('lobbyPlayers').innerHTML = arr.map(p => `<li><span style="color:${p.color||'#fff'}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</li>`).join('');
+                    document.getElementById('lobbyPlayers').innerHTML = arr.map(p => `<li><span style="color:${p.color||'#fff'}">■</span> ${p.name} ${p.id===myId?'(TY)':''} ${p.isDead?'[POWALONY]':''}</li>`).join('');
                 });
                 
                 db.ref(`room_items/${currentRoom}`).on('value', snap => { networkItems = snap.val() || {}; });
@@ -848,24 +919,35 @@
             }
         };
 
-        // Kopiowanie linku z parametrem ?room=
+        // Kopiowanie linku (zabezpieczone pod dowolną przeglądarkę)
         document.getElementById('btnCopyLink').onclick = () => {
             const url = window.location.origin + window.location.pathname + '?room=' + currentRoom;
-            navigator.clipboard.writeText(url).then(() => {
+            function showCopied() {
                 const s = document.getElementById('copySuccess');
                 s.classList.remove('hidden');
                 setTimeout(() => s.classList.add('hidden'), 2500);
-            });
+            }
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(showCopied).catch(fallback);
+            } else {
+                fallback();
+            }
+            function fallback() {
+                const t = document.createElement('textarea');
+                t.value = url;
+                document.body.appendChild(t);
+                t.select();
+                try { document.execCommand('copy'); showCopied(); } catch(e){}
+                document.body.removeChild(t);
+            }
         };
 
-        // Automatyczne wklejenie kodu z linku URL
-        window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const rCode = params.get('room');
-            if(rCode) {
-                document.getElementById('joinCode').value = rCode.toUpperCase();
-            }
-        });
+        // Automatyczne wypełnienie kodu z parametru URL ?room=
+        const urlRoom = new URLSearchParams(window.location.search).get('room');
+        if(urlRoom) {
+            document.getElementById('joinCode').value = urlRoom.toUpperCase();
+            showErr("Wykryto kod z linku: " + urlRoom.toUpperCase() + ". Wpisz nick i kliknij DOŁĄCZ!", true);
+        }
 
         document.getElementById('btnCreateRoom').onclick = () => Lobby.createRoom();
         document.getElementById('btnJoinRoom').onclick = () => Lobby.joinRoom();
