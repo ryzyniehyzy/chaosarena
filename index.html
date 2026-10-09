@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chaos Arena Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #0f0f13; overflow: hidden;
+            font-family: 'Press Start 2P', cursive; color: #fff;
+            user-select: none; -webkit-user-select: none;
+        }
+        
+        #gameCanvas {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; display: none;
+            z-index: 10;
+        }
+
+        .crt::before {
+            content: " "; display: block; position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
+
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50; display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+
+        .interactive { pointer-events: auto; }
+        .screen { display: none; }
+        .screen.active { display: flex; }
+
+        .pixel-box {
+            background-color: #1a1a24; border: 4px solid #fff;
+            box-shadow: 8px 8px 0px 0px rgba(0,0,0,0.8);
+            pointer-events: auto;
+        }
+
+        .btn {
+            background-color: #ff3366; border: 4px solid #fff;
+            box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4);
+            color: white; text-transform: uppercase; cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn:hover { background-color: #ff5c85; }
+        .btn:active { box-shadow: inset 4px 4px 0px 0px rgba(0,0,0,0.4); transform: translateY(4px); }
+        .btn:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+
+        .input-pixel {
+            background-color: #2a2a35; border: 4px solid #fff;
+            color: #fff; outline: none; font-family: inherit;
+        }
+        .input-pixel:focus { border-color: #00e5ff; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a24; border-left: 2px solid #fff; }
+        ::-webkit-scrollbar-thumb { background: #fff; }
+
+        #chatBox {
+            position: absolute; bottom: 20px; left: 20px; width: 350px;
+            z-index: 60; pointer-events: auto; display: none;
+            background: rgba(0,0,0,0.7); border: 2px solid #fff;
+        }
+        
+        #hud {
+            position: absolute; top: 20px; right: 20px;
+            z-index: 60; pointer-events: none; display: none;
+            text-shadow: 2px 2px 0 #000;
+        }
+    </style>
+</head>
+<body class="crt">
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="uiContainer" class="ui-layer interactive">
+        <!-- MENU SCREEN -->
+        <div id="screen-menu" class="screen active flex-col gap-6 p-8 pixel-box max-w-md w-full text-center">
+            <h1 class="text-4xl text-[#00e5ff] mb-2 leading-tight" style="text-shadow: 4px 4px 0 #ff3366;">CHAOS<br>ARENA</h1>
+            
+            <div class="flex flex-col gap-2 text-left">
+                <label class="text-[10px] text-gray-400">Pseudonim:</label>
+                <input type="text" id="playerName" value="Paweł Pyka" class="input-pixel p-3 text-sm w-full text-center" maxlength="15">
+            </div>
+
+            <div class="flex flex-col gap-2 text-left">
+                <label class="text-[10px] text-gray-400">Kolor postaci:</label>
+                <input type="color" id="playerColor" value="#00e5ff" class="w-full h-10 cursor-pointer border-4 border-white bg-black">
+            </div>
+
+            <div class="flex flex-col gap-4 mt-4">
+                <button id="btnCreateRoom" class="btn p-4 text-xs w-full">STWÓRZ POKÓJ</button>
+                <div class="flex gap-2">
+                    <input type="text" id="joinCode" placeholder="KOD" class="input-pixel p-4 w-1/2 text-center uppercase" maxlength="6">
+                    <button id="btnJoinRoom" class="btn p-4 text-xs w-1/2 !bg-[#00e5ff] hover:!bg-[#66edff] !text-black">DOŁĄCZ</button>
+                </div>
+            </div>
+            
+            <p id="menuError" class="text-xs text-red-500 mt-2 hidden"></p>
+        </div>
+
+        <!-- LOBBY SCREEN -->
+        <div id="screen-lobby" class="screen flex-col gap-6 p-8 pixel-box max-w-2xl w-full">
+            <div class="flex justify-between items-center border-b-4 border-white pb-4">
+                <h2 class="text-2xl text-[#00e5ff]">LOBBY</h2>
+                <div class="text-right">
+                    <span class="text-[10px] text-gray-400 block">KOD POKOJU:</span>
+                    <span id="lobbyCode" class="text-3xl text-[#ff3366] tracking-widest font-bold">------</span>
+                </div>
+            </div>
+
+            <div class="flex gap-6">
+                <div class="w-1/2 flex flex-col gap-2">
+                    <label class="text-[10px] text-gray-400">Gracze (<span id="playerCount">1</span>/12):</label>
+                    <ul id="playerList" class="bg-black/50 border-2 border-gray-600 h-48 overflow-y-auto p-2 flex flex-col gap-2 text-xs"></ul>
+                </div>
+                
+                <div class="w-1/2 flex flex-col gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] text-gray-400">Tryb Gry (Tylko Host):</label>
+                        <select id="gameModeSelect" class="input-pixel p-3 text-xs w-full cursor-pointer disabled:opacity-50">
+                            <option value="lms">🛡️ Last Man Standing</option>
+                            <option value="race">🏁 Wyścig Chaosu</option>
+                            <option value="capture">🟢 Łapanie Punktów</option>
+                            <option value="koth">👑 King of the Hill</option>
+                            <option value="survival">🔴 Mini Games Party (Survival)</option>
+                        </select>
+                    </div>
+                    
+                    <p id="hostWarning" class="text-[9px] text-yellow-400 hidden">Czekaj aż Host wystartuje grę...</p>
+                    
+                    <div class="flex-grow flex items-end">
+                        <button id="btnStartGame" class="btn p-4 text-xs w-full !bg-[#00cc44] hover:!bg-[#33ff77] hidden">ROZPOCZNIJ GRĘ</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="btnLeaveLobby" class="btn p-3 text-[10px] w-1/3 !bg-gray-600 mt-2">Wyjdź</button>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="screen-end" class="screen flex-col gap-6 p-8 pixel-box max-w-md w-full text-center">
+            <h2 class="text-3xl text-yellow-400 mb-4">KONIEC GRY</h2>
+            <div id="winnerName" class="text-xl text-white mb-6"></div>
+            
+            <div class="text-left text-xs mb-2">Tabela Wyników:</div>
+            <ul id="endLeaderboard" class="bg-black/50 border-2 border-white h-40 overflow-y-auto p-4 flex flex-col gap-3 text-xs text-left mb-4"></ul>
+
+            <button id="btnReturnLobby" class="btn p-4 text-xs w-full hidden">WRÓĆ DO LOBBY (HOST)</button>
+            <p id="endWaitMsg" class="text-[10px] text-gray-400">Czekaj aż Host przywróci pokój...</p>
+        </div>
+    </div>
+
+    <!-- IN-GAME HUD -->
+    <div id="hud" class="flex flex-col items-end gap-4">
+        <div class="bg-black/60 border-2 border-white p-4 min-w-[200px]">
+            <div id="hudTime" class="text-2xl text-center text-yellow-400 mb-2">00:00</div>
+            <div id="hudModeName" class="text-[10px] text-gray-300 text-center border-b border-gray-600 pb-2 mb-2">Tryb</div>
+            <ul id="hudLeaderboard" class="flex flex-col gap-1 text-[10px]"></ul>
+        </div>
+        <button id="btnLeaveGame" class="btn p-2 text-[10px] !bg-red-700 interactive">OPUŚĆ GRĘ</button>
+    </div>
+
+    <!-- CHAT BOX -->
+    <div id="chatBox" class="flex flex-col h-48">
+        <div id="chatMessages" class="flex-grow overflow-y-auto p-2 text-[9px] flex flex-col gap-1 bg-black/80"></div>
+        <form id="chatForm" class="flex border-t-2 border-white">
+            <input type="text" id="chatInput" placeholder="Napisz..." class="bg-transparent text-white p-2 text-[10px] flex-grow outline-none font-mono">
+            <button type="submit" class="bg-white text-black p-2 text-[10px] cursor-pointer">WYŚLIJ</button>
+        </form>
+    </div>
+
+    <!-- FATAL ERROR MODAL -->
+    <div id="errorModal" class="hidden fixed top-0 left-0 w-full h-full bg-black/90 flex items-center justify-center z-[100] p-4 interactive">
+        <div class="pixel-box p-6 max-w-lg text-center bg-red-900 !border-red-500">
+            <h2 class="text-xl text-white mb-4">⚠️ DIAGNOSTYKA BŁĘDU</h2>
+            <p id="errorMsg" class="text-xs text-red-200 mb-6 leading-relaxed font-mono text-left bg-black p-4 overflow-auto max-h-40"></p>
+            <button onclick="document.getElementById('errorModal').classList.add('hidden')" class="btn p-3 w-full !bg-gray-800">ZAMKNIJ</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, update, remove, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
+            authDomain: "chaosarena-75404.firebaseapp.com",
+            databaseURL: "https://chaosarena-75404-default-rtdb.firebaseio.com/",
+            projectId: "chaosarena-75404",
+            storageBucket: "chaosarena-75404.firebasestorage.app",
+            messagingSenderId: "24436364546",
+            appId: "1:24436364546:web:9793a5e85d4734195f9e1b",
+            measurementId: "G-PR43K57SFX"
+        };
+
+        function showError(msg) {
+            document.getElementById('errorMsg').innerText = msg;
+            document.getElementById('errorModal').classList.remove('hidden');
+            console.error("Game Error:", msg);
+        }
+
+        let app, db, auth;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            auth = getAuth(app);
+        } catch(e) {
+            showError("Błąd krytyczny Firebase inicjalizacji: " + e.message);
+        }
+
+        let userId = "user_" + Math.random().toString(36).substring(2, 9);
+        let currentRoomId = null;
+        let isHost = false;
+        
+        let roomUnsubscribe = null;
+        let playersUnsubscribe = null;
+
+        const localState = {
+            name: "Paweł Pyka",
+            color: "#00e5ff",
+            x: 1000, y: 1000,
+            vx: 0, vy: 0,
+            score: 0,
+            isDead: false,
+            lastSync: 0
+        };
+
+        let remotePlayers = {}; 
+        let globalGameState = {
+            status: 'lobby',
+            mode: 'lms',
+            timer: 0,
+            safeZone: null,
+            zones: [],
+            kothZone: null,
+            balls: [],
+            winner: null
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const ARENA_WIDTH = 2000;
+        const ARENA_HEIGHT = 2000;
+        let camera = { x: 0, y: 0 };
+        let gameLoopId = null;
+        let hostLogicInterval = null;
+        let syncInterval = null;
+        const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
+
+        async function authenticate() {
+            try {
+                if (auth && auth.currentUser) {
+                    userId = auth.currentUser.uid;
+                    return true;
+                }
+                const res = await signInAnonymously(auth);
+                if (res && res.user) {
+                    userId = res.user.uid;
+                }
+                return true;
+            } catch (err) {
+                console.warn("Autoryzacja anonimowa Firebase napotkała ograniczenie, korzystam z bezpiecznego fallback ID:", err.message);
+                // Nie blokujemy gracza, jeśli Firebase Auth zgłosi błąd polityki domen na GitHub Pages – używamy wygenerowanego unikalnego ID
+                return true;
+            }
+        }
+
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
+        }
+
+        async function createRoom() {
+            const errBox = document.getElementById('menuError');
+            errBox.classList.add('hidden');
+            
+            localState.name = document.getElementById('playerName').value.trim() || "Paweł Pyka";
+            localState.color = document.getElementById('playerColor').value || "#00e5ff";
+            
+            await authenticate();
+
+            currentRoomId = generateRoomCode();
+            isHost = true;
+
+            try {
+                const roomRef = ref(db, `rooms/${currentRoomId}`);
+                await set(roomRef, {
+                    hostId: userId,
+                    status: 'lobby',
+                    mode: 'lms',
+                    timer: 60,
+                    stateData: "{}"
+                });
+                
+                try {
+                    onDisconnect(roomRef).remove();
+                } catch(e) {}
+
+                await joinPlayerToRoom();
+                showLobby();
+            } catch(e) {
+                showError("Nie udało się utworzyć pokoju w bazie Realtime Database.\n\nSprawdź czy:\n1. Adres bazy w kodzie jest poprawny.\n2. Reguły w Firebase mają ustawiony odczyt/zapis.\nSzczegóły: " + e.message);
+            }
+        }
+
+        async function joinRoomBtn() {
+            const errBox = document.getElementById('menuError');
+            const code = document.getElementById('joinCode').value.toUpperCase().trim();
+            
+            if(code.length !== 6) {
+                errBox.innerText = "Kod pokoju musi mieć dokładnie 6 znaków!"; 
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            localState.name = document.getElementById('playerName').value.trim() || "Gracz";
+            localState.color = document.getElementById('playerColor').value || "#ff3366";
+
+            await authenticate();
+
+            try {
+                const roomRef = ref(db, `rooms/${code}`);
+                const snapshot = await get(roomRef);
+                
+                if (snapshot.exists()) {
+                    currentRoomId = code;
+                    isHost = false;
+                    await joinPlayerToRoom();
+                    showLobby();
+                } else {
+                    errBox.innerText = "Nie znaleziono pokoju o takim kodzie!";
+                    errBox.classList.remove('hidden');
+                }
+            } catch(e) {
+                showError("Błąd podczas dołączania do pokoju: " + e.message);
+            }
+        }
+
+        async function joinPlayerToRoom() {
+            const playerRef = ref(db, `room_players/${currentRoomId}/${userId}`);
+            await set(playerRef, {
+                id: userId,
+                name: localState.name,
+                color: localState.color,
+                x: localState.x, y: localState.y,
+                vx: 0, vy: 0,
+                score: 0,
+                isDead: false,
+                ts: Date.now()
+            });
+            
+            try {
+                onDisconnect(playerRef).remove();
+            } catch(e) {}
+
+            listenToRoom();
+            listenToPlayers();
+        }
+
+        function listenToRoom() {
+            if (roomUnsubscribe) roomUnsubscribe();
+            const roomRef = ref(db, `rooms/${currentRoomId}`);
+            
+            roomUnsubscribe = onValue(roomRef, (snapshot) => {
+                if (!snapshot.exists()) {
+                    leaveRoom(true); 
+                    return;
+                }
+                const data = snapshot.val();
+                
+                if (data.stateData) {
+                    try { Object.assign(globalGameState, JSON.parse(data.stateData)); } 
+                    catch(e){}
+                }
+                
+                globalGameState.timer = data.timer;
+                globalGameState.mode = data.mode;
+
+                if (globalGameState.status !== data.status) {
+                    globalGameState.status = data.status;
+                    if (data.status === 'playing') startGameClient();
+                    else if (data.status === 'ended') showEndScreen();
+                    else if (data.status === 'lobby') showLobby();
+                }
+
+                if (globalGameState.status === 'lobby' && !isHost) {
+                    const select = document.getElementById('gameModeSelect');
+                    if(select) select.value = data.mode;
+                }
+            }, (error) => console.error("Room sync error:", error));
+        }
+
+        function listenToPlayers() {
+            if (playersUnsubscribe) playersUnsubscribe();
+            const playersRef = ref(db, `room_players/${currentRoomId}`);
+            
+            playersUnsubscribe = onValue(playersRef, (snapshot) => {
+                const playersData = snapshot.val() || {};
+                const activeInRoom = [];
+                
+                Object.values(playersData).forEach(data => {
+                    activeInRoom.push(data);
+
+                    if (data.id !== userId) {
+                        if (!remotePlayers[data.id]) {
+                            remotePlayers[data.id] = { ...data, targetX: data.x, targetY: data.y };
+                        } else {
+                            const rp = remotePlayers[data.id];
+                            rp.name = data.name; rp.color = data.color;
+                            rp.score = data.score; rp.isDead = data.isDead;
+                            rp.targetX = data.x; rp.targetY = data.y;
+                            rp.vx = data.vx; rp.vy = data.vy;
+                        }
+                    } else if (globalGameState.status === 'playing') {
+                        localState.score = data.score;
+                        if (data.isDead && !localState.isDead) {
+                            localState.isDead = true;
+                        }
+                    }
+                });
+
+                const activeIds = new Set(activeInRoom.map(p => p.id));
+                Object.keys(remotePlayers).forEach(id => {
+                    if (!activeIds.has(id)) delete remotePlayers[id];
+                });
+
+                updatePlayerListUI(activeInRoom);
+            }, (error) => console.error("Players sync error:", error));
+        }
+
+        async function syncLocalPlayer() {
+            if (!userId || !currentRoomId) return;
+            const now = Date.now();
+            if (now - localState.lastSync < 40) return;
+            localState.lastSync = now;
+
+            const playerRef = ref(db, `room_players/${currentRoomId}/${userId}`);
+            try {
+                await update(playerRef, {
+                    x: Math.round(localState.x), 
+                    y: Math.round(localState.y),
+                    vx: Math.round(localState.vx), 
+                    vy: Math.round(localState.vy),
+                    ts: Date.now()
+                });
+            } catch(e) {}
+        }
+
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            const container = document.getElementById('uiContainer');
+            if(container) container.classList.add('interactive');
+            if(id) {
+                const target = document.getElementById(id);
+                if(target) target.classList.add('active');
+            }
+        }
+
+        function showLobby() {
+            switchScreen('screen-lobby');
+            document.getElementById('lobbyCode').innerText = currentRoomId;
+            document.getElementById('chatBox').style.display = 'flex';
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+
+            const modeSelect = document.getElementById('gameModeSelect');
+            const startBtn = document.getElementById('btnStartGame');
+            const hostWarn = document.getElementById('hostWarning');
+
+            if (isHost) {
+                modeSelect.disabled = false;
+                startBtn.style.display = 'block';
+                hostWarn.style.display = 'none';
+                
+                modeSelect.onchange = async (e) => {
+                    await update(ref(db, `rooms/${currentRoomId}`), { mode: e.target.value });
+                };
+            } else {
+                modeSelect.disabled = true;
+                startBtn.style.display = 'none';
+                hostWarn.style.display = 'block';
+            }
+        }
+
+        function updatePlayerListUI(players) {
+            const countElem = document.getElementById('playerCount');
+            if(countElem) countElem.innerText = players.length;
+            
+            const list = document.getElementById('playerList');
+            const hudLeader = document.getElementById('hudLeaderboard');
+            if(!list || !hudLeader) return;
+
+            players.sort((a,b) => b.score - a.score);
+
+            if (globalGameState.status === 'lobby' || globalGameState.status === 'ended') {
+                list.innerHTML = players.map(p => `
+                    <li class="flex items-center gap-2 p-1 ${p.id===userId?'bg-white/10':''}">
+                        <div class="w-4 h-4" style="background-color:${p.color}"></div>
+                        <span class="flex-grow">${p.name} ${p.id===userId?'(TY)':''}</span>
+                        <span class="text-yellow-400 font-bold">${p.score} pkt</span>
+                    </li>
+                `).join('');
+            }
+
+            if (globalGameState.status === 'playing') {
+                hudLeader.innerHTML = players.map(p => `
+                    <li class="flex justify-between w-full ${p.isDead ? 'opacity-50 line-through' : ''} ${p.id===userId?'text-white font-bold':'text-gray-300'}">
+                        <span><span style="color:${p.color}">■</span> ${p.name.substring(0,8)}</span>
+                        <span>${p.score}</span>
+                    </li>
+                `).join('');
+            }
+
+            if (globalGameState.status === 'ended') {
+                const endL = document.getElementById('endLeaderboard');
+                if(endL) {
+                    endL.innerHTML = players.map((p, index) => `
+                        <li class="flex justify-between items-center bg-black/40 p-2 border border-gray-600">
+                            <span>#${index+1} <span style="color:${p.color}">■</span> ${p.name}</span>
+                            <span class="text-yellow-400">${p.score} pkt</span>
+                        </li>
+                    `).join('');
+                }
+            }
+        }
+
+        async function leaveRoom(kicked = false) {
+            if (userId && currentRoomId) {
+                try { await remove(ref(db, `room_players/${currentRoomId}/${userId}`)); } catch(e){}
+            }
+            if (isHost && currentRoomId) {
+                try { await remove(ref(db, `rooms/${currentRoomId}`)); } catch(e){}
+            }
+            
+            if (roomUnsubscribe) roomUnsubscribe();
+            if (playersUnsubscribe) playersUnsubscribe();
+            
+            clearInterval(syncInterval);
+            clearInterval(hostLogicInterval);
+            cancelAnimationFrame(gameLoopId);
+            
+            currentRoomId = null; isHost = false; remotePlayers = {};
+            
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('chatBox').style.display = 'none';
+            switchScreen('screen-menu');
+            
+            if (kicked) showError("Pokój został zamknięty lub serwer rozłączył sesję.");
+        }
+
+        class HostEngine {
+            constructor() {
+                this.state = {
+                    safeZone: { x: 1000, y: 1000, r: 1000 },
+                    zones: [],
+                    kothZone: { x: 1000, y: 1000, r: 200 },
+                    balls: []
+                };
+                this.timer = 60;
+                this.tickRate = 100;
+            }
+
+            initMode(mode) {
+                this.state = { safeZone: null, zones: [], kothZone: null, balls: [] };
+                if (mode === 'lms') {
+                    this.timer = 60;
+                    this.state.safeZone = { x: 1000, y: 1000, r: 1200 };
+                } else if (mode === 'race') {
+                    this.timer = 45;
+                } else if (mode === 'capture') {
+                    this.timer = 60;
+                    for(let i=0; i<3; i++) this.spawnZone();
+                } else if (mode === 'koth') {
+                    this.timer = 60;
+                    this.state.kothZone = { x: 1000, y: 1000, r: 250 };
+                } else if (mode === 'survival') {
+                    this.timer = 60;
+                    for(let i=0; i<15; i++) {
+                        this.state.balls.push({
+                            x: 500 + Math.random()*1000, y: 500 + Math.random()*1000,
+                            vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, r: 25
+                        });
+                    }
+                }
+            }
+
+            spawnZone() {
+                this.state.zones.push({
+                    x: 200 + Math.random() * 1600,
+                    y: 200 + Math.random() * 1600,
+                    r: 100
+                });
+            }
+
+            async tick() {
+                if (globalGameState.status !== 'playing') return;
+
+                const mode = globalGameState.mode;
+                const updates = {};
+                let aliveCount = 0;
+                let lastAliveName = "";
+
+                const allPlayers = [{id: userId, ...localState}];
+                Object.keys(remotePlayers).forEach(id => {
+                    allPlayers.push({id, ...remotePlayers[id]});
+                });
+
+                if (mode === 'lms') {
+                    this.state.safeZone.r -= (this.tickRate / 1000) * 15; 
+                    if(this.state.safeZone.r < 50) this.state.safeZone.r = 50;
+                    
+                    allPlayers.forEach(p => {
+                        if (p.isDead) return;
+                        aliveCount++; lastAliveName = p.name;
+                        const dist = Math.hypot(p.x - this.state.safeZone.x, p.y - this.state.safeZone.y);
+                        if (dist > this.state.safeZone.r) {
+                            updates[`${p.id}/isDead`] = true;
+                        }
+                    });
+                    if (aliveCount <= 1 && allPlayers.length > 1) this.timer = 0;
+
+                } else if (mode === 'race') {
+                    allPlayers.forEach(p => {
+                        if (p.isDead) return;
+                        if (p.x > 1900) { 
+                            updates[`${p.id}/score`] = p.score + 100;
+                            updates[`${p.id}/isDead`] = true;
+                            this.timer = 0;
+                        }
+                    });
+
+                } else if (mode === 'capture') {
+                    allPlayers.forEach(p => {
+                        if (p.isDead) return;
+                        for(let i = this.state.zones.length-1; i>=0; i--) {
+                            const z = this.state.zones[i];
+                            const dist = Math.hypot(p.x - z.x, p.y - z.y);
+                            if (dist < z.r + 20) {
+                                updates[`${p.id}/score`] = p.score + 10;
+                                this.state.zones.splice(i, 1);
+                                this.spawnZone();
+                            }
+                        }
+                    });
+
+                } else if (mode === 'koth') {
+                    const z = this.state.kothZone;
+                    allPlayers.forEach(p => {
+                        if (p.isDead) return;
+                        const dist = Math.hypot(p.x - z.x, p.y - z.y);
+                        if (dist < z.r) {
+                            updates[`${p.id}/score`] = p.score + 1;
+                        }
+                    });
+
+                } else if (mode === 'survival') {
+                    this.state.balls.forEach(b => {
+                        b.x += b.vx; b.y += b.vy;
+                        if (b.x < b.r || b.x > ARENA_WIDTH - b.r) b.vx *= -1;
+                        if (b.y < b.r || b.y > ARENA_HEIGHT - b.r) b.vy *= -1;
+                    });
+                    
+                    allPlayers.forEach(p => {
+                        if (p.isDead) return;
+                        aliveCount++; lastAliveName = p.name;
+                        this.state.balls.forEach(b => {
+                            const dist = Math.hypot(p.x - b.x, p.y - b.y);
+                            if (dist < b.r + 20) updates[`${p.id}/isDead`] = true;
+                        });
+                    });
+                    if (aliveCount <= 1 && allPlayers.length > 1) this.timer = 0;
+                }
+
+                if (Math.random() < this.tickRate / 1000) {
+                    this.timer--;
+                }
+
+                if(Object.keys(updates).length > 0) {
+                    try { await update(ref(db, `room_players/${currentRoomId}`), updates); } catch(e){}
+                }
+
+                if (this.timer <= 0) {
+                    let winner = lastAliveName;
+                    if (mode !== 'lms' && mode !== 'survival') {
+                        let topScore = -1;
+                        allPlayers.forEach(p => { if(p.score > topScore) { topScore = p.score; winner = p.name; }});
+                    }
+                    
+                    await update(ref(db, `rooms/${currentRoomId}`), { 
+                        status: 'ended', 
+                        stateData: JSON.stringify({ winner: winner || "Remis" }) 
+                    });
+                } else {
+                    await update(ref(db, `rooms/${currentRoomId}`), { 
+                        timer: this.timer,
+                        stateData: JSON.stringify(this.state)
+                    });
+                }
+            }
+        }
+        
+        const hostEngine = new HostEngine();
+
+        const startBtn = document.getElementById('btnStartGame');
+        if(startBtn) {
+            startBtn.onclick = async () => {
+                if (!isHost) return;
+                const mode = document.getElementById('gameModeSelect').value;
+                
+                try {
+                    const resetUpdates = {};
+                    resetUpdates[`${userId}/score`] = 0;
+                    resetUpdates[`${userId}/isDead`] = false;
+                    resetUpdates[`${userId}/x`] = 200+Math.random()*1600;
+                    resetUpdates[`${userId}/y`] = 200+Math.random()*1600;
+
+                    for (const id of Object.keys(remotePlayers)) {
+                        resetUpdates[`${id}/score`] = 0;
+                        resetUpdates[`${id}/isDead`] = false;
+                        resetUpdates[`${id}/x`] = 200+Math.random()*1600;
+                        resetUpdates[`${id}/y`] = 200+Math.random()*1600;
+                    }
+                    
+                    await update(ref(db, `room_players/${currentRoomId}`), resetUpdates);
+                    hostEngine.initMode(mode);
+                    
+                    await update(ref(db, `rooms/${currentRoomId}`), { 
+                        status: 'playing', 
+                        mode: mode,
+                        timer: hostEngine.timer,
+                        stateData: JSON.stringify(hostEngine.state)
+                    });
+                } catch (e) { showError("Błąd uruchamiania gry: " + e.message); }
+            };
+        }
+
+        function startGameClient() {
+            switchScreen(null);
+            canvas.style.display = 'block';
+            document.getElementById('hud').style.display = 'flex';
+            
+            const modeNames = { 'lms':'Last Man Standing', 'race':'Wyścig Chaosu', 'capture':'Łapanie Punktów', 'koth':'King of the Hill', 'survival':'Survival' };
+            const modeNameElem = document.getElementById('hudModeName');
+            if(modeNameElem) modeNameElem.innerText = modeNames[globalGameState.mode] || 'Arena';
+
+            localState.isDead = false;
+            localState.score = 0;
+            
+            if (globalGameState.mode === 'race') {
+                localState.x = 100; localState.y = Math.random() * ARENA_HEIGHT;
+            }
+
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncLocalPlayer, 50);
+
+            if (isHost) {
+                if(hostLogicInterval) clearInterval(hostLogicInterval);
+                hostLogicInterval = setInterval(() => hostEngine.tick(), hostEngine.tickRate);
+            }
+
+            let lastTime = performance.now();
+            if(gameLoopId) cancelAnimationFrame(gameLoopId);
+            
+            const loop = (time) => {
+                const dt = (time - lastTime) / 1000;
+                lastTime = time;
+                updatePhysics(dt);
+                draw();
+                if (globalGameState.status === 'playing') {
+                    gameLoopId = requestAnimationFrame(loop);
+                }
+            };
+            gameLoopId = requestAnimationFrame(loop);
+        }
+
+        function showEndScreen() {
+            clearInterval(syncInterval);
+            clearInterval(hostLogicInterval);
+            cancelAnimationFrame(gameLoopId);
+            
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            switchScreen('screen-end');
+
+            const winnerElem = document.getElementById('winnerName');
+            if(winnerElem) winnerElem.innerText = globalGameState.winner ? `Wygrywa: ${globalGameState.winner}!` : "Koniec Czasu!";
+            
+            const retBtn = document.getElementById('btnReturnLobby');
+            const waitMsg = document.getElementById('endWaitMsg');
+            if (isHost) {
+                if(retBtn) retBtn.style.display = 'block'; 
+                if(waitMsg) waitMsg.style.display = 'none';
+                if(retBtn) {
+                    retBtn.onclick = async () => {
+                        await update(ref(db, `rooms/${currentRoomId}`), { status: 'lobby' });
+                    };
+                }
+            } else {
+                if(retBtn) retBtn.style.display = 'none'; 
+                if(waitMsg) waitMsg.style.display = 'block';
+            }
+        }
+
+        function updatePhysics(dt) {
+            const timeElem = document.getElementById('hudTime');
+            if(timeElem) timeElem.innerText = `00:${Math.max(0, globalGameState.timer).toString().padStart(2,'0')}`;
+
+            if (localState.isDead) return;
+
+            const speed = 400;
+            let moveX = 0; let moveY = 0;
+            if (keys.w || keys.ArrowUp) moveY -= 1;
+            if (keys.s || keys.ArrowDown) moveY += 1;
+            if (keys.a || keys.ArrowLeft) moveX -= 1;
+            if (keys.d || keys.ArrowRight) moveX += 1;
+
+            if (moveX !== 0 && moveY !== 0) {
+                const len = Math.sqrt(moveX*moveX + moveY*moveY);
+                moveX /= len; moveY /= len;
+            }
+
+            localState.vx = moveX * speed;
+            localState.vy = moveY * speed;
+
+            localState.x += localState.vx * dt;
+            localState.y += localState.vy * dt;
+
+            localState.x = Math.max(20, Math.min(ARENA_WIDTH - 20, localState.x));
+            localState.y = Math.max(20, Math.min(ARENA_HEIGHT - 20, localState.y));
+
+            camera.x += (localState.x - canvas.width / 2 - camera.x) * 5 * dt;
+            camera.y += (localState.y - canvas.height / 2 - camera.y) * 5 * dt;
+            camera.x = Math.max(0, Math.min(ARENA_WIDTH - canvas.width, camera.x));
+            camera.y = Math.max(0, Math.min(ARENA_HEIGHT - canvas.height, camera.y));
+
+            Object.values(remotePlayers).forEach(rp => {
+                if (rp.isDead) return;
+                rp.x += (rp.targetX - rp.x) * 10 * dt;
+                rp.y += (rp.targetY - rp.y) * 10 * dt;
+                rp.x += rp.vx * dt * 0.5;
+                rp.y += rp.vy * dt * 0.5;
+            });
+        }
+
+        function draw() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            ctx.fillStyle = '#111118';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            ctx.strokeStyle = '#2a2a35'; ctx.lineWidth = 2;
+            const grid = 100;
+            const sx = Math.floor(camera.x / grid) * grid; const sy = Math.floor(camera.y / grid) * grid;
+            ctx.beginPath();
+            for(let x=sx; x<camera.x+canvas.width; x+=grid) { ctx.moveTo(x,0); ctx.lineTo(x,ARENA_HEIGHT); }
+            for(let y=sy; y<camera.y+canvas.height; y+=grid) { ctx.moveTo(0,y); ctx.lineTo(ARENA_WIDTH,y); }
+            ctx.stroke();
+
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 10;
+            ctx.strokeRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
+
+            const s = globalGameState;
+            if (globalGameState.mode === 'lms' && s.safeZone) {
+                ctx.fillStyle = 'rgba(255, 51, 102, 0.2)';
+                ctx.fillRect(0,0, ARENA_WIDTH, ARENA_HEIGHT);
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath(); ctx.arc(s.safeZone.x, s.safeZone.y, s.safeZone.r, 0, Math.PI*2); ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
+                
+                ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 5;
+                ctx.beginPath(); ctx.arc(s.safeZone.x, s.safeZone.y, s.safeZone.r, 0, Math.PI*2); ctx.stroke();
+            }
+
+            if (globalGameState.mode === 'race') {
+                ctx.fillStyle = 'rgba(0, 204, 68, 0.3)';
+                ctx.fillRect(1900, 0, 100, ARENA_HEIGHT);
+                ctx.fillStyle = '#fff'; ctx.font = '20px "Press Start 2P"';
+                ctx.fillText("META", 1910, ARENA_HEIGHT/2);
+            }
+
+            if (globalGameState.mode === 'capture' && s.zones) {
+                s.zones.forEach(z => {
+                    ctx.fillStyle = 'rgba(0, 229, 255, 0.3)'; ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                });
+            }
+
+            if (globalGameState.mode === 'koth' && s.kothZone) {
+                ctx.fillStyle = 'rgba(255, 204, 0, 0.3)'; ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = 6;
+                ctx.beginPath(); ctx.arc(s.kothZone.x, s.kothZone.y, s.kothZone.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            }
+
+            if (globalGameState.mode === 'survival' && s.balls) {
+                s.balls.forEach(b => {
+                    ctx.fillStyle = '#ff3366'; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(b.x - 5, b.y - 5, 5, 0, Math.PI*2); ctx.fill();
+                });
+            }
+
+            const drawPlayer = (p) => {
+                if (p.isDead) return;
+                ctx.save(); ctx.translate(p.x, p.y);
+                
+                ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-20, -20, 40, 40);
+                ctx.fillStyle = p.color; ctx.fillRect(-20, -24, 40, 40);
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.strokeRect(-20, -24, 40, 40);
+                
+                ctx.fillStyle = '#fff';
+                let eyeOffset = 0;
+                if(p.vx > 0) eyeOffset = 5; else if(p.vx < 0) eyeOffset = -5;
+                ctx.fillRect(-10 + eyeOffset, -18, 6, 6); ctx.fillRect(4 + eyeOffset, -18, 6, 6);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-8 + eyeOffset, -16, 2, 2); ctx.fillRect(6 + eyeOffset, -16, 2, 2);
+
+                ctx.restore();
+
+                ctx.fillStyle = '#fff'; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+                ctx.fillText(p.name, p.x, p.y - 35);
+            };
+
+            Object.values(remotePlayers).forEach(drawPlayer);
+            drawPlayer(localState);
+
+            if (localState.isDead) {
+                ctx.restore(); 
+                ctx.fillStyle = 'rgba(255,0,0,0.3)'; ctx.fillRect(0,0,canvas.width, canvas.height);
+                ctx.fillStyle = '#fff'; ctx.font = '30px "Press Start 2P"'; ctx.textAlign = 'center';
+                ctx.fillText("JESTEŚ MARTWY", canvas.width/2, canvas.height/2);
+                ctx.font = '12px "Press Start 2P"';
+                ctx.fillText("Obserwujesz rozgrywkę", canvas.width/2, canvas.height/2 + 40);
+                ctx.save(); ctx.translate(-camera.x, -camera.y);
+            }
+
+            ctx.restore();
+        }
+
+        const chatForm = document.getElementById('chatForm');
+        if(chatForm) {
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chatInput');
+                if(!input) return;
+                const msg = input.value.trim();
+                if (!msg || !currentRoomId) return;
+                input.value = '';
+                
+                const chatBox = document.getElementById('chatMessages');
+                if(chatBox) {
+                    const newMsg = document.createElement('div');
+                    newMsg.innerHTML = `<span style="color:${localState.color}">[${localState.name}]</span>: ${msg}`;
+                    chatBox.appendChild(newMsg);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            });
+        }
+
+        window.addEventListener('keydown', e => { 
+            if (keys.hasOwnProperty(e.key) && document.activeElement !== document.getElementById('chatInput')) {
+                keys[e.key] = true; 
+            }
+        });
+        window.addEventListener('keyup', e => { 
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = false; 
+            }
+        });
+        window.addEventListener('resize', () => { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        });
+
+        const btnCreate = document.getElementById('btnCreateRoom');
+        const btnJoin = document.getElementById('btnJoinRoom');
+        const btnLeaveL = document.getElementById('btnLeaveLobby');
+        const btnLeaveG = document.getElementById('btnLeaveGame');
+
+        if(btnCreate) btnCreate.onclick = createRoom;
+        if(btnJoin) btnJoin.onclick = joinRoomBtn;
+        if(btnLeaveL) btnLeaveL.onclick = () => leaveRoom(false);
+        if(btnLeaveG) btnLeaveG.onclick = () => leaveRoom(false);
+    </script>
+</body>
+</html>
