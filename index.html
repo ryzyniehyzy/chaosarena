@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK v8 (Niezawodne dla GitHub Pages) -->
+    <!-- Firebase SDK v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -16,21 +16,21 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #1a1a24; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; }
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.85); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(5px); }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.88); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(5px); }
         .screen.active { display: flex; }
         .panel { background-color: #2a2a35; border: 4px solid #fff; box-shadow: 8px 8px 0px 0px rgba(0,0,0,1); padding: 2rem; max-width: 700px; width: 92%; text-align: center; position: relative;}
         .btn { background-color: #ffaa00; border: 4px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4); color: #000; padding: 1rem 1.5rem; text-transform: uppercase; cursor: pointer; transition: transform 0.1s; font-family: inherit; font-size: 13px; margin-top: 0.8rem;}
         .btn:hover { background-color: #ffbb33; } .btn:active { transform: translateY(4px); }
         .input-pixel { background-color: #1a1a24; border: 4px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.6rem; width: 100%; text-align: center;}
         
-        #hud { position: absolute; top: 20px; left: 20px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
-        #centerMsg { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); z-index: 45; color: #ffaa00; font-size: 50px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; }
-        
         .car-selector { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
         .car-card { border: 2px solid #555; padding: 10px; cursor: pointer; width: 30%; background: #111; color: gray; transition: all 0.2s; }
         .car-card.selected { border-color: #ffaa00; background: #222; color: #fff; transform: translateY(-3px); }
         
-        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.06)); z-index: 100; pointer-events: none; opacity: 0.2; }
+        #hud { position: absolute; top: 20px; left: 20px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
+        #centerMsg { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); z-index: 45; color: #ffaa00; font-size: 50px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; }
+        
+        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 100; pointer-events: none; opacity: 0.2; }
     </style>
 </head>
 <body class="crt">
@@ -41,9 +41,9 @@
 
     <!-- IN-GAME HUD -->
     <div id="hud">
-        <div id="lapText" class="text-3xl mb-1 text-[#ffaa00] font-bold">OKRĄŻENIE 1/3</div>
-        <div id="posText" class="text-sm text-white mb-4">Pozycja: 1</div>
-        <ul id="teamList" class="mt-4 text-[10px] space-y-2 bg-black/60 p-4 border-2 border-gray-500"></ul>
+        <div id="lapText" class="text-2xl mb-1 text-[#ffaa00] font-bold">OKRĄŻENIE 1/3</div>
+        <div id="posText" class="text-xs text-white mb-3">Pozycja: 1</div>
+        <ul id="teamList" class="mt-4 text-[10px] space-y-2 bg-black/70 p-3 border-2 border-gray-500"></ul>
     </div>
 
     <div id="uiContainer" class="ui-layer">
@@ -52,7 +52,7 @@
         <div id="screen-menu" class="screen active">
             <div class="panel">
                 <h1 class="text-3xl text-white mb-2 leading-tight">KIEROWCA PYKA</h1>
-                <h2 class="text-xl text-[#ffaa00] mb-6">ONLINE RACING</h2>
+                <h2 class="text-lg text-[#ffaa00] mb-6">PIXEL RACING ONLINE</h2>
                 
                 <div class="flex gap-4 mb-4">
                     <div class="w-1/2 text-left">
@@ -60,29 +60,29 @@
                         <input type="text" id="playerName" value="Kierowca" class="input-pixel text-xs interactive" maxlength="10">
                     </div>
                     <div class="w-1/2 text-left">
-                        <label class="text-[10px] text-gray-400">Kolor Lakieru:</label>
+                        <label class="text-[10px] text-gray-400">Kolor nadwozia:</label>
                         <input type="color" id="playerColor" value="#ff0000" class="w-full h-10 border-4 border-white cursor-pointer bg-black interactive">
                     </div>
                 </div>
 
                 <div class="text-[10px] text-gray-400 text-left mb-2">Wybierz pojazd:</div>
                 <div class="car-selector interactive">
-                    <div class="car-card selected" onclick="selectCar('racer')" id="card-racer">
-                        <h3 class="text-[10px] text-yellow-400 mb-1">ŚCIGACZ</h3>
-                        <p class="text-[8px]">Szybki, słaby na trawie</p>
+                    <div class="car-card selected" onclick="selectCar('red')" id="card-red">
+                        <h3 class="text-[9px] text-red-400 mb-1">SPORT</h3>
+                        <p class="text-[7px]">Zwinny i szybki</p>
                     </div>
-                    <div class="car-card" onclick="selectCar('muscle')" id="card-muscle">
-                        <h3 class="text-[10px] text-orange-400 mb-1">MUSCLE</h3>
-                        <p class="text-[8px]">Przyspieszenie i drifty</p>
+                    <div class="car-card" onclick="selectCar('green')" id="card-green">
+                        <h3 class="text-[9px] text-green-400 mb-1">TERENÓWKA</h3>
+                        <p class="text-[7px]">Odporna na trawę</p>
                     </div>
-                    <div class="car-card" onclick="selectCar('offroad')" id="card-offroad">
-                        <h3 class="text-[10px] text-green-400 mb-1">TERENÓWKA</h3>
-                        <p class="text-[8px]">Wolniejsza, tnie zakręty</p>
+                    <div class="car-card" onclick="selectCar('futuristic')" id="card-futuristic">
+                        <h3 class="text-[9px] text-cyan-400 mb-1">FUTURO</h3>
+                        <p class="text-[7px]">Kosmiczna prędkość</p>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button class="btn w-full interactive" id="btnCreateRoom">STWÓRZ WYŚCIG (HOST)</button>
+                    <button class="btn w-full interactive" id="btnCreateRoom">STWÓRZ POKÓJ (HOST)</button>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="KOD POKOJU" class="input-pixel interactive uppercase w-1/2 text-xs" maxlength="6">
                         <button class="btn !bg-[#00e5ff] !text-black hover:!bg-[#66edff] w-1/2 interactive !mt-0" id="btnJoinRoom">DOŁĄCZ</button>
@@ -96,44 +96,87 @@
         <div id="screen-lobby" class="screen">
             <div class="panel">
                 <h2 class="text-2xl text-[#ffaa00] mb-3">PARK MASZYN</h2>
-                <div class="text-xs text-gray-400 mb-2">ZAPROŚ ZNAJOMYCH KODEM:</div>
-                <div id="lobbyCode" class="text-4xl text-[#fff] font-bold tracking-widest mb-3"></div>
+                <div class="text-xs text-gray-400 mb-2">KOD POKOJU:</div>
+                <div id="lobbyCode" class="text-3xl text-[#fff] font-bold tracking-widest mb-3"></div>
                 
-                <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !text-white !p-2 text-[10px] w-full mb-3 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK DO GRY</button>
+                <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !text-white !p-2 text-[10px] w-full mb-3 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK DLA KOLEGI</button>
                 <div id="copySuccess" class="text-[9px] text-green-400 mb-3 hidden font-bold">SKOPIOWANO LINK!</div>
 
-                <div class="text-[10px] text-gray-400 text-left mb-1">KIEROWCY NA TORZE:</div>
-                <ul id="lobbyPlayers" class="bg-black/50 border-2 border-gray-600 h-28 overflow-y-auto p-2 mb-4 text-xs text-left space-y-2"></ul>
+                <div class="text-[10px] text-gray-400 text-left mb-1">KIEROWCY W POKOJU:</div>
+                <ul id="lobbyPlayers" class="bg-black/50 border-2 border-gray-600 h-24 overflow-y-auto p-2 mb-3 text-xs text-left space-y-1"></ul>
                 
                 <div id="hostControls" class="hidden">
-                    <label class="text-[10px] text-gray-400">Liczba okrążeń:</label>
-                    <select id="lapsSelect" class="input-pixel mb-3 interactive">
-                        <option value="1">1 Okrążenie</option>
-                        <option value="3" selected>3 Okrążenia</option>
-                        <option value="5">5 Okrążeń</option>
-                    </select>
+                    <div class="flex gap-2 mb-3">
+                        <div class="w-1/2 text-left">
+                            <label class="text-[9px] text-gray-400">Wybierz Mapę:</label>
+                            <select id="mapSelect" class="input-pixel text-[10px] interactive">
+                                <option value="summer">☀️ Letni Tor (Zielony)</option>
+                                <option value="autumn">🍂 Jesienny Tor (Złoty)</option>
+                                <option value="winter">❄️ Zimowy Tor (Śnieg)</option>
+                            </select>
+                        </div>
+                        <div class="w-1/2 text-left">
+                            <label class="text-[9px] text-gray-400">Okrążenia:</label>
+                            <select id="lapsSelect" class="input-pixel text-[10px] interactive">
+                                <option value="1">1 Okrążenie</option>
+                                <option value="3" selected>3 Okrążenia</option>
+                                <option value="5">5 Okrążeń</option>
+                            </select>
+                        </div>
+                    </div>
                     <button id="btnStartGame" class="btn w-full !bg-[#00cc44] hover:!bg-[#33ff77] interactive">START WYŚCIGU</button>
                 </div>
                 
-                <p id="hostWarning" class="text-[10px] text-yellow-400 hidden animate-pulse">Czekaj aż Host ustawi okrążenia i wystartuje...</p>
-                <button class="btn !bg-gray-600 !text-white w-full mt-3 interactive text-[11px] !p-2" onclick="location.reload()">OPUŚĆ GARAŻ</button>
+                <p id="hostWarning" class="text-[10px] text-yellow-400 hidden animate-pulse">Czekaj aż Host wystartuje wyścig...</p>
+                <button class="btn !bg-gray-600 !text-white w-full mt-3 interactive text-[11px] !p-2" onclick="location.reload()">WYJDŹ</button>
             </div>
         </div>
 
         <!-- KONIEC GRY -->
         <div id="screen-gameover" class="screen">
             <div class="panel">
-                <h2 class="text-4xl text-[#ffaa00] mb-4">META!</h2>
-                <div class="text-left text-xs mb-2 text-gray-400">Klasyfikacja końcowa:</div>
+                <h2 class="text-3xl text-[#ffaa00] mb-4">WYNIKI WYŚCIGU</h2>
                 <ul id="endLeaderboard" class="bg-black/50 border-2 border-white h-40 overflow-y-auto p-4 flex flex-col gap-3 text-xs text-left mb-4 text-white"></ul>
-                <button class="btn interactive mt-4 w-full" onclick="location.reload()">NOWY WYŚCIG</button>
+                <button class="btn interactive mt-2 w-full" onclick="location.reload()">NOWY WYŚCIG</button>
             </div>
         </div>
     </div>
 
     <script>
-        // === ZARZĄDZANIE UI ===
-        let chosenCar = 'racer';
+        // === ZASOBY GRAFICZNE (Twoje Mapy i Auta) ===
+        const Assets = {
+            maps: {
+                summer: new Image(),
+                autumn: new Image(),
+                winter: new Image()
+            },
+            cars: {
+                red: new Image(),
+                green: new Image(),
+                futuristic: new Image()
+            },
+            loaded: 0,
+            total: 6,
+            init() {
+                // Bezpośrednie linki do Twoich plików wgranego repozytorium GitHub
+                this.maps.summer.src = 'https://ryzyniehyzy.github.io/chaosarena/map1.png';
+                this.maps.autumn.src = 'https://ryzyniehyzy.github.io/chaosarena/map2.png';
+                this.maps.winter.src = 'https://ryzyniehyzy.github.io/chaosarena/map3.png';
+                
+                this.cars.red.src = 'https://ryzyniehyzy.github.io/chaosarena/car1.png';
+                this.cars.green.src = 'https://ryzyniehyzy.github.io/chaosarena/car2.png';
+                this.cars.futuristic.src = 'https://ryzyniehyzy.github.io/chaosarena/car3.png';
+
+                Object.values(this.maps).forEach(img => img.onload = () => Assets.checkLoad());
+                Object.values(this.cars).forEach(img => img.onload = () => Assets.checkLoad());
+            },
+            checkLoad() {
+                this.loaded++;
+            }
+        };
+        Assets.init();
+
+        let chosenCar = 'red';
         function selectCar(type) {
             chosenCar = type;
             document.querySelectorAll('.car-card').forEach(c => c.classList.remove('selected'));
@@ -164,7 +207,7 @@
             if(duration > 0) setTimeout(() => el.style.display = 'none', duration);
         }
 
-        // === FIREBASE INIT ===
+        // === FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -181,11 +224,11 @@
 
         let myId = null, currentRoom = null, isHost = false;
         let networkPlayers = {}; 
-        const State = { status: 'lobby', maxLaps: 3, countdown: 0 };
+        const State = { status: 'lobby', maxLaps: 3, countdown: 0, mapKey: 'summer' };
 
-        // === AUDIO SYSTEM (Silnik samochodowy) ===
+        // === AUDIO (Dźwięk silnika) ===
         const AudioSys = {
-            ctx: null, engineOsc: null, engineGain: null, isEngineRunning: false,
+            ctx: null, engineOsc: null, engineGain: null,
             init() { 
                 if(!this.ctx) {
                     this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
@@ -202,23 +245,17 @@
             updateEngine(speed, maxSpeed) {
                 if(!this.ctx) return;
                 let ratio = Math.abs(speed) / maxSpeed;
-                if(ratio < 0.1) ratio = 0.1; // idle sound
-                
-                // Modulacja częstotliwości i głośności silnika
-                this.engineOsc.frequency.setTargetAtTime(50 + (ratio * 150), this.ctx.currentTime, 0.1);
-                this.engineGain.gain.setTargetAtTime(0.05 + (ratio * 0.05), this.ctx.currentTime, 0.1);
+                if(ratio < 0.1) ratio = 0.1;
+                this.engineOsc.frequency.setTargetAtTime(60 + (ratio * 180), this.ctx.currentTime, 0.1);
+                this.engineGain.gain.setTargetAtTime(0.04 + (ratio * 0.05), this.ctx.currentTime, 0.1);
             },
-            stopEngine() {
-                if(this.engineGain) this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
-            },
+            stopEngine() { if(this.engineGain) this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1); },
             play(type) {
                 if(!this.ctx) return;
                 const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
                 o.connect(g); g.connect(this.ctx.destination); const t = this.ctx.currentTime;
-                
                 if (type === 'beep') { o.type = 'sine'; o.frequency.setValueAtTime(600, t); g.gain.setValueAtTime(0.1, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.2); o.start(t); o.stop(t+0.2); }
-                else if (type === 'go') { o.type = 'square'; o.frequency.setValueAtTime(800, t); g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.5); o.start(t); o.stop(t+0.5); }
-                else if (type === 'skid') { o.type = 'triangle'; o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(50, t+0.1); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.1); o.start(t); o.stop(t+0.1); }
+                else if (type === 'go') { o.type = 'square'; o.frequency.setValueAtTime(900, t); g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.5); o.start(t); o.stop(t+0.5); }
             }
         };
 
@@ -236,263 +273,114 @@
         const Camera = {
             x: 0, y: 0, zoom: 1,
             update(dt, target, speed) {
-                // Kamera oddala się przy wyższej prędkości
-                let targetZoom = 1.0 - (Math.abs(speed) / 1000) * 0.3;
-                this.zoom += (targetZoom - this.zoom) * 2 * dt;
-                
+                let targetZoom = 1.0 - (Math.abs(speed) / 900) * 0.25;
+                this.zoom += (targetZoom - this.zoom) * 3 * dt;
                 let targetX = target.x - (width / 2) / this.zoom;
                 let targetY = target.y - (height / 2) / this.zoom;
-                this.x += (targetX - this.x) * 5 * dt; 
-                this.y += (targetY - this.y) * 5 * dt;
+                this.x += (targetX - this.x) * 6 * dt; 
+                this.y += (targetY - this.y) * 6 * dt;
             },
             apply() { ctx.save(); ctx.scale(this.zoom, this.zoom); ctx.translate(-this.x, -this.y); },
             clear() { ctx.restore(); }
         };
 
-        const FX = {
-            p: [],
-            skid(x, y) { this.p.push({ x:x, y:y, t:'skid', l:3.0 }); },
-            smoke(x, y) { this.p.push({ x:x+(Math.random()*10-5), y:y+(Math.random()*10-5), r:Math.random()*4+2, l:0.5, max:0.5, t:'smoke' }); },
-            update(dt) {
-                for(let i=this.p.length-1; i>=0; i--) { 
-                    this.p[i].l -= dt; 
-                    if(this.p[i].t === 'smoke') { this.p[i].r += 10*dt; }
-                    if(this.p[i].l <= 0) this.p.splice(i,1); 
-                }
-            },
-            drawMarks() {
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                this.p.forEach(e => { if(e.t==='skid') ctx.fillRect(e.x-3, e.y-3, 6, 6); });
-            },
-            drawSmoke() {
-                this.p.forEach(e => { if(e.t==='smoke') { ctx.fillStyle = '#fff'; ctx.globalAlpha = (e.l/e.max)*0.3; ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fill(); }});
-                ctx.globalAlpha = 1;
-            }
-        };
-
-        // --- MAPA (Owal) ---
-        const Track = {
-            w: 240, // szerokość toru
-            path: [
-                {x: 600, y: 300}, {x: 2000, y: 300}, // Top straight
-                {x: 2000, y: 1100}, {x: 600, y: 1100} // Bottom straight
-            ],
-            arcR: 400,
-            
-            drawBase() {
-                // Trawa
-                ctx.fillStyle = '#1e3f20'; ctx.fillRect(0,0, 3000, 2000);
-                
-                // Krawężniki zewnetrzne (Tarki)
-                ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-                ctx.strokeStyle = '#ff0000'; ctx.lineWidth = this.w + 20; this.strokePath();
-                ctx.setLineDash([40, 40]); ctx.strokeStyle = '#ffffff'; this.strokePath(); ctx.setLineDash([]);
-                
-                // Tor asfaltowy
-                ctx.strokeStyle = '#3a3a45'; ctx.lineWidth = this.w; this.strokePath();
-                
-                // Krawężniki wewnetrzne
-                ctx.strokeStyle = '#ff0000'; ctx.lineWidth = this.w - 180; this.strokePath();
-                ctx.setLineDash([40, 40]); ctx.strokeStyle = '#ffffff'; this.strokePath(); ctx.setLineDash([]);
-                
-                // Zielony środek
-                ctx.strokeStyle = '#1e3f20'; ctx.lineWidth = this.w - 200; this.strokePath();
-
-                // Linia Start/Meta
-                ctx.fillStyle = '#fff';
-                for(let i=0; i<this.w; i+=20) {
-                    ctx.fillRect(1300, 300 - this.w/2 + i, 20, 20);
-                    ctx.fillStyle = ctx.fillStyle === '#ffffff' ? '#000000' : '#ffffff';
-                }
-                ctx.fillStyle = '#000';
-                for(let i=0; i<this.w; i+=20) {
-                    ctx.fillRect(1320, 300 - this.w/2 + i, 20, 20);
-                    ctx.fillStyle = ctx.fillStyle === '#000000' ? '#ffffff' : '#000000';
-                }
-            },
-            strokePath() {
-                ctx.beginPath();
-                ctx.moveTo(this.path[0].x, this.path[0].y);
-                ctx.lineTo(this.path[1].x, this.path[1].y);
-                ctx.arc(2000, 700, 400, -Math.PI/2, Math.PI/2);
-                ctx.lineTo(this.path[3].x, this.path[3].y);
-                ctx.arc(600, 700, 400, Math.PI/2, -Math.PI/2);
-                ctx.stroke();
-            },
-            // Zwraca stopień przebywania na trawie (0 = asfalt, 1 = trawa całkowita)
-            getGrassFactor(x, y) {
-                // Uproszczona matematyka dystansu od centralnej osi toru
-                let dist = 0;
-                if(x >= 600 && x <= 2000) {
-                    if(y < 700) dist = Math.abs(y - 300); // Górna prosta
-                    else dist = Math.abs(y - 1100); // Dolna prosta
-                } else if(x > 2000) {
-                    dist = Math.abs(Math.hypot(x - 2000, y - 700) - 400); // Prawy łuk
-                } else if(x < 600) {
-                    dist = Math.abs(Math.hypot(x - 600, y - 700) - 400); // Lewy łuk
-                }
-                
-                if(dist < this.w/2 - 10) return 0; // na asfalcie
-                if(dist > this.w/2 + 30) return 1; // głęboka trawa
-                return (dist - (this.w/2 - 10)) / 40; // krawędź
-            },
-            // Zwraca numer Checkpointu od 0 do 3 w celu weryfikacji okrążenia
-            getCheckpoint(x, y) {
-                if(x > 1200 && x < 1400 && y < 700) return 0; // META (Start)
-                if(x > 2200 && y > 500 && y < 900) return 1; // Prawy łuk
-                if(x > 1200 && x < 1400 && y > 700) return 2; // Dolna prosta
-                if(x < 400 && y > 500 && y < 900) return 3; // Lewy łuk
-                return -1;
-            }
-        };
-
         const CAR_STATS = {
-            racer: { n: 'Ścigacz', maxSpd: 800, acc: 400, turn: 2.5, friction: 0.98, grassFric: 0.85, drift: 0.9 },
-            muscle: { n: 'Muscle', maxSpd: 650, acc: 600, turn: 2.2, friction: 0.97, grassFric: 0.9, drift: 0.96 },
-            offroad: { n: 'Terenówka', maxSpd: 550, acc: 500, turn: 2.8, friction: 0.95, grassFric: 0.98, drift: 0.85 }
+            red: { n: 'Sport', maxSpd: 850, acc: 500, turn: 2.8, friction: 0.98 },
+            green: { n: 'Terenówka', maxSpd: 650, acc: 600, turn: 2.4, friction: 0.96 },
+            futuristic: { n: 'Futuro', maxSpd: 950, acc: 700, turn: 3.1, friction: 0.99 }
         };
 
         class Car {
             constructor(name, color, type) {
                 this.name = name; this.color = color; this.type = type;
-                this.stats = CAR_STATS[type] || CAR_STATS.racer;
+                this.stats = CAR_STATS[type] || CAR_STATS.red;
                 
-                // Pozycja startowa przed linią startu
-                this.x = 1200; this.y = 300; this.angle = 0;
+                // Pozycja startowa przed metą
+                this.x = 640; this.y = 570; this.angle = 0;
                 this.speed = 0;
-                
                 this.lap = 1; this.checkpoint = 0; this.progress = 0;
                 this.finished = false;
             }
             update(dt) {
                 if(State.countdown > 0 || this.finished) { AudioSys.stopEngine(); return; }
 
-                let isBraking = false;
                 if(Input.keys['KeyW'] || Input.keys['ArrowUp']) this.speed += this.stats.acc * dt;
-                if(Input.keys['KeyS'] || Input.keys['ArrowDown']) { this.speed -= this.stats.acc * 1.5 * dt; isBraking = true; }
+                if(Input.keys['KeyS'] || Input.keys['ArrowDown']) this.speed -= this.stats.acc * 1.5 * dt;
                 
-                // Tarcie nawierzchni
-                let gF = Track.getGrassFactor(this.x, this.y);
-                let currentFriction = this.stats.friction - (gF * (this.stats.friction - this.stats.grassFric));
+                this.speed *= this.stats.friction;
                 
-                this.speed *= currentFriction;
-                
-                // Limit prędkości (na trawie max speed mocno spada dla Ścigacza)
-                let currentMax = this.stats.maxSpd * (1 - (gF * 0.5));
+                let currentMax = this.stats.maxSpd;
                 if(this.speed > currentMax) this.speed = currentMax;
-                if(this.speed < -currentMax/2) this.speed = -currentMax/2;
+                if(this.speed < -currentMax/3) this.speed = -currentMax/3;
 
-                // Skręcanie
                 let turnAmt = 0;
                 if(Math.abs(this.speed) > 10) {
                     let dir = this.speed > 0 ? 1 : -1;
-                    let turnEff = Math.min(1, Math.abs(this.speed) / 200); // Słabszy skręt przy małej prędkości
+                    let turnEff = Math.min(1, Math.abs(this.speed) / 200);
                     if(Input.keys['KeyA'] || Input.keys['ArrowLeft']) turnAmt = -this.stats.turn * dir * turnEff * dt;
                     if(Input.keys['KeyD'] || Input.keys['ArrowRight']) turnAmt = this.stats.turn * dir * turnEff * dt;
                     this.angle += turnAmt;
                 }
 
-                // Ślizganie (Drift) / Ślady opon
-                let isDrifting = false;
-                if(Input.keys['Space']) { 
-                    this.speed *= this.stats.drift; isDrifting = true; turnAmt *= 1.5; 
-                }
-                if(Math.abs(turnAmt) > 0.03 || isDrifting || isBraking) {
-                    if(Math.abs(this.speed) > 150 && gF === 0) {
-                        FX.skid(this.x, this.y);
-                        if(Math.random() < 0.2) AudioSys.play('skid');
-                        if(isDrifting) FX.smoke(this.x, this.y);
-                    }
-                }
-
                 this.x += Math.cos(this.angle) * this.speed * dt;
                 this.y += Math.sin(this.angle) * this.speed * dt;
-
-                // Cząsteczki spalin (tył auta)
-                if(Math.random() < 0.3) {
-                    FX.smoke(this.x - Math.cos(this.angle)*20, this.y - Math.sin(this.angle)*20);
-                }
+                
+                // Granice mapy
+                this.x = Math.max(50, Math.min(1230, this.x));
+                this.y = Math.max(50, Math.min(670, this.y));
 
                 AudioSys.updateEngine(this.speed, this.stats.maxSpd);
 
-                // Logika Checkpointów i Okrążeń
-                let cp = Track.getCheckpoint(this.x, this.y);
-                if(cp !== -1) {
-                    // Wymuszona kolejność 0 -> 1 -> 2 -> 3 -> 0
-                    if(cp === (this.checkpoint + 1) % 4) {
-                        this.checkpoint = cp;
-                        if(cp === 0) {
-                            this.lap++;
-                            if(this.lap > State.maxLaps) {
-                                this.finished = true;
-                                this.lap = State.maxLaps;
-                                Game.reportFinish();
-                            }
+                // Checkpointy dla owalnego toru
+                let cp = -1;
+                if(this.x > 500 && this.x < 800 && this.y > 500) cp = 0; // Meta (dół)
+                else if(this.x > 1000 && this.y > 200 && this.y < 500) cp = 1; // Prawy łuk
+                else if(this.x > 500 && this.x < 800 && this.y < 250) cp = 2; // Góra
+                else if(this.x < 300 && this.y > 200 && this.y < 500) cp = 3; // Lewy łuk
+
+                if(cp !== -1 && cp === (this.checkpoint + 1) % 4) {
+                    this.checkpoint = cp;
+                    if(cp === 0) {
+                        this.lap++;
+                        if(this.lap > State.maxLaps) {
+                            this.finished = true;
+                            this.lap = State.maxLaps;
+                            Game.reportFinish();
                         }
                     }
                 }
-                
-                // Do sortowania wyników w czasie rzeczywistym
                 this.progress = (this.lap * 10) + this.checkpoint;
             }
             draw(ctx) {
                 ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
                 
-                // Cień
-                ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-22, -12, 44, 24);
-
-                // Koła
-                ctx.fillStyle = '#111';
-                ctx.fillRect(-15, -14, 10, 4); ctx.fillRect(10, -14, 10, 4);
-                ctx.fillRect(-15, 10, 10, 4); ctx.fillRect(10, 10, 10, 4);
-
-                // Karoseria zależna od typu
-                if(this.type === 'racer') {
-                    ctx.fillStyle = this.color; ctx.beginPath(); ctx.moveTo(25, 0); ctx.lineTo(15, -10); ctx.lineTo(-20, -8); ctx.lineTo(-20, 8); ctx.lineTo(15, 10); ctx.fill();
-                    ctx.fillStyle = '#222'; ctx.fillRect(-5, -6, 12, 12); // szyba
-                    ctx.fillStyle = '#ffffaa'; ctx.fillRect(20, -8, 4, 3); ctx.fillRect(20, 5, 4, 3); // lampy przód
-                } else if(this.type === 'muscle') {
-                    ctx.fillStyle = this.color; ctx.fillRect(-22, -11, 46, 22);
-                    ctx.fillStyle = '#fff'; ctx.fillRect(-22, -3, 46, 6); // paski
-                    ctx.fillStyle = '#111'; ctx.fillRect(-8, -9, 16, 18); // dach/szyba
-                    ctx.fillStyle = '#ffffaa'; ctx.beginPath(); ctx.arc(24, -7, 3, 0, Math.PI*2); ctx.arc(24, 7, 3, 0, Math.PI*2); ctx.fill();
-                } else { // offroad
-                    ctx.fillStyle = this.color; ctx.fillRect(-18, -12, 38, 24);
-                    ctx.strokeStyle = '#111'; ctx.lineWidth=3; ctx.strokeRect(-18, -12, 38, 24);
-                    ctx.fillStyle = '#333'; ctx.fillRect(-4, -10, 14, 20); // szyba
-                    ctx.fillStyle = '#ffaa00'; ctx.fillRect(20, -10, 2, 6); ctx.fillRect(20, 4, 2, 6);
-                }
-
-                // Lampy stopu
-                if(Input.keys['KeyS'] || Input.keys['ArrowDown'] || Input.keys['Space']) {
-                    ctx.fillStyle = '#ff0000'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 10;
-                    ctx.fillRect(-22, -9, 2, 4); ctx.fillRect(-22, 5, 2, 4);
-                    ctx.shadowBlur = 0;
+                const img = Assets.cars[this.type] || Assets.cars.red;
+                if(img && img.complete && img.naturalWidth !== 0) {
+                    // Rysowanie Twojego Sprite'a auta (skala dopasowana)
+                    ctx.drawImage(img, -24, -14, 48, 28);
+                } else {
+                    // Fallback zastępczy
+                    ctx.fillStyle = this.color; ctx.fillRect(-20, -10, 40, 20);
                 }
 
                 ctx.restore();
-
-                // Nick nad autem
-                ctx.fillStyle = '#fff'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign='center';
-                ctx.fillText(this.name, this.x, this.y - 25);
+                ctx.fillStyle = '#fff'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign='center';
+                ctx.fillText(this.name, this.x, this.y - 20);
             }
         }
 
         const Game = {
             player: null, lastTime: 0, loopId: null, syncId: null,
-            leaderboard: [],
             
             start() {
                 Input.init(); 
                 this.player = new Car(document.getElementById('playerName').value, document.getElementById('playerColor').value, chosenCar);
                 
-                // Pozycja startowa na gridzie (zależna od ID, u nas losowa w siatce dla uproszczenia)
-                this.player.x = 1300 - (Math.random()*100);
-                this.player.y = 300 + (Math.random()*80 - 40);
+                // Pozycja startowa
+                this.player.x = 600 + Math.random()*80;
+                this.player.y = 570;
 
-                FX.p = [];
                 switchScreen(null); document.getElementById('hud').style.display = 'block';
-                
                 this.lastTime = performance.now(); this.loopId = requestAnimationFrame(t => this.loop(t));
 
                 if(this.syncId) clearInterval(this.syncId);
@@ -529,17 +417,13 @@
 
                 this.player.update(dt);
                 Camera.update(dt, this.player, this.player.speed);
-                FX.update(dt);
 
-                // HUD Okrążeń
                 document.getElementById('lapText').innerText = `OKRĄŻENIE ${Math.min(this.player.lap, State.maxLaps)}/${State.maxLaps}`;
 
-                // Klasyfikacja na żywo
                 let arr = [{ name: this.player.name, color: this.player.color, prg: this.player.progress, fin: this.player.finished }];
                 Object.values(networkPlayers).forEach(p => arr.push(p));
                 arr.sort((a,b) => {
-                    if(a.fin && !b.fin) return -1;
-                    if(!a.fin && b.fin) return 1;
+                    if(a.fin && !b.fin) return -1; if(!a.fin && b.fin) return 1;
                     return b.prg - a.prg;
                 });
                 
@@ -549,30 +433,31 @@
             },
 
             draw() {
-                ctx.fillStyle = '#000'; ctx.fillRect(0,0,width,height);
+                ctx.fillStyle = '#111'; ctx.fillRect(0,0,width,height);
                 Camera.apply();
 
-                Track.drawBase();
-                FX.drawMarks();
+                // Rysowanie wybranej mapy jako tło
+                const bgMap = Assets.maps[State.mapKey] || Assets.maps.summer;
+                if(bgMap && bgMap.complete && bgMap.naturalWidth !== 0) {
+                    ctx.drawImage(bgMap, 0, 0, 1280, 720);
+                } else {
+                    ctx.fillStyle = '#228822'; ctx.fillRect(0, 0, 1280, 720);
+                }
                 
                 // Rysowanie innych aut
                 Object.values(networkPlayers).forEach(p => {
                     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-22, -12, 44, 24); // Cień
-                    ctx.fillStyle = '#111'; ctx.fillRect(-15, -14, 10, 4); ctx.fillRect(10, -14, 10, 4); ctx.fillRect(-15, 10, 10, 4); ctx.fillRect(10, 10, 10, 4);
-                    
-                    if(p.cType === 'racer') { ctx.fillStyle = p.color; ctx.beginPath(); ctx.moveTo(25, 0); ctx.lineTo(15, -10); ctx.lineTo(-20, -8); ctx.lineTo(-20, 8); ctx.lineTo(15, 10); ctx.fill(); ctx.fillStyle = '#222'; ctx.fillRect(-5, -6, 12, 12); } 
-                    else if(p.cType === 'muscle') { ctx.fillStyle = p.color; ctx.fillRect(-22, -11, 46, 22); ctx.fillStyle = '#fff'; ctx.fillRect(-22, -3, 46, 6); ctx.fillStyle = '#111'; ctx.fillRect(-8, -9, 16, 18); } 
-                    else { ctx.fillStyle = p.color; ctx.fillRect(-18, -12, 38, 24); ctx.strokeStyle = '#111'; ctx.lineWidth=3; ctx.strokeRect(-18, -12, 38, 24); ctx.fillStyle = '#333'; ctx.fillRect(-4, -10, 14, 20); }
-                    
-                    if(p.spd < -10) { ctx.fillStyle = '#ff0000'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 10; ctx.fillRect(-22, -9, 2, 4); ctx.fillRect(-22, 5, 2, 4); ctx.shadowBlur = 0; }
+                    const img = Assets.cars[p.cType] || Assets.cars.red;
+                    if(img && img.complete && img.naturalWidth !== 0) {
+                        ctx.drawImage(img, -24, -14, 48, 28);
+                    } else {
+                        ctx.fillStyle = p.color; ctx.fillRect(-20, -10, 40, 20);
+                    }
                     ctx.restore();
-                    ctx.fillStyle = '#fff'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText(p.name, p.x, p.y - 25);
+                    ctx.fillStyle = '#fff'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign='center'; ctx.fillText(p.name, p.x, p.y - 20);
                 });
                 
                 this.player.draw(ctx);
-                FX.drawSmoke();
-
                 Camera.clear();
             },
 
@@ -592,7 +477,6 @@
                 arr.sort((a,b) => a.time - b.time);
                 
                 document.getElementById('endLeaderboard').innerHTML = arr.map((p, i) => `<li><span style="color:${p.color}">■</span> ${i+1}. ${p.name} ${p.fin ? '[META]' : '[DNF]'}</li>`).join('');
-                
                 if(isHost) { db.ref(`rooms/${currentRoom}`).remove(); }
             }
         };
@@ -603,7 +487,7 @@
                 AudioSys.init(); showErr("Przygotowywanie toru...", true);
                 try {
                     await this.auth(); currentRoom = Math.random().toString(36).substr(2,5).toUpperCase(); isHost = true;
-                    await db.ref(`rooms/${currentRoom}`).set({ status: 'lobby', countdown: 0, laps: 3 });
+                    await db.ref(`rooms/${currentRoom}`).set({ status: 'lobby', countdown: 0, laps: 3, map: 'summer' });
                     document.getElementById('menuError').classList.add('hidden');
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
@@ -613,11 +497,11 @@
                 AudioSys.init();
                 if(!code) code = document.getElementById('joinCode').value.toUpperCase().trim();
                 if(code.length < 5) return showErr("Wpisz poprawny 5-znakowy kod!");
-                showErr("Podjeżdżanie do garażu...", true);
+                showErr("Dołączanie do garażu...", true);
                 try {
                     await this.auth();
                     const snap = await db.ref(`rooms/${code}`).once('value');
-                    if(!snap.exists()) return showErr("Pokój nie istnieje lub wyścig się skończył!");
+                    if(!snap.exists()) return showErr("Pokój nie istnieje!");
                     
                     currentRoom = code;
                     const pRef = db.ref(`room_players/${currentRoom}/${myId}`);
@@ -647,6 +531,7 @@
                     let data = snap.val(); 
                     State.maxLaps = data.laps || 3;
                     State.countdown = data.countdown || 0;
+                    State.mapKey = data.map || 'summer';
                     
                     if(State.status !== data.status) {
                         State.status = data.status;
@@ -663,7 +548,6 @@
                     });
                     document.getElementById('lobbyPlayers').innerHTML = arr.map(p => `<li><span style="color:${p.color}">■</span> ${p.name} (${CAR_STATS[p.cType].n}) ${p.id===myId?'(TY)':''}</li>`).join('');
                     
-                    // Host sprawdza czy wszyscy ukończyli
                     if(isHost && State.status === 'playing') {
                         let allFinished = arr.every(p => p.fin || p.finishTime);
                         if(allFinished && arr.length > 0) {
@@ -674,7 +558,6 @@
             }
         };
 
-        // Kopiowanie Linku
         document.getElementById('btnCopyLink').onclick = () => {
             const url = window.location.origin + window.location.pathname + '?room=' + currentRoom;
             navigator.clipboard.writeText(url).then(() => {
@@ -683,7 +566,6 @@
             });
         };
 
-        // Automatyczne wypełnienie kodu z URL
         const urlRoom = new URLSearchParams(window.location.search).get('room');
         if(urlRoom) { document.getElementById('joinCode').value = urlRoom.toUpperCase(); }
 
@@ -692,7 +574,8 @@
         document.getElementById('btnStartGame').onclick = () => { 
             if(isHost) {
                 let laps = parseInt(document.getElementById('lapsSelect').value);
-                db.ref(`rooms/${currentRoom}`).update({ status: 'playing', laps: laps, countdown: 3.99 }); 
+                let mapKey = document.getElementById('mapSelect').value;
+                db.ref(`rooms/${currentRoom}`).update({ status: 'playing', laps: laps, map: mapKey, countdown: 3.99 }); 
             }
         };
     </script>
