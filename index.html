@@ -132,46 +132,47 @@
             </div>
         </div>
 
-        <!-- KONIEC GRY -->
+        <!-- KONIEC GRY (ROZBUDOWANY RANKING) -->
         <div id="screen-gameover" class="screen">
-            <div class="panel">
-                <h2 class="text-3xl text-[#ffaa00] mb-4">WYNIKI WYŚCIGU</h2>
-                <ul id="endLeaderboard" class="bg-black/50 border-2 border-white h-40 overflow-y-auto p-4 flex flex-col gap-3 text-xs text-left mb-4 text-white"></ul>
-                <button class="btn interactive mt-2 w-full" onclick="location.reload()">NOWY WYŚCIG</button>
+            <div class="panel !max-w-3xl">
+                <h2 class="text-2xl text-[#ffaa00] mb-2">🏁 WYNIKI WYŚCIGU 🏁</h2>
+                <div id="winnerBanner" class="text-sm text-green-400 mb-4 font-bold"></div>
+                
+                <div class="bg-black/60 border-2 border-gray-500 p-3 mb-4 max-h-56 overflow-y-auto">
+                    <table class="w-full text-left text-[10px]">
+                        <thead>
+                            <tr class="border-b border-gray-600 text-yellow-400">
+                                <th class="pb-2">Poz.</th>
+                                <th class="pb-2">Kierowca</th>
+                                <th class="pb-2">Pojazd</th>
+                                <th class="pb-2 text-right">Czas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="endLeaderboardRows">
+                            <!-- Wypełniane dynamicznie przez JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="btnRestart" class="btn interactive w-1/2 !bg-[#00cc44] hover:!bg-[#33ff77] hidden">NOWY WYŚCIG (HOST)</button>
+                    <button class="btn interactive w-full !bg-gray-600 !text-white" onclick="location.reload()">WYJDŹ DO MENU</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // === ZASOBY GRAFICZNE (Twoje Mapy i Auta) ===
         const Assets = {
-            maps: {
-                summer: new Image(),
-                autumn: new Image(),
-                winter: new Image()
-            },
-            cars: {
-                red: new Image(),
-                green: new Image(),
-                futuristic: new Image()
-            },
-            loaded: 0,
-            total: 6,
+            maps: { summer: new Image(), autumn: new Image(), winter: new Image() },
+            cars: { red: new Image(), green: new Image(), futuristic: new Image() },
             init() {
-                // Bezpośrednie linki do Twoich plików wgranego repozytorium GitHub
                 this.maps.summer.src = 'https://ryzyniehyzy.github.io/chaosarena/map1.png';
                 this.maps.autumn.src = 'https://ryzyniehyzy.github.io/chaosarena/map2.png';
                 this.maps.winter.src = 'https://ryzyniehyzy.github.io/chaosarena/map3.png';
-                
                 this.cars.red.src = 'https://ryzyniehyzy.github.io/chaosarena/car1.png';
                 this.cars.green.src = 'https://ryzyniehyzy.github.io/chaosarena/car2.png';
                 this.cars.futuristic.src = 'https://ryzyniehyzy.github.io/chaosarena/car3.png';
-
-                Object.values(this.maps).forEach(img => img.onload = () => Assets.checkLoad());
-                Object.values(this.cars).forEach(img => img.onload = () => Assets.checkLoad());
-            },
-            checkLoad() {
-                this.loaded++;
             }
         };
         Assets.init();
@@ -207,7 +208,7 @@
             if(duration > 0) setTimeout(() => el.style.display = 'none', duration);
         }
 
-        // === FIREBASE ===
+        // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -224,9 +225,8 @@
 
         let myId = null, currentRoom = null, isHost = false;
         let networkPlayers = {}; 
-        const State = { status: 'lobby', maxLaps: 3, countdown: 0, mapKey: 'summer' };
+        const State = { status: 'lobby', maxLaps: 3, countdown: 0, mapKey: 'summer', startTime: 0 };
 
-        // === AUDIO (Dźwięk silnika) ===
         const AudioSys = {
             ctx: null, engineOsc: null, engineGain: null,
             init() { 
@@ -294,12 +294,9 @@
             constructor(name, color, type) {
                 this.name = name; this.color = color; this.type = type;
                 this.stats = CAR_STATS[type] || CAR_STATS.red;
-                
-                // Pozycja startowa przed metą
-                this.x = 640; this.y = 570; this.angle = 0;
-                this.speed = 0;
+                this.x = 640; this.y = 570; this.angle = 0; this.speed = 0;
                 this.lap = 1; this.checkpoint = 0; this.progress = 0;
-                this.finished = false;
+                this.finished = false; this.finishTime = null;
             }
             update(dt) {
                 if(State.countdown > 0 || this.finished) { AudioSys.stopEngine(); return; }
@@ -308,7 +305,6 @@
                 if(Input.keys['KeyS'] || Input.keys['ArrowDown']) this.speed -= this.stats.acc * 1.5 * dt;
                 
                 this.speed *= this.stats.friction;
-                
                 let currentMax = this.stats.maxSpd;
                 if(this.speed > currentMax) this.speed = currentMax;
                 if(this.speed < -currentMax/3) this.speed = -currentMax/3;
@@ -325,18 +321,16 @@
                 this.x += Math.cos(this.angle) * this.speed * dt;
                 this.y += Math.sin(this.angle) * this.speed * dt;
                 
-                // Granice mapy
                 this.x = Math.max(50, Math.min(1230, this.x));
                 this.y = Math.max(50, Math.min(670, this.y));
 
                 AudioSys.updateEngine(this.speed, this.stats.maxSpd);
 
-                // Checkpointy dla owalnego toru
                 let cp = -1;
-                if(this.x > 500 && this.x < 800 && this.y > 500) cp = 0; // Meta (dół)
-                else if(this.x > 1000 && this.y > 200 && this.y < 500) cp = 1; // Prawy łuk
-                else if(this.x > 500 && this.x < 800 && this.y < 250) cp = 2; // Góra
-                else if(this.x < 300 && this.y > 200 && this.y < 500) cp = 3; // Lewy łuk
+                if(this.x > 500 && this.x < 800 && this.y > 500) cp = 0; 
+                else if(this.x > 1000 && this.y > 200 && this.y < 500) cp = 1; 
+                else if(this.x > 500 && this.x < 800 && this.y < 250) cp = 2; 
+                else if(this.x < 300 && this.y > 200 && this.y < 500) cp = 3; 
 
                 if(cp !== -1 && cp === (this.checkpoint + 1) % 4) {
                     this.checkpoint = cp;
@@ -345,7 +339,8 @@
                         if(this.lap > State.maxLaps) {
                             this.finished = true;
                             this.lap = State.maxLaps;
-                            Game.reportFinish();
+                            this.finishTime = Date.now() - State.startTime;
+                            Game.reportFinish(this.finishTime);
                         }
                     }
                 }
@@ -353,16 +348,12 @@
             }
             draw(ctx) {
                 ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                
                 const img = Assets.cars[this.type] || Assets.cars.red;
                 if(img && img.complete && img.naturalWidth !== 0) {
-                    // Rysowanie Twojego Sprite'a auta (skala dopasowana)
                     ctx.drawImage(img, -24, -14, 48, 28);
                 } else {
-                    // Fallback zastępczy
                     ctx.fillStyle = this.color; ctx.fillRect(-20, -10, 40, 20);
                 }
-
                 ctx.restore();
                 ctx.fillStyle = '#fff'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign='center';
                 ctx.fillText(this.name, this.x, this.y - 20);
@@ -375,10 +366,7 @@
             start() {
                 Input.init(); 
                 this.player = new Car(document.getElementById('playerName').value, document.getElementById('playerColor').value, chosenCar);
-                
-                // Pozycja startowa
-                this.player.x = 600 + Math.random()*80;
-                this.player.y = 570;
+                this.player.x = 600 + Math.random()*80; this.player.y = 570;
 
                 switchScreen(null); document.getElementById('hud').style.display = 'block';
                 this.lastTime = performance.now(); this.loopId = requestAnimationFrame(t => this.loop(t));
@@ -389,17 +377,17 @@
                         db.ref(`room_players/${currentRoom}/${myId}`).update({ 
                             x: Math.round(this.player.x), y: Math.round(this.player.y), angle: this.player.angle,
                             spd: Math.round(this.player.speed), lap: this.player.lap, prg: this.player.progress,
-                            fin: this.player.finished, cType: this.player.type
+                            fin: this.player.finished, cType: this.player.type, finishTime: this.player.finishTime || null
                         });
                     }
                 }, 50);
             },
 
-            reportFinish() {
+            reportFinish(fTime) {
                 db.ref(`room_players/${currentRoom}/${myId}`).once('value', snap => {
                     const data = snap.val();
                     if(!data.finishTime) {
-                        db.ref(`room_players/${currentRoom}/${myId}`).update({ finishTime: Date.now() });
+                        db.ref(`room_players/${currentRoom}/${myId}`).update({ fin: true, finishTime: fTime });
                     }
                 });
             },
@@ -410,7 +398,11 @@
                     let sec = Math.ceil(State.countdown);
                     if(sec !== this.lastSec) {
                         if(sec > 0) { showCenterMsg(sec); AudioSys.play('beep'); }
-                        else { showCenterMsg("START!", 1000); AudioSys.play('go'); }
+                        else { 
+                            showCenterMsg("START!", 1000); 
+                            AudioSys.play('go'); 
+                            State.startTime = Date.now();
+                        }
                         this.lastSec = sec;
                     }
                 }
@@ -424,6 +416,7 @@
                 Object.values(networkPlayers).forEach(p => arr.push(p));
                 arr.sort((a,b) => {
                     if(a.fin && !b.fin) return -1; if(!a.fin && b.fin) return 1;
+                    if(a.fin && b.fin) return (a.finishTime || 0) - (b.finishTime || 0);
                     return b.prg - a.prg;
                 });
                 
@@ -436,7 +429,6 @@
                 ctx.fillStyle = '#111'; ctx.fillRect(0,0,width,height);
                 Camera.apply();
 
-                // Rysowanie wybranej mapy jako tło
                 const bgMap = Assets.maps[State.mapKey] || Assets.maps.summer;
                 if(bgMap && bgMap.complete && bgMap.naturalWidth !== 0) {
                     ctx.drawImage(bgMap, 0, 0, 1280, 720);
@@ -444,7 +436,6 @@
                     ctx.fillStyle = '#228822'; ctx.fillRect(0, 0, 1280, 720);
                 }
                 
-                // Rysowanie innych aut
                 Object.values(networkPlayers).forEach(p => {
                     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
                     const img = Assets.cars[p.cType] || Assets.cars.red;
@@ -472,12 +463,35 @@
                 switchScreen('screen-gameover'); 
                 document.getElementById('hud').style.display='none'; 
                 
-                let arr = [{ name: this.player.name, color: this.player.color, fin: this.player.finished, time: this.player.finishTime || 9999999999999 }];
+                let arr = [{ name: this.player.name, color: this.player.color, fin: this.player.finished, finishTime: this.player.finishTime || null }];
                 Object.values(networkPlayers).forEach(p => arr.push(p));
-                arr.sort((a,b) => a.time - b.time);
                 
-                document.getElementById('endLeaderboard').innerHTML = arr.map((p, i) => `<li><span style="color:${p.color}">■</span> ${i+1}. ${p.name} ${p.fin ? '[META]' : '[DNF]'}</li>`).join('');
-                if(isHost) { db.ref(`rooms/${currentRoom}`).remove(); }
+                // Sortowanie po ukończeniu i czasie
+                arr.sort((a,b) => {
+                    if(a.fin && !b.fin) return -1;
+                    if(!a.fin && b.fin) return 1;
+                    if(a.finishTime && b.finishTime) return a.finishTime - b.finishTime;
+                    return 0;
+                });
+
+                if(arr.length > 0 && arr[0].fin) {
+                    document.getElementById('winnerBanner').innerText = `🏆 ZWYCIĘZCA: ${arr[0].name.toUpperCase()}!`;
+                } else {
+                    document.getElementById('winnerBanner').innerText = `WYŚCIG UKOŃCZONY`;
+                }
+
+                document.getElementById('endLeaderboardRows').innerHTML = arr.map((p, i) => {
+                    let timeStr = "DNF (Brak Mety)";
+                    if(p.finishTime) {
+                        let secs = (p.finishTime / 1000).toFixed(2);
+                        timeStr = `${secs} s`;
+                    }
+                    return `<tr class="border-b border-gray-800"><td class="py-2">#${i+1}</td><td class="py-2"><span style="color:${p.color}">■</span> ${p.name}</td><td class="py-2">${CAR_STATS[p.cType]?.n || 'Sport'}</td><td class="py-2 text-right text-yellow-400 font-bold">${timeStr}</td></tr>`;
+                }).join('');
+
+                if(isHost) {
+                    document.getElementById('btnRestart').style.display = 'block';
+                }
             }
         };
 
@@ -497,7 +511,7 @@
                 AudioSys.init();
                 if(!code) code = document.getElementById('joinCode').value.toUpperCase().trim();
                 if(code.length < 5) return showErr("Wpisz poprawny 5-znakowy kod!");
-                showErr("Dołączanie do garażu...", true);
+                showErr("Podjeżdżanie do garażu...", true);
                 try {
                     await this.auth();
                     const snap = await db.ref(`rooms/${code}`).once('value');
@@ -508,7 +522,7 @@
                     await pRef.set({ 
                         id: myId, name: document.getElementById('playerName').value.trim() || "Kierowca", 
                         color: document.getElementById('playerColor').value || "#ff0000", 
-                        cType: chosenCar, x: 0, y: 0, angle: 0, spd: 0, lap: 1, prg: 0, fin: false
+                        cType: chosenCar, x: 0, y: 0, angle: 0, spd: 0, lap: 1, prg: 0, fin: false, finishTime: null
                     });
                     pRef.onDisconnect().remove();
 
@@ -576,6 +590,11 @@
                 let laps = parseInt(document.getElementById('lapsSelect').value);
                 let mapKey = document.getElementById('mapSelect').value;
                 db.ref(`rooms/${currentRoom}`).update({ status: 'playing', laps: laps, map: mapKey, countdown: 3.99 }); 
+            }
+        };
+        document.getElementById('btnRestart').onclick = () => {
+            if(isHost) {
+                db.ref(`rooms/${currentRoom}`).update({ status: 'playing', countdown: 3.99 });
             }
         };
     </script>
