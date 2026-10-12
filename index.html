@@ -128,11 +128,11 @@
                 </div>
                 
                 <p id="hostWarning" class="text-[10px] text-yellow-400 hidden animate-pulse">Czekaj aż Host wystartuje wyścig...</p>
-                <button class="btn !bg-gray-600 !text-white w-full mt-3 interactive text-[11px] !p-2" onclick="location.reload()">WYJDŹ</button>
+                <button class="btn !bg-gray-600 !text-white w-full mt-3 interactive text-[11px] !p-2" onclick="location.reload()">OPUŚĆ GARAŻ</button>
             </div>
         </div>
 
-        <!-- KONIEC GRY (ROZBUDOWANY RANKING) -->
+        <!-- KONIEC GRY (WYNIKI Z OPCJĄ REWANŻU) -->
         <div id="screen-gameover" class="screen">
             <div class="panel !max-w-3xl">
                 <h2 class="text-2xl text-[#ffaa00] mb-2">🏁 WYNIKI WYŚCIGU 🏁</h2>
@@ -148,14 +148,13 @@
                                 <th class="pb-2 text-right">Czas</th>
                             </tr>
                         </thead>
-                        <tbody id="endLeaderboardRows">
-                            <!-- Wypełniane dynamicznie przez JS -->
-                        </tbody>
+                        <tbody id="endLeaderboardRows"></tbody>
                     </table>
                 </div>
 
                 <div class="flex gap-2">
-                    <button id="btnRestart" class="btn interactive w-1/2 !bg-[#00cc44] hover:!bg-[#33ff77] hidden">NOWY WYŚCIG (HOST)</button>
+                    <button id="btnRestart" class="btn interactive w-1/2 !bg-[#00cc44] hover:!bg-[#33ff77] hidden">REWANŻ (HOST)</button>
+                    <button id="btnBackLobby" class="btn interactive w-full !bg-indigo-600 !text-white hidden">POWRÓT DO LOBBY</button>
                     <button class="btn interactive w-full !bg-gray-600 !text-white" onclick="location.reload()">WYJDŹ DO MENU</button>
                 </div>
             </div>
@@ -208,7 +207,6 @@
             if(duration > 0) setTimeout(() => el.style.display = 'none', duration);
         }
 
-        // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -416,7 +414,6 @@
                 Object.values(networkPlayers).forEach(p => arr.push(p));
                 arr.sort((a,b) => {
                     if(a.fin && !b.fin) return -1; if(!a.fin && b.fin) return 1;
-                    if(a.fin && b.fin) return (a.finishTime || 0) - (b.finishTime || 0);
                     return b.prg - a.prg;
                 });
                 
@@ -466,7 +463,6 @@
                 let arr = [{ name: this.player.name, color: this.player.color, fin: this.player.finished, finishTime: this.player.finishTime || null }];
                 Object.values(networkPlayers).forEach(p => arr.push(p));
                 
-                // Sortowanie po ukończeniu i czasie
                 arr.sort((a,b) => {
                     if(a.fin && !b.fin) return -1;
                     if(!a.fin && b.fin) return 1;
@@ -491,6 +487,10 @@
 
                 if(isHost) {
                     document.getElementById('btnRestart').style.display = 'block';
+                    document.getElementById('btnBackLobby').style.display = 'block';
+                } else {
+                    document.getElementById('btnRestart').style.display = 'none';
+                    document.getElementById('btnBackLobby').style.display = 'block';
                 }
             }
         };
@@ -522,7 +522,7 @@
                     await pRef.set({ 
                         id: myId, name: document.getElementById('playerName').value.trim() || "Kierowca", 
                         color: document.getElementById('playerColor').value || "#ff0000", 
-                        cType: chosenCar, x: 0, y: 0, angle: 0, spd: 0, lap: 1, prg: 0, fin: false, finishTime: null
+                        cType: chosenCar, x: 640, y: 570, angle: 0, spd: 0, lap: 1, prg: 0, fin: false, finishTime: null
                     });
                     pRef.onDisconnect().remove();
 
@@ -551,6 +551,10 @@
                         State.status = data.status;
                         if(data.status === 'playing') { Game.start(); }
                         else if(data.status === 'gameover') Game.endGame();
+                        else if(data.status === 'lobby') {
+                            switchScreen('screen-lobby');
+                            document.getElementById('hud').style.display = 'none';
+                        }
                     }
                 });
 
@@ -592,9 +596,30 @@
                 db.ref(`rooms/${currentRoom}`).update({ status: 'playing', laps: laps, map: mapKey, countdown: 3.99 }); 
             }
         };
+        // Przycisk REWANŻ dla hosta
         document.getElementById('btnRestart').onclick = () => {
             if(isHost) {
+                // Reset flag okrążeń graczy w bazie przed nowym startem
+                db.ref(`room_players/${currentRoom}`).once('value', snap => {
+                    let updates = {};
+                    snap.forEach(s => {
+                        updates[`${s.key}/lap`] = 1;
+                        updates[`${s.key}/checkpoint`] = 0;
+                        updates[`${s.key}/prg`] = 0;
+                        updates[`${s.key}/fin`] = false;
+                        updates[`${s.key}/finishTime`] = null;
+                        updates[`${s.key}/x`] = 640 + Math.random()*80;
+                        updates[`${s.key}/y`] = 570;
+                    });
+                    db.ref(`room_players/${currentRoom}`).update(updates);
+                });
                 db.ref(`rooms/${currentRoom}`).update({ status: 'playing', countdown: 3.99 });
+            }
+        };
+        // Przycisk powrotu do lobby z ekranu wyników
+        document.getElementById('btnBackLobby').onclick = () => {
+            if(isHost) {
+                db.ref(`rooms/${currentRoom}`).update({ status: 'lobby' });
             }
         };
     </script>
