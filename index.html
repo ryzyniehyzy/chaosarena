@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAWEŁ PYKA: PIXEL ARENA PARTY</title>
+    <title>PAWEŁ PYKA: PIXEL ARENA DELUXE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -13,33 +13,37 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #0b0b10; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #08080c; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: crosshair; image-rendering: pixelated; }
         
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(10, 10, 16, 0.9); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(8, 8, 14, 0.92); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(4px); }
         .screen.active { display: flex; }
         
-        .panel { background-color: #181824; border: 4px solid #fff; box-shadow: 10px 10px 0px 0px #000; padding: 2rem; max-width: 750px; width: 94%; text-align: center; position: relative; }
-        .btn { background-color: #ff2a6d; border: 4px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.45); color: #fff; padding: 0.9rem 1.4rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s; font-family: inherit; font-size: 12px; }
+        .panel { background-color: #161622; border: 4px solid #fff; box-shadow: 10px 10px 0px 0px #000; padding: 1.5rem; max-width: 820px; width: 95%; text-align: center; position: relative; }
+        .btn { background-color: #ff2a6d; border: 4px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5); color: #fff; padding: 0.85rem 1.2rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s; font-family: inherit; font-size: 11px; }
         .btn:hover { background-color: #ff5286; }
         .btn:active { transform: translateY(3px); }
         
-        .input-pixel { background-color: #0d0d14; border: 4px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.65rem; width: 100%; text-align: center; font-size: 11px; }
+        .input-pixel { background-color: #0b0b12; border: 4px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.6rem; width: 100%; text-align: center; font-size: 10px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { border: 3px solid #3a3a52; background: #101018; padding: 10px; cursor: pointer; transition: all 0.15s; text-align: left; }
-        .mode-card.selected { border-color: #05d5fa; background: #1c1c2e; box-shadow: 0 0 12px rgba(5, 213, 250, 0.35); }
+        .mode-card { border: 3px solid #323248; background: #0e0e17; padding: 8px; cursor: pointer; transition: all 0.12s; text-align: left; }
+        .mode-card:hover { border-color: #666688; }
+        .mode-card.selected { border-color: #05d5fa; background: #19192b; box-shadow: inset 0 0 0 2px #05d5fa; }
 
-        #hud { position: absolute; top: 16px; left: 16px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
-        #hudRight { position: absolute; top: 16px; right: 16px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
-        #centerAnnouncement { position: absolute; top: 22%; left: 50%; transform: translate(-50%, -50%); z-index: 45; color: #ffde00; font-size: 26px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+        .skin-card { border: 3px solid #323248; background: #0e0e17; padding: 6px; cursor: pointer; font-size: 8px; color: #aaa; }
+        .skin-card.selected { border-color: #ffde00; color: #fff; background: #222215; }
 
-        .bar-wrap { width: 220px; height: 18px; border: 3px solid #fff; background: #111; margin-top: 6px; position: relative; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
+        #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
+        #centerAnnouncement { position: absolute; top: 22%; left: 50%; transform: translate(-50%, -50%); z-index: 45; color: #ffde00; font-size: 24px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+
+        .bar-wrap { width: 210px; height: 16px; border: 3px solid #fff; background: #111; margin-top: 5px; position: relative; }
         #hpBar { height: 100%; background: #ff2a6d; width: 100%; transition: width 0.1s; }
         #dashBar { height: 100%; background: #05d5fa; width: 100%; }
 
-        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.45; }
+        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.4; }
     </style>
 </head>
 <body class="crt">
@@ -50,147 +54,157 @@
 
     <!-- LEWY HUD -->
     <div id="hud">
-        <div id="hudModeTitle" class="text-lg text-[#05d5fa] mb-1">TRYB</div>
+        <div id="hudModeTitle" class="text-base text-[#05d5fa] mb-1">TRYB</div>
         <div id="hudTimer" class="text-2xl text-yellow-400 mb-2">01:30</div>
-        <div class="text-[9px] text-gray-300">ZDROWIE (HP)</div>
+        <div class="text-[8px] text-gray-300">ZDROWIE (HP)</div>
         <div class="bar-wrap"><div id="hpBar"></div></div>
-        <div class="text-[9px] text-gray-300 mt-2">ZRYW [SPACJA]</div>
+        <div class="text-[8px] text-gray-300 mt-2">ZRYW [SPACJA]</div>
         <div class="bar-wrap !h-3"><div id="dashBar"></div></div>
-        <div id="hudWeapon" class="text-[10px] text-yellow-300 mt-3">BROŃ: Pistolet</div>
+        <div id="hudWeapon" class="text-[9px] text-yellow-300 mt-3">BROŃ: Pistolet</div>
     </div>
 
-    <!-- PRAWY HUD (RANKING NA ŻYWO) -->
+    <!-- PRAWY HUD -->
     <div id="hudRight">
-        <div class="bg-black/75 border-2 border-white p-3 min-w-[210px]">
-            <div class="text-[10px] text-[#05d5fa] border-b border-gray-600 pb-1 mb-2">TABELA WYNIKÓW</div>
-            <ul id="liveScoreboard" class="text-[9px] space-y-2"></ul>
+        <div class="bg-black/80 border-3 border-white p-3 min-w-[200px]">
+            <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING GRACZY</div>
+            <ul id="liveScoreboard" class="text-[8px] space-y-2"></ul>
         </div>
     </div>
 
     <div id="uiContainer" class="ui-layer">
         
-        <!-- EKRAN MENU GŁÓWNEGO -->
+        <!-- MENU GŁÓWNE -->
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-lg">
                 <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-sm text-yellow-400 mb-6 tracking-wider">PIXEL ARENA PARTY</h2>
+                <h2 class="text-xs text-yellow-400 mb-5 tracking-wider">PIXEL ARENA DELUXE (6 TRYBÓW)</h2>
                 
-                <div class="flex gap-4 mb-5">
+                <div class="flex gap-3 mb-4">
                     <div class="w-2/3 text-left">
-                        <label class="text-[9px] text-gray-400 block mb-1">TWÓJ PSEUDONIM:</label>
+                        <label class="text-[8px] text-gray-400 block mb-1">TWÓJ NICK:</label>
                         <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
                     </div>
                     <div class="w-1/3 text-left">
-                        <label class="text-[9px] text-gray-400 block mb-1">KOLOR:</label>
-                        <input type="color" id="playerColor" value="#05d5fa" class="w-full h-[42px] border-4 border-white cursor-pointer bg-black interactive">
+                        <label class="text-[8px] text-gray-400 block mb-1">BARWA:</label>
+                        <input type="color" id="playerColor" value="#05d5fa" class="w-full h-[38px] border-4 border-white cursor-pointer bg-black interactive">
                     </div>
                 </div>
 
-                <div class="bg-black/50 border-2 border-gray-700 p-3 mb-5 text-[9px] text-gray-300 leading-relaxed text-left">
-                    <span class="text-yellow-400">STEROWANIE:</span><br>
-                    • [W,A,S,D] - Ruch postaci<br>
-                    • [MYSZKA + LPM] - Celowanie i Strzał<br>
-                    • [SPACJA] - Szybki unik (Dash)
+                <!-- Wybór Skórki Pixel-Art -->
+                <div class="text-[8px] text-gray-400 text-left mb-1">WYBIERZ KLASĘ POSTACI (PIXEL SKIN):</div>
+                <div class="grid grid-cols-4 gap-2 mb-5 interactive">
+                    <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ</div>
+                    <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA</div>
+                    <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ</div>
+                    <div class="skin-card" onclick="selectSkin('astro')" id="sk-astro">👨‍🚀 KOSMOS</div>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button class="btn w-full interactive !bg-[#00c853] hover:!bg-[#2ee578]" id="btnCreateRoom">STWÓRZ IMPREZĘ (HOST)</button>
+                    <button class="btn w-full interactive !bg-[#00c853] hover:!bg-[#2ee578]" id="btnCreateRoom">STWÓRZ POKÓJ (HOST)</button>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
                         <button class="btn !bg-[#05d5fa] !text-black hover:!bg-[#5ce3fc] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ</button>
                     </div>
                 </div>
-                <div id="menuError" class="bg-black/90 border-2 border-red-500 p-2 text-[9px] text-yellow-400 mt-4 hidden"></div>
+                <div id="menuError" class="bg-black/90 border-2 border-red-500 p-2 text-[8px] text-yellow-400 mt-3 hidden"></div>
             </div>
         </div>
 
-        <!-- EKRAN LOBBY -->
+        <!-- LOBBY -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
-                <div class="flex justify-between items-center border-b-4 border-white pb-3 mb-4">
+                <div class="flex justify-between items-center border-b-4 border-white pb-2 mb-3">
                     <div class="text-left">
-                        <h2 class="text-xl text-[#05d5fa]">LOBBY EKIPY</h2>
-                        <span class="text-[8px] text-gray-400">Wszyscy zostają w pokoju po meczu!</span>
+                        <h2 class="text-lg text-[#05d5fa]">LOBBY DRUŻYNY</h2>
+                        <span class="text-[7px] text-gray-400">Wybierz jeden z 6 trybów Pixel-Art!</span>
                     </div>
                     <div class="text-right">
-                        <span class="text-[8px] text-gray-400 block">KOD POKOJU:</span>
+                        <span class="text-[7px] text-gray-400 block">KOD POKOJU:</span>
                         <span id="lobbyCode" class="text-2xl text-[#ff2a6d] font-bold tracking-widest">-----</span>
                     </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row gap-5">
-                    <!-- Lista graczy + Link -->
-                    <div class="w-full md:w-5/12 flex flex-col">
-                        <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 !text-[9px] w-full mb-2 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK ZAPROSZENIA</button>
-                        <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK DO SCHOWKA!</div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- Gracze -->
+                    <div class="w-full md:w-4/12 flex flex-col">
+                        <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 !text-[8px] w-full mb-2 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK ZAPROSZENIA</button>
+                        <div id="copyAlert" class="text-[7px] text-green-400 mb-2 hidden">SKOPIOWANO LINK!</div>
                         
-                        <div class="text-[9px] text-gray-400 text-left mb-1">GRACZE W LOBBY (<span id="lobbyCount">1</span>):</div>
-                        <ul id="lobbyPlayerList" class="bg-black/60 border-2 border-gray-600 h-44 overflow-y-auto p-2 text-[10px] text-left space-y-2 flex-grow"></ul>
+                        <div class="text-[8px] text-gray-400 text-left mb-1">GRACZE W POKOJU (<span id="lobbyCount">1</span>):</div>
+                        <ul id="lobbyPlayerList" class="bg-black/60 border-2 border-gray-600 h-48 overflow-y-auto p-2 text-[9px] text-left space-y-2 flex-grow"></ul>
                     </div>
 
-                    <!-- Wybór trybu i mapy -->
-                    <div class="w-full md:w-7/12 flex flex-col justify-between">
+                    <!-- 6 Trybów i 3 Mapy -->
+                    <div class="w-full md:w-8/12 flex flex-col justify-between">
                         <div>
-                            <div class="text-[9px] text-gray-400 text-left mb-2">WYBIERZ TRYB GRY (HOST):</div>
-                            <div class="grid grid-cols-2 gap-2 mb-3 interactive" id="modeGrid">
+                            <div class="text-[8px] text-gray-400 text-left mb-1">TRYB ROZGRYWKI (WYBIERA HOST):</div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3 interactive">
                                 <div class="mode-card selected" onclick="Lobby.selectMode('arena')" id="m-arena">
-                                    <div class="text-[10px] text-[#ff2a6d] mb-1">🔫 KRWAWA ARENA</div>
-                                    <div class="text-[7px] text-gray-400">Strzelanka każdy na każdego. Zbieraj bronie!</div>
+                                    <div class="text-[9px] text-[#ff2a6d] mb-1">🔫 ARENA PvP</div>
+                                    <div class="text-[7px] text-gray-400">Każdy na każdego. Zbieraj bronie!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('zombies')" id="m-zombies">
-                                    <div class="text-[10px] text-[#00e676] mb-1">🧟 HORDA ZOMBIE</div>
-                                    <div class="text-[7px] text-gray-400">Współpraca (Co-op). Przetrwajcie 90 sekund!</div>
+                                    <div class="text-[9px] text-[#00e676] mb-1">🧟 ZOMBIE CO-OP</div>
+                                    <div class="text-[7px] text-gray-400">Wspólna obrona przed hordą!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
-                                    <div class="text-[10px] text-[#ff9100] mb-1">💣 GORĄCA BOMBA</div>
-                                    <div class="text-[7px] text-gray-400">Dotknij kolegę, by oddać mu tykającą bombę!</div>
+                                    <div class="text-[9px] text-[#ff9100] mb-1">💣 GORĄCA BOMBA</div>
+                                    <div class="text-[7px] text-gray-400">Oddaj tykającą bombę koledze!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('koth')" id="m-koth">
-                                    <div class="text-[10px] text-[#ffde00] mb-1">👑 KRÓL WZGÓRZA</div>
-                                    <div class="text-[7px] text-gray-400">Przejmij złotą strefę i spychaj innych strzałami!</div>
+                                    <div class="text-[9px] text-[#ffde00] mb-1">👑 KRÓL WZGÓRZA</div>
+                                    <div class="text-[7px] text-gray-400">Zajmij strefę i spychaj innych!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('sniper')" id="m-sniper">
+                                    <div class="text-[9px] text-[#05d5fa] mb-1">🎯 SNAJPERZY</div>
+                                    <div class="text-[7px] text-gray-400">Tylko snajperki! 1 strzał = Zgon!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('coins')" id="m-coins">
+                                    <div class="text-[9px] text-[#e040fb] mb-1">💎 ZŁOTA GORĄCZKA</div>
+                                    <div class="text-[7px] text-gray-400">Zbieraj klejnoty i kradnij innym!</div>
                                 </div>
                             </div>
 
-                            <div class="text-[9px] text-gray-400 text-left mb-1">MAPA ARENY:</div>
+                            <div class="text-[8px] text-gray-400 text-left mb-1">BIOM ARENY PIXEL-ART:</div>
                             <select id="mapSelect" class="input-pixel interactive mb-3" onchange="Lobby.changeMap(this.value)">
-                                <option value="forest">🌲 Leśny Bunkier (Skrzynie i Drzewa)</option>
-                                <option value="ice">❄️ Arktyczna Baza (Śliski Lód)</option>
-                                <option value="lava">🌋 Wulkaniczna Kuźnia (Groźna Lawa)</option>
+                                <option value="forest">🌲 Leśna Polana (Sosny, Kępki Trawy i Skrzynie)</option>
+                                <option value="ice">❄️ Lodowa Twierdza (Śliski Lód i Kryształy)</option>
+                                <option value="lava">🌋 Wulkaniczny Krater (Ciemny Bazalt i Lawa)</option>
                             </select>
                         </div>
 
                         <div>
                             <button id="btnStartMatch" class="btn w-full !bg-[#00c853] hover:!bg-[#2ee578] interactive hidden">START MECZU!</button>
-                            <div id="clientWaitMsg" class="text-[9px] text-yellow-400 py-3 animate-pulse hidden">Host wybiera ustawienia meczu...</div>
+                            <div id="clientWaitMsg" class="text-[9px] text-yellow-400 py-2 animate-pulse hidden">Czekaj aż Host uruchomi rundę...</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- EKRAN PODSUMOWANIA (PODIUM) -->
+        <!-- PODIUM -->
         <div id="screen-podium" class="screen">
             <div class="panel !max-w-xl">
                 <h2 class="text-2xl text-yellow-400 mb-1">🏆 KONIEC RUNDY 🏆</h2>
-                <div id="winnerSub" class="text-xs text-[#05d5fa] mb-5">ZWYCIĘZCA: ---</div>
+                <div id="winnerSub" class="text-xs text-[#05d5fa] mb-4">ZWYCIĘZCA: ---</div>
 
-                <div class="bg-black/70 border-2 border-gray-600 p-3 mb-5 max-h-56 overflow-y-auto">
-                    <table class="w-full text-left text-[10px]">
+                <div class="bg-black/70 border-2 border-gray-600 p-3 mb-4 max-h-52 overflow-y-auto">
+                    <table class="w-full text-left text-[9px]">
                         <thead>
                             <tr class="border-b border-gray-600 text-gray-400">
-                                <th class="pb-2">#</th>
+                                <th class="pb-2">Poz.</th>
                                 <th class="pb-2">Gracz</th>
-                                <th class="pb-2 text-right">Wynik</th>
+                                <th class="pb-2 text-right">Punkty</th>
                             </tr>
                         </thead>
                         <tbody id="podiumRows"></tbody>
                     </table>
                 </div>
 
-                <div class="flex gap-3">
-                    <button id="btnBackToLobby" class="btn w-full !bg-[#05d5fa] !text-black interactive hidden">WRÓĆ DO LOBBY (ZMIEŃ TRYB)</button>
-                    <button id="btnQuickRematch" class="btn w-full !bg-[#00c853] interactive hidden">SZYBKI REWANŻ</button>
-                    <div id="podiumWait" class="text-[9px] text-yellow-400 w-full py-2 animate-pulse hidden">Czekaj na decyzję Hosta...</div>
+                <div class="flex gap-2">
+                    <button id="btnBackToLobby" class="btn w-1/2 !bg-[#05d5fa] !text-black interactive hidden">ZMIEŃ TRYB (LOBBY)</button>
+                    <button id="btnQuickRematch" class="btn w-1/2 !bg-[#00c853] interactive hidden">SZYBKI REWANŻ</button>
+                    <div id="podiumWait" class="text-[9px] text-yellow-400 w-full py-2 animate-pulse hidden">Host wybiera co dalej...</div>
                 </div>
             </div>
         </div>
@@ -198,7 +212,14 @@
     </div>
 
     <script>
-        // === POMOCNICZE UI ===
+        // === WYBÓR SKÓRKI I EKRANY ===
+        let chosenSkin = 'cap';
+        function selectSkin(sk) {
+            chosenSkin = sk;
+            document.querySelectorAll('.skin-card').forEach(el => el.classList.remove('selected'));
+            document.getElementById('sk-' + sk)?.classList.add('selected');
+        }
+
         function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const ui = document.getElementById('uiContainer');
@@ -213,7 +234,7 @@
         function showErr(msg, isWarn = false) {
             const el = document.getElementById('menuError');
             el.innerText = msg; el.classList.remove('hidden');
-            el.className = `bg-black/90 border-2 p-2 text-[9px] mt-4 ${isWarn ? 'border-yellow-400 text-yellow-300' : 'border-red-500 text-red-400'}`;
+            el.className = `bg-black/90 border-2 p-2 text-[8px] mt-3 ${isWarn ? 'border-yellow-400 text-yellow-300' : 'border-red-500 text-red-400'}`;
         }
 
         function announce(txt, dur = 1600) {
@@ -222,7 +243,7 @@
             if(dur > 0) setTimeout(() => el.style.display = 'none', dur);
         }
 
-        // === SYNTEZATOR DŹWIĘKÓW RETRO (Web Audio API) ===
+        // === SYNTEZATOR DŹWIĘKÓW 8-BIT ===
         const Sound = {
             ctx: null,
             init() {
@@ -234,17 +255,17 @@
                 const o = this.ctx.createOscillator(), g = this.ctx.createGain();
                 o.connect(g); g.connect(this.ctx.destination);
                 const t = this.ctx.currentTime;
-                if(type === 'shoot') { o.type='square'; o.frequency.setValueAtTime(420, t); o.frequency.exponentialRampToValueAtTime(55, t+0.09); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.09); o.start(t); o.stop(t+0.09); }
-                else if(type === 'shotgun') { o.type='sawtooth'; o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(30, t+0.18); g.gain.setValueAtTime(0.09, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.18); o.start(t); o.stop(t+0.18); }
-                else if(type === 'sniper') { o.type='square'; o.frequency.setValueAtTime(780, t); o.frequency.exponentialRampToValueAtTime(40, t+0.25); g.gain.setValueAtTime(0.11, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.25); o.start(t); o.stop(t+0.25); }
-                else if(type === 'hit') { o.type='triangle'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(35, t+0.08); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.08); o.start(t); o.stop(t+0.08); }
-                else if(type === 'dash') { o.type='sine'; o.frequency.setValueAtTime(250, t); o.frequency.linearRampToValueAtTime(550, t+0.12); g.gain.setValueAtTime(0.06, t); g.gain.linearRampToValueAtTime(0.01, t+0.12); o.start(t); o.stop(t+0.12); }
-                else if(type === 'pickup') { o.type='sine'; o.frequency.setValueAtTime(400, t); o.frequency.setValueAtTime(650, t+0.07); g.gain.setValueAtTime(0.07, t); g.gain.linearRampToValueAtTime(0.01, t+0.16); o.start(t); o.stop(t+0.16); }
-                else if(type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(18, t+0.45); g.gain.setValueAtTime(0.16, t); g.gain.linearRampToValueAtTime(0.01, t+0.45); o.start(t); o.stop(t+0.45); }
+                if(type === 'shoot') { o.type='square'; o.frequency.setValueAtTime(440, t); o.frequency.exponentialRampToValueAtTime(60, t+0.08); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.08); o.start(t); o.stop(t+0.08); }
+                else if(type === 'shotgun') { o.type='sawtooth'; o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(28, t+0.18); g.gain.setValueAtTime(0.09, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.18); o.start(t); o.stop(t+0.18); }
+                else if(type === 'sniper') { o.type='square'; o.frequency.setValueAtTime(820, t); o.frequency.exponentialRampToValueAtTime(35, t+0.26); g.gain.setValueAtTime(0.11, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.26); o.start(t); o.stop(t+0.26); }
+                else if(type === 'hit') { o.type='triangle'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(35, t+0.08); g.gain.setValueAtTime(0.07, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.08); o.start(t); o.stop(t+0.08); }
+                else if(type === 'dash') { o.type='sine'; o.frequency.setValueAtTime(280, t); o.frequency.linearRampToValueAtTime(620, t+0.11); g.gain.setValueAtTime(0.06, t); g.gain.linearRampToValueAtTime(0.01, t+0.11); o.start(t); o.stop(t+0.11); }
+                else if(type === 'coin') { o.type='square'; o.frequency.setValueAtTime(587, t); o.frequency.setValueAtTime(880, t+0.06); g.gain.setValueAtTime(0.06, t); g.gain.linearRampToValueAtTime(0.01, t+0.16); o.start(t); o.stop(t+0.16); }
+                else if(type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(16, t+0.45); g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0.01, t+0.45); o.start(t); o.stop(t+0.45); }
             }
         };
 
-        // === FIREBASE KONFIGURACJA ===
+        // === FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -259,53 +280,53 @@
 
         let myId = null, currentRoom = null, isHost = false;
         let netPlayers = {}, netZombies = {}, netItems = {};
-        const RoomState = { status: 'lobby', mode: 'arena', map: 'forest', timer: 90, bombHolder: null, bombTimer: 12, koth: {x:800, y:800, r:110} };
+        const RoomState = { status: 'lobby', mode: 'arena', map: 'forest', timer: 90, bombHolder: null, bombTimer: 10, koth: {x:800, y:800, r:110} };
 
-        // === MAPY I PRZESZKODY (Proceduralny Pixel-Art) ===
+        // === MAPY I DETALE PIXEL-ART ===
         const WORLD_SIZE = 1600;
+        const propDecorations = [];
+        for(let i=0; i<90; i++) {
+            propDecorations.push({ x: Math.floor(Math.random()*38)*40 + 20, y: Math.floor(Math.random()*38)*40 + 20, v: i%3 });
+        }
+
         const MAPS = {
             forest: {
-                bg: '#1b3019', grid: '#223b20', wallColor: '#6e4720', borderColor: '#4a2e12',
-                friction: 0.86,
+                bg: '#1e381b', tileAlt: '#193017', friction: 0.85,
                 obstacles: [
-                    {x:350, y:350, w:120, h:120, t:'crate'}, {x:1130, y:350, w:120, h:120, t:'crate'},
-                    {x:350, y:1130, w:120, h:120, t:'crate'}, {x:1130, y:1130, w:120, h:120, t:'crate'},
-                    {x:740, y:450, w:120, h:60, t:'crate'}, {x:740, y:1090, w:120, h:60, t:'crate'},
-                    {x:450, y:740, w:60, h:120, t:'crate'}, {x:1090, y:740, w:60, h:120, t:'crate'}
+                    {x:320, y:320, w:120, h:120, t:'crate'}, {x:1160, y:320, w:120, h:120, t:'crate'},
+                    {x:320, y:1160, w:120, h:120, t:'crate'}, {x:1160, y:1160, w:120, h:120, t:'crate'},
+                    {x:740, y:440, w:120, h:80, t:'tree'}, {x:740, y:1080, w:120, h:80, t:'tree'},
+                    {x:440, y:740, w:80, h:120, t:'tree'}, {x:1080, y:740, w:80, h:120, t:'tree'}
                 ]
             },
             ice: {
-                bg: '#bfe3f7', grid: '#a8d5f0', wallColor: '#4fa4b8', borderColor: '#2c6d7d',
-                friction: 0.965, // Śliski lód!
+                bg: '#b8e0f5', tileAlt: '#a5d4ed', friction: 0.965,
                 obstacles: [
-                    {x:400, y:400, w:160, h:70, t:'ice'}, {x:1040, y:400, w:160, h:70, t:'ice'},
-                    {x:400, y:1130, w:160, h:70, t:'ice'}, {x:1040, y:1130, w:160, h:70, t:'ice'},
-                    {x:750, y:750, w:100, h:100, t:'ice'}
+                    {x:380, y:380, w:160, h:80, t:'ice'}, {x:1060, y:380, w:160, h:80, t:'ice'},
+                    {x:380, y:1140, w:160, h:80, t:'ice'}, {x:1060, y:1140, w:160, h:80, t:'ice'},
+                    {x:740, y:740, w:120, h:120, t:'ice'}
                 ]
             },
             lava: {
-                bg: '#1c1619', grid: '#292024', wallColor: '#3b2f35', borderColor: '#ff4d00',
-                friction: 0.86,
+                bg: '#1c1518', tileAlt: '#241b1f', friction: 0.85,
                 obstacles: [
                     {x:300, y:300, w:140, h:140, t:'lava'}, {x:1160, y:300, w:140, h:140, t:'lava'},
                     {x:300, y:1160, w:140, h:140, t:'lava'}, {x:1160, y:1160, w:140, h:140, t:'lava'},
-                    {x:680, y:320, w:240, h:60, t:'rock'}, {x:680, y:1220, w:240, h:60, t:'rock'}
+                    {x:680, y:340, w:240, h:70, t:'rock'}, {x:680, y:1190, w:240, h:70, t:'rock'}
                 ]
             }
         };
 
-        // === BRONIE ===
         const WEAPONS = {
-            pistol:  { name: 'Pistolet',  rate: 0.24, dmg: 22, proj: 1, spread: 0.04, spd: 1300, knock: 140, snd: 'shoot' },
-            shotgun: { name: 'Strzelba',  rate: 0.72, dmg: 18, proj: 6, spread: 0.30, spd: 1150, knock: 320, snd: 'shotgun' },
-            minigun: { name: 'Minigun',   rate: 0.08, dmg: 12, proj: 1, spread: 0.15, spd: 1350, knock: 95,  snd: 'shoot' },
-            sniper:  { name: 'Snajperka', rate: 1.05, dmg: 75, proj: 1, spread: 0.01, spd: 1900, knock: 480, snd: 'sniper' }
+            pistol:  { name: 'Pistolet',  rate: 0.24, dmg: 22, proj: 1, spread: 0.04, spd: 1300, knock: 150, snd: 'shoot' },
+            shotgun: { name: 'Strzelba',  rate: 0.70, dmg: 18, proj: 6, spread: 0.28, spd: 1150, knock: 340, snd: 'shotgun' },
+            minigun: { name: 'Minigun',   rate: 0.08, dmg: 12, proj: 1, spread: 0.14, spd: 1350, knock: 95,  snd: 'shoot' },
+            sniper:  { name: 'Snajperka', rate: 0.95, dmg: 85, proj: 1, spread: 0.00, spd: 2000, knock: 500, snd: 'sniper' }
         };
 
-        // === WEJŚCIE I KAMERA ===
         const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
         let W = window.innerWidth, H = window.innerHeight;
-        window.onresize = () => { W = window.innerWidth; H = window.innerHeight; canvas.width = W; canvas.height = H; };
+        window.onresize = () => { W = window.innerWidth; H = window.innerHeight; canvas.width = W; canvas.height = H; ctx.imageSmoothingEnabled = false; };
         window.onresize();
 
         const Input = {
@@ -337,29 +358,28 @@
                 ctx.save();
                 let ox = this.shkT > 0 ? (Math.random()-0.5)*this.shkI : 0;
                 let oy = this.shkT > 0 ? (Math.random()-0.5)*this.shkI : 0;
-                ctx.translate(Math.round(-this.x + ox), Math.round(-this.y + oy));
+                ctx.translate(Math.floor(-this.x + ox), Math.floor(-this.y + oy));
             },
             restore() { ctx.restore(); }
         };
 
-        // === EFEKTY CZĄSTECZKOWE ===
         const FX = {
             parts: [], texts: [], decals: [],
-            burst(x, y, color, count=8, spd=180, size=5) {
+            burst(x, y, color, count=8, spd=180, size=6) {
                 for(let i=0; i<count; i++) {
                     let a = Math.random()*Math.PI*2, v = Math.random()*spd + 30;
                     this.parts.push({ x, y, vx: Math.cos(a)*v, vy: Math.sin(a)*v, l: 0.35, m: 0.35, s: size, c: color });
                 }
             },
             text(x, y, txt, c='#fff', s=11) {
-                this.texts.push({ x: x+(Math.random()*16-8), y: y-18, txt, c, s, l: 0.75, m: 0.75 });
+                this.texts.push({ x: x+(Math.random()*16-8), y: y-20, txt, c, s, l: 0.75, m: 0.75 });
             },
             update(dt) {
                 for(let i=this.parts.length-1; i>=0; i--) {
                     let p = this.parts[i]; p.x += p.vx*dt; p.y += p.vy*dt; p.vx *= 0.9; p.vy *= 0.9; p.l -= dt;
                     if(p.l <= 0) {
                         if(p.c === '#d91643' || p.c === '#28b835') {
-                            this.decals.push({x: p.x, y: p.y, s: p.s+2, c: p.c === '#d91643' ? '#63081e' : '#134d18'});
+                            this.decals.push({x: Math.floor(p.x/4)*4, y: Math.floor(p.y/4)*4, s: p.s+2, c: p.c === '#d91643' ? '#63081e' : '#134d18'});
                             if(this.decals.length > 250) this.decals.shift();
                         }
                         this.parts.splice(i,1);
@@ -372,109 +392,222 @@
             },
             drawDecals() { this.decals.forEach(d => { ctx.fillStyle = d.c; ctx.fillRect(d.x, d.y, d.s, d.s); }); },
             drawTop() {
-                this.parts.forEach(p => { ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, p.l/p.m); ctx.fillRect(p.x-p.s/2, p.y-p.s/2, p.s, p.s); });
+                this.parts.forEach(p => { ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, p.l/p.m); ctx.fillRect(Math.floor(p.x-p.s/2), Math.floor(p.y-p.s/2), p.s, p.s); });
                 ctx.globalAlpha = 1; ctx.textAlign = 'center';
-                this.texts.forEach(t => { ctx.fillStyle = t.c; ctx.globalAlpha = Math.max(0, t.l/t.m); ctx.font = `${t.s}px "Press Start 2P"`; ctx.fillText(t.txt, t.x, t.y); });
+                this.texts.forEach(t => { ctx.fillStyle = t.c; ctx.globalAlpha = Math.max(0, t.l/t.m); ctx.font = `${t.s}px "Press Start 2P"`; ctx.fillText(t.txt, Math.floor(t.x), Math.floor(t.y)); });
                 ctx.globalAlpha = 1;
             }
         };
 
-        // === RYSOWANIE PIXEL-ARTOWEJ POSTACI ===
-        function drawPixelCharacter(ctx, x, y, angle, color, name, hp, maxHp, wep, animStep, isBomb, isDead) {
+        // === RYSOWANIE PRZESZKÓD W STYLU PIXEL-ART ===
+        function drawPixelObstacle(ctx, o) {
+            const P = 4; // Rozmiar pojedynczego piksela
+            if(o.t === 'lava') {
+                ctx.fillStyle = '#b31b00'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.fillStyle = '#ff4d00'; ctx.fillRect(o.x+P*2, o.y+P*2, o.w-P*4, o.h-P*4);
+                ctx.fillStyle = '#ffde00';
+                let pulse = Math.floor(Math.sin(performance.now()*0.005)*P*2);
+                ctx.fillRect(o.x+P*5+pulse, o.y+P*5, P*6, P*6);
+                ctx.fillRect(o.x+o.w-P*12-pulse, o.y+o.h-P*10, P*5, P*5);
+                return;
+            }
+            // Cień blokowy
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(o.x+P*2, o.y+P*2, o.w, o.h);
+
+            if(o.t === 'crate') {
+                ctx.fillStyle = '#261405'; ctx.fillRect(o.x, o.y, o.w, o.h); // czarny kontur
+                ctx.fillStyle = '#8c5828'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2); // drewno
+                ctx.fillStyle = '#6e4219';
+                // Deski poziome i ramka
+                for(let py = o.y+P*4; py < o.y+o.h-P*2; py += P*5) ctx.fillRect(o.x+P*2, py, o.w-P*4, P);
+                ctx.fillStyle = '#ab713b';
+                ctx.fillRect(o.x+P*2, o.y+P*2, o.w-P*4, P*2);
+                ctx.fillRect(o.x+P*2, o.y+o.h-P*4, o.w-P*4, P*2);
+                // Gwoździe
+                ctx.fillStyle = '#222';
+                ctx.fillRect(o.x+P*3, o.y+P*2, P, P); ctx.fillRect(o.x+o.w-P*4, o.y+P*2, P, P);
+                ctx.fillRect(o.x+P*3, o.y+o.h-P*3, P, P); ctx.fillRect(o.x+o.w-P*4, o.y+o.h-P*3, P, P);
+            } else if(o.t === 'tree') {
+                ctx.fillStyle = '#0d1f0c'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.fillStyle = '#1f4e1c'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#2d6e28'; ctx.fillRect(o.x+P*3, o.y+P*3, o.w-P*6, o.h-P*6);
+                ctx.fillStyle = '#479440'; ctx.fillRect(o.x+P*5, o.y+P*4, o.w-P*12, o.h-P*12);
+            } else if(o.t === 'ice') {
+                ctx.fillStyle = '#1d4f66'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.fillStyle = '#5bc0eb'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#a3e2ff'; ctx.fillRect(o.x+P*2, o.y+P*2, o.w-P*6, P*3);
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(o.x+P*3, o.y+P*3, P*4, P);
+            } else {
+                ctx.fillStyle = '#141013'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.fillStyle = '#3d3338'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#54474e'; ctx.fillRect(o.x+P*2, o.y+P*2, o.w-P*5, P*3);
+            }
+        }
+
+        // === RYSOWANIE BOGATYCH POSTACI PIXEL-ART ===
+        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, wep, anim, isBomb, isDead, muzzle) {
+            const P = 3; // Skala piksela postaci (3x3 px)
             ctx.save();
-            ctx.translate(Math.round(x), Math.round(y));
+            ctx.translate(Math.floor(x), Math.floor(y));
 
             if(isDead) {
-                ctx.fillStyle = 'rgba(180, 0, 30, 0.7)';
-                ctx.fillRect(-16, -10, 32, 20);
-                ctx.fillStyle = '#fff'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-                ctx.fillText("💀", 0, 4);
+                // Pixelowa czaszka nagrobna
+                ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
+                ctx.fillStyle = '#ddd'; ctx.fillRect(-3*P, -3*P, 6*P, 5*P);
+                ctx.fillStyle = '#000'; ctx.fillRect(-2*P, -1*P, P, P); ctx.fillRect(P, -1*P, P, P);
                 ctx.restore();
                 return;
             }
 
-            // Cień pod postacią
+            // Cień z pikseli
             ctx.fillStyle = 'rgba(0,0,0,0.45)';
-            ctx.fillRect(-14, -12, 28, 28);
+            ctx.fillRect(-5*P, -4*P, 10*P, 9*P);
 
-            // Bombowiec pulsuje
             if(isBomb) {
                 ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.arc(0, 0, 26 + Math.sin(performance.now()*0.02)*5, 0, Math.PI*2); ctx.stroke();
+                ctx.strokeRect(-7*P, -7*P, 14*P, 14*P);
             }
 
             ctx.rotate(angle);
 
-            // Animacja nóg podczas chodzenia
-            let legOff = Math.sin(animStep) * 6;
-            ctx.fillStyle = '#1f1f2e';
-            ctx.fillRect(-8 + legOff, -12, 8, 8);
-            ctx.fillRect(-8 - legOff, 4, 8, 8);
+            // Animowane buty pixel-art
+            let step = Math.round(Math.sin(anim) * 2) * P;
+            ctx.fillStyle = '#111';
+            ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
+            ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
 
-            // Tułów (Kurtka Pixel Art z obrysem)
-            ctx.fillStyle = '#000'; ctx.fillRect(-13, -15, 26, 30);
-            ctx.fillStyle = color; ctx.fillRect(-11, -13, 22, 26);
+            // Korpus / Plecak / Zbroja (Czarna obwódka + kolor)
+            ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
+            ctx.fillStyle = skin === 'knight' ? '#8c969e' : (skin === 'ninja' ? '#1c1c28' : color);
+            ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
 
-            // Dłonie i Broń
-            ctx.fillStyle = '#ffcca3';
-            ctx.fillRect(6, -12, 7, 6);
-            ctx.fillRect(10, 5, 7, 6);
+            // Dłonie
+            ctx.fillStyle = '#000';
+            ctx.fillRect(2*P, -5*P, 3*P, 3*P);
+            ctx.fillRect(3*P, 2*P, 3*P, 3*P);
+            ctx.fillStyle = skin === 'astro' ? '#fff' : (skin === 'knight' ? '#aab4bd' : '#ffcca3');
+            ctx.fillRect(2*P, -4*P, 2*P, 2*P);
+            ctx.fillRect(3*P, 3*P, 2*P, 2*P);
 
-            // Model broni
-            ctx.fillStyle = wep === 'sniper' ? '#3d5a45' : (wep === 'shotgun' ? '#6e4720' : '#2b2b36');
-            let gunLen = wep === 'sniper' ? 30 : (wep === 'minigun' ? 24 : 18);
-            ctx.fillRect(8, 3, gunLen, 7);
-            ctx.fillStyle = '#000'; ctx.strokeRect(8, 3, gunLen, 7);
+            // Pixel-Artowa Broń
+            let gunLen = wep === 'sniper' ? 9 : (wep === 'minigun' ? 7 : 5);
+            ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
+            ctx.fillStyle = wep === 'sniper' ? '#3b5e3c' : (wep === 'shotgun' ? '#7a4b24' : '#4a4a5a');
+            ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
+            if(wep === 'sniper') { ctx.fillStyle = '#05d5fa'; ctx.fillRect(5*P, P, 2*P, P); } // Luneta
 
-            // Głowa i Czapka z daszkiem
-            ctx.fillStyle = '#ffcca3'; ctx.fillRect(-8, -9, 16, 18);
-            ctx.fillStyle = '#111'; ctx.fillRect(2, -8, 12, 16); // Daszek
-            ctx.fillStyle = color; ctx.fillRect(-9, -10, 15, 20); // Czapka
-            ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.strokeRect(-9, -10, 15, 20);
+            // Błysk wystrzału (Muzzle Flash)
+            if(muzzle > 0) {
+                ctx.fillStyle = '#ffde00';
+                ctx.fillRect((3+gunLen)*P, 0, 3*P, 5*P);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect((3+gunLen)*P, P, 2*P, 3*P);
+            }
+
+            // Głowa zależna od wybranej Skórki (Pixel Skin)
+            ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
+
+            if(skin === 'cap') {
+                // Klasyczny Paweł z daszkiem i okularami
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#111'; ctx.fillRect(P, -3*P, 4*P, 6*P); // Daszek czapki
+                ctx.fillStyle = color; ctx.fillRect(-3*P, -3*P, 4*P, 6*P); // Czapka
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(-2*P, -P, P, 2*P); // Pasek na czapce
+            } else if(skin === 'ninja') {
+                // Cyber-Ninja z czerwoną opaską
+                ctx.fillStyle = '#181824'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(0, -2*P, 2*P, 4*P); // Oczy
+                ctx.fillStyle = color; ctx.fillRect(-2*P, -3*P, 2*P, 6*P); // Opaska
+                // Powiewające końce opaski z tyłu
+                ctx.fillRect(-6*P, -2*P + step*0.4, 2*P, P);
+                ctx.fillRect(-6*P, P - step*0.4, 2*P, P);
+            } else if(skin === 'knight') {
+                // Rycerz w stalowym hełmie z pióropuszem
+                ctx.fillStyle = '#b0bac2'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#222'; ctx.fillRect(P, -2*P, P, 4*P); // Wizjer hełmu
+                ctx.fillStyle = color; ctx.fillRect(-5*P, -P, 3*P, 2*P); // Pióropusz
+            } else if(skin === 'astro') {
+                // Kosmonauta ze złotą szybą
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#ffaa00'; ctx.fillRect(0, -2*P, 2*P, 4*P); // Złoty wizjer
+                ctx.fillStyle = '#fff'; ctx.fillRect(P, -2*P, P, P); // Odblask na szybie
+            }
 
             ctx.restore();
 
-            // Pasek HP i Nick
+            // Pasek Zdrowia i Nick
             if(hp < maxHp) {
-                ctx.fillStyle = '#000'; ctx.fillRect(x - 18, y - 34, 36, 6);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(x - 17, y - 33, 34 * Math.max(0, hp/maxHp), 4);
+                ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(x - 18), Math.floor(y - 34), 36, 6);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 33), Math.floor(34 * Math.max(0, hp/maxHp)), 4);
             }
             ctx.fillStyle = isBomb ? '#ffde00' : '#fff';
             ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-            ctx.fillText(isBomb ? `💣 ${name}` : name, x, y - 39);
+            ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x), Math.floor(y - 38));
+        }
+
+        // === RYSOWANIE ZOMBIE PIXEL-ART ===
+        function drawPixelZombie(ctx, z) {
+            const P = z.t === 2 ? 4 : 3;
+            ctx.save();
+            ctx.translate(Math.floor(z.x), Math.floor(z.y));
+            ctx.rotate(z.a || 0);
+
+            ctx.fillStyle = 'rgba(0,0,0,0.45)';
+            ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
+
+            // Wyciągnięte łapy zombie
+            ctx.fillStyle = '#000';
+            ctx.fillRect(2*P, -4*P, 4*P, 2*P);
+            ctx.fillRect(2*P, 2*P, 4*P, 2*P);
+            ctx.fillStyle = z.t === 2 ? '#5f4b8b' : (z.t === 1 ? '#d94545' : '#359e3e');
+            ctx.fillRect(2*P, -3.5*P, 3*P, P);
+            ctx.fillRect(2*P, 2.5*P, 3*P, P);
+
+            // Głowa i bary
+            ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
+            ctx.fillStyle = z.t === 2 ? '#7862ad' : (z.t === 1 ? '#f05454' : '#43b84d');
+            ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+
+            // Świecące ślepia
+            ctx.fillStyle = '#ffde00';
+            ctx.fillRect(P, -2*P, P, P);
+            ctx.fillRect(P, P, P, P);
+            ctx.restore();
         }
 
         // === KLASA LOKALNEGO GRACZA ===
         class LocalPlayer {
-            constructor(name, color) {
-                this.name = name; this.color = color;
-                this.x = 200 + Math.random()*1200; this.y = 200 + Math.random()*1200;
+            constructor(name, color, skin) {
+                this.name = name; this.color = color; this.skin = skin;
+                this.x = 250 + Math.random()*1100; this.y = 250 + Math.random()*1100;
                 this.vx = 0; this.vy = 0;
-                this.angle = 0; this.anim = 0;
+                this.angle = 0; this.anim = 0; this.muzzle = 0;
                 this.hp = 100; this.maxHp = 100;
-                this.wep = 'pistol'; this.fireCd = 0;
-                this.dashCd = 0; this.dashTime = 0;
+                this.wep = RoomState.mode === 'sniper' ? 'sniper' : 'pistol';
+                this.fireCd = 0; this.dashCd = 0; this.dashTime = 0;
                 this.score = 0; this.isDead = false; this.respawnTimer = 0;
                 this.passImmunity = 0;
             }
             tryDash() {
                 if(this.dashCd <= 0 && !this.isDead) {
-                    this.dashCd = 2.0; this.dashTime = 0.16;
+                    this.dashCd = 1.8; this.dashTime = 0.16;
                     Sound.play('dash');
-                    FX.burst(this.x, this.y, '#05d5fa', 10, 120, 4);
+                    FX.burst(this.x, this.y, '#05d5fa', 10, 130, 5);
                 }
             }
             update(dt) {
                 if(this.passImmunity > 0) this.passImmunity -= dt;
+                if(this.muzzle > 0) this.muzzle -= dt;
 
                 if(this.isDead) {
                     if(RoomState.mode !== 'bomb') {
                         this.respawnTimer -= dt;
                         if(this.respawnTimer <= 0) {
                             this.isDead = false; this.hp = 100;
-                            this.x = 200 + Math.random()*1200; this.y = 200 + Math.random()*1200;
-                            this.wep = 'pistol';
-                            FX.burst(this.x, this.y, '#05d5fa', 12, 200, 5);
+                            this.x = 250 + Math.random()*1100; this.y = 250 + Math.random()*1100;
+                            this.wep = RoomState.mode === 'sniper' ? 'sniper' : 'pistol';
+                            FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
                         }
                     }
                     return;
@@ -484,58 +617,60 @@
                 if(Input.keys['KeyW'] || Input.keys['ArrowUp']) iy -= 1;
                 if(Input.keys['KeyS'] || Input.keys['ArrowDown']) iy += 1;
                 if(Input.keys['KeyA'] || Input.keys['ArrowLeft']) ix -= 1;
-                if(Input.keys['KeyD'] || Input.keys['ArrowRight']) ix += 1;
+                if(Input.keys['KeyD'] || Input.keys['ArrowRight']) ix -= 1;
                 if(ix !== 0 && iy !== 0) { let l = Math.hypot(ix, iy); ix /= l; iy /= l; }
 
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
-                let baseSpd = RoomState.bombHolder === myId ? 330 : 270;
-                if(this.dashTime > 0) { baseSpd = 780; this.dashTime -= dt; FX.burst(this.x, this.y, this.color, 1, 20, 4); }
+                let baseSpd = RoomState.bombHolder === myId ? 340 : 275;
+                if(this.dashTime > 0) { baseSpd = 780; this.dashTime -= dt; FX.burst(this.x, this.y, this.color, 1, 20, 5); }
 
-                // Fizyka z uwzględnieniem tarcia (Lód vs Trawa)
                 if(mapObj.friction > 0.9) {
                     this.vx += ix * baseSpd * 4 * dt;
                     this.vy += iy * baseSpd * 4 * dt;
                     this.vx *= mapObj.friction; this.vy *= mapObj.friction;
                 } else {
-                    this.vx = ix * baseSpd + (this.vx * 0.75);
-                    this.vy = iy * baseSpd + (this.vy * 0.75);
+                    this.vx = ix * baseSpd + (this.vx * 0.72);
+                    this.vy = iy * baseSpd + (this.vy * 0.72);
                 }
 
                 this.moveWithCollisions(this.vx * dt, this.vy * dt, mapObj.obstacles);
 
-                if(Math.hypot(ix, iy) > 0.1) this.anim += dt * 12;
+                if(Math.hypot(ix, iy) > 0.1) this.anim += dt * 13;
                 this.angle = Math.atan2(Input.wy - this.y, Input.wx - this.x);
 
                 if(this.fireCd > 0) this.fireCd -= dt;
                 if(this.dashCd > 0) this.dashCd -= dt;
 
-                // Strzelanie (We wszystkich trybach oprócz Bombowca)
+                if(RoomState.mode === 'sniper') this.wep = 'sniper';
+
+                // Strzelanie
                 if(Input.down && this.fireCd <= 0 && RoomState.mode !== 'bomb') {
                     let w = WEAPONS[this.wep];
-                    this.fireCd = w.rate;
-                    Sound.play(w.snd); Cam.shake(4, 0.08);
+                    this.fireCd = w.rate; this.muzzle = 0.06;
+                    Sound.play(w.snd); Cam.shake(5, 0.09);
                     this.vx -= Math.cos(this.angle) * (w.knock * 0.35);
                     this.vy -= Math.sin(this.angle) * (w.knock * 0.35);
 
+                    let dmgVal = RoomState.mode === 'sniper' ? 999 : w.dmg;
                     for(let i=0; i<w.proj; i++) {
                         let a = this.angle + (Math.random()-0.5)*w.spread;
-                        Game.spawnBullet(this.x, this.y, a, w.spd, w.dmg, w.knock, true);
+                        Game.spawnBullet(this.x, this.y, a, w.spd, dmgVal, w.knock, true);
                     }
                 }
 
-                // Przekazywanie Gorącej Bomby dotykiem
+                // Przekazywanie Gorącej Bomby
                 if(RoomState.mode === 'bomb' && RoomState.bombHolder === myId && this.passImmunity <= 0) {
                     Object.entries(netPlayers).forEach(([pid, p]) => {
                         if(!p.isDead && Math.hypot(this.x - p.x, this.y - p.y) < 42) {
                             this.passImmunity = 1.0;
                             db.ref(`rooms/${currentRoom}`).update({ bombHolder: pid });
                             FX.text(this.x, this.y, "ODDANA!", "#00e676", 12);
-                            Sound.play('pickup');
+                            Sound.play('coin');
                         }
                     });
                 }
 
-                // Król Wzgórza - naliczanie punktów w strefie
+                // Król Wzgórza
                 if(RoomState.mode === 'koth') {
                     let k = RoomState.koth;
                     if(Math.hypot(this.x - k.x, this.y - k.y) < k.r) {
@@ -547,14 +682,20 @@
                     }
                 }
 
-                // Podnoszenie skrzynek z ziemi
+                // Zbieranie przedmiotów i monet
                 Object.entries(netItems).forEach(([id, item]) => {
                     if(Math.hypot(this.x - item.x, this.y - item.y) < 32) {
-                        Sound.play('pickup');
-                        if(item.t === 'medkit') {
+                        if(item.t === 'coin' || item.t === 'gem') {
+                            let val = item.t === 'gem' ? 5 : 1;
+                            this.score += val;
+                            Sound.play('coin');
+                            FX.text(this.x, this.y, `+${val} 💎`, "#ffde00", 11);
+                        } else if(item.t === 'medkit') {
+                            Sound.play('coin');
                             this.hp = Math.min(this.maxHp, this.hp + 50);
                             FX.text(this.x, this.y, "+50 HP", "#00e676", 11);
-                        } else {
+                        } else if(RoomState.mode !== 'sniper') {
+                            Sound.play('coin');
                             this.wep = item.t;
                             FX.text(this.x, this.y, WEAPONS[this.wep].name.toUpperCase(), "#05d5fa", 11);
                             document.getElementById('hudWeapon').innerText = `BROŃ: ${WEAPONS[this.wep].name}`;
@@ -585,19 +726,27 @@
                 this.hp -= dmg;
                 this.vx += kx; this.vy += ky;
                 Sound.play('hit'); Cam.shake(6, 0.12);
-                FX.burst(this.x, this.y, '#d91643', 6, 150, 4);
+                FX.burst(this.x, this.y, '#d91643', 8, 160, 5);
                 if(this.hp <= 0) {
-                    this.hp = 0; this.isDead = true; this.respawnTimer = 3.0;
+                    this.hp = 0; this.isDead = true; this.respawnTimer = 2.5;
                     Sound.play('boom');
                     FX.text(this.x, this.y, "ZGON!", "#ff2a6d", 14);
-                    if(attackerId && attackerId !== myId) {
-                        db.ref(`events/${currentRoom}`).push({ type: 'kill', killer: attackerId });
+
+                    if(RoomState.mode === 'coins') {
+                        // W Gorączce Złota tracisz połowę monet na rzecz zabójcy!
+                        let lost = Math.floor(this.score / 2);
+                        this.score -= lost;
+                        if(attackerId && attackerId !== myId && lost > 0) {
+                            db.ref(`events/${currentRoom}`).push({ type: 'kill', killer: attackerId, pts: lost });
+                        }
+                    } else if(attackerId && attackerId !== myId) {
+                        db.ref(`events/${currentRoom}`).push({ type: 'kill', killer: attackerId, pts: 10 });
                     }
                 }
             }
         }
 
-        // === GŁÓWNA LOGIKA GRY ===
+        // === SILNIK ROZGRYWKI ===
         const Game = {
             me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
             hostZombies: [],
@@ -606,16 +755,21 @@
                 Input.init();
                 this.me = new LocalPlayer(
                     document.getElementById('playerName').value.trim() || "Paweł",
-                    document.getElementById('playerColor').value
+                    document.getElementById('playerColor').value,
+                    chosenSkin
                 );
                 this.bullets = []; this.hostZombies = []; FX.parts = []; FX.texts = []; FX.decals = [];
 
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'block';
                 document.getElementById('hudRight').style.display = 'block';
-                document.getElementById('hudWeapon').innerText = RoomState.mode === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : 'BROŃ: Pistolet';
+                document.getElementById('hudWeapon').innerText = RoomState.mode === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : (RoomState.mode === 'sniper' ? 'BROŃ: Snajperka (1 HIT)' : 'BROŃ: Pistolet');
 
-                const modeTitles = { arena: '🔫 KRWAWA ARENA', zombies: '🧟 HORDA ZOMBIE', bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA' };
+                const modeTitles = {
+                    arena: '🔫 ARENA PvP', zombies: '🧟 HORDA ZOMBIE',
+                    bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA',
+                    sniper: '🎯 TYLKO SNAJPERKI', coins: '💎 ZŁOTA GORĄCZKA'
+                };
                 document.getElementById('hudModeTitle').innerText = modeTitles[RoomState.mode] || 'ARENA';
                 announce(modeTitles[RoomState.mode], 1800);
 
@@ -625,7 +779,7 @@
                     db.ref(`room_players/${currentRoom}/${myId}`).update({
                         x: Math.round(this.me.x), y: Math.round(this.me.y), angle: Number(this.me.angle.toFixed(2)),
                         hp: Math.round(this.me.hp), score: this.me.score, isDead: this.me.isDead,
-                        wep: this.me.wep, anim: Number(this.me.anim.toFixed(1)), shooting: Input.down
+                        wep: this.me.wep, skin: this.me.skin, anim: Number(this.me.anim.toFixed(1)), shooting: Input.down
                     });
                 }, 50);
 
@@ -646,7 +800,6 @@
                 });
             },
 
-            // --- PĘTLA SERWEROWA HOSTA ---
             hostTick() {
                 if(RoomState.status !== 'playing') return;
                 RoomState.timer -= 0.1;
@@ -655,15 +808,26 @@
                 if(this.me && !this.me.isDead) allActive.push({ id: myId, x: this.me.x, y: this.me.y });
                 Object.entries(netPlayers).forEach(([id, p]) => { if(!p.isDead) allActive.push({ id, x: p.x, y: p.y }); });
 
-                // Spawning skrzynek z bronią i apteczek
-                if(Math.random() < 0.035 && Object.keys(netItems).length < 6 && RoomState.mode !== 'bomb') {
-                    let pool = ['medkit', 'shotgun', 'minigun', 'sniper'];
-                    let t = pool[Math.floor(Math.random()*pool.length)];
-                    let iid = 'i_' + Math.random().toString(36).substr(2, 5);
-                    db.ref(`room_items/${currentRoom}/${iid}`).set({
-                        x: 200 + Math.round(Math.random()*1200),
-                        y: 200 + Math.round(Math.random()*1200), t
-                    });
+                // Spawning przedmiotów lub monet
+                if(RoomState.mode === 'coins') {
+                    if(Math.random() < 0.15 && Object.keys(netItems).length < 18) {
+                        let iid = 'c_' + Math.random().toString(36).substr(2, 5);
+                        db.ref(`room_items/${currentRoom}/${iid}`).set({
+                            x: 160 + Math.round(Math.random()*1280),
+                            y: 160 + Math.round(Math.random()*1280),
+                            t: Math.random() < 0.25 ? 'gem' : 'coin'
+                        });
+                    }
+                } else if(RoomState.mode !== 'bomb' && RoomState.mode !== 'sniper') {
+                    if(Math.random() < 0.035 && Object.keys(netItems).length < 6) {
+                        let pool = ['medkit', 'shotgun', 'minigun', 'sniper'];
+                        let iid = 'i_' + Math.random().toString(36).substr(2, 5);
+                        db.ref(`room_items/${currentRoom}/${iid}`).set({
+                            x: 200 + Math.round(Math.random()*1200),
+                            y: 200 + Math.round(Math.random()*1200),
+                            t: pool[Math.floor(Math.random()*pool.length)]
+                        });
+                    }
                 }
 
                 // Logika Hordy Zombie
@@ -674,16 +838,17 @@
                         this.hostZombies.push({
                             id: 'z_'+Math.random().toString(36).substr(2,5),
                             x: 800 + Math.cos(edge)*750, y: 800 + Math.sin(edge)*750,
-                            hp: type === 2 ? 180 : (type === 1 ? 30 : 60), t: type
+                            hp: type === 2 ? 180 : (type === 1 ? 30 : 60), t: type, a: 0
                         });
                     }
                     this.hostZombies.forEach(z => {
                         let target = null, minD = 9999;
                         allActive.forEach(p => { let d = Math.hypot(p.x - z.x, p.y - z.y); if(d < minD) { minD = d; target = p; } });
                         if(target) {
-                            let a = Math.atan2(target.y - z.y, target.x - z.x);
+                            z.a = Number(Math.atan2(target.y - z.y, target.x - z.x).toFixed(2));
                             let spd = z.t === 1 ? 175 : (z.t === 2 ? 55 : 105);
-                            z.x += Math.cos(a) * spd * 0.1; z.y += Math.sin(a) * spd * 0.1;
+                            z.x = Math.round(z.x + Math.cos(z.a) * spd * 0.1);
+                            z.y = Math.round(z.y + Math.sin(z.a) * spd * 0.1);
                         }
                     });
                     db.ref(`rooms/${currentRoom}`).update({ zombies: JSON.stringify(this.hostZombies) });
@@ -714,7 +879,7 @@
                     }
                 }
 
-                // Logika Króla Wzgórza - przesuwanie strefy
+                // Logika Króla Wzgórza
                 if(RoomState.mode === 'koth') {
                     this.kothShift = (this.kothShift || 0) + 0.1;
                     if(this.kothShift >= 18) {
@@ -731,7 +896,6 @@
                 }
             },
 
-            // --- PĘTLA KLIENTA (60 FPS) ---
             update(dt) {
                 if(!this.me) return;
                 this.me.update(dt);
@@ -739,32 +903,31 @@
 
                 let obstacles = (MAPS[RoomState.map] || MAPS.forest).obstacles;
 
-                // Aktualizacja pocisków i kolizji
                 for(let i=this.bullets.length-1; i>=0; i--) {
                     let b = this.bullets[i];
                     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
 
-                    // Trafienie w przeszkodę
                     let hitWall = obstacles.some(o => o.t !== 'lava' && b.x > o.x && b.x < o.x+o.w && b.y > o.y && b.y < o.y+o.h);
                     if(hitWall || b.life <= 0) {
-                        if(hitWall) FX.burst(b.x, b.y, '#ffcc00', 4, 90, 3);
+                        if(hitWall) FX.burst(b.x, b.y, '#ffde00', 5, 90, 4);
                         this.bullets.splice(i,1); continue;
                     }
 
                     if(!b.isMine) continue;
 
-                    // Trafienie w innego gracza (PvP lub Knockback w KOTH)
-                    if(RoomState.mode === 'arena' || RoomState.mode === 'koth') {
+                    // Trafienie w gracza (We wszystkich trybach PvP)
+                    if(['arena', 'koth', 'sniper', 'coins'].includes(RoomState.mode)) {
                         for(let [pid, p] of Object.entries(netPlayers)) {
-                            if(!p.isDead && Math.hypot(b.x - p.x, b.y - p.y) < 20) {
+                            if(!p.isDead && Math.hypot(b.x - p.x, b.y - p.y) < 22) {
                                 let angle = Math.atan2(b.vy, b.vx);
+                                let appliedDmg = RoomState.mode === 'koth' ? 6 : b.dmg;
                                 db.ref(`events/${currentRoom}`).push({
                                     type: 'hitPlayer', target: pid, attacker: myId,
-                                    dmg: RoomState.mode === 'koth' ? 5 : b.dmg,
+                                    dmg: appliedDmg,
                                     kx: Math.cos(angle)*b.knock, ky: Math.sin(angle)*b.knock
                                 });
-                                FX.text(p.x, p.y, `-${RoomState.mode === 'koth' ? 5 : b.dmg}`, '#ffde00', 11);
-                                FX.burst(b.x, b.y, '#d91643', 6, 150, 4);
+                                FX.text(p.x, p.y, `-${appliedDmg}`, '#ffde00', 11);
+                                FX.burst(b.x, b.y, '#d91643', 6, 150, 5);
                                 Sound.play('hit');
                                 this.bullets.splice(i,1); break;
                             }
@@ -774,10 +937,10 @@
                     // Trafienie w Zombie
                     if(RoomState.mode === 'zombies') {
                         for(let [zid, z] of Object.entries(netZombies)) {
-                            if(Math.hypot(b.x - z.x, b.y - z.y) < 22) {
+                            if(Math.hypot(b.x - z.x, b.y - z.y) < 24) {
                                 db.ref(`events/${currentRoom}`).push({ type: 'hitZombie', zid, dmg: b.dmg, attacker: myId });
                                 FX.text(z.x, z.y, `-${b.dmg}`, '#00e676', 10);
-                                FX.burst(b.x, b.y, '#28b835', 6, 150, 4);
+                                FX.burst(b.x, b.y, '#28b835', 6, 150, 5);
                                 Sound.play('hit');
                                 this.bullets.splice(i,1); break;
                             }
@@ -785,7 +948,7 @@
                     }
                 }
 
-                // Obrażenia od Zombie dla mojego gracza
+                // Obrażenia od Zombie
                 if(RoomState.mode === 'zombies' && !this.me.isDead) {
                     Object.values(netZombies).forEach(z => {
                         if(Math.hypot(this.me.x - z.x, this.me.y - z.y) < 30) {
@@ -794,7 +957,6 @@
                     });
                 }
 
-                // Wizualne pociski innych graczy
                 Object.values(netPlayers).forEach(p => {
                     if(p.shooting && !p.isDead && Math.random() < 0.25 && RoomState.mode !== 'bomb') {
                         this.spawnBullet(p.x, p.y, p.angle, 1300, 0, 0, false);
@@ -803,37 +965,42 @@
 
                 FX.update(dt);
 
-                // Aktualizacja HUD
                 let secs = Math.max(0, Math.ceil(RoomState.timer));
                 document.getElementById('hudTimer').innerText = RoomState.mode === 'bomb' && RoomState.bombTimer
                     ? `BOMBA: ${RoomState.bombTimer.toFixed(1)}s`
                     : `00:${secs.toString().padStart(2,'0')}`;
                 document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
-                document.getElementById('dashBar').style.width = `${Math.max(0, ((2 - this.me.dashCd)/2)*100)}%`;
+                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.8 - this.me.dashCd)/1.8)*100)}%`;
 
                 let scores = [{ name: this.me.name, color: this.me.color, score: this.me.score }];
                 Object.values(netPlayers).forEach(p => scores.push({ name: p.name, color: p.color, score: p.score || 0 }));
                 scores.sort((a,b) => b.score - a.score);
                 document.getElementById('liveScoreboard').innerHTML = scores.map((s, idx) =>
-                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score} pkt</span></li>`
+                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score}</span></li>`
                 ).join('');
             },
 
             draw() {
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
-                ctx.fillStyle = '#07070a'; ctx.fillRect(0, 0, W, H);
+                ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, W, H);
 
                 Cam.apply();
 
-                // Tło Areny
+                // Szachownica kafelków Pixel-Art
                 ctx.fillStyle = mapObj.bg; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                ctx.fillStyle = mapObj.tileAlt;
+                for(let gx=0; gx<WORLD_SIZE; gx+=80) {
+                    for(let gy=0; gy<WORLD_SIZE; gy+=80) {
+                        if(((gx+gy)/80) % 2 === 0) ctx.fillRect(gx, gy, 80, 80);
+                    }
+                }
 
-                // Pixelowa siatka kafelków
-                ctx.strokeStyle = mapObj.grid; ctx.lineWidth = 2;
-                ctx.beginPath();
-                for(let x=0; x<=WORLD_SIZE; x+=80) { ctx.moveTo(x,0); ctx.lineTo(x,WORLD_SIZE); }
-                for(let y=0; y<=WORLD_SIZE; y+=80) { ctx.moveTo(0,y); ctx.lineTo(WORLD_SIZE,y); }
-                ctx.stroke();
+                // Detale podłoża (Kępki trawy, kamyki, śnieżynki)
+                propDecorations.forEach(d => {
+                    ctx.fillStyle = RoomState.map === 'ice' ? '#ffffff' : (RoomState.map === 'lava' ? '#362b2e' : '#2c5227');
+                    ctx.fillRect(d.x, d.y, 4, 8);
+                    ctx.fillRect(d.x+4, d.y+4, 4, 4);
+                });
 
                 FX.drawDecals();
 
@@ -843,61 +1010,53 @@
                     ctx.fillStyle = 'rgba(255, 222, 0, 0.22)';
                     ctx.beginPath(); ctx.arc(k.x, k.y, k.r, 0, Math.PI*2); ctx.fill();
                     ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 4; ctx.stroke();
-                    ctx.fillStyle = '#ffde00'; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-                    ctx.fillText("👑 STREFA PUNKTOWA", k.x, k.y - k.r - 10);
+                    ctx.fillStyle = '#ffde00'; ctx.font = '9px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText("👑 STREFA KOTH", k.x, k.y - k.r - 10);
                 }
 
-                // Przeszkody i skrzynie na mapie
-                mapObj.obstacles.forEach(o => {
-                    if(o.t === 'lava') {
-                        ctx.fillStyle = '#ff3300'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                        ctx.fillStyle = '#ffaa00'; ctx.fillRect(o.x+10, o.y+10, o.w-20, o.h-20);
-                    } else {
-                        ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(o.x+6, o.y+6, o.w, o.h);
-                        ctx.fillStyle = mapObj.wallColor; ctx.fillRect(o.x, o.y, o.w, o.h);
-                        ctx.strokeStyle = mapObj.borderColor; ctx.lineWidth = 4; ctx.strokeRect(o.x, o.y, o.w, o.h);
-                    }
-                });
+                // Przeszkody Pixel-Art
+                mapObj.obstacles.forEach(o => drawPixelObstacle(ctx, o));
 
-                // Granica świata
+                // Mur graniczny
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
 
-                // Przedmioty do zebrania
+                // Przedmioty i Klejnoty
                 Object.values(netItems).forEach(item => {
-                    ctx.save(); ctx.translate(item.x, item.y);
-                    ctx.fillStyle = item.t === 'medkit' ? '#00e676' : '#05d5fa';
-                    ctx.fillRect(-12, -12, 24, 24);
-                    ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.strokeRect(-12, -12, 24, 24);
-                    ctx.fillStyle = '#000'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-                    ctx.fillText(item.t === 'medkit' ? '+' : 'W', 0, 4);
+                    ctx.save(); ctx.translate(Math.floor(item.x), Math.floor(item.y));
+                    if(item.t === 'coin' || item.t === 'gem') {
+                        ctx.fillStyle = '#000'; ctx.fillRect(-10, -10, 20, 20);
+                        ctx.fillStyle = item.t === 'gem' ? '#e040fb' : '#ffde00';
+                        ctx.fillRect(-8, -8, 16, 16);
+                        ctx.fillStyle = '#fff'; ctx.fillRect(-4, -4, 4, 4);
+                    } else {
+                        ctx.fillStyle = '#000'; ctx.fillRect(-13, -13, 26, 26);
+                        ctx.fillStyle = item.t === 'medkit' ? '#00e676' : '#05d5fa';
+                        ctx.fillRect(-10, -10, 20, 20);
+                        ctx.fillStyle = '#000'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
+                        ctx.fillText(item.t === 'medkit' ? '+' : 'W', 0, 4);
+                    }
                     ctx.restore();
                 });
 
-                // Zombiaki
+                // Zombiaki Pixel-Art
                 if(RoomState.mode === 'zombies') {
-                    Object.values(netZombies).forEach(z => {
-                        ctx.save(); ctx.translate(z.x, z.y);
-                        let r = z.t === 2 ? 22 : (z.t === 1 ? 13 : 16);
-                        ctx.fillStyle = z.t === 2 ? '#6c5ce7' : (z.t === 1 ? '#ff5252' : '#28b835');
-                        ctx.fillRect(-r, -r, r*2, r*2);
-                        ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.strokeRect(-r, -r, r*2, r*2);
-                        ctx.fillStyle = '#ff0000'; ctx.fillRect(-6, -4, 4, 4); ctx.fillRect(2, -4, 4, 4);
-                        ctx.restore();
-                    });
+                    Object.values(netZombies).forEach(z => drawPixelZombie(ctx, z));
                 }
 
-                // Pociski
-                ctx.fillStyle = '#ffde00';
-                this.bullets.forEach(b => { ctx.fillRect(b.x-3, b.y-3, 6, 6); });
+                // Pociski z pikselowym obrysem
+                this.bullets.forEach(b => {
+                    ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(b.x-5), Math.floor(b.y-5), 10, 10);
+                    ctx.fillStyle = '#ffde00'; ctx.fillRect(Math.floor(b.x-3), Math.floor(b.y-3), 6, 6);
+                });
 
                 // Inni gracze
                 Object.entries(netPlayers).forEach(([pid, p]) => {
-                    drawPixelCharacter(ctx, p.x, p.y, p.angle, p.color, p.name, p.hp, 100, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead);
+                    drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0);
                 });
 
                 // Lokalny gracz
                 if(this.me) {
-                    drawPixelCharacter(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.name, this.me.hp, this.me.maxHp, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead);
+                    drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle);
                 }
 
                 FX.drawTop();
@@ -931,7 +1090,7 @@
             }
         };
 
-        // === OBSŁUGA LOBBY I SIECI ===
+        // === LOBBY & SYNCHRONIZACJA ===
         const Lobby = {
             async auth() {
                 if(myId) return;
@@ -962,7 +1121,8 @@
                     const pRef = db.ref(`room_players/${currentRoom}/${myId}`);
                     await pRef.set({
                         id: myId, name: document.getElementById('playerName').value.trim() || "Paweł",
-                        color: document.getElementById('playerColor').value, x: 800, y: 800, hp: 100, score: 0, isDead: false, wep: 'pistol'
+                        color: document.getElementById('playerColor').value, skin: chosenSkin,
+                        x: 800, y: 800, hp: 100, score: 0, isDead: false, wep: 'pistol'
                     });
                     pRef.onDisconnect().remove();
 
@@ -998,7 +1158,6 @@
                     RoomState.bombTimer = d.bombTimer ?? 10;
                     if(d.koth) RoomState.koth = d.koth;
 
-                    // Podświetlenie aktywnego trybu w lobby
                     document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
                     document.getElementById('m-' + RoomState.mode)?.classList.add('selected');
                     document.getElementById('mapSelect').value = RoomState.map;
@@ -1036,7 +1195,6 @@
 
                 db.ref(`room_items/${currentRoom}`).on('value', snap => { netItems = snap.val() || {}; });
 
-                // Zdarzenia bojowe (Trafienia, Zabójstwa, Wybuchy)
                 db.ref(`events/${currentRoom}`).on('child_added', snap => {
                     let ev = snap.val(); snap.ref.remove();
                     if(!ev || !Game.me) return;
@@ -1071,7 +1229,6 @@
             }
         };
 
-        // Kopiowanie linku zaproszenia
         document.getElementById('btnCopyLink').onclick = () => {
             const url = window.location.origin + window.location.pathname + '?room=' + currentRoom;
             navigator.clipboard.writeText(url);
