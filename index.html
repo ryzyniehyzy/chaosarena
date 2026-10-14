@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAWEŁ PYKA: SUPER PIXEL PARTY</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY - CASINO EDITION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -13,23 +13,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #07070c; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #06060b; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: crosshair; image-rendering: pixelated; }
         
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(7, 7, 14, 0.92); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(6, 6, 12, 0.92); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
         .screen.active { display: flex; }
         
-        .panel { background-color: #151525; border: 4px solid #fff; box-shadow: 12px 12px 0px 0px #000; padding: 1.5rem; max-width: 1020px; width: 96%; text-align: center; position: relative; max-height: 94vh; overflow-y: auto; }
+        .panel { background-color: #151526; border: 4px solid #fff; box-shadow: 12px 12px 0px 0px #000; padding: 1.5rem; max-width: 1060px; width: 96%; text-align: center; position: relative; max-height: 94vh; overflow-y: auto; }
         .btn { background-color: #ff2a6d; border: 3px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5); color: #fff; padding: 0.75rem 1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, background-color 0.1s; font-family: inherit; font-size: 10px; outline: none; }
         .btn:hover { background-color: #ff5286; }
         .btn:active { transform: translateY(3px); }
-        .btn:disabled { background-color: #444; color: #888; border-color: #777; cursor: not-allowed; }
         
         .input-pixel { background-color: #090912; border: 3px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.55rem; width: 100%; text-align: center; font-size: 10px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 9px; cursor: pointer; transition: all 0.12s; text-align: left; }
+        .mode-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 8px; cursor: pointer; transition: all 0.12s; text-align: left; }
         .mode-card:hover { border-color: #666699; }
         .mode-card.selected { border-color: #05d5fa; background: #191932; box-shadow: inset 0 0 0 2px #05d5fa; }
 
@@ -43,21 +42,30 @@
         #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
         
-        /* HUD PLANSZÓWKI (MARIO PARTY) */
-        #boardHud { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 45; width: 92%; max-width: 850px; display: none; pointer-events: none; }
-        .board-box { background: rgba(15, 15, 28, 0.92); border: 4px solid #fff; box-shadow: 8px 8px 0 #000; padding: 14px; pointer-events: auto; }
+        /* HUD PLANSZÓWKI */
+        #boardHud { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 45; width: 94%; max-width: 900px; display: none; pointer-events: none; }
+        .board-box { background: rgba(14, 14, 28, 0.94); border: 4px solid #ffde00; box-shadow: 8px 8px 0 #000; padding: 12px 16px; pointer-events: auto; }
+
+        /* KOSTKA 3D PIXEL ART NA ŚRODKU */
+        #diceOverlay { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 58; display: none; flex-direction: column; align-items: center; pointer-events: none; }
+        .dice-cube { width: 96px; height: 96px; background: #fff; border: 6px solid #000; box-shadow: inset -8px -8px 0 #ccc, 10px 10px 0 rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; font-size: 38px; color: #111; }
+
+        /* AUTOMAT KASYNOWY (JEDNORĘKI BANDYTA) */
+        #casinoModal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 62; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+        .slot-machine { background: #2b1138; border: 6px solid #ffde00; box-shadow: 0 0 35px #ff2a6d, 12px 12px 0 #000; padding: 24px; text-align: center; max-width: 520px; width: 92%; }
+        .slot-reel { width: 90px; height: 95px; background: #fff; border: 5px solid #000; box-shadow: inset 0 6px 8px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+
+        /* KOŁO FORTUNY RULETKI */
+        #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
 
         /* CZAT I EMOTKI */
-        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 18, 0.9); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
-        #chatMessages { height: 115px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
-        .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 5px; cursor: pointer; font-size: 12px; border-radius: 2px; }
+        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 18, 0.92); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
+        #chatMessages { height: 110px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+        .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 5px; cursor: pointer; font-size: 12px; }
         .emote-btn:hover { background: #323254; border-color: #05d5fa; }
 
-        /* KOŁO RULETKI */
-        #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
-
         #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
-        #centerAnnouncement { position: absolute; top: 22%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 22px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+        #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 22px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
 
         .bar-wrap { width: 200px; height: 15px; border: 3px solid #fff; background: #111; margin-top: 4px; position: relative; }
         #hpBar { height: 100%; background: #ff2a6d; width: 100%; transition: width 0.1s; }
@@ -74,13 +82,34 @@
     <div id="centerAnnouncement">START!</div>
     <div id="killFeed"></div>
 
+    <!-- ANIMOWANA KOSTKA NA ŚRODKU EKRANU -->
+    <div id="diceOverlay">
+        <div id="diceBox" class="dice-cube">🎲</div>
+        <div id="diceSubText" class="text-xs text-[#ffde00] mt-3 bg-black/80 px-3 py-1 border border-white">LOSOWANIE...</div>
+    </div>
+
+    <!-- AUTOMAT JEDNORĘKI BANDYTA (POLE KASYNA) -->
+    <div id="casinoModal">
+        <div class="slot-machine">
+            <div class="text-lg text-[#ffde00] mb-1">🎰 ROYAL PIXEL CASINO 🎰</div>
+            <div class="text-[8px] text-pink-300 mb-4">Zakręć automatem! 3 takie same symbole = WIELKI JACKPOT!</div>
+            <div class="flex justify-center gap-3 mb-5">
+                <div id="reel1" class="slot-reel">🍒</div>
+                <div id="reel2" class="slot-reel">💎</div>
+                <div id="reel3" class="slot-reel">7️⃣</div>
+            </div>
+            <div id="slotResultText" class="text-[9px] text-yellow-300 mb-4 h-5">Pociągnij za dźwignię!</div>
+            <button id="btnSpinSlot" class="btn !bg-[#00c853] hover:!bg-[#2ee578] !text-xs !px-6 !py-3" onclick="Board.spinSlotMachine()">🕹️ ZAKRĘĆ AUTOMATEM!</button>
+        </div>
+    </div>
+
     <!-- HUD PLANSZÓWKI (MARIO PARTY) -->
     <div id="boardHud">
         <div class="board-box flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="text-left">
-                <div class="text-xs text-[#ffde00] mb-1">🎲 PLANSZA SUPER PIXEL PARTY (CEL: POLE 25)</div>
+                <div class="text-xs text-[#ffde00] mb-1">🏝️ WYSPA CASINO PARTY (META: POLE 30)</div>
                 <div id="boardTurnText" class="text-[10px] text-[#05d5fa]">Tura gracza: ---</div>
-                <div id="boardStatusMsg" class="text-[8px] text-gray-300 mt-1">Rzucajcie po kolei kostką, a potem walczcie w minigrze!</div>
+                <div id="boardStatusMsg" class="text-[8px] text-gray-300 mt-1">Rzucajcie po kolei kostką!</div>
             </div>
             <div class="flex items-center gap-2">
                 <div id="myCardsContainer" class="flex gap-1"></div>
@@ -89,13 +118,15 @@
         </div>
     </div>
 
-    <!-- NAKŁADKA RULETKI LOSUJĄCEJ MINIGRĘ -->
+    <!-- RULETKA LOSUJĄCA MINIGRĘ (BEZ POWTÓREK) -->
     <div id="rouletteOverlay">
-        <div class="text-xl text-[#05d5fa] mb-3">🎰 LOSOWANIE NASTĘPNEJ MINIGRY! 🎰</div>
-        <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_30px_#ff2a6d] mb-4">
+        <div class="text-lg text-[#05d5fa] mb-2">🎡 KOŁO FORTUNY MINIGIER (BEZ POWTÓREK!) 🎡</div>
+        <div class="text-[8px] text-yellow-300 mb-4">Każda minigra w puli jest unikalna aż do wyczerpania talii!</div>
+        <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_35px_#05d5fa] mb-4">
             🔫 ARENA PvP
         </div>
-        <div id="rouletteSub" class="text-[10px] text-gray-300">Zwycięzca minigry wybierze 1 z 3 Kart Wspomagających na planszę!</div>
+        <div id="rouletteMapText" class="text-xs text-[#00e676] mb-2">BIOM: Leśny Bunkier</div>
+        <div class="text-[9px] text-gray-400">Zwycięzca minigry wybierze 1 z 3 Kart Kasynowych!</div>
     </div>
 
     <!-- LEWY HUD MINIGRY -->
@@ -112,13 +143,13 @@
 
     <!-- PRAWY HUD -->
     <div id="hudRight">
-        <div class="bg-black/80 border-3 border-white p-3 min-w-[210px]">
-            <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING GRACZY</div>
+        <div class="bg-black/80 border-3 border-white p-3 min-w-[215px]">
+            <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">TABELA WYNIKÓW</div>
             <ul id="liveScoreboard" class="text-[8px] space-y-2"></ul>
         </div>
     </div>
 
-    <!-- CZAT NA ŻYWO + PASEK 10 EMOTEK -->
+    <!-- CZAT NA ŻYWO + EMOTKI -->
     <div id="chatWidget">
         <div class="bg-[#1b1b2f] px-2 py-1 flex justify-between items-center border-b-2 border-gray-600">
             <span class="text-[8px] text-[#05d5fa]">💬 CZAT I EMOTKI</span>
@@ -131,10 +162,10 @@
                 <button class="emote-btn" onclick="Chat.sendEmote('💀')">💀</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('😂')">😂</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('👑')">👑</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('🤡')">🤡</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('❤️')">❤️</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('🎰')">🎰</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('💎')">💎</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('🤬')">🤬</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('👀')">👀</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('🤡')">🤡</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('🎉')">🎉</button>
             </div>
             <div id="chatMessages"></div>
@@ -147,11 +178,11 @@
 
     <div id="uiContainer" class="ui-layer">
         
-        <!-- 1. EKRAN MENU GŁÓWNEGO -->
+        <!-- 1. MENU GŁÓWNE -->
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-xl">
                 <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-xs text-yellow-400 mb-5 tracking-wider">🎲 SUPER PIXEL PARTY EDITION 🎲</h2>
+                <h2 class="text-xs text-yellow-400 mb-5 tracking-wider">🎰 SUPER PIXEL PARTY & CASINO 🎰</h2>
                 
                 <div class="flex gap-3 mb-4">
                     <div class="w-2/3 text-left">
@@ -185,14 +216,13 @@
             </div>
         </div>
 
-        <!-- 2. ROZBUDOWANE LOBBY (CENTRUM DOWODZENIA + USTAWIENIA) -->
+        <!-- 2. LOBBY -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
-                <!-- Nagłówek Lobby -->
                 <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-3 mb-4 gap-2">
                     <div class="text-left">
-                        <h2 class="text-lg text-[#05d5fa]">🏰 CENTRUM IMPREZY (LOBBY)</h2>
-                        <span class="text-[8px] text-yellow-300">Grajcie w Mario Party na planszy lub odpalajcie szybkie minigry!</span>
+                        <h2 class="text-lg text-[#05d5fa]">🎰 CENTRUM IMPREZY & KASYNA (LOBBY)</h2>
+                        <span class="text-[8px] text-yellow-300">9 Unikalnych Minigier (Zero Powtórek!) + Nowa Wyspa 30 Pól z Kasynem!</span>
                     </div>
                     <div class="flex items-center gap-3 bg-black/60 border-2 border-[#ff2a6d] px-4 py-2">
                         <div class="text-right">
@@ -205,16 +235,14 @@
                 <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK ZAPROSZENIA DO SCHOWKA!</div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 text-left">
-                    <!-- Kolumna 1: Lista Graczy + Ustawienia Dźwięku/Grafiki (4/12) -->
                     <div class="lg:col-span-4 flex flex-col gap-3">
                         <div class="bg-black/60 border-2 border-gray-600 p-3">
                             <div class="text-[9px] text-[#05d5fa] mb-2">👥 EKIPA W POKOJU (<span id="lobbyCount">1</span>):</div>
                             <ul id="lobbyPlayerList" class="h-36 overflow-y-auto space-y-2 text-[9px]"></ul>
                         </div>
 
-                        <!-- Panel Ustawień Gracza -->
                         <div class="bg-black/60 border-2 border-gray-600 p-3">
-                            <div class="text-[9px] text-yellow-400 mb-2 border-b border-gray-700 pb-1">⚙️ USTAWIENIA GRY I DŹWIĘKU</div>
+                            <div class="text-[9px] text-yellow-400 mb-2 border-b border-gray-700 pb-1">⚙️ USTAWIENIA AUDIO I WIDEO</div>
                             <div class="space-y-2 text-[8px]">
                                 <label class="flex justify-between items-center cursor-pointer">
                                     <span>🎵 Muzyka Chiptune:</span>
@@ -236,28 +264,34 @@
                         </div>
                     </div>
 
-                    <!-- Kolumna 2: Wybór Głównego Trybu i Minigier (8/12) -->
                     <div class="lg:col-span-8 flex flex-col justify-between bg-black/40 border-2 border-gray-700 p-3">
                         <div>
-                            <div class="text-[9px] text-yellow-400 mb-2">1. WYBIERZ RODZAJ ROZGRYWKI (DECUDUJE HOST):</div>
+                            <div class="text-[9px] text-yellow-400 mb-2">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
                             
-                            <!-- Główny Baner Mario Party + Ruletka -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
-                                    <div class="text-[10px] text-[#ffde00] mb-1">🎲 SUPER MARIO PARTY (PLANSZA!)</div>
-                                    <div class="text-[7px] text-gray-300 leading-relaxed">Rzucajcie kostką na planszy 25 pól! Po każdej turze ruletka losuje minigrę, a zwycięzca wybiera 1 z 3 Kart!</div>
+                                    <div class="text-[10px] text-[#ffde00] mb-1">🎲 SUPER MARIO PARTY (WYSPA 30 PÓL)</div>
+                                    <div class="text-[7px] text-gray-300 leading-relaxed">Skacz pionkami po polach, graj na Automacie w Kasynie, zamieniaj się miejscami i losuj 9 różnych minigier bez powtórek!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
-                                    <div class="text-[10px] text-[#00e676] mb-1">🎰 LOSOWA RULETKA MINIGIER</div>
-                                    <div class="text-[7px] text-gray-300 leading-relaxed">Nie wiesz w co grać? Zakręć kołem fortuny, które wylosuje Wam tryb oraz mapę!</div>
+                                    <div class="text-[10px] text-[#00e676] mb-1">🎡 RULETKA MINIGIER (TASOWANIE TALII)</div>
+                                    <div class="text-[7px] text-gray-300 leading-relaxed">Losuje za każdym razem inną minigrę z puli 9 trybów (zero powtórek pod rząd!).</div>
                                 </div>
                             </div>
 
-                            <div class="text-[8px] text-gray-400 mb-1">LUB WYBIERZ KONKRETNĄ MINIGRĘ BEZ PLANSZY:</div>
+                            <div class="text-[8px] text-gray-400 mb-1">LUB ODPAL KONKRETNĄ MINIGRĘ Z 9 DOSTĘPNYCH:</div>
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3 interactive">
                                 <div class="mode-card" onclick="Lobby.selectMode('arena')" id="m-arena">
                                     <div class="text-[8px] text-[#ff2a6d]">🔫 ARENA PvP</div>
-                                    <div class="text-[6px] text-gray-400">Bazooki, Plazma i Power-Upy</div>
+                                    <div class="text-[6px] text-gray-400">Bazooki, Plazma i Dopalacze</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('meteors')" id="m-meteors">
+                                    <div class="text-[8px] text-orange-400">☄️ DESZCZ METEORYTÓW</div>
+                                    <div class="text-[6px] text-gray-400">Spychaj innych pod komety!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('heist')" id="m-heist">
+                                    <div class="text-[8px] text-yellow-300">🎰 NAPAD NA KASYNO</div>
+                                    <div class="text-[6px] text-gray-400">Rozbijaj Złoty Sejf w centrum!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('royale')" id="m-royale">
                                     <div class="text-[8px] text-[#ff9100]">🌪️ STREFA BURZY</div>
@@ -268,28 +302,29 @@
                                     <div class="text-[6px] text-gray-400">Kooperacja przeciw potworom</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
-                                    <div class="text-[8px] text-yellow-300">💣 GORĄCA BOMBA</div>
-                                    <div class="text-[6px] text-gray-400">Oddaj bombę zanim wybuchnie</div>
+                                    <div class="text-[8px] text-red-400">💣 GORĄCA BOMBA</div>
+                                    <div class="text-[6px] text-gray-400">Oddaj tykającą bombę koledze</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('koth')" id="m-koth">
                                     <div class="text-[8px] text-[#05d5fa]">👑 KRÓL WZGÓRZA</div>
-                                    <div class="text-[6px] text-gray-400">Trzymaj strefę i spychaj innych</div>
+                                    <div class="text-[6px] text-gray-400">Kontroluj złotą strefę</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('sniper')" id="m-sniper">
-                                    <div class="text-[8px] text-cyan-300">🎯 SNAJPERZY</div>
+                                    <div class="text-[8px] text-cyan-300">🎯 SNAJPERZY (1 HIT)</div>
                                     <div class="text-[6px] text-gray-400">1 celny strzał = Zgon!</div>
                                 </div>
-                                <div class="mode-card col-span-2 md:col-span-3" onclick="Lobby.selectMode('coins')" id="m-coins">
-                                    <div class="text-[8px] text-[#e040fb]">💎 GORĄCZKA ZŁOTA (ZBIERAJ KLEJNOTY I KRADNIJ INNYM)</div>
+                                <div class="mode-card" onclick="Lobby.selectMode('coins')" id="m-coins">
+                                    <div class="text-[8px] text-[#e040fb]">💎 ZŁOTA GORĄCZKA</div>
+                                    <div class="text-[6px] text-gray-400">Zbieraj klejnoty i kradnij!</div>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
-                                    <label class="text-[8px] text-gray-400 block mb-1">BIOM ARENY PIXEL-ART:</label>
+                                    <label class="text-[8px] text-gray-400 block mb-1">BIOM ARENY:</label>
                                     <select id="mapSelect" class="input-pixel interactive" onchange="Lobby.changeMap(this.value)">
                                         <option value="forest">🌲 Leśny Bunkier</option>
-                                        <option value="cyber">🟣 Cyber-Neon</option>
+                                        <option value="cyber">🟣 Cyber-Vegas (Kasyno)</option>
                                         <option value="ice">❄️ Lodowa Twierdza</option>
                                         <option value="lava">🌋 Wulkaniczny Krater</option>
                                     </select>
@@ -314,10 +349,10 @@
             </div>
         </div>
 
-        <!-- 3. EKRAN NAGRODY PO MINIGRZE W MARIO PARTY (WYBÓR 1 Z 3 KART) -->
+        <!-- 3. WYBÓR 1 Z 3 KART PO MINIGRZE -->
         <div id="screen-cards" class="screen">
             <div class="panel !max-w-2xl">
-                <h2 class="text-xl text-[#ffde00] mb-1">🎉 KONIEC MINIGRY! 🎉</h2>
+                <h2 class="text-xl text-[#ffde00] mb-1">🎉 NAGRODA ZA MINIGRĘ! 🎉</h2>
                 <div id="cardWinnerText" class="text-xs text-[#05d5fa] mb-4">Zwycięzca wybiera 1 z 3 Kart Wspomagających na Planszę!</div>
 
                 <div id="cardChoicesContainer" class="flex justify-between gap-3 mb-4 hidden">
@@ -329,20 +364,20 @@
                     <div class="reward-card" onclick="Board.pickRewardCard('dash3')">
                         <div class="text-2xl mb-2">🚀</div>
                         <div class="text-[10px] text-[#00e676] mb-1">RAKIETOWY SKOK</div>
-                        <div class="text-[7px] text-gray-300 leading-relaxed">Natychmiast przesuwa Twój pionek o +3 pola do przodu bez czekania!</div>
+                        <div class="text-[7px] text-gray-300 leading-relaxed">Natychmiast przesuwa Twój pionek o +3 pola do przodu!</div>
                     </div>
-                    <div class="reward-card" onclick="Board.pickRewardCard('sabotage')">
-                        <div class="text-2xl mb-2">💣</div>
-                        <div class="text-[10px] text-[#ff2a6d] mb-1">SABOTAŻ WROGA</div>
-                        <div class="text-[7px] text-gray-300 leading-relaxed">Cofa lidera (lub losowego rywala) o 3 pola do tyłu i zdejmuje Twoje więzienie!</div>
+                    <div class="reward-card" onclick="Board.pickRewardCard('magnet')">
+                        <div class="text-2xl mb-2">🧲</div>
+                        <div class="text-[10px] text-[#ff2a6d] mb-1">MAGNES / SABOTAŻ</div>
+                        <div class="text-[7px] text-gray-300 leading-relaxed">Cofa lidera o 3 pola do tyłu i anuluje Twoje więzienie!</div>
                     </div>
                 </div>
 
-                <div id="cardWaitMsg" class="text-[9px] text-yellow-300 py-4 animate-pulse">Czekaj aż zwycięzca minigry wybierze swoją Kartę Nagrody...</div>
+                <div id="cardWaitMsg" class="text-[9px] text-yellow-300 py-4 animate-pulse">Czekaj aż zwycięzca minigry wybierze swoją Kartę...</div>
             </div>
         </div>
 
-        <!-- 4. EKRAN PODSUMOWANIA / PODIUM KOŃCOWE -->
+        <!-- 4. PODIUM -->
         <div id="screen-podium" class="screen">
             <div class="panel !max-w-xl">
                 <h2 class="text-2xl text-yellow-400 mb-1">🏆 WIELKI FINAŁ 🏆</h2>
@@ -372,7 +407,7 @@
     </div>
 
     <script>
-        // === USTAWIENIA LOKALNE (AUDIO / WIDEO) ===
+        // === USTAWIENIA AUDIO / WIDEO ===
         const Settings = {
             music: true, sfx: true, shake: true, crt: true,
             update() {
@@ -438,14 +473,14 @@
             startMusicLoop() {
                 if(this.musicTimer) return;
                 const bassNotes = [110, 110, 130.8, 146.8, 98, 98, 130.8, 164.8];
-                const leadNotes = [440, 0, 523.2, 587.3, 659.2, 0, 523.2, 440];
+                const leadNotes = [440, 523.2, 659.2, 587.3, 523.2, 0, 440, 392];
                 this.musicTimer = setInterval(() => {
                     if(!Settings.music || !this.ctx || (RoomState.status !== 'playing' && RoomState.status !== 'board')) return;
                     const t = this.ctx.currentTime;
                     let bFreq = bassNotes[this.step % bassNotes.length];
                     const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
                     osc.type = 'triangle'; osc.frequency.setValueAtTime(bFreq, t);
-                    g.gain.setValueAtTime(0.022, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+                    g.gain.setValueAtTime(0.02, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
                     osc.connect(g); g.connect(this.ctx.destination);
                     osc.start(t); osc.stop(t + 0.19);
 
@@ -453,9 +488,9 @@
                     if(lFreq > 0 && this.step % 2 === 0) {
                         const lOsc = this.ctx.createOscillator(), lg = this.ctx.createGain();
                         lOsc.type = 'sine'; lOsc.frequency.setValueAtTime(lFreq, t);
-                        lg.gain.setValueAtTime(0.014, t); lg.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+                        lg.gain.setValueAtTime(0.012, t); lg.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
                         lOsc.connect(lg); lg.connect(this.ctx.destination);
-                        lOsc.start(t); lOsc.stop(t + 0.25);
+                        lOsc.start(t); lOsc.stop(t + 0.23);
                     }
                     this.step++;
                 }, 220);
@@ -470,8 +505,10 @@
                 else if(type === 'sniper') { o.type='square'; o.frequency.setValueAtTime(820, t); o.frequency.exponentialRampToValueAtTime(35, t+0.26); g.gain.setValueAtTime(0.09, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.26); o.start(t); o.stop(t+0.26); }
                 else if(type === 'plasma') { o.type='sine'; o.frequency.setValueAtTime(680, t); o.frequency.linearRampToValueAtTime(220, t+0.12); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.12); o.start(t); o.stop(t+0.12); }
                 else if(type === 'hit') { o.type='triangle'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(35, t+0.08); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.08); o.start(t); o.stop(t+0.08); }
+                else if(type === 'step') { o.type='sine'; o.frequency.setValueAtTime(320, t); o.frequency.exponentialRampToValueAtTime(520, t+0.07); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.07); o.start(t); o.stop(t+0.07); }
                 else if(type === 'dash') { o.type='sine'; o.frequency.setValueAtTime(280, t); o.frequency.linearRampToValueAtTime(620, t+0.11); g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0.01, t+0.11); o.start(t); o.stop(t+0.11); }
                 else if(type === 'coin') { o.type='square'; o.frequency.setValueAtTime(587, t); o.frequency.setValueAtTime(880, t+0.06); g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0.01, t+0.16); o.start(t); o.stop(t+0.16); }
+                else if(type === 'jackpot') { o.type='square'; o.frequency.setValueAtTime(523, t); o.frequency.setValueAtTime(659, t+0.1); o.frequency.setValueAtTime(784, t+0.2); o.frequency.setValueAtTime(1046, t+0.3); g.gain.setValueAtTime(0.08, t); g.gain.linearRampToValueAtTime(0.01, t+0.5); o.start(t); o.stop(t+0.5); }
                 else if(type === 'tick') { o.type='sine'; o.frequency.setValueAtTime(750, t); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.005, t+0.04); o.start(t); o.stop(t+0.04); }
                 else if(type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(100, t); o.frequency.exponentialRampToValueAtTime(15, t+0.45); g.gain.setValueAtTime(0.16, t); g.gain.linearRampToValueAtTime(0.01, t+0.45); o.start(t); o.stop(t+0.45); }
             }
@@ -491,15 +528,38 @@
         const db = firebase.database(), auth = firebase.auth();
 
         let myId = null, currentRoom = null, isHost = false;
-        let netPlayers = {}, netZombies = {}, netItems = {};
+        let netPlayers = {}, netZombies = {}, netItems = {}, netMeteors = [];
+
+        // Talia Minigier bez powtórek (Shuffle Bag)
+        const ALL_MINIGAMES = ['arena', 'meteors', 'heist', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
+        let minigameDeck = [];
+        let lastPlayedMap = '';
+
+        function drawNextUniqueMinigame() {
+            if(minigameDeck.length === 0) {
+                minigameDeck = [...ALL_MINIGAMES];
+                for(let i = minigameDeck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [minigameDeck[i], minigameDeck[j]] = [minigameDeck[j], minigameDeck[i]];
+                }
+            }
+            return minigameDeck.pop();
+        }
+
+        function drawNextUniqueMap() {
+            const maps = ['forest', 'cyber', 'ice', 'lava'].filter(m => m !== lastPlayedMap);
+            lastPlayedMap = maps[Math.floor(Math.random() * maps.length)];
+            return lastPlayedMap;
+        }
+
         const RoomState = {
             status: 'lobby', isPartyCampaign: true, mode: 'party', activeMinigame: 'arena',
             map: 'forest', matchDuration: 60, timer: 60, bombHolder: null, bombTimer: 10,
-            koth: {x:800, y:800, r:110}, stormR: 1100,
-            turnOrder: [], turnIdx: 0, boardMsg: 'Rozpoczynamy imprezę!', minigameWinner: null
+            koth: {x:800, y:800, r:110}, stormR: 1100, vaultHp: 500,
+            turnOrder: [], turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna!', minigameWinner: null
         };
 
-        // === SYSTEM CZATU I EMOTEK ===
+        // === CZAT ===
         const Chat = {
             minimized: false,
             init() {
@@ -509,8 +569,7 @@
                     const inp = document.getElementById('chatInput');
                     const txt = inp.value.trim();
                     if(!txt || !currentRoom) return;
-                    inp.value = '';
-                    inp.blur();
+                    inp.value = ''; inp.blur();
                     db.ref(`chat/${currentRoom}`).push({
                         name: document.getElementById('playerName').value.trim() || 'Paweł',
                         color: document.getElementById('playerColor').value,
@@ -535,27 +594,40 @@
             }
         };
 
-        // === PLANSZÓWKA (SUPER MARIO PARTY MODE - 26 PÓL) ===
+        // === NOWA WYSPA PLANSZOWA (30 PÓL + 4 BIOMY + KASYNO + ZAMIANA) ===
         const BOARD_TILES = [
-            {x:180, y:560, t:'start', n:'START'}, {x:310, y:560, t:'norm', n:'1'}, {x:440, y:560, t:'card', n:'🃏 KARTA'},
-            {x:570, y:560, t:'norm', n:'3'}, {x:700, y:560, t:'boost', n:'🚀 +2'}, {x:830, y:560, t:'norm', n:'5'},
-            {x:960, y:560, t:'prison', n:'🔒 WIĘZIENIE'}, {x:1090, y:560, t:'norm', n:'7'}, {x:1090, y:430, t:'back', n:'💀 -2'},
-            {x:960, y:430, t:'norm', n:'9'}, {x:830, y:430, t:'card', n:'🃏 KARTA'}, {x:700, y:430, t:'norm', n:'11'},
-            {x:570, y:430, t:'boost', n:'🚀 +2'}, {x:440, y:430, t:'norm', n:'13'}, {x:310, y:430, t:'prison', n:'🔒 WIĘZIENIE'},
-            {x:180, y:430, t:'norm', n:'15'}, {x:180, y:290, t:'card', n:'🃏 KARTA'}, {x:310, y:290, t:'norm', n:'17'},
-            {x:440, y:290, t:'back', n:'💀 -2'}, {x:570, y:290, t:'norm', n:'19'}, {x:700, y:290, t:'boost', n:'🚀 +2'},
-            {x:830, y:290, t:'prison', n:'🔒 WIĘZIENIE'}, {x:960, y:290, t:'back', n:'💀 -2'}, {x:1090, y:290, t:'norm', n:'23'},
-            {x:1090, y:160, t:'back', n:'💀 -2'}, {x:960, y:160, t:'goal', n:'🏰 META'}
+            // Rząd 1 (Plaża Południowa: 0..7)
+            {x:140, y:590, t:'start', n:'START'}, {x:265, y:590, t:'norm', n:'1'}, {x:390, y:590, t:'card', n:'🃏 KARTA'},
+            {x:515, y:590, t:'boost', n:'🚀 +2'}, {x:640, y:590, t:'norm', n:'4'}, {x:765, y:590, t:'casino', n:'🎰 KASYNO'},
+            {x:890, y:590, t:'norm', n:'6'}, {x:1015, y:590, t:'prison', n:'🔒 PAKA'},
+            // Zakręt Prawy
+            {x:1130, y:525, t:'norm', n:'8'},
+            // Rząd 2 (Leśna Dżungla: 9..16)
+            {x:1015, y:450, t:'back', n:'💀 -2'}, {x:890, y:450, t:'norm', n:'10'}, {x:765, y:450, t:'swap', n:'🔀 ZAMIANA'},
+            {x:640, y:450, t:'norm', n:'12'}, {x:515, y:450, t:'casino', n:'🎰 KASYNO'}, {x:390, y:450, t:'boost', n:'🚀 +2'},
+            {x:265, y:450, t:'norm', n:'15'}, {x:140, y:450, t:'prison', n:'🔒 PAKA'},
+            // Zakręt Lewy
+            {x:140, y:330, t:'card', n:'🃏 KARTA'},
+            // Rząd 3 (Neonowe Las Vegas: 18..24)
+            {x:265, y:310, t:'norm', n:'18'}, {x:390, y:310, t:'casino', n:'🎰 KASYNO'}, {x:515, y:310, t:'back', n:'💀 -2'},
+            {x:640, y:310, t:'swap', n:'🔀 ZAMIANA'}, {x:765, y:310, t:'boost', n:'🚀 +2'}, {x:890, y:310, t:'norm', n:'23'},
+            {x:1015, y:310, t:'prison', n:'🔒 PAKA'},
+            // Zakręt Finałowy (Wulkaniczny Zamek: 25..30)
+            {x:1130, y:235, t:'norm', n:'25'}, {x:1015, y:165, t:'casino', n:'🎰 KASYNO'}, {x:875, y:165, t:'back', n:'💀 -2'},
+            {x:735, y:165, t:'card', n:'🃏 KARTA'}, {x:595, y:165, t:'back', n:'💀 -3'}, {x:440, y:165, t:'goal', n:'🏰 META!'}
         ];
 
         const Board = {
-            myPos: 0, myPrison: 0, myCards: [], activeDoubleDice: false, rollingLock: false,
+            myPos: 0, visualPos: 0, jumpHeight: 0,
+            myPrison: 0, myCards: [], activeDoubleDice: false, rollingLock: false,
+            netVisualPos: {},
 
             initBoardView() {
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'none';
                 document.getElementById('hudRight').style.display = 'block';
                 document.getElementById('boardHud').style.display = 'block';
+                this.visualPos = this.myPos;
                 this.rollingLock = false;
                 this.renderCardsUI();
                 this.updateTurnUI();
@@ -565,7 +637,7 @@
             renderCardsUI() {
                 const c = document.getElementById('myCardsContainer');
                 if(!c) return;
-                const names = { double: '🎲 2x Kostka', dash3: '🚀 +3 Pola', sabotage: '💣 Sabotaż' };
+                const names = { double: '🎲 2x Kostka', dash3: '🚀 +3 Pola', magnet: '🧲 Sabotaż' };
                 c.innerHTML = this.myCards.map((card, idx) =>
                     `<button class="btn !bg-purple-700 hover:!bg-purple-500 !p-2 !text-[8px]" onclick="Board.useCard(${idx})">${names[card] || card}</button>`
                 ).join('');
@@ -573,7 +645,7 @@
 
             useCard(idx) {
                 const currentTurnId = RoomState.turnOrder[RoomState.turnIdx];
-                if(currentTurnId !== myId) return announce("CZEKAJ NA SWOJĄ TURĘ!", 1200);
+                if(currentTurnId !== myId || this.rollingLock) return announce("CZEKAJ NA SWOJĄ TURĘ!", 1200);
                 const card = this.myCards[idx];
                 this.myCards.splice(idx, 1);
                 this.renderCardsUI();
@@ -584,11 +656,11 @@
                     announce("🎲 AKTYWOWANO ZŁOTĄ KOSTKĘ (2-12)!", 1500);
                 } else if(card === 'dash3') {
                     this.myPrison = 0;
-                    this.myPos = Math.min(25, this.myPos + 3);
-                    db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: 0 });
-                    announce("🚀 SKOK O +3 POLA!", 1400);
-                    if(this.myPos >= 25) db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
-                } else if(card === 'sabotage') {
+                    this.animateStepsTo(Math.min(30, this.myPos + 3), () => {
+                        db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: 0 });
+                        if(this.myPos >= 30) db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                    });
+                } else if(card === 'magnet') {
                     this.myPrison = 0;
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ prison: 0 });
                     let targets = Object.keys(netPlayers);
@@ -596,7 +668,7 @@
                         let tid = targets[Math.floor(Math.random()*targets.length)];
                         let tPos = Math.max(0, (netPlayers[tid].boardPos || 0) - 3);
                         db.ref(`room_players/${currentRoom}/${tid}`).update({ boardPos: tPos });
-                        announce(`💣 COFNIĘTO GRACZA ${netPlayers[tid].name} O 3 POLA!`, 1600);
+                        announce(`🧲 COFNIĘTO GRACZA ${netPlayers[tid].name} O 3 POLA!`, 1600);
                     }
                 }
             },
@@ -611,6 +683,39 @@
                 document.getElementById('btnRollDice').style.display = (isMyTurn && !this.rollingLock) ? 'block' : 'none';
             },
 
+            // Płynna animacja skakania pionka pole po polu
+            animateStepsTo(targetTileIdx, onComplete) {
+                const stepLoop = () => {
+                    if(this.myPos === targetTileIdx) {
+                        this.visualPos = this.myPos;
+                        this.jumpHeight = 0;
+                        if(onComplete) onComplete();
+                        return;
+                    }
+                    const dir = targetTileIdx > this.myPos ? 1 : -1;
+                    const startP = this.myPos;
+                    const nextP = this.myPos + dir;
+                    let progress = 0;
+                    Sound.play('step');
+
+                    const hopAnim = setInterval(() => {
+                        progress += 0.14;
+                        if(progress >= 1) {
+                            clearInterval(hopAnim);
+                            this.myPos = nextP;
+                            this.visualPos = nextP;
+                            this.jumpHeight = 0;
+                            db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos });
+                            setTimeout(stepLoop, 50);
+                        } else {
+                            this.visualPos = startP + (nextP - startP) * progress;
+                            this.jumpHeight = Math.sin(progress * Math.PI) * 26;
+                        }
+                    }, 22);
+                };
+                stepLoop();
+            },
+
             rollDice() {
                 if(this.rollingLock) return;
                 this.rollingLock = true;
@@ -619,13 +724,12 @@
 
                 const myName = document.getElementById('playerName').value.trim() || 'Paweł';
 
-                // Sprawdzenie więzienia
                 if(this.myPrison > 0) {
                     this.myPrison--;
                     Sound.play('hit');
-                    announce("🔒 SIEDZISZ W WIĘZIENIU! TRACISZ TURĘ!", 1800);
+                    announce("🔒 SIEDZISZ W WIĘZIENIU! TRACISZ KOLEJKĘ!", 1800);
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ prison: this.myPrison });
-                    db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🔒 ${myName} odsiaduje wyrok w więzieniu i traci kolejkę!` });
+                    db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🔒 ${myName} odsiaduje wyrok i traci kolejkę!` });
                     setTimeout(() => this.advanceTurn(), 1900);
                     return;
                 }
@@ -633,58 +737,174 @@
                 let maxRoll = this.activeDoubleDice ? 12 : 6;
                 let minRoll = this.activeDoubleDice ? 2 : 1;
                 this.activeDoubleDice = false;
+                let finalRoll = Math.floor(Math.random() * (maxRoll - minRoll + 1)) + minRoll;
 
-                let roll = Math.floor(Math.random() * (maxRoll - minRoll + 1)) + minRoll;
-                Sound.play('coin');
-                announce(`🎲 WYRZUCONO: ${roll}!`, 1400);
+                // Animacja kręcącej się kostki 3D na środku ekranu
+                const dOv = document.getElementById('diceOverlay');
+                const dBox = document.getElementById('diceBox');
+                const dSub = document.getElementById('diceSubText');
+                dOv.style.display = 'flex';
+                dSub.innerText = "RZUCANIE KOSTKĄ...";
 
-                this.myPos = Math.min(25, this.myPos + roll);
-                let tile = BOARD_TILES[this.myPos];
-                let msg = `🎲 ${myName} wyrzuca [${roll}] i staje na polu ${tile.n}!`;
-
-                setTimeout(() => {
-                    if(tile.t === 'boost') {
-                        this.myPos = Math.min(25, this.myPos + 2);
-                        msg += ` 🚀 BOOST +2 POLA!`;
-                        Sound.play('dash');
-                    } else if(tile.t === 'back') {
-                        this.myPos = Math.max(0, this.myPos - 2);
-                        msg += ` 💀 PUŁAPKA -2 POLA!`;
-                        Sound.play('hit');
-                    } else if(tile.t === 'prison') {
-                        this.myPrison = 1;
-                        msg += ` 🔒 TRAFIA DO WIĘZIENIA NA 1 TURĘ!`;
-                        Sound.play('boom');
-                    } else if(tile.t === 'card') {
-                        const pool = ['double', 'dash3', 'sabotage'];
-                        const newC = pool[Math.floor(Math.random()*pool.length)];
-                        this.myCards.push(newC);
-                        this.renderCardsUI();
-                        msg += ` 🃏 ZDOBYWA KARTĘ WSPOMAGAJĄCĄ!`;
+                let ticks = 0;
+                const diceTimer = setInterval(() => {
+                    Sound.play('tick');
+                    dBox.innerText = Math.floor(Math.random() * maxRoll) + 1;
+                    dBox.style.transform = `rotate(${(ticks % 2 === 0 ? 12 : -12)}deg) scale(1.1)`;
+                    ticks++;
+                    if(ticks > 14) {
+                        clearInterval(diceTimer);
+                        dBox.innerText = finalRoll;
+                        dBox.style.transform = 'rotate(0deg) scale(1.25)';
+                        dSub.innerText = `WYRZUCONO: ${finalRoll}!`;
                         Sound.play('coin');
+
+                        setTimeout(() => {
+                            dOv.style.display = 'none';
+                            let dest = Math.min(30, this.myPos + finalRoll);
+                            this.animateStepsTo(dest, () => this.triggerTileEffect(myName, finalRoll));
+                        }, 850);
                     }
+                }, 75);
+            },
 
-                    db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: this.myPrison });
-                    db.ref(`rooms/${currentRoom}`).update({ boardMsg: msg });
+            triggerTileEffect(myName, roll) {
+                let tile = BOARD_TILES[this.myPos];
+                let msg = `🎲 ${myName} wyrzucił [${roll}] i stanął na polu: ${tile.n}!`;
 
-                    if(this.myPos >= 25) {
-                        if(Game.me) Game.me.score += 500;
-                        db.ref(`room_players/${currentRoom}/${myId}`).update({ score: 999 });
-                        db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                if(tile.t === 'boost') {
+                    Sound.play('dash');
+                    announce("🚀 POLE BOOST! +2 POLA!", 1300);
+                    this.animateStepsTo(Math.min(30, this.myPos + 2), () => this.finishTurnCheck(msg + " 🚀 (+2 pola)"));
+                } else if(tile.t === 'back') {
+                    let penalty = this.myPos === 29 ? 3 : 2;
+                    Sound.play('hit');
+                    announce(`💀 PUŁAPKA! -${penalty} POLA!`, 1300);
+                    this.animateStepsTo(Math.max(0, this.myPos - penalty), () => this.finishTurnCheck(msg + ` 💀 (-${penalty} pola)`));
+                } else if(tile.t === 'prison') {
+                    this.myPrison = 1;
+                    Sound.play('boom');
+                    announce("🔒 TRAFIASZ DO WIĘZIENIA NA 1 TURĘ!", 1500);
+                    this.finishTurnCheck(msg + " 🔒 (Więzienie!)");
+                } else if(tile.t === 'card') {
+                    const pool = ['double', 'dash3', 'magnet'];
+                    this.myCards.push(pool[Math.floor(Math.random()*pool.length)]);
+                    this.renderCardsUI();
+                    Sound.play('coin');
+                    announce("🃏 ZDOBYWASZ KARTĘ WSPOMAGAJĄCĄ!", 1500);
+                    this.finishTurnCheck(msg + " 🃏 (Nowa Karta!)");
+                } else if(tile.t === 'swap') {
+                    let others = Object.keys(netPlayers);
+                    if(others.length > 0) {
+                        let tid = others[Math.floor(Math.random()*others.length)];
+                        let theirPos = netPlayers[tid].boardPos || 0;
+                        let oldMyPos = this.myPos;
+                        this.myPos = theirPos; this.visualPos = theirPos;
+                        db.ref(`room_players/${currentRoom}/${tid}`).update({ boardPos: oldMyPos });
+                        Sound.play('jackpot');
+                        announce(`🔀 ZAMIANA MIEJSC Z GRACZEM ${netPlayers[tid].name}!`, 1700);
+                        this.finishTurnCheck(msg + ` 🔀 Zamienił się miejscami z ${netPlayers[tid].name}!`);
                     } else {
-                        setTimeout(() => this.advanceTurn(), 1300);
+                        this.finishTurnCheck(msg);
                     }
-                }, 900);
+                } else if(tile.t === 'casino') {
+                    // Otwieramy Automat Jednorękiego Bandyty!
+                    this.openSlotMachineModal(myName);
+                } else {
+                    this.finishTurnCheck(msg);
+                }
+            },
+
+            openSlotMachineModal(myName) {
+                const modal = document.getElementById('casinoModal');
+                const btn = document.getElementById('btnSpinSlot');
+                document.getElementById('slotResultText').innerText = "Pociągnij za dźwignię automatu!";
+                btn.disabled = false;
+                modal.style.display = 'flex';
+            },
+
+            spinSlotMachine() {
+                const btn = document.getElementById('btnSpinSlot');
+                btn.disabled = true;
+                const symbols = ['🍒', '💎', '7️⃣', '🃏', '💀'];
+                const r1 = document.getElementById('reel1'), r2 = document.getElementById('reel2'), r3 = document.getElementById('reel3');
+                const resTxt = document.getElementById('slotResultText');
+                let ticks = 0;
+
+                const spinInt = setInterval(() => {
+                    Sound.play('tick');
+                    r1.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+                    r2.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+                    r3.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+                    ticks++;
+                    if(ticks > 18) {
+                        clearInterval(spinInt);
+                        const myName = document.getElementById('playerName').value.trim() || 'Paweł';
+                        let rollOutcome = Math.random();
+                        let cMsg = '';
+
+                        if(rollOutcome < 0.30) {
+                            r1.innerText = '7️⃣'; r2.innerText = '7️⃣'; r3.innerText = '7️⃣';
+                            resTxt.innerText = "🎰 JACKPOT 777! +4 POLA DO PRZODU!";
+                            Sound.play('jackpot');
+                            cMsg = `🎰 ${myName} rozbił BANK W KASYNIE (777) i skacze +4 pola!`;
+                            setTimeout(() => {
+                                document.getElementById('casinoModal').style.display = 'none';
+                                this.animateStepsTo(Math.min(30, this.myPos + 4), () => this.finishTurnCheck(cMsg));
+                            }, 1600);
+                        } else if(rollOutcome < 0.65) {
+                            r1.innerText = '🃏'; r2.innerText = '🃏'; r3.innerText = '💎';
+                            resTxt.innerText = "🃏 WYGRANA! OTRZYMUJESZ ZŁOTĄ KOSTKĘ!";
+                            Sound.play('coin');
+                            this.myCards.push('double');
+                            this.renderCardsUI();
+                            cMsg = `🎰 ${myName} wygrał w Kasynie Kartę Złotej Kostki!`;
+                            setTimeout(() => {
+                                document.getElementById('casinoModal').style.display = 'none';
+                                this.finishTurnCheck(cMsg);
+                            }, 1500);
+                        } else if(rollOutcome < 0.85) {
+                            r1.innerText = '🍒'; r2.innerText = '🍒'; r3.innerText = '🍒';
+                            resTxt.innerText = "🍒 BONUS! +2 POLA DO PRZODU!";
+                            Sound.play('coin');
+                            cMsg = `🎰 ${myName} trafił wiśnie w Kasynie (+2 pola)!`;
+                            setTimeout(() => {
+                                document.getElementById('casinoModal').style.display = 'none';
+                                this.animateStepsTo(Math.min(30, this.myPos + 2), () => this.finishTurnCheck(cMsg));
+                            }, 1500);
+                        } else {
+                            r1.innerText = '💀'; r2.innerText = '💀'; r3.innerText = '💀';
+                            resTxt.innerText = "💀 BANKRUT! COFASZ SIĘ O 2 POLA!";
+                            Sound.play('boom');
+                            cMsg = `🎰 ${myName} zbankrutował w Kasynie (-2 pola)!`;
+                            setTimeout(() => {
+                                document.getElementById('casinoModal').style.display = 'none';
+                                this.animateStepsTo(Math.max(0, this.myPos - 2), () => this.finishTurnCheck(cMsg));
+                            }, 1500);
+                        }
+                    }
+                }, 80);
+            },
+
+            finishTurnCheck(msg) {
+                db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: this.myPrison });
+                db.ref(`rooms/${currentRoom}`).update({ boardMsg: msg });
+
+                if(this.myPos >= 30) {
+                    if(Game.me) Game.me.score += 500;
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ score: 999 });
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                } else {
+                    setTimeout(() => this.advanceTurn(), 1100);
+                }
             },
 
             advanceTurn() {
                 let nextIdx = RoomState.turnIdx + 1;
                 if(nextIdx >= RoomState.turnOrder.length) {
-                    // Wszyscy rzucili kostką -> uruchamiamy Ruletkę Minigier!
-                    const games = ['arena', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
-                    const maps = ['forest', 'cyber', 'ice', 'lava'];
-                    const pickedGame = games[Math.floor(Math.random()*games.length)];
-                    const pickedMap = maps[Math.floor(Math.random()*maps.length)];
+                    // Wszyscy wykonali ruch -> losujemy UNIKALNĄ minigrę i biom!
+                    const pickedGame = drawNextUniqueMinigame();
+                    const pickedMap = drawNextUniqueMap();
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'roulette', activeMinigame: pickedGame, map: pickedMap, turnIdx: 0
                     });
@@ -695,87 +915,120 @@
 
             pickRewardCard(cardType) {
                 Sound.play('coin');
+                const myName = document.getElementById('playerName').value.trim() || 'Paweł';
                 if(cardType === 'dash3') {
-                    this.myPos = Math.min(25, this.myPos + 3);
+                    this.myPos = Math.min(30, this.myPos + 3);
+                    this.visualPos = this.myPos;
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos });
                 } else {
                     this.myCards.push(cardType);
                     this.renderCardsUI();
                 }
-                const myName = document.getElementById('playerName').value.trim() || 'Paweł';
-                if(this.myPos >= 25) {
+                if(this.myPos >= 30) {
                     db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'board', turnIdx: 0,
-                        boardMsg: `🏆 ${myName} odebrał Kartę za wygraną minigrę! Nowa runda rzutów!`
+                        boardMsg: `🏆 ${myName} wybrał Kartę Nagrody! Nowa tura rzutów kostką!`
                     });
                 }
             },
 
             drawBoard(ctx) {
-                ctx.fillStyle = '#0d1322';
+                // Animowane morze z falami Pixel-Art
+                ctx.fillStyle = '#0c223d';
                 ctx.fillRect(0, 0, W, H);
 
                 ctx.save();
-                // Centrowanie planszy 1280x720
                 let scale = Math.min(W / 1320, H / 760);
-                ctx.translate((W - 1280*scale)/2, (H - 720*scale)/2 + 30);
+                ctx.translate((W - 1280*scale)/2, (H - 720*scale)/2 + 28);
                 ctx.scale(scale, scale);
 
-                // Tło wyspy pixel-art
-                ctx.fillStyle = '#1b3826'; ctx.fillRect(80, 90, 1120, 560);
-                ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 6; ctx.strokeRect(80, 90, 1120, 560);
+                // Fale na wodzie
+                ctx.fillStyle = '#15365e';
+                let waveShift = Math.sin(performance.now()*0.003)*12;
+                for(let wx=40; wx<1240; wx+=120) {
+                    for(let wy=40; wy<680; wy+=90) {
+                        ctx.fillRect(wx + waveShift, wy, 36, 6);
+                    }
+                }
 
-                // Ścieżki łączące pola
-                ctx.strokeStyle = '#6e5233'; ctx.lineWidth = 28;
+                // Złota plaża wyspy
+                ctx.fillStyle = '#e6c875'; ctx.fillRect(65, 85, 1150, 580);
+                // Zielona wyspa główna
+                ctx.fillStyle = '#1e4620'; ctx.fillRect(85, 105, 1110, 540);
+                // Strefa Las Vegas (Fioletowy dywan kasynowy pośrodku)
+                ctx.fillStyle = '#291536'; ctx.fillRect(105, 255, 960, 110);
+                // Strefa Wulkanu na północy
+                ctx.fillStyle = '#2b1b1e'; ctx.fillRect(380, 115, 800, 110);
+
+                ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 6; ctx.strokeRect(65, 85, 1150, 580);
+
+                // Ścieżka między polami
+                ctx.strokeStyle = '#8c673a'; ctx.lineWidth = 26;
                 ctx.beginPath();
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y); else ctx.lineTo(t.x, t.y); });
                 ctx.stroke();
 
-                // Rysowanie poszczególnych pól (0..25)
+                // Rysowanie 31 pól (0..30)
                 BOARD_TILES.forEach((t, i) => {
                     ctx.save();
                     ctx.translate(t.x, t.y);
-                    ctx.fillStyle = '#000'; ctx.fillRect(-44, -34, 88, 68);
-                    let col = '#d4c29a';
+                    ctx.fillStyle = '#000'; ctx.fillRect(-42, -30, 84, 60);
+                    let col = '#dfd0b8';
                     if(t.t === 'start') col = '#00e676';
                     else if(t.t === 'goal') col = '#ffde00';
                     else if(t.t === 'boost') col = '#05d5fa';
                     else if(t.t === 'back') col = '#ff2a6d';
                     else if(t.t === 'prison') col = '#6c5ce7';
                     else if(t.t === 'card') col = '#e040fb';
+                    else if(t.t === 'casino') col = '#ff9100';
+                    else if(t.t === 'swap') col = '#00e5ff';
 
-                    ctx.fillStyle = col; ctx.fillRect(-40, -30, 80, 60);
-                    ctx.fillStyle = '#000'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-                    ctx.fillText(t.n, 0, 4);
+                    ctx.fillStyle = col; ctx.fillRect(-38, -26, 76, 52);
+                    ctx.fillStyle = '#000'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText(t.n, 0, 3);
                     ctx.restore();
                 });
 
-                // Rysowanie pionków graczy na polach
-                let allP = [{ id: myId, name: document.getElementById('playerName').value || 'Ty', color: document.getElementById('playerColor').value, skin: chosenSkin, pos: this.myPos, prison: this.myPrison }];
+                // Interpolacja pozycji pionków dla płynnego ruchu
+                let allP = [{
+                    id: myId, name: document.getElementById('playerName').value || 'Ty',
+                    color: document.getElementById('playerColor').value, skin: chosenSkin,
+                    vPos: this.visualPos, jump: this.jumpHeight, pos: this.myPos, prison: this.myPrison
+                }];
+
                 Object.entries(netPlayers).forEach(([pid, p]) => {
-                    allP.push({ id: pid, name: p.name, color: p.color, skin: p.skin || 'cap', pos: p.boardPos || 0, prison: p.prison || 0 });
+                    let targetP = p.boardPos || 0;
+                    if(this.netVisualPos[pid] === undefined) this.netVisualPos[pid] = targetP;
+                    this.netVisualPos[pid] += (targetP - this.netVisualPos[pid]) * 0.18;
+                    let netJump = Math.abs(targetP - this.netVisualPos[pid]) > 0.1 ? Math.abs(Math.sin(performance.now()*0.015))*18 : 0;
+                    allP.push({ id: pid, name: p.name, color: p.color, skin: p.skin || 'cap', vPos: this.netVisualPos[pid], jump: netJump, pos: targetP, prison: p.prison || 0 });
                 });
 
                 allP.forEach((p, idx) => {
-                    let tile = BOARD_TILES[Math.min(25, p.pos)] || BOARD_TILES[0];
-                    let ox = (idx % 2 === 0 ? -16 : 16);
-                    let oy = (idx < 2 ? -14 : 14);
-                    drawPixelHero(ctx, tile.x + ox, tile.y + oy, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', performance.now()*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '');
+                    let lowIdx = Math.floor(Math.min(30, Math.max(0, p.vPos)));
+                    let highIdx = Math.min(30, lowIdx + 1);
+                    let frac = p.vPos - lowIdx;
+                    let t1 = BOARD_TILES[lowIdx], t2 = BOARD_TILES[highIdx];
+                    let px = t1.x + (t2.x - t1.x) * frac;
+                    let py = t1.y + (t2.y - t1.y) * frac;
+
+                    let ox = (idx % 2 === 0 ? -14 : 14);
+                    let oy = (idx < 2 ? -10 : 10) - p.jump;
+                    drawPixelHero(ctx, px + ox, py + oy, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', performance.now()*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '');
                 });
 
                 ctx.restore();
 
-                // Aktualizacja tabeli po prawej (według pola na planszy)
                 allP.sort((a,b) => b.pos - a.pos);
                 document.getElementById('liveScoreboard').innerHTML = allP.map((p, i) =>
-                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">Pole ${p.pos}/25</span></li>`
+                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">Pole ${p.pos}/30</span></li>`
                 ).join('');
             }
         };
 
-        // === MAPY I PRZESZKODY PIXEL-ART ===
+        // === MAPY I PRZESZKODY MINIGIER ===
         const WORLD_SIZE = 1600;
         const propDecorations = [];
         for(let i=0; i<95; i++) {
@@ -788,39 +1041,35 @@
                 obstacles: [
                     {x:320, y:320, w:120, h:120, t:'crate'}, {x:1160, y:320, w:120, h:120, t:'crate'},
                     {x:320, y:1160, w:120, h:120, t:'crate'}, {x:1160, y:1160, w:120, h:120, t:'crate'},
-                    {x:740, y:440, w:120, h:80, t:'tree'}, {x:740, y:1080, w:120, h:80, t:'tree'},
-                    {x:440, y:740, w:80, h:120, t:'tree'}, {x:1080, y:740, w:80, h:120, t:'tree'}
+                    {x:740, y:440, w:120, h:80, t:'tree'}, {x:740, y:1080, w:120, h:80, t:'tree'}
                 ]
             },
             cyber: {
-                bg: '#0e0b1c', tileAlt: '#151029', friction: 0.85,
+                bg: '#120924', tileAlt: '#1b0e36', friction: 0.85,
                 obstacles: [
                     {x:340, y:340, w:130, h:90, t:'neon'}, {x:1130, y:340, w:130, h:90, t:'neon'},
-                    {x:340, y:1170, w:130, h:90, t:'neon'}, {x:1130, y:1170, w:130, h:90, t:'neon'},
-                    {x:740, y:740, w:120, h:120, t:'neon'}
+                    {x:340, y:1170, w:130, h:90, t:'neon'}, {x:1130, y:1170, w:130, h:90, t:'neon'}
                 ]
             },
             ice: {
                 bg: '#b8e0f5', tileAlt: '#a5d4ed', friction: 0.96,
                 obstacles: [
                     {x:380, y:380, w:160, h:80, t:'ice'}, {x:1060, y:380, w:160, h:80, t:'ice'},
-                    {x:380, y:1140, w:160, h:80, t:'ice'}, {x:1060, y:1140, w:160, h:80, t:'ice'},
-                    {x:740, y:740, w:120, h:120, t:'ice'}
+                    {x:380, y:1140, w:160, h:80, t:'ice'}, {x:1060, y:1140, w:160, h:80, t:'ice'}
                 ]
             },
             lava: {
                 bg: '#1c1518', tileAlt: '#241b1f', friction: 0.82,
                 obstacles: [
                     {x:300, y:300, w:140, h:140, t:'lava'}, {x:1160, y:300, w:140, h:140, t:'lava'},
-                    {x:300, y:1160, w:140, h:140, t:'lava'}, {x:1160, y:1160, w:140, h:140, t:'lava'},
-                    {x:680, y:340, w:240, h:70, t:'rock'}, {x:680, y:1190, w:240, h:70, t:'rock'}
+                    {x:300, y:1160, w:140, h:140, t:'lava'}, {x:1160, y:1160, w:140, h:140, t:'lava'}
                 ]
             }
         };
 
         const WEAPONS = {
-            pistol:  { name: 'Pistolet',  rate: 0.23, dmg: 22, proj: 1, spread: 0.04, spd: 1300, knock: 150, snd: 'shoot', bType: 'norm' },
-            shotgun: { name: 'Strzelba',  rate: 0.68, dmg: 18, proj: 6, spread: 0.28, spd: 1150, knock: 340, snd: 'shotgun', bType: 'norm' },
+            pistol:  { name: 'Pistolet',  rate: 0.23, dmg: 22, proj: 1, spread: 0.04, spd: 1300, knock: 160, snd: 'shoot', bType: 'norm' },
+            shotgun: { name: 'Strzelba',  rate: 0.68, dmg: 18, proj: 6, spread: 0.28, spd: 1150, knock: 360, snd: 'shotgun', bType: 'norm' },
             minigun: { name: 'Minigun',   rate: 0.08, dmg: 12, proj: 1, spread: 0.14, spd: 1350, knock: 95,  snd: 'shoot', bType: 'norm' },
             sniper:  { name: 'Snajperka', rate: 0.90, dmg: 85, proj: 1, spread: 0.00, spd: 2050, knock: 500, snd: 'sniper', bType: 'norm' },
             plasma:  { name: 'Plazma (Odbicia)', rate: 0.18, dmg: 28, proj: 1, spread: 0.05, spd: 1100, knock: 180, snd: 'plasma', bType: 'bounce' },
@@ -850,7 +1099,7 @@
 
                     if(e.code === 'Space' && Game.me) Game.me.tryDash();
                     if(e.code === 'KeyE' && Game.me) {
-                        const emotes = ['😎', '🔥', '💀', '😂', '👑', '🎉'];
+                        const emotes = ['😎', '🔥', '💀', '😂', '👑', '🎰'];
                         Chat.sendEmote(emotes[Math.floor(Math.random()*emotes.length)]);
                     }
                 });
@@ -965,12 +1214,9 @@
                 ctx.fillStyle = '#8c5828'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
                 ctx.fillStyle = '#6e4219';
                 for(let py = o.y+P*4; py < o.y+o.h-P*2; py += P*5) ctx.fillRect(o.x+P*2, py, o.w-P*4, P);
-                ctx.fillStyle = '#ab713b';
-                ctx.fillRect(o.x+P*2, o.y+P*2, o.w-P*4, P*2);
-                ctx.fillRect(o.x+P*2, o.y+o.h-P*4, o.w-P*4, P*2);
             } else if(o.t === 'neon') {
-                ctx.fillStyle = '#05d5fa'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#18122b'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.fillStyle = '#240d3b'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(o.x+P*3, o.y+P*3, o.w-P*6, P*2);
             } else if(o.t === 'tree') {
                 ctx.fillStyle = '#0d1f0c'; ctx.fillRect(o.x, o.y, o.w, o.h);
@@ -979,7 +1225,6 @@
             } else if(o.t === 'ice') {
                 ctx.fillStyle = '#1d4f66'; ctx.fillRect(o.x, o.y, o.w, o.h);
                 ctx.fillStyle = '#5bc0eb'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
-                ctx.fillStyle = '#a3e2ff'; ctx.fillRect(o.x+P*2, o.y+P*2, o.w-P*6, P*3);
             } else {
                 ctx.fillStyle = '#141013'; ctx.fillRect(o.x, o.y, o.w, o.h);
                 ctx.fillStyle = '#3d3338'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
@@ -1104,7 +1349,7 @@
             ctx.restore();
         }
 
-        // === KLASA GRACZA W MINIGRZE ===
+        // === KLASA LOKALNEGO GRACZA ===
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
@@ -1112,7 +1357,7 @@
                 this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
                 this.angle = 0; this.anim = 0; this.muzzle = 0;
                 this.hp = 100; this.maxHp = 100; this.shield = 0;
-                this.wep = RoomState.activeMinigame === 'sniper' ? 'sniper' : 'pistol';
+                this.wep = RoomState.activeMinigame === 'sniper' ? 'sniper' : (RoomState.activeMinigame === 'meteors' ? 'shotgun' : 'pistol');
                 this.fireCd = 0; this.dashCd = 0; this.dashTime = 0;
                 this.quadTime = 0; this.speedTime = 0;
                 this.emote = ''; this.emoteTimer = 0;
@@ -1125,7 +1370,7 @@
             }
             tryDash() {
                 if(this.dashCd <= 0 && !this.isDead && RoomState.status === 'playing') {
-                    this.dashCd = 1.7; this.dashTime = 0.16;
+                    this.dashCd = 1.6; this.dashTime = 0.16;
                     Sound.play('dash');
                     FX.burst(this.x, this.y, '#05d5fa', 10, 130, 5);
                 }
@@ -1138,6 +1383,12 @@
                 if(this.speedTime > 0) this.speedTime -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
+                // W trybie Deszczu Meteorytów dostajesz +2 pkt za każdą sekundę przeżycia
+                if(gm === 'meteors' && !this.isDead) {
+                    this.survTick = (this.survTick || 0) + dt;
+                    if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
+                }
+
                 if(this.isDead) {
                     if(gm !== 'bomb') {
                         this.respawnTimer -= dt;
@@ -1145,7 +1396,7 @@
                             this.isDead = false; this.hp = 100; this.shield = 0;
                             this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
                             this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                            this.wep = gm === 'sniper' ? 'sniper' : 'pistol';
+                            this.wep = gm === 'sniper' ? 'sniper' : (gm === 'meteors' ? 'shotgun' : 'pistol');
                             FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
                         }
                     }
@@ -1300,7 +1551,7 @@
                     Sound.play('boom');
                     FX.text(this.x, this.y, "ZGON!", "#ff2a6d", 14);
 
-                    if(RoomState.activeMinigame === 'coins') {
+                    if(RoomState.activeMinigame === 'coins' || RoomState.activeMinigame === 'heist') {
                         let lost = Math.floor(this.score / 2);
                         this.score -= lost;
                         if(attackerId && attackerId !== myId) {
@@ -1313,25 +1564,29 @@
             }
         }
 
-        // === SILNIK GRY I RULETKI ===
+        // === GŁÓWNA PĘTLA MINIGIER ===
         const Game = {
             me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
-            hostZombies: [],
+            hostZombies: [], hostMeteors: [],
 
-            runRouletteAnimation(targetGame) {
+            runRouletteAnimation(targetGame, targetMap) {
                 switchScreen(null);
                 document.getElementById('boardHud').style.display = 'none';
                 document.getElementById('hud').style.display = 'none';
                 const ov = document.getElementById('rouletteOverlay');
                 const box = document.getElementById('rouletteBox');
+                const mapTxt = document.getElementById('rouletteMapText');
                 ov.style.display = 'flex';
 
                 const labels = {
-                    arena: '🔫 ARENA PvP', royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
+                    arena: '🔫 ARENA PvP', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
+                    royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA', sniper: '🎯 SNAJPERZY', coins: '💎 ZŁOTA GORĄCZKA'
                 };
+                const mapNames = { forest: '🌲 Leśny Bunkier', cyber: '🟣 Cyber-Vegas', ice: '❄️ Lodowa Twierdza', lava: '🌋 Wulkaniczny Krater' };
                 const keys = Object.keys(labels);
                 let count = 0;
+
                 const spin = setInterval(() => {
                     Sound.play('tick');
                     box.innerText = labels[keys[count % keys.length]];
@@ -1339,18 +1594,19 @@
                     if(count > 18) {
                         clearInterval(spin);
                         box.innerText = labels[targetGame] || '🔫 ARENA PvP';
-                        Sound.play('coin');
+                        mapTxt.innerText = `ARENA: ${mapNames[targetMap] || 'Leśny Bunkier'}`;
+                        Sound.play('jackpot');
                         setTimeout(() => {
                             ov.style.display = 'none';
                             if(isHost) {
                                 db.ref(`room_items/${currentRoom}`).remove();
                                 db.ref(`rooms/${currentRoom}`).update({
-                                    status: 'playing', timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, zombies: "[]"
+                                    status: 'playing', timer: RoomState.matchDuration, stormR: 1100, vaultHp: 500, bombHolder: null, zombies: "[]", meteors: "[]"
                                 });
                             }
-                        }, 1400);
+                        }, 1500);
                     }
-                }, 110);
+                }, 105);
             },
 
             startMatch() {
@@ -1363,7 +1619,7 @@
                     document.getElementById('playerColor').value,
                     chosenSkin
                 );
-                this.bullets = []; this.hostZombies = []; FX.parts = []; FX.texts = []; FX.decals = []; FX.rings = [];
+                this.bullets = []; this.hostZombies = []; this.hostMeteors = []; FX.parts = []; FX.texts = []; FX.decals = []; FX.rings = [];
 
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'block';
@@ -1373,7 +1629,8 @@
                 document.getElementById('hudWeapon').innerText = gm === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : (gm === 'sniper' ? 'BROŃ: Snajperka (1 HIT)' : 'BROŃ: Pistolet');
 
                 const modeTitles = {
-                    arena: '🔫 ARENA PvP', royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
+                    arena: '🔫 ARENA PvP', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
+                    royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA',
                     sniper: '🎯 TYLKO SNAJPERKI', coins: '💎 ZŁOTA GORĄCZKA'
                 };
@@ -1442,6 +1699,28 @@
 
                 if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 1.2);
 
+                // Tryb: Deszcz Meteorytów
+                if(gm === 'meteors') {
+                    if(Math.random() < 0.35 && this.hostMeteors.length < 10) {
+                        this.hostMeteors.push({
+                            id: 'm_' + Math.random().toString(36).substr(2, 4),
+                            x: 200 + Math.round(Math.random()*1200),
+                            y: 200 + Math.round(Math.random()*1200),
+                            t: 1.6, r: 95
+                        });
+                    }
+                    for(let i = this.hostMeteors.length - 1; i >= 0; i--) {
+                        let m = this.hostMeteors[i];
+                        m.t -= 0.1;
+                        if(m.t <= 0) {
+                            db.ref(`events/${currentRoom}`).push({ type: 'meteorBoom', x: m.x, y: m.y, r: m.r });
+                            this.hostMeteors.splice(i, 1);
+                        }
+                    }
+                    db.ref(`rooms/${currentRoom}`).update({ meteors: JSON.stringify(this.hostMeteors) });
+                }
+
+                // Spawning skrzynek i monet
                 if(gm === 'coins') {
                     if(Math.random() < 0.18 && Object.keys(netItems).length < 18) {
                         let iid = 'c_' + Math.random().toString(36).substr(2, 5);
@@ -1518,7 +1797,6 @@
                 }
 
                 if(RoomState.timer <= 0) {
-                    // Wyłonienie zwycięzcy minigry
                     let list = [{ id: myId, score: this.me ? this.me.score : 0 }];
                     Object.entries(netPlayers).forEach(([pid, p]) => list.push({ id: pid, score: p.score || 0 }));
                     list.sort((a,b) => b.score - a.score);
@@ -1549,6 +1827,16 @@
 
                     if(b.bType === 'rocket' && Math.random() < 0.6) FX.burst(b.x, b.y, '#888888', 1, 30, 5);
 
+                    // Trafienie w Złoty Sejf Kasyna (Tryb Heist)
+                    if(gm === 'heist' && Math.hypot(b.x - 800, b.y - 800) < 55) {
+                        FX.burst(b.x, b.y, '#ffde00', 6, 140, 5);
+                        if(b.isMine) {
+                            Sound.play('coin');
+                            db.ref(`events/${currentRoom}`).push({ type: 'hitVault', x: b.x, y: b.y });
+                        }
+                        this.bullets.splice(i,1); continue;
+                    }
+
                     let hitObs = obstacles.find(o => o.t !== 'lava' && b.x > o.x && b.x < o.x+o.w && b.y > o.y && b.y < o.y+o.h);
                     let outBounds = b.x < 10 || b.x > WORLD_SIZE-10 || b.y < 10 || b.y > WORLD_SIZE-10;
 
@@ -1572,7 +1860,7 @@
 
                     if(!b.isMine) continue;
 
-                    if(['arena', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
+                    if(['arena', 'meteors', 'heist', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
                         for(let [pid, p] of Object.entries(netPlayers)) {
                             if(!p.isDead && Math.hypot(b.x - p.x, b.y - p.y) < 22) {
                                 if(b.bType === 'rocket') {
@@ -1580,11 +1868,12 @@
                                     this.bullets.splice(i,1); break;
                                 }
                                 let angle = Math.atan2(b.vy, b.vx);
-                                let appliedDmg = gm === 'koth' ? 6 : b.dmg;
+                                let appliedDmg = (gm === 'koth' || gm === 'meteors') ? 6 : b.dmg;
+                                let appliedKnock = gm === 'meteors' ? b.knock * 1.45 : b.knock;
                                 db.ref(`events/${currentRoom}`).push({
                                     type: 'hitPlayer', target: pid, attacker: myId,
                                     dmg: appliedDmg,
-                                    kx: Math.cos(angle)*b.knock, ky: Math.sin(angle)*b.knock
+                                    kx: Math.cos(angle)*appliedKnock, ky: Math.sin(angle)*appliedKnock
                                 });
                                 FX.text(p.x, p.y, `-${appliedDmg}`, '#ffde00', 11);
                                 FX.burst(b.x, b.y, '#d91643', 6, 150, 5);
@@ -1634,7 +1923,7 @@
                     : `00:${secs.toString().padStart(2,'0')}`;
                 document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
                 document.getElementById('shieldBar').style.width = `${Math.min(100, (this.me.shield/50)*100)}%`;
-                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.7 - this.me.dashCd)/1.7)*100)}%`;
+                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.6 - this.me.dashCd)/1.6)*100)}%`;
 
                 let buffs = [];
                 if(this.me.quadTime > 0) buffs.push(`🔥 2X DMG (${Math.ceil(this.me.quadTime)}s)`);
@@ -1670,6 +1959,31 @@
                 });
 
                 FX.drawDecals();
+
+                // Cienie nadlatujących Meteorytów
+                if(gm === 'meteors') {
+                    netMeteors.forEach(m => {
+                        ctx.fillStyle = 'rgba(255, 42, 109, 0.28)';
+                        ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill();
+                        ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.stroke();
+                        // Spadająca kometa z góry
+                        let dropOffset = Math.max(0, m.t * 260);
+                        ctx.fillStyle = '#ff9100';
+                        ctx.fillRect(m.x - 16, m.y - dropOffset - 16, 32, 32);
+                    });
+                }
+
+                // Złoty Sejf Kasyna na środku (Tryb Heist)
+                if(gm === 'heist') {
+                    ctx.save(); ctx.translate(800, 800);
+                    ctx.fillStyle = '#000'; ctx.fillRect(-52, -52, 104, 104);
+                    ctx.fillStyle = '#ffde00'; ctx.fillRect(-46, -46, 92, 92);
+                    ctx.fillStyle = '#b8860b'; ctx.fillRect(-34, -34, 68, 68);
+                    ctx.fillStyle = '#fff'; ctx.font = '9px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText("🎰 SEJF", 0, -58);
+                    ctx.fillText("STRZELAJ!", 0, 5);
+                    ctx.restore();
+                }
 
                 if(gm === 'koth' && RoomState.koth) {
                     let k = RoomState.koth;
@@ -1724,7 +2038,6 @@
                 FX.drawTop();
                 Cam.restore();
 
-                // Minimapa w prawym dolnym rogu
                 const mSize = 110, mx = W - mSize - 14, my = H - mSize - 14, scale = mSize / WORLD_SIZE;
                 ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(mx, my, mSize, mSize);
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(mx, my, mSize, mSize);
@@ -1806,7 +2119,7 @@
                     isHost = true;
                     await db.ref(`rooms/${currentRoom}`).set({
                         status: 'lobby', mode: 'party', activeMinigame: 'arena', map: 'forest',
-                        matchDuration: 60, timer: 60, stormR: 1100, turnIdx: 0, boardMsg: 'Witajcie na Planszy!'
+                        matchDuration: 60, timer: 60, stormR: 1100, turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna!'
                     });
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
@@ -1888,11 +2201,14 @@
                             arr.forEach(z => netZombies[z.id] = z);
                         } catch(e){}
                     }
+                    if(d.meteors) {
+                        try { netMeteors = JSON.parse(d.meteors); } catch(e){}
+                    }
 
                     if(RoomState.status !== d.status) {
                         RoomState.status = d.status;
                         if(d.status === 'board') Board.initBoardView();
-                        else if(d.status === 'roulette') Game.runRouletteAnimation(RoomState.activeMinigame);
+                        else if(d.status === 'roulette') Game.runRouletteAnimation(RoomState.activeMinigame, RoomState.map);
                         else if(d.status === 'playing') Game.startMatch();
                         else if(d.status === 'card_reward') Game.showCardRewardScreen();
                         else if(d.status === 'podium') Game.showPodium();
@@ -1912,7 +2228,10 @@
                     let all = snap.val() || {}; netPlayers = {}; let arr = [];
                     Object.entries(all).forEach(([pid, p]) => {
                         if(pid !== myId) netPlayers[pid] = p;
-                        else if(p.boardPos !== undefined) Board.myPos = p.boardPos;
+                        else if(p.boardPos !== undefined && !Board.rollingLock) {
+                            Board.myPos = p.boardPos;
+                            Board.visualPos = p.boardPos;
+                        }
                         arr.push(p);
                     });
                     document.getElementById('lobbyCount').innerText = arr.length;
@@ -1939,6 +2258,24 @@
 
                     if(ev.type === 'hitPlayer' && ev.target === myId) {
                         Game.me.takeDamage(ev.dmg, ev.attacker, ev.kx, ev.ky);
+                    }
+                    else if(ev.type === 'meteorBoom') {
+                        FX.explosion(ev.x, ev.y);
+                        if(!Game.me.isDead && Math.hypot(Game.me.x - ev.x, Game.me.y - ev.y) < ev.r) {
+                            Game.me.takeDamage(65, null);
+                        }
+                    }
+                    else if(isHost && ev.type === 'hitVault') {
+                        if(Object.keys(netItems).length < 22) {
+                            let angle = Math.random()*Math.PI*2;
+                            let dist = 70 + Math.random()*90;
+                            let iid = 'v_' + Math.random().toString(36).substr(2, 5);
+                            db.ref(`room_items/${currentRoom}/${iid}`).set({
+                                x: Math.round(800 + Math.cos(angle)*dist),
+                                y: Math.round(800 + Math.sin(angle)*dist),
+                                t: Math.random() < 0.35 ? 'gem' : 'coin'
+                            });
+                        }
                     }
                     else if(ev.type === 'kill') {
                         let kPlayer = ev.killer === myId ? Game.me : netPlayers[ev.killer];
@@ -1974,23 +2311,22 @@
                 let order = [myId, ...Object.keys(netPlayers)];
 
                 if(RoomState.mode === 'party') {
-                    // Reset pozycji na planszy przy nowym meczu Party
-                    Board.myPos = 0; Board.myPrison = 0; Board.myCards = [];
+                    Board.myPos = 0; Board.visualPos = 0; Board.myPrison = 0; Board.myCards = [];
                     let pUpdates = {};
                     order.forEach(pid => { pUpdates[`${pid}/boardPos`] = 0; pUpdates[`${pid}/prison`] = 0; pUpdates[`${pid}/score`] = 0; });
                     db.ref(`room_players/${currentRoom}`).update(pUpdates);
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'board', turnOrder: order, turnIdx: 0,
-                        boardMsg: '🎲 Runda 1! Rzucajcie po kolei kostką!'
+                        boardMsg: '🎲 Rozpoczynamy wyścig do pola 30! Rzucajcie po kolei kostką!'
                     });
                 } else if(RoomState.mode === 'roulette') {
-                    const games = ['arena', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
-                    const picked = games[Math.floor(Math.random()*games.length)];
-                    db.ref(`rooms/${currentRoom}`).update({ status: 'roulette', activeMinigame: picked });
+                    const pickedGame = drawNextUniqueMinigame();
+                    const pickedMap = drawNextUniqueMap();
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'roulette', activeMinigame: pickedGame, map: pickedMap });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'playing', activeMinigame: RoomState.mode,
-                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, zombies: "[]"
+                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, zombies: "[]", meteors: "[]"
                     });
                 }
             }
