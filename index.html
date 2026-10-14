@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL - ULTIMATE</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' rx='3' fill='%23151526'/><path fill='%23ffde00' d='M2 5h2v2h2V5h4v2h2V5h2v7H2z'/><rect x='4' y='8' width='2' height='2' fill='%23ff2a6d'/><rect x='10' y='8' width='2' height='2' fill='%2305d5fa'/><rect x='2' y='12' width='12' height='2' fill='%23ff9100'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -15,45 +15,59 @@
 
     <style>
         :root {
-            --bg-grad: radial-gradient(circle at center, rgba(28,16,54,0.92) 0%, rgba(7,7,16,0.98) 100%);
-            --panel-grad: linear-gradient(160deg, #1d1936 0%, #0e0c1c 100%);
+            --bg-grad: radial-gradient(circle at center, rgba(34,16,72,0.92) 0%, rgba(6,6,15,0.98) 100%);
+            --panel-grad: linear-gradient(160deg, #1d1838 0%, #0d0b1a 100%);
+            --accent-glow: #05d5fa;
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #05050a; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: none; image-rendering: pixelated; }
         
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-grad); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(8px); transition: background 0.4s; }
+        .screen {
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px), var(--bg-grad);
+            background-size: 36px 36px, 36px 36px, 100% 100%;
+            width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(8px); transition: all 0.4s;
+        }
         .screen.active { display: flex; }
         
-        .panel { background: var(--panel-grad); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.15rem; max-width: 1180px; width: 96%; text-align: center; position: relative; max-height: 95vh; overflow-y: auto; }
-        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.6rem 0.85rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 9px; outline: none; text-shadow: 2px 2px 0 #000; }
-        .btn:hover { filter: brightness(1.15); }
+        .panel {
+            background: var(--panel-grad); border: 4px solid #fff;
+            box-shadow: 0 0 25px rgba(5,213,250,0.22), 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.88), inset 0 4px 0 rgba(255,255,255,0.18);
+            padding: 1rem 1.25rem; max-width: 1240px; width: 97%; text-align: center; position: relative; max-height: 96vh; overflow-y: auto;
+        }
+        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.55rem 0.8rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 9px; outline: none; text-shadow: 2px 2px 0 #000; }
+        .btn:hover { filter: brightness(1.18); }
         .btn:active { transform: translateY(3px); box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.45), 0 1px 0 #000; }
         .btn:disabled { background: #444; color: #888; border-color: #777; cursor: not-allowed; filter: none; }
         
-        .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.5rem; width: 100%; text-align: center; font-size: 9px; }
+        .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.45rem; width: 100%; text-align: center; font-size: 8px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #151526 0%, #0c0c16 100%); padding: 6px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 3px 0 #000; }
+        .mode-card { position: relative; border: 3px solid #2d2d48; background: linear-gradient(180deg, #161629 0%, #0b0b15 100%); padding: 6px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 3px 0 #000; }
         .mode-card:hover { border-color: #666699; transform: translateY(-2px); }
-        .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1e2240 0%, #121529 100%); box-shadow: inset 0 0 12px rgba(5,213,250,0.35), 0 3px 0 #000; }
+        .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1e2548 0%, #10142a 100%); box-shadow: inset 0 0 14px rgba(5,213,250,0.4), 0 3px 0 #000; }
+        .mode-card.excluded { opacity: 0.42; border-color: #4a1525; background: #12080c; }
 
-        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 6px 4px; cursor: pointer; font-size: 7px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
-        .skin-card:hover { border-color: #777; color: #fff; }
-        .skin-card.selected { border-color: #ffde00; color: #fff; background: #2b2612; transform: translateY(-2px); box-shadow: 0 0 10px rgba(255,222,0,0.4); }
+        .pool-badge { position: absolute; top: 3px; right: 3px; font-size: 9px; padding: 1px 3px; border-radius: 2px; background: rgba(0,0,0,0.7); border: 1px solid #555; z-index: 5; }
+        .pool-badge:hover { transform: scale(1.2); border-color: #ffde00; }
+
+        .skin-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #141424 0%, #0a0a12 100%); padding: 5px 3px; cursor: pointer; font-size: 7px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
+        .skin-card:hover { border-color: #888; color: #fff; }
+        .skin-card.selected { border-color: #ffde00; color: #fff; background: linear-gradient(180deg, #332b10 0%, #1c1707 100%); transform: translateY(-2px); box-shadow: 0 0 12px rgba(255,222,0,0.45); }
 
         .reward-card { border: 4px solid #ffde00; background: linear-gradient(180deg, #25213b 0%, #151224 100%); padding: 14px; cursor: pointer; transition: transform 0.15s; width: 31%; box-shadow: 0 8px 0 #000; }
         .reward-card:hover { transform: translateY(-6px); border-color: #05d5fa; }
 
-        .lobby-slot-box { background: linear-gradient(180deg, #2e113d 0%, #170721 100%); border: 3px solid #ffde00; box-shadow: inset 0 0 15px rgba(255, 42, 109, 0.4), 0 4px 0 #000; padding: 8px; }
-        .mini-reel { width: 44px; height: 48px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .lobby-slot-box { background: linear-gradient(180deg, #321042 0%, #160620 100%); border: 3px solid #ffde00; box-shadow: inset 0 0 18px rgba(255, 42, 109, 0.45), 0 4px 0 #000; padding: 8px; }
+        .mini-reel { width: 44px; height: 46px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
         /* HUD MINIGIER */
-        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.82); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
-        #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 22, 0.86); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
+        #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: auto; }
         
         /* HUD PLANSZÓWKI */
-        #boardHud { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 45; width: 95%; max-width: 960px; display: none; pointer-events: none; }
+        #boardHud { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 45; width: 95%; max-width: 980px; display: none; pointer-events: none; }
         .board-box { background: linear-gradient(180deg, rgba(22,22,42,0.95) 0%, rgba(12,12,24,0.95) 100%); border: 4px solid #ffde00; box-shadow: 0 0 20px rgba(255,222,0,0.25), 8px 8px 0 #000; padding: 10px 16px; pointer-events: auto; }
 
         /* KOSTKA 3D */
@@ -82,36 +96,10 @@
         #shieldBar { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #00b0ff 0%, #80d8ff 100%); width: 0%; opacity: 0.85; }
         #dashBar { height: 100%; background: linear-gradient(90deg, #ffab00 0%, #ffea00 100%); width: 100%; }
 
-        .crt-effect::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
+        .theme-chip { padding: 3px 5px; font-size: 6px; border: 1px solid #fff; cursor: pointer; text-shadow: 1px 1px 0 #000; transition: transform 0.1s; }
+        .theme-chip:hover { transform: scale(1.08); border-color: #ffde00; }
 
-        /* DOPRACOWANY PIXEL-ART: neonowe krawędzie, wejścia paneli i żywe przyciski */
-        @keyframes pixelPanelIn { from { opacity: 0; transform: translateY(14px) scale(.985); filter: brightness(.7); } to { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); } }
-        @keyframes pixelNeonPulse { 0%,100% { box-shadow: 0 0 0 3px #000, 0 0 12px rgba(5,213,250,.12), 8px 8px 0 #000; } 50% { box-shadow: 0 0 0 3px #000, 0 0 24px rgba(5,213,250,.3), 8px 8px 0 #000; } }
-        @keyframes pixelBtnShine { 0%,70%,100% { background-position: 150% 0; } 35% { background-position: -50% 0; } }
-        @keyframes pixelFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        .screen.active .panel { animation: pixelPanelIn .28s steps(5,end) both, pixelNeonPulse 4s ease-in-out infinite; }
-        .btn { background-image: linear-gradient(110deg, transparent 0%, transparent 42%, rgba(255,255,255,.18) 50%, transparent 58%, transparent 100%), linear-gradient(180deg, #ff3877 0%, #d91656 100%); background-size: 240% 100%, 100% 100%; animation: pixelBtnShine 6s linear infinite; }
-        .mode-card, .skin-card, .reward-card, .lobby-slot-box { transition: transform .16s steps(3,end), filter .16s, box-shadow .16s; }
-        .mode-card:hover, .skin-card:hover { filter: brightness(1.18); box-shadow: 0 0 0 2px rgba(5,213,250,.35), 0 5px 0 #000; }
-        .reward-card:hover { animation: pixelFloat .45s steps(3,end) infinite; }
-        #hud { border-color: #ffde00; box-shadow: 0 0 0 3px #000, 0 0 18px rgba(255,222,0,.18), 6px 6px 0 #000; }
-        #hudTimer { color: #ffde00; text-shadow: 2px 2px #000, 0 0 12px rgba(255,222,0,.45); }
-        #centerAnnouncement { animation: pixelFloat .55s steps(3,end) infinite; }
-        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; } }
-        /* Dodatkowy szlif: głębia paneli, wyraźne stany interakcji i wygoda na małych ekranach. */
-        .panel { background-image: radial-gradient(circle at 12% 0%, rgba(5,213,250,.09), transparent 32%), var(--panel-grad); }
-        .btn:focus-visible, .mode-card:focus-visible, .skin-card:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #ffde00; outline-offset: 3px; }
-        .btn, .mode-card, .skin-card { -webkit-tap-highlight-color: transparent; }
-        #chatWidget, .board-box, #hud { backdrop-filter: blur(5px); }
-        #hudTimer { font-variant-numeric: tabular-nums; }
-        @media (max-width: 640px) {
-            .panel { width: 98%; padding: .7rem; border-width: 3px; max-height: 97vh; }
-            .screen.active .panel { animation: pixelPanelIn .2s steps(4,end) both; }
-            #chatWidget { width: min(280px, calc(100vw - 20px)); left: 8px; bottom: 8px; }
-            #hud { top: 8px; left: 8px; padding: 7px 9px; }
-            #hudRight { top: 8px; right: 8px; }
-            #centerAnnouncement { max-width: 94vw; font-size: clamp(12px, 4vw, 20px); }
-        }
+        .crt-effect::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
     </style>
 </head>
 <body id="mainBody" class="crt-effect">
@@ -188,10 +176,10 @@
 
     <!-- RULETKA MINIGIER + LOSOWANIE ŚMIESZNEJ MUTACJI -->
     <div id="rouletteOverlay">
-        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY (13 MINIGIER) 🎡</div>
-        <div class="text-[8px] text-yellow-300 mb-4">Talia bez powtórek + Losowa Śmieszna Klątwa!</div>
+        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY (WYBRANA PULA MINIGIER) 🎡</div>
+        <div class="text-[8px] text-yellow-300 mb-4">Losowanie z Twojej aktywnej listy + Śmieszna Klątwa!</div>
         <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_40px_#05d5fa] mb-3">
-            🔫 ARENA PvP
+            ⚽ PIŁKA NOŻNA
         </div>
         <div id="rouletteMutatorText" class="text-xs text-[#ff2a6d] bg-black/80 border-2 border-[#ff2a6d] px-4 py-2 mb-2">
             🤡 ŚMIESZNY EFEKT: BRAK
@@ -204,20 +192,22 @@
         <div id="hudModeTitle" class="text-xs text-[#05d5fa] mb-1">TRYB</div>
         <div id="hudMutatorBadge" class="text-[8px] text-yellow-300 bg-purple-950 border border-yellow-400 px-2 py-0.5 mb-1 inline-block"></div>
         <div id="hudTimer" class="text-xl text-yellow-400 mb-1">01:00</div>
+        <div id="hudSubTimer" class="text-[9px] text-red-400 mb-1 hidden"></div>
         <div id="squidLightBanner" class="text-[10px] font-bold mb-1 hidden">🟢 ZIELONE ŚWIATŁO!</div>
         <div class="text-[7px] text-gray-300">ZDROWIE + TARCZA</div>
         <div class="bar-wrap"><div id="hpBar"></div><div id="shieldBar"></div></div>
-        <div class="text-[7px] text-gray-300 mt-2">ZRYW / NITRO [SPACJA]</div>
+        <div class="text-[7px] text-gray-300 mt-2">ZRYW / SKOK / WŚLIZG [SPACJA]</div>
         <div class="bar-wrap !h-2.5"><div id="dashBar"></div></div>
         <div id="hudWeapon" class="text-[8px] text-yellow-300 mt-2">BROŃ: Pistolet</div>
         <div id="hudBuffs" class="text-[8px] text-[#e040fb] mt-1"></div>
     </div>
 
-    <!-- PRAWY HUD -->
+    <!-- PRAWY HUD + PRZYCISK POMINIĘCIA MINIGRY DLA HOSTA -->
     <div id="hudRight">
-        <div class="bg-black/85 border-3 border-white p-3 min-w-[215px] shadow-[6px_6px_0_#000]">
+        <div class="bg-black/85 border-3 border-white p-3 min-w-[225px] shadow-[6px_6px_0_#000]">
             <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING GRACZY</div>
-            <ul id="liveScoreboard" class="text-[8px] space-y-2"></ul>
+            <ul id="liveScoreboard" class="text-[8px] space-y-2 mb-2"></ul>
+            <button id="btnSkipMinigame" class="btn !bg-amber-600 hover:!bg-amber-500 !py-1.5 !px-2 !text-[7px] w-full hidden" onclick="Game.skipCurrentMinigame()">⏭️ POMIŃ MINIGRĘ (HOST)</button>
         </div>
     </div>
 
@@ -234,7 +224,7 @@
                 <button class="emote-btn" onclick="Chat.sendEmote('💀')">💀</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('😂')">😂</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('👑')">👑</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('🤡')">🤡</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('⚽')">⚽</button>
                 <button class="emote-btn !bg-amber-900" title="Pierdnięcie" onclick="Chat.sendSoundMeme('fart', '💨 PRRRRT!')">💨</button>
                 <button class="emote-btn !bg-red-900" title="Airhorn" onclick="Chat.sendSoundMeme('horn', '📢 AIRHORN!')">📢</button>
                 <button class="emote-btn !bg-purple-900" title="Trąbka Klauna" onclick="Chat.sendSoundMeme('honk', '🤡 HONK HONK!')">🎪</button>
@@ -251,26 +241,27 @@
         
         <!-- 1. MENU GŁÓWNE -->
         <div id="screen-menu" class="screen active">
-            <div class="panel !max-w-2xl">
-                <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (SQUID GAME + WYŚCIGI + MEMY) ✨</h2>
+            <div class="panel !max-w-3xl">
+                <div class="inline-block bg-black/60 border-2 border-[#ffde00] px-4 py-1 text-[8px] text-[#ffde00] mb-2">👑 ULTIMATE PARTY EDITION • 16 MINIGIER • 9 POSTACI 👑</div>
+                <h1 class="text-3xl md:text-4xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
+                <h2 class="text-[10px] text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (PIŁKA + SPLATOON + GOKARTY HD + BOTY) ✨</h2>
                 
                 <div class="flex flex-col md:flex-row gap-4 items-center mb-4">
-                    <div class="bg-black/80 border-4 border-[#05d5fa] p-2 flex flex-col items-center shadow-[6px_6px_0_#000]">
+                    <div class="bg-black/85 border-4 border-[#05d5fa] p-2.5 flex flex-col items-center shadow-[6px_6px_0_#000]">
                         <div class="text-[7px] text-yellow-300 mb-1">PODGLĄD KLASY & CELOWNIKA:</div>
-                        <canvas id="previewCanvas" width="125" height="125" class="bg-[#121222] border-2 border-gray-700"></canvas>
-                        <div id="skinDescText" class="text-[7px] text-[#00e676] mt-1">Bluza, Słuchawki i Czapka</div>
+                        <canvas id="previewCanvas" width="135" height="135" class="bg-[#121222] border-2 border-gray-700"></canvas>
+                        <div id="skinDescText" class="text-[7px] text-[#00e676] mt-1.5">Bluza, Słuchawki i Czapka</div>
                     </div>
 
                     <div class="flex-grow w-full">
-                        <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div class="grid grid-cols-3 gap-2 mb-2.5">
                             <div class="text-left">
                                 <label class="text-[7px] text-gray-400 block mb-1">TWÓJ NICK:</label>
                                 <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
                             </div>
                             <div class="text-left">
                                 <label class="text-[7px] text-gray-400 block mb-1">KOLOR STROJU:</label>
-                                <input type="color" id="playerColor" value="#05d5fa" onchange="Preview.draw()" class="w-full h-[34px] border-3 border-white cursor-pointer bg-black interactive">
+                                <input type="color" id="playerColor" value="#05d5fa" onchange="Preview.draw()" class="w-full h-[32px] border-3 border-white cursor-pointer bg-black interactive">
                             </div>
                             <div class="text-left">
                                 <label class="text-[7px] text-gray-400 block mb-1">CELOWNIK:</label>
@@ -284,30 +275,40 @@
                             </div>
                         </div>
 
-                        <div class="text-[8px] text-gray-400 text-left mb-1">WYBIERZ UNIKALNY MODEL POSTACI:</div>
-                        <div class="grid grid-cols-3 gap-2 mb-3 interactive">
+                        <div class="text-[8px] text-yellow-300 text-left mb-1">WYBIERZ SWOJĄ POSTAĆ (9 UNIKALNYCH MODELI PIXEL-ART):</div>
+                        <div class="grid grid-cols-3 gap-1.5 mb-2.5 interactive">
                             <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ<br><span class="text-[6px] text-gray-400">Słuchawki & Bluza</span></div>
                             <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA<br><span class="text-[6px] text-gray-400">Katany & Szal</span></div>
                             <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ<br><span class="text-[6px] text-gray-400">Zbroja & Tarcza</span></div>
-                            <div class="skin-card" onclick="selectSkin('astro')" id="sk-astro">👨‍🚀 KOSMOS<br><span class="text-[6px] text-gray-400">Szklany Hełm & Jet</span></div>
-                            <div class="skin-card" onclick="selectSkin('cyborg')" id="sk-cyborg">🤖 CYBORG<br><span class="text-[6px] text-gray-400">Szczypce & Radar</span></div>
-                            <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL<br><span class="text-[6px] text-gray-400">Płaszcz & Korona</span></div>
+                            <div class="skin-card" onclick="selectSkin('astro')" id="sk-astro">👨‍🚀 KOSMOS<br><span class="text-[6px] text-gray-400">Szklany Hełm</span></div>
+                            <div class="skin-card" onclick="selectSkin('cyborg')" id="sk-cyborg">🤖 CYBORG<br><span class="text-[6px] text-gray-400">Szczypce & Laser</span></div>
+                            <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL<br><span class="text-[6px] text-gray-400">Złota Korona</span></div>
+                            <div class="skin-card" onclick="selectSkin('wizard')" id="sk-wizard">🧙‍♂️ MAG<br><span class="text-[6px] text-gray-400">Kapelusz & Różdżka</span></div>
+                            <div class="skin-card" onclick="selectSkin('pirate')" id="sk-pirate">🏴‍☠️ PIRAT<br><span class="text-[6px] text-gray-400">Opaska & Złoty Hak</span></div>
+                            <div class="skin-card" onclick="selectSkin('agent')" id="sk-agent">🕶️ AGENT SIGMA<br><span class="text-[6px] text-gray-400">Garnitur & Okulary</span></div>
                         </div>
 
-                        <div class="flex items-center justify-between bg-black/50 border border-gray-700 px-2 py-1">
-                            <span class="text-[7px] text-gray-300">🎨 MOTYW TŁA GRADIENTU:</span>
-                            <div class="flex gap-1 interactive">
-                                <button class="px-2 py-1 text-[7px] bg-purple-900 border border-white" onclick="Settings.setTheme('cyber')">Neon</button>
-                                <button class="px-2 py-1 text-[7px] bg-pink-900 border border-white" onclick="Settings.setTheme('sunset')">Sunset</button>
-                                <button class="px-2 py-1 text-[7px] bg-emerald-900 border border-white" onclick="Settings.setTheme('emerald')">Szmaragd</button>
-                                <button class="px-2 py-1 text-[7px] bg-red-950 border border-white" onclick="Settings.setTheme('crimson')">Krwawy</button>
+                        <div class="flex flex-wrap items-center justify-between bg-black/60 border border-gray-600 px-2 py-1.5 gap-1">
+                            <span class="text-[7px] text-cyan-300">🎨 MOTYW TŁA LOBBY:</span>
+                            <div class="flex flex-wrap gap-1 interactive">
+                                <button class="theme-chip bg-purple-900" onclick="Settings.setTheme('cyber')">Neon</button>
+                                <button class="theme-chip bg-pink-900" onclick="Settings.setTheme('sunset')">Sunset</button>
+                                <button class="theme-chip bg-emerald-900" onclick="Settings.setTheme('emerald')">Las</button>
+                                <button class="theme-chip bg-red-950" onclick="Settings.setTheme('crimson')">Krwawy</button>
+                                <button class="theme-chip bg-yellow-700" onclick="Settings.setTheme('gold')">Złoto</button>
+                                <button class="theme-chip bg-sky-800" onclick="Settings.setTheme('arctic')">Arktyka</button>
+                                <button class="theme-chip bg-green-950" onclick="Settings.setTheme('matrix')">Matrix</button>
+                                <button class="theme-chip bg-fuchsia-900" onclick="Settings.setTheme('synth')">Synth</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-2.5">
-                    <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5" id="btnCreateRoom">STWÓRZ IMPREZĘ ONLINE (HOST)</button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5" id="btnCreateRoom">🌐 STWÓRZ POKÓJ ONLINE</button>
+                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !text-xs !py-3.5 font-bold" id="btnCreateSoloBots">🤖 GRAJ SOLO Z 3 BOTAMI!</button>
+                    </div>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="WPISZ KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
                         <button class="btn !bg-gradient-to-b !from-[#05d5fa] !to-[#0097b2] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ DO GRY</button>
@@ -320,17 +321,17 @@
         <!-- 2. LOBBY -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
-                <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-2.5 gap-2">
+                <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-2 gap-2">
                     <div class="text-left">
-                        <h2 class="text-base md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL</h2>
-                        <span class="text-[7px] text-yellow-300">Plansza 50 Pól | Wyścigi Gokartów | Prawdziwe Squid Game | Śmieszne Klątwy!</span>
+                        <h2 class="text-sm md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL (ULTIMATE)</h2>
+                        <span class="text-[7px] text-yellow-300">Wybieraj które minigry mają się losować (☑️/⬜), zmieniaj tła i graj z Botami lub znajomymi!</span>
                     </div>
-                    <div class="flex items-center gap-2 bg-black/60 border-2 border-[#ff2a6d] px-3 py-1">
+                    <div class="flex items-center gap-2 bg-black/75 border-2 border-[#ffde00] px-3 py-1 shadow-[4px_4px_0_#000]">
                         <div class="text-right">
-                            <span class="text-[7px] text-gray-400 block">KOD POKOJU:</span>
-                            <span id="lobbyCode" class="text-lg text-[#ffde00] font-bold tracking-widest">-----</span>
+                            <span class="text-[6px] text-gray-400 block">KOD POKOJU:</span>
+                            <span id="lobbyCode" class="text-base text-[#ffde00] font-bold tracking-widest">-----</span>
                         </div>
-                        <button class="btn !bg-indigo-600 !p-2 !text-[8px] interactive" id="btnCopyLink">🔗 KOPIUJ LINK</button>
+                        <button class="btn !bg-indigo-600 !p-2 !text-[7px] interactive" id="btnCopyLink">🔗 KOPIUJ LINK</button>
                     </div>
                 </div>
                 <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK ZAPROSZENIA DO SCHOWKA!</div>
@@ -338,10 +339,9 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 text-left">
                     <!-- Lewa kolumna -->
                     <div class="lg:col-span-4 flex flex-col gap-2">
-                        <div class="bg-black/60 border-2 border-gray-600 p-2">
+                        <div class="bg-black/65 border-2 border-[#05d5fa] p-2 shadow-[4px_4px_0_#000]">
                             <div class="flex justify-between items-center mb-1">
                                 <span class="text-[8px] text-[#05d5fa]">👥 GRACZE (<span id="lobbyCount">1</span>):</span>
-                                 <button id="btnAddBots" class="btn !bg-indigo-600 !py-1 !px-2 !text-[7px]" type="button">🤖 DODAJ BOTY</button>
                                 <select id="lobbySkinSelect" class="bg-[#111] border border-yellow-400 text-[7px] text-yellow-300 p-1 interactive" onchange="Lobby.changeMySkinInLobby(this.value)">
                                     <option value="cap">🧢 Paweł</option>
                                     <option value="ninja">🥷 Ninja</option>
@@ -349,9 +349,16 @@
                                     <option value="astro">👨‍🚀 Kosmos</option>
                                     <option value="cyborg">🤖 Cyborg</option>
                                     <option value="king">👑 Król</option>
+                                    <option value="wizard">🧙‍♂️ Mag</option>
+                                    <option value="pirate">🏴‍☠️ Pirat</option>
+                                    <option value="agent">🕶️ Agent Sigma</option>
                                 </select>
                             </div>
                             <ul id="lobbyPlayerList" class="h-20 overflow-y-auto space-y-1 text-[8px]"></ul>
+                            <div id="hostBotControls" class="flex gap-1 mt-1.5 pt-1.5 border-t border-gray-700 hidden interactive">
+                                <button class="btn !bg-emerald-700 hover:!bg-emerald-600 !py-1 !px-2 !text-[7px] w-1/2" onclick="BotAI.addBot()">+🤖 DODAJ BOTA</button>
+                                <button class="btn !bg-red-800 hover:!bg-red-700 !py-1 !px-2 !text-[7px] w-1/2" onclick="BotAI.removeBot()">-🤖 USUŃ BOTA</button>
+                            </div>
                         </div>
 
                         <!-- AUTOMAT + RULETKA W LOBBY -->
@@ -377,10 +384,10 @@
                             </div>
                         </div>
 
-                        <!-- Ustawienia + Ukryte Pole Kodu ("sigma") -->
-                        <div class="bg-black/60 border-2 border-gray-600 p-2">
+                        <!-- Ustawienia + 8 Motywów Tła + Kod ("sigma") -->
+                        <div class="bg-black/65 border-2 border-gray-600 p-2 shadow-[4px_4px_0_#000]">
                             <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-1">
-                                <span class="text-[7px] text-yellow-400">⚙️ OPCJE, CELOWNIK & KOD</span>
+                                <span class="text-[7px] text-yellow-400">⚙️ OPCJE, 8 TŁA LOBBY & KOD</span>
                                 <select id="lobbyCrosshair" class="bg-black border border-gray-500 text-[7px] text-cyan-300 p-0.5 interactive" onchange="Settings.changeCrosshair(this.value)">
                                     <option value="cross">➕ Krzyżyk</option>
                                     <option value="circle">⭕ Kółko</option>
@@ -403,12 +410,15 @@
                                     <input type="checkbox" id="chkCrt" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 📺 Filtr CRT
                                 </label>
                             </div>
-                            <div class="flex gap-1 items-center mb-1.5">
-                                <span class="text-[6px] text-gray-400">TŁO:</span>
-                                <button class="px-1.5 py-0.5 text-[6px] bg-purple-900 border border-white" onclick="Settings.setTheme('cyber')">Neon</button>
-                                <button class="px-1.5 py-0.5 text-[6px] bg-pink-900 border border-white" onclick="Settings.setTheme('sunset')">Sunset</button>
-                                <button class="px-1.5 py-0.5 text-[6px] bg-emerald-900 border border-white" onclick="Settings.setTheme('emerald')">Las</button>
-                                <button class="px-1.5 py-0.5 text-[6px] bg-red-950 border border-white" onclick="Settings.setTheme('crimson')">Mrok</button>
+                            <div class="grid grid-cols-4 gap-1 mb-1.5 interactive">
+                                <button class="theme-chip bg-purple-900" onclick="Settings.setTheme('cyber')">Neon</button>
+                                <button class="theme-chip bg-pink-900" onclick="Settings.setTheme('sunset')">Sunset</button>
+                                <button class="theme-chip bg-emerald-900" onclick="Settings.setTheme('emerald')">Las</button>
+                                <button class="theme-chip bg-red-950" onclick="Settings.setTheme('crimson')">Mrok</button>
+                                <button class="theme-chip bg-yellow-700" onclick="Settings.setTheme('gold')">Złoto</button>
+                                <button class="theme-chip bg-sky-800" onclick="Settings.setTheme('arctic')">Arktyka</button>
+                                <button class="theme-chip bg-green-950" onclick="Settings.setTheme('matrix')">Matrix</button>
+                                <button class="theme-chip bg-fuchsia-900" onclick="Settings.setTheme('synth')">Synth</button>
                             </div>
                             <div class="flex gap-1">
                                 <input type="password" id="secretCodeInput" placeholder="Wpisz tajny kod..." class="bg-black border border-gray-600 text-[7px] text-white px-2 py-1 flex-grow outline-none">
@@ -417,71 +427,112 @@
                         </div>
                     </div>
 
-                    <!-- Prawa kolumna: 13 Trybów -->
-                    <div class="lg:col-span-8 flex flex-col justify-between bg-black/40 border-2 border-gray-700 p-3">
+                    <!-- Prawa kolumna: 16 Trybów + Wybór Puli Losowania -->
+                    <div class="lg:col-span-8 flex flex-col justify-between bg-black/50 border-2 border-gray-600 p-2.5 shadow-[4px_4px_0_#000]">
                         <div>
-                            <div class="text-[9px] text-yellow-400 mb-1.5">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
+                            <div class="text-[8px] text-yellow-400 mb-1">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
                                     <div class="text-[9px] text-[#ffde00] mb-0.5">🎲 SUPER MARIO PARTY XL (WYSPA 50 PÓL!)</div>
-                                    <div class="text-[6px] text-gray-300 leading-relaxed">Powiększona wyspa 50 pól! Sklep Handlarza, Pojedynki 1v1, Kasyno i 13 minigier losowanych bez powtórek!</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Plansza 50 pól! Po każdej turze rzutów losuje minigrę wyłącznie z zaznaczonych poniżej (☑️)!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
-                                    <div class="text-[9px] text-[#00e676] mb-0.5">🎡 RULETKA 13 MINIGIER + ŚMIESZNE KLĄTWY</div>
-                                    <div class="text-[6px] text-gray-300 leading-relaxed">Koło fortuny losuje unikalną minigrę oraz śmieszną mutację (np. Wielkie Głowy lub Skórki Banana)!</div>
+                                    <div class="text-[9px] text-[#00e676] mb-0.5">🎡 RULETKA MINIGIER + ŚMIESZNE KLĄTWY</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Koło fortuny losuje minigrę z zaznaczonej poniżej puli (☑️) oraz śmieszną mutację!</div>
                                 </div>
                             </div>
 
-                            <div class="text-[7px] text-gray-400 mb-1">LUB WYBIERZ KONKRETNĄ MINIGRĘ Z 13 DOSTĘPNYCH:</div>
+                            <!-- Pasek filtrowania puli minigier -->
+                            <div class="flex flex-wrap justify-between items-center bg-black/60 border border-gray-700 px-2 py-1 mb-1.5 gap-1">
+                                <span class="text-[7px] text-cyan-300">🎯 PULA LOSOWANIA (KLIKNIJ ☑️ ABY WŁĄCZYĆ/WYŁĄCZYĆ Z LOSOWANIA):</span>
+                                <div class="flex gap-1 interactive">
+                                    <button class="px-1.5 py-0.5 text-[6px] bg-emerald-800 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('all')">☑️ Wszystkie (16)</button>
+                                    <button class="px-1.5 py-0.5 text-[6px] bg-amber-700 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('noshers')">🏃 Tylko Bez Strzelania (8)</button>
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5 mb-2 interactive">
+                                <!-- 3 NOWE UNIKALNE MINIGRY BEZ STRZELANIA -->
+                                <div class="mode-card" onclick="Lobby.selectMode('soccer')" id="m-soccer">
+                                    <span class="pool-badge" id="pool-soccer" onclick="Lobby.togglePoolGame(event, 'soccer')">☑️</span>
+                                    <div class="text-[7px] text-lime-400">⚽ PIŁKA NOŻNA</div>
+                                    <div class="text-[6px] text-gray-400">Boisko, wślizgi i gole!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('paint')" id="m-paint">
+                                    <span class="pool-badge" id="pool-paint" onclick="Lobby.togglePoolGame(event, 'paint')">☑️</span>
+                                    <div class="text-[7px] text-pink-400">🎨 WOJNA KOLORÓW</div>
+                                    <div class="text-[6px] text-gray-400">Zamaluj najwięcej pól!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('lasers')" id="m-lasers">
+                                    <span class="pool-badge" id="pool-lasers" onclick="Lobby.togglePoolGame(event, 'lasers')">☑️</span>
+                                    <div class="text-[7px] text-red-400">🚨 LASEROWY UNIK</div>
+                                    <div class="text-[6px] text-gray-400">Skacz nad wiązkami [SPACJA]</div>
+                                </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('race')" id="m-race">
+                                    <span class="pool-badge" id="pool-race" onclick="Lobby.togglePoolGame(event, 'race')">☑️</span>
                                     <div class="text-[7px] text-[#ffde00]">🏎️ WYŚCIG GOKARTÓW</div>
-                                    <div class="text-[6px] text-gray-400">Tor, Drifty, Nitro i Plamy Oleju!</div>
+                                    <div class="text-[6px] text-gray-400">Tor HD, Drifty i Nitro!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('squid')" id="m-squid">
-                                    <div class="text-[7px] text-green-400">🚦 SQUID GAME (LALKA)</div>
-                                    <div class="text-[6px] text-gray-400">Biegnij do mety! Laser zabija!</div>
-                                </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('arena')" id="m-arena">
-                                    <div class="text-[7px] text-[#ff2a6d]">🔫 ARENA PvP</div>
-                                    <div class="text-[6px] text-gray-400">Bazooki & Plazma</div>
+                                    <span class="pool-badge" id="pool-squid" onclick="Lobby.togglePoolGame(event, 'squid')">☑️</span>
+                                    <div class="text-[7px] text-green-400">🚦 SQUID GAME</div>
+                                    <div class="text-[6px] text-gray-400">Czerwone, Zielone Światło</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('spleef')" id="m-spleef">
+                                    <span class="pool-badge" id="pool-spleef" onclick="Lobby.togglePoolGame(event, 'spleef')">☑️</span>
                                     <div class="text-[7px] text-cyan-300">🧊 KRUSZĄCY LÓD</div>
-                                    <div class="text-[6px] text-gray-400">Znikające kafelki!</div>
+                                    <div class="text-[6px] text-gray-400">Znikające kafelki lodu!</div>
                                 </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('crown')" id="m-crown">
-                                    <div class="text-[7px] text-yellow-400">👑 KRADZIEŻ KORONY</div>
-                                    <div class="text-[6px] text-gray-400">Uciekaj z koroną!</div>
+                                <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
+                                    <span class="pool-badge" id="pool-bomb" onclick="Lobby.togglePoolGame(event, 'bomb')">☑️</span>
+                                    <div class="text-[7px] text-orange-400">💣 GORĄCA BOMBA</div>
+                                    <div class="text-[6px] text-gray-400">Oddaj tykający lont!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('meteors')" id="m-meteors">
-                                    <div class="text-[7px] text-orange-400">☄️ METEORYTY</div>
-                                    <div class="text-[6px] text-gray-400">Spychaj pod komety</div>
+                                    <span class="pool-badge" id="pool-meteors" onclick="Lobby.togglePoolGame(event, 'meteors')">☑️</span>
+                                    <div class="text-[7px] text-amber-400">☄️ METEORYTY</div>
+                                    <div class="text-[6px] text-gray-400">Uciekaj przed kometami!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('crown')" id="m-crown">
+                                    <span class="pool-badge" id="pool-crown" onclick="Lobby.togglePoolGame(event, 'crown')">☑️</span>
+                                    <div class="text-[7px] text-yellow-400">👑 KRADZIEŻ KORONY</div>
+                                    <div class="text-[6px] text-gray-400">Trzymaj i chroń koronę!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('heist')" id="m-heist">
+                                    <span class="pool-badge" id="pool-heist" onclick="Lobby.togglePoolGame(event, 'heist')">☑️</span>
                                     <div class="text-[7px] text-yellow-300">🎰 NAPAD KASYNO</div>
                                     <div class="text-[6px] text-gray-400">Rozbijaj Złoty Sejf</div>
                                 </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('royale')" id="m-royale">
-                                    <div class="text-[7px] text-[#ff9100]">🌪️ STREFA BURZY</div>
-                                    <div class="text-[6px] text-gray-400">Kurczący pierścień</div>
-                                </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('zombies')" id="m-zombies">
+                                    <span class="pool-badge" id="pool-zombies" onclick="Lobby.togglePoolGame(event, 'zombies')">☑️</span>
                                     <div class="text-[7px] text-[#00e676]">🧟 HORDA ZOMBIE</div>
-                                    <div class="text-[6px] text-gray-400">Obrona Co-op</div>
-                                </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
-                                    <div class="text-[7px] text-red-400">💣 GORĄCA BOMBA</div>
-                                    <div class="text-[6px] text-gray-400">Oddaj tykający lont</div>
+                                    <div class="text-[6px] text-gray-400">Obrona Przetrwania</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('koth')" id="m-koth">
+                                    <span class="pool-badge" id="pool-koth" onclick="Lobby.togglePoolGame(event, 'koth')">☑️</span>
                                     <div class="text-[7px] text-[#05d5fa]">👑 KRÓL WZGÓRZA</div>
                                     <div class="text-[6px] text-gray-400">Trzymaj złotą strefę</div>
                                 </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('royale')" id="m-royale">
+                                    <span class="pool-badge" id="pool-royale" onclick="Lobby.togglePoolGame(event, 'royale')">☑️</span>
+                                    <div class="text-[7px] text-[#ff9100]">🌪️ STREFA BURZY</div>
+                                    <div class="text-[6px] text-gray-400">Kurczący pierścień</div>
+                                </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('sniper')" id="m-sniper">
+                                    <span class="pool-badge" id="pool-sniper" onclick="Lobby.togglePoolGame(event, 'sniper')">☑️</span>
                                     <div class="text-[7px] text-indigo-300">🎯 SNAJPERZY</div>
                                     <div class="text-[6px] text-gray-400">1 celny strzał = Zgon</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('coins')" id="m-coins">
+                                    <span class="pool-badge" id="pool-coins" onclick="Lobby.togglePoolGame(event, 'coins')">☑️</span>
+                                    <div class="text-[7px] text-purple-300">💎 ZŁOTA GORĄCZKA</div>
+                                    <div class="text-[6px] text-gray-400">Zbieraj diamenty</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('arena')" id="m-arena">
+                                    <span class="pool-badge" id="pool-arena" onclick="Lobby.togglePoolGame(event, 'arena')">☑️</span>
+                                    <div class="text-[7px] text-[#ff2a6d]">🔫 ARENA PvP</div>
+                                    <div class="text-[6px] text-gray-400">Bazooki & Plazma</div>
                                 </div>
                             </div>
 
@@ -489,10 +540,10 @@
                                 <div>
                                     <label class="text-[7px] text-gray-400 block mb-1">BIOM ARENY:</label>
                                     <select id="mapSelect" class="input-pixel interactive" onchange="Lobby.changeMap(this.value)">
-                                        <option value="forest">🌲 Leśny Bunkier</option>
-                                        <option value="cyber">🟣 Cyber-Vegas</option>
-                                        <option value="ice">❄️ Lodowa Twierdza</option>
-                                        <option value="lava">🌋 Wulkaniczny Krater</option>
+                                        <option value="forest">🌲 Leśny Bunkier HD</option>
+                                        <option value="cyber">🟣 Cyber-Vegas HD</option>
+                                        <option value="ice">❄️ Lodowa Twierdza HD</option>
+                                        <option value="lava">🌋 Wulkaniczny Krater HD</option>
                                     </select>
                                 </div>
                                 <div>
@@ -518,7 +569,7 @@
                         </div>
 
                         <div>
-                            <button id="btnStartMatch" class="btn w-full !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
+                            <button id="btnStartMatch" class="btn w-full !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
                             <div id="clientWaitMsg" class="text-[8px] text-yellow-400 py-2 text-center animate-pulse hidden">Graj w kasynie po lewej i czekaj aż Host odpali mecz!</div>
                         </div>
                     </div>
@@ -582,9 +633,8 @@
         </div>
 
     </div>
-
     <script>
-        // === USTAWIENIA, MOTYWY, CELOWNIKI & TAJNY KOD "SIGMA" ===
+        // === USTAWIENIA, 8 MOTYWÓW WIZUALNYCH, CELOWNIKI & TAJNY KOD "SIGMA" ===
         const Settings = {
             music: true, sfx: true, shake: true, crt: true,
             crosshair: 'cross',
@@ -607,19 +657,20 @@
             },
             setTheme(th) {
                 const root = document.documentElement;
-                if(th === 'cyber') {
-                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(28,16,54,0.92) 0%, rgba(7,7,16,0.98) 100%)');
-                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #1d1936 0%, #0e0c1c 100%)');
-                } else if(th === 'sunset') {
-                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(74,18,48,0.92) 0%, rgba(18,6,20,0.98) 100%)');
-                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #3b1331 0%, #17081c 100%)');
-                } else if(th === 'emerald') {
-                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(12,52,38,0.92) 0%, rgba(5,15,12,0.98) 100%)');
-                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #113328 0%, #071712 100%)');
-                } else if(th === 'crimson') {
-                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(64,12,18,0.92) 0%, rgba(12,4,6,0.98) 100%)');
-                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #361015 0%, #140608 100%)');
-                }
+                const themes = {
+                    cyber:   ['radial-gradient(circle at center, rgba(34,16,72,0.92) 0%, rgba(6,6,15,0.98) 100%)', 'linear-gradient(160deg, #1d1838 0%, #0d0b1a 100%)'],
+                    sunset:  ['radial-gradient(circle at center, rgba(84,18,52,0.92) 0%, rgba(18,5,20,0.98) 100%)', 'linear-gradient(160deg, #3d1233 0%, #17071a 100%)'],
+                    emerald: ['radial-gradient(circle at center, rgba(12,62,42,0.92) 0%, rgba(4,14,10,0.98) 100%)', 'linear-gradient(160deg, #10382b 0%, #061711 100%)'],
+                    crimson: ['radial-gradient(circle at center, rgba(75,10,18,0.92) 0%, rgba(12,3,5,0.98) 100%)',  'linear-gradient(160deg, #3b0f15 0%, #140507 100%)'],
+                    gold:    ['radial-gradient(circle at center, rgba(72,54,10,0.92) 0%, rgba(16,12,4,0.98) 100%)',  'linear-gradient(160deg, #382b0c 0%, #171105 100%)'],
+                    arctic:  ['radial-gradient(circle at center, rgba(14,56,84,0.92) 0%, rgba(5,14,24,0.98) 100%)',  'linear-gradient(160deg, #11324d 0%, #071624 100%)'],
+                    matrix:  ['radial-gradient(circle at center, rgba(8,48,16,0.94) 0%, rgba(2,10,4,0.99) 100%)',    'linear-gradient(160deg, #0a2910 0%, #031206 100%)'],
+                    synth:   ['radial-gradient(circle at center, rgba(76,12,92,0.92) 0%, rgba(14,4,26,0.98) 100%)',  'linear-gradient(160deg, #380e4a 0%, #140521 100%)']
+                };
+                const selected = themes[th] || themes.cyber;
+                root.style.setProperty('--bg-grad', selected[0]);
+                root.style.setProperty('--panel-grad', selected[1]);
+                Sound.init(); Sound.play('tick');
             },
             redeemCode() {
                 const inp = document.getElementById('secretCodeInput');
@@ -682,7 +733,10 @@
             knight: 'Stalowe Naramienniki, Tarcza i Pióropusz',
             astro: 'Szklany Hełm i Odrzutowy Jetpack',
             cyborg: 'Mechaniczne Szczypce i Laserowy Radar',
-            king: 'Królewski Płaszcz z Futrem i Złota Korona'
+            king: 'Królewski Płaszcz z Futrem i Złota Korona',
+            wizard: 'Spiczasty Kapelusz Maga i Mistyczna Różdżka',
+            pirate: 'Kapitański Kapelusz, Opaska i Złoty Hak',
+            agent: 'Czarny Garnitur, Czerwony Krawat i Okulary Sigma'
         };
 
         function selectSkin(sk) {
@@ -713,15 +767,6 @@
             el.className = `bg-black/90 border-2 p-2 text-[8px] mt-3 ${isWarn ? 'border-yellow-400 text-yellow-300' : 'border-red-500 text-red-400'}`;
         }
 
-        // Bezpieczne wstawianie danych graczy do HTML (nick/czat nie mogą być kodem HTML).
-        function escapeHTML(value) {
-            return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-        }
-        function safeColor(value, fallback = '#ffffff') {
-            const c = String(value || '');
-            return /^#[0-9a-fA-F]{6}$/.test(c) ? c : fallback;
-        }
-
         function announce(txt, dur = 1800) {
             const el = document.getElementById('centerAnnouncement');
             el.innerText = txt; el.style.display = 'block';
@@ -732,7 +777,7 @@
             const box = document.getElementById('killFeed');
             const item = document.createElement('div');
             item.className = 'bg-black/85 border border-gray-500 px-3 py-1 text-[8px] text-white shadow-[3px_3px_0_#000]';
-            item.innerHTML = `<span style="color:${safeColor(killerColor)}">${escapeHTML(killerName)}</span> 💥 <span style="color:${safeColor(victimColor)}">${escapeHTML(victimName)}</span>`;
+            item.innerHTML = `<span style="color:${killerColor}">${killerName}</span> 💥 <span style="color:${victimColor}">${victimName}</span>`;
             box.appendChild(item);
             setTimeout(() => item.remove(), 3500);
         }
@@ -789,7 +834,6 @@
                 else if(type === 'jackpot') { o.type='square'; o.frequency.setValueAtTime(523, t); o.frequency.setValueAtTime(659, t+0.1); o.frequency.setValueAtTime(784, t+0.2); o.frequency.setValueAtTime(1046, t+0.3); g.gain.setValueAtTime(0.08, t); g.gain.linearRampToValueAtTime(0.01, t+0.5); o.start(t); o.stop(t+0.5); }
                 else if(type === 'tick') { o.type='sine'; o.frequency.setValueAtTime(750, t); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.005, t+0.04); o.start(t); o.stop(t+0.04); }
                 else if(type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(100, t); o.frequency.exponentialRampToValueAtTime(15, t+0.45); g.gain.setValueAtTime(0.16, t); g.gain.linearRampToValueAtTime(0.01, t+0.45); o.start(t); o.stop(t+0.45); }
-                // Śmieszne dźwięki Meme Soundboard
                 else if(type === 'fart') { o.type='sawtooth'; o.frequency.setValueAtTime(110, t); o.frequency.linearRampToValueAtTime(42, t+0.38); g.gain.setValueAtTime(0.14, t); g.gain.linearRampToValueAtTime(0.01, t+0.38); o.start(t); o.stop(t+0.38); }
                 else if(type === 'horn') { o.type='sawtooth'; o.frequency.setValueAtTime(466, t); g.gain.setValueAtTime(0.14, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.42); o.start(t); o.stop(t+0.42); }
                 else if(type === 'honk') { o.type='triangle'; o.frequency.setValueAtTime(520, t); o.frequency.setValueAtTime(380, t+0.1); o.frequency.setValueAtTime(580, t+0.2); g.gain.setValueAtTime(0.12, t); g.gain.linearRampToValueAtTime(0.01, t+0.32); o.start(t); o.stop(t+0.32); }
@@ -896,7 +940,7 @@
             }
         };
 
-        // === FIREBASE ===
+        // === FIREBASE & PULA 16 MINIGIER Z MOŻLIWOŚCIĄ WYKLUCZANIA ===
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -912,19 +956,26 @@
         let myId = null, currentRoom = null, isHost = false;
         let netPlayers = {}, netZombies = {}, netItems = {}, netMeteors = [];
 
-        const ALL_MINIGAMES = ['race', 'squid', 'arena', 'spleef', 'crown', 'meteors', 'heist', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
+        const ALL_MINIGAMES = [
+            'soccer', 'paint', 'lasers', 'race', 'squid', 'spleef', 'bomb', 'meteors',
+            'crown', 'heist', 'zombies', 'koth', 'royale', 'sniper', 'coins', 'arena'
+        ];
+        const NO_SHOOTING_GAMES = ['soccer', 'paint', 'lasers', 'race', 'squid', 'spleef', 'bomb', 'meteors'];
+
         let minigameDeck = [];
         let lastPlayedMap = '';
 
         function drawNextUniqueMinigame() {
+            const allowed = (RoomState.allowedGames && RoomState.allowedGames.length > 0) ? RoomState.allowedGames : ALL_MINIGAMES;
+            minigameDeck = minigameDeck.filter(g => allowed.includes(g));
             if(minigameDeck.length === 0) {
-                minigameDeck = [...ALL_MINIGAMES];
+                minigameDeck = [...allowed];
                 for(let i = minigameDeck.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [minigameDeck[i], minigameDeck[j]] = [minigameDeck[j], minigameDeck[i]];
                 }
             }
-            return minigameDeck.pop();
+            return minigameDeck.pop() || allowed[0];
         }
 
         function drawNextUniqueMap() {
@@ -942,11 +993,13 @@
         };
 
         const RoomState = {
-            status: 'lobby', isPartyCampaign: true, mode: 'party', activeMinigame: 'arena',
+            status: 'lobby', isPartyCampaign: true, mode: 'party', activeMinigame: 'soccer',
+            allowedGames: [...ALL_MINIGAMES],
             map: 'forest', mutatorSetting: 'random', mutator: 'none',
             matchDuration: 60, timer: 60, bombHolder: null, bombTimer: 10,
             crownHolder: null, squidState: 'green', brokenIce: {},
             koth: {x:800, y:800, r:110}, stormR: 1100, vaultHp: 500,
+            ball: {x:800, y:800, vx:0, vy:0},
             turnOrder: [], turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna XL (50 Pól)!', minigameWinner: null
         };
 
@@ -997,43 +1050,113 @@
             }
         };
 
-        // === RYSOWANIE GOKARTA WYŚCIGOWEGO PIXEL-ART ===
+        // === ULEPSZONY GOKART WYŚCIGOWY PIXEL-ART 2.5D HD ===
         function drawPixelKart(ctx, x, y, angle, color, skin, name, lap) {
+            const P = 2;
             ctx.save();
             ctx.translate(Math.floor(x), Math.floor(y));
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.beginPath(); ctx.ellipse(0, 6, 24, 14, 0, 0, Math.PI*2); ctx.fill();
+
+            ctx.fillStyle = 'rgba(0,0,0,0.58)';
+            ctx.beginPath(); ctx.ellipse(0, 7, 29, 17, 0, 0, Math.PI*2); ctx.fill();
 
             ctx.rotate(angle);
-            // Opony gokarta
-            ctx.fillStyle = '#111';
-            ctx.fillRect(-18, -16, 12, 6); ctx.fillRect(8, -16, 12, 6);
-            ctx.fillRect(-18, 10, 12, 6);  ctx.fillRect(8, 10, 12, 6);
-            // Spojler i zderzak
-            ctx.fillStyle = '#222';
-            ctx.fillRect(-24, -12, 6, 24);
+
+            // Podwójne płomienie Nitro z rur wydechowych
+            if(Math.sin(performance.now()*0.05) > 0) {
+                ctx.fillStyle = '#ff2a6d';
+                ctx.fillRect(-17*P, -5.5*P, 5*P, 2.5*P);
+                ctx.fillRect(-17*P, 3*P, 5*P, 2.5*P);
+                ctx.fillStyle = '#ffde00';
+                ctx.fillRect(-15*P, -4.8*P, 3*P, 1.2*P);
+                ctx.fillRect(-15*P, 3.6*P, 3*P, 1.2*P);
+            }
+
+            // Chromowane kolektory wydechowe
+            ctx.fillStyle = '#b0bec5';
+            ctx.fillRect(-12.5*P, -5*P, 3.5*P, 2.5*P);
+            ctx.fillRect(-12.5*P, 2.5*P, 3.5*P, 2.5*P);
+
+            // 4 Opony typu Slick z czerwonym paskiem i złotymi felgami
+            const wheels = [
+                {wx: -10.5*P, wy: -10.5*P},
+                {wx: -10.5*P, wy: 6.5*P},
+                {wx: 4*P,     wy: -10.5*P},
+                {wx: 4*P,     wy: 6.5*P}
+            ];
+            wheels.forEach(w => {
+                ctx.fillStyle = '#07070b';
+                ctx.fillRect(w.wx, w.wy, 6.5*P, 4*P);
+                ctx.fillStyle = '#262633';
+                ctx.fillRect(w.wx + P, w.wy + P, 4.5*P, 2*P);
+                ctx.fillStyle = '#ffde00';
+                ctx.fillRect(w.wx + 2*P, w.wy + P, 2.5*P, 2*P);
+            });
+
+            // Podwozie i boczne wloty powietrza (Sidepods)
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-11*P, -7.5*P, 24*P, 15*P);
+            ctx.fillStyle = '#1b2028';
+            ctx.fillRect(-9*P, -6.5*P, 20*P, 13*P);
+
+            // Karoseria główna z refleksami świetlnymi
+            ctx.fillStyle = color;
+            ctx.fillRect(-8*P, -5.5*P, 18.5*P, 11*P);
+            ctx.fillRect(8*P, -4*P, 5*P, 8*P);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.32)';
+            ctx.fillRect(-7*P, -5.5*P, 16*P, 2*P);
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(-7*P, 3.5*P, 16*P, 2*P);
+
+            // Centralne pasy wyścigowe + numer startowy
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(-8*P, -1.5*P, 20.5*P, P);
+            ctx.fillRect(-8*P, 0.5*P, 20.5*P, P);
+            ctx.fillRect(6*P, -2.5*P, 4*P, 5*P);
+
+            // Przednie skrzydło dociskowe
+            ctx.fillStyle = '#000';
+            ctx.fillRect(11.5*P, -6.5*P, 3*P, 13*P);
             ctx.fillStyle = '#ffde00';
-            ctx.fillRect(20, -10, 5, 20);
-            // Karoseria wyścigowa
-            ctx.fillStyle = '#000'; ctx.fillRect(-18, -12, 40, 24);
-            ctx.fillStyle = color;  ctx.fillRect(-16, -10, 36, 20);
-            // Białe pasy wyścigowe
-            ctx.fillStyle = '#fff'; ctx.fillRect(-16, -3, 36, 6);
-            // Fotel i głowa kierowcy w kasku
-            ctx.fillStyle = '#111'; ctx.fillRect(-8, -7, 14, 14);
-            ctx.fillStyle = '#ffcca3'; ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(-2, 0, 7, Math.PI/2, -Math.PI/2); ctx.fill();
+            ctx.fillRect(12*P, -5.5*P, 1.5*P, 11*P);
+
+            // Tylne skrzydło karbonowe
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-12.5*P, -7.5*P, 4*P, 15*P);
+            ctx.fillStyle = '#ff2a6d';
+            ctx.fillRect(-12*P, -6.5*P, 2.5*P, 13*P);
+
+            // Kokpit i kierownica
+            ctx.fillStyle = '#0e0e14';
+            ctx.fillRect(-5*P, -4*P, 7.5*P, 8*P);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(3.5*P, -2.5*P, 2*P, 5*P);
+
+            ctx.fillStyle = '#ffcca3';
+            ctx.fillRect(2*P, -3*P, 2*P, 1.5*P);
+            ctx.fillRect(2*P, 1.5*P, 2*P, 1.5*P);
+
+            // Kask kierowcy z neonowym wizjerem
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+            ctx.fillStyle = color;
+            ctx.fillRect(-3*P, -1*P, 4*P, 2*P);
+            ctx.fillStyle = '#05d5fa';
+            ctx.fillRect(1*P, -2.5*P, 2*P, 5*P);
+
             ctx.restore();
 
             if(name) {
                 ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-                ctx.fillStyle = '#000'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x)+1, Math.floor(y - 26));
-                ctx.fillStyle = '#ffde00'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x), Math.floor(y - 27));
+                ctx.fillStyle = '#000'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x)+1, Math.floor(y - 30));
+                ctx.fillStyle = '#ffde00'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x), Math.floor(y - 31));
             }
         }
 
-        // === MODELE 6 KLAS BOHATERÓW (Z OBSŁUGĄ MUTATORÓW: WIELKIE GŁOWY / MIKRO) ===
-        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote, hasCrown=false) {
+        // === MODELE 9 KLAS BOHATERÓW PIXEL-ART ===
+        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote, hasCrown=false, jumpZ=0) {
             if(RoomState.status === 'playing' && RoomState.activeMinigame === 'race') {
                 drawPixelKart(ctx, x, y, angle, color, skin, name, hp);
                 return;
@@ -1041,14 +1164,14 @@
 
             const P = 3;
             ctx.save();
-            ctx.translate(Math.floor(x), Math.floor(y));
+            ctx.translate(Math.floor(x), Math.floor(y - jumpZ));
 
             if(RoomState.status === 'playing' && RoomState.mutator === 'tiny') {
                 ctx.scale(0.68, 0.68);
             }
 
             if(isDead) {
-                ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6, 16, 8, 0, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6 + jumpZ, 16, 8, 0, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
                 ctx.fillStyle = '#e0e0e0'; ctx.fillRect(-3*P, -3*P, 6*P, 5*P);
                 ctx.fillStyle = '#000'; ctx.fillRect(-2*P, -1*P, P, P); ctx.fillRect(P, -1*P, P, P);
@@ -1056,8 +1179,9 @@
                 return;
             }
 
+            // Cień na ziemi (zostaje na dole podczas skoku!)
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.beginPath(); ctx.ellipse(0, 8, 17, 9, 0, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(0, 8 + jumpZ, Math.max(8, 17 - jumpZ*0.2), Math.max(4, 9 - jumpZ*0.1), 0, 0, Math.PI*2); ctx.fill();
 
             if(quad) {
                 ctx.fillStyle = 'rgba(224, 64, 251, 0.35)';
@@ -1086,35 +1210,58 @@
             ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
             ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
 
-            // Korpus + Broń
+            // Korpus zależny od klasy
             ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
-            ctx.fillStyle = skin === 'knight' ? '#9aa5b1' : (skin === 'ninja' ? '#191926' : color);
+            ctx.fillStyle = skin === 'knight' ? '#9aa5b1' : (skin === 'ninja' || skin === 'agent' ? '#171722' : (skin === 'wizard' ? '#3f1d70' : color));
             ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
 
+            // Czerwony krawat Agenta Sigma
+            if(skin === 'agent') {
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, -1.5*P, 3*P, 3*P);
+                ctx.fillStyle = '#ff1744'; ctx.fillRect(P, -0.5*P, 3*P, P);
+            }
+
+            // Dłonie (lub Złoty Hak Pirata!)
             ctx.fillStyle = '#000';
             ctx.fillRect(2*P, -6*P, 3*P, 3*P);
             ctx.fillRect(3*P, 3*P, 3*P, 3*P);
             ctx.fillStyle = skin === 'cyborg' ? '#90a4ae' : (skin === 'knight' ? '#cbd2d9' : '#ffcca3');
             ctx.fillRect(2*P, -5*P, 2*P, 2*P);
-            ctx.fillRect(3*P, 4*P, 2*P, 2*P);
-
-            if(RoomState.activeMinigame !== 'squid') {
-                let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
-                ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
-                ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
-                ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
-
-                if(muzzle > 0) {
-                    ctx.fillStyle = '#ffde00';
-                    ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 10, 0, Math.PI*2); ctx.fill();
-                }
+            if(skin === 'pirate') {
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(3*P, 4*P, 3*P, P); ctx.fillRect(5*P, 3*P, P, 2*P);
+            } else {
+                ctx.fillRect(3*P, 4*P, 2*P, 2*P);
             }
 
-            // Głowa (powiększona 2.2x jeśli aktywna klątwa WIELKIE GŁOWY!)
+            // Broń lub Różdżka (ukryta w trybach czysto zręcznościowych bez strzelania)
+            const gm = RoomState.activeMinigame;
+            const noGunModes = ['squid', 'soccer', 'paint', 'lasers', 'bomb'];
+            if(!noGunModes.includes(gm) || RoomState.status !== 'playing') {
+                if(skin === 'wizard' && wep === 'pistol') {
+                    ctx.fillStyle = '#5c3818'; ctx.fillRect(3*P, P, 6*P, 2*P);
+                    ctx.fillStyle = '#05d5fa'; ctx.fillRect(8*P, 0.5*P, 2.5*P, 3*P);
+                } else {
+                    let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
+                    ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
+                    ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
+                    ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
+
+                    if(muzzle > 0) {
+                        ctx.fillStyle = '#ffde00';
+                        ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 10, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+            } else if(gm === 'paint') {
+                // Wałek malarski w trybie Wojny Kolorów!
+                ctx.fillStyle = '#888'; ctx.fillRect(3*P, -2*P, 3*P, 4*P);
+                ctx.fillStyle = color; ctx.fillRect(5*P, -4*P, 3*P, 8*P);
+            }
+
             if(RoomState.status === 'playing' && RoomState.mutator === 'bighead') {
                 ctx.scale(2.15, 2.15);
             }
 
+            // Głowa zależna od wybranego spośród 9 modeli
             if(skin === 'cap') {
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
                 ctx.fillStyle = '#111'; ctx.fillRect(2*P, -3*P, 4*P, 6*P);
@@ -1156,27 +1303,47 @@
                 ctx.fillStyle = '#05d5fa'; ctx.fillRect(-2*P, -2*P, P, P);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-2*P, P, P, P);
             }
+            else if(skin === 'wizard') {
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(2*P, -2*P, 3*P, 4*P); // Biała broda
+                ctx.fillStyle = '#2c1254'; ctx.beginPath(); ctx.arc(-P, 0, 5.2*P, 0, Math.PI*2); ctx.fill(); // Rondo kapelusza
+                ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(-5*P, -2*P); ctx.lineTo(2*P, 0); ctx.lineTo(-2*P, 3*P); ctx.fill();
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(-2*P, -P, P, 2*P);
+            }
+            else if(skin === 'pirate') {
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#111'; ctx.fillRect(-4*P, -5*P, 7*P, 10*P); // Trikorn piracki
+                ctx.fillStyle = '#d91656'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P); // Bandana
+                ctx.fillStyle = '#fff'; ctx.fillRect(-2*P, -P, 2*P, 2*P); // Czaszka na kapeluszu
+                ctx.fillStyle = '#000'; ctx.fillRect(2*P, 0, 2*P, 2.5*P); // Opaska na oko
+            }
+            else if(skin === 'agent') {
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
+                ctx.fillStyle = '#1a1a24'; ctx.fillRect(-4*P, -3*P, 4*P, 6*P); // Elegancka fryzura
+                ctx.fillStyle = '#000'; ctx.fillRect(1.5*P, -3*P, 2*P, 6*P); // Okulary przeciwsłoneczne Sigma
+                ctx.fillStyle = '#05d5fa'; ctx.fillRect(2*P, -2.5*P, P, 2*P); ctx.fillRect(2*P, 0.5*P, P, 2*P);
+            }
 
             ctx.restore();
             ctx.restore();
 
             if(hp < maxHp || shield > 0) {
-                ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(x - 18), Math.floor(y - 36), 36, 6);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 35), Math.floor(34 * Math.max(0, hp/maxHp)), 4);
+                ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(x - 18), Math.floor(y - 36 - jumpZ), 36, 6);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 35 - jumpZ), Math.floor(34 * Math.max(0, hp/maxHp)), 4);
                 if(shield > 0) {
-                    ctx.fillStyle = '#05d5fa'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 35), Math.floor(34 * Math.min(1, shield/50)), 4);
+                    ctx.fillStyle = '#05d5fa'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 35 - jumpZ), Math.floor(34 * Math.min(1, shield/50)), 4);
                 }
             }
             if(name) {
                 let prefix = isBomb ? '💣 ' : (hasCrown ? '👑 ' : '');
                 ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-                ctx.fillStyle = '#000'; ctx.fillText(prefix + name, Math.floor(x)+1, Math.floor(y - 40));
-                ctx.fillStyle = (isBomb || hasCrown) ? '#ffde00' : '#fff'; ctx.fillText(prefix + name, Math.floor(x), Math.floor(y - 41));
+                ctx.fillStyle = '#000'; ctx.fillText(prefix + name, Math.floor(x)+1, Math.floor(y - 40 - jumpZ));
+                ctx.fillStyle = (isBomb || hasCrown) ? '#ffde00' : '#fff'; ctx.fillText(prefix + name, Math.floor(x), Math.floor(y - 41 - jumpZ));
             }
 
             if(emote) {
                 ctx.font = '16px sans-serif';
-                ctx.fillText(emote, Math.floor(x), Math.floor(y - 54));
+                ctx.fillText(emote, Math.floor(x), Math.floor(y - 54 - jumpZ));
             }
         }
 
@@ -1196,21 +1363,130 @@
                 const pCtx = c.getContext('2d');
                 pCtx.imageSmoothingEnabled = false;
                 pCtx.fillStyle = '#121222';
-                pCtx.fillRect(0, 0, 125, 125);
+                pCtx.fillRect(0, 0, 135, 135);
                 pCtx.strokeStyle = '#1f1f38';
-                pCtx.strokeRect(8, 8, 109, 109);
+                pCtx.strokeRect(8, 8, 119, 119);
 
                 pCtx.save();
-                pCtx.translate(62, 68);
-                pCtx.scale(1.35, 1.35);
+                pCtx.translate(67, 72);
+                pCtx.scale(1.4, 1.4);
                 const col = document.getElementById('playerColor').value || '#05d5fa';
-                drawPixelHero(pCtx, 0, 0, this.angle, col, chosenSkin, '', 100, 100, 0, 'shotgun', performance.now()*0.01, false, false, 0, false, '');
+                drawPixelHero(pCtx, 0, 0, this.angle, col, chosenSkin, '', 100, 100, 0, 'pistol', performance.now()*0.01, false, false, 0, false, '');
                 pCtx.restore();
 
-                drawCustomCrosshair(pCtx, 102, 24, Settings.crosshair);
+                drawCustomCrosshair(pCtx, 110, 24, Settings.crosshair);
             }
         };
         Preview.init();
+
+        // === SZTUCZNA INTELIGENCJA BOTÓW ===
+        const BOT_PRESETS = [
+            { name: '🤖 Bot Kuba',   color: '#ff2a6d', skin: 'ninja' },
+            { name: '🤖 Bot Sigma',  color: '#00e676', skin: 'agent' },
+            { name: '🤖 Bot Mag',    color: '#e040fb', skin: 'wizard' },
+            { name: '🤖 Bot Kapitan',color: '#ffde00', skin: 'pirate' },
+            { name: '🤖 Bot Rycerz', color: '#ff9100', skin: 'knight' }
+        ];
+
+        const BotAI = {
+            botTurnLock: false,
+
+            async addBot() {
+                if(!isHost || !currentRoom) return;
+                Sound.init();
+                const existingBots = Object.keys(netPlayers).filter(id => id.startsWith('bot_'));
+                if(existingBots.length >= 5) return announce("MAKSYMALNIE 5 BOTÓW!", 1200);
+                const preset = BOT_PRESETS[existingBots.length % BOT_PRESETS.length];
+                const botId = 'bot_' + Math.random().toString(36).substr(2, 5);
+
+                await db.ref(`room_players/${currentRoom}/${botId}`).set({
+                    id: botId, isBot: true, name: preset.name, color: preset.color, skin: preset.skin,
+                    chips: 100, x: 600 + Math.round(Math.random()*400), y: 600 + Math.round(Math.random()*400),
+                    angle: 0, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false,
+                    wep: 'pistol', anim: 0, shooting: false, quad: false, emote: ''
+                });
+                Sound.play('coin');
+            },
+
+            async removeBot() {
+                if(!isHost || !currentRoom) return;
+                const existingBots = Object.keys(netPlayers).filter(id => id.startsWith('bot_'));
+                if(existingBots.length === 0) return;
+                const lastBotId = existingBots[existingBots.length - 1];
+                await db.ref(`room_players/${currentRoom}/${lastBotId}`).remove();
+                Sound.play('hit');
+            },
+
+            checkBoardTurn() {
+                if(!isHost || RoomState.status !== 'board' || this.botTurnLock) return;
+                const currentTurnId = RoomState.turnOrder[RoomState.turnIdx];
+                if(!currentTurnId || !currentTurnId.startsWith('bot_')) return;
+
+                const bot = netPlayers[currentTurnId];
+                if(!bot) {
+                    Board.advanceTurn();
+                    return;
+                }
+
+                this.botTurnLock = true;
+                setTimeout(() => {
+                    if(RoomState.status !== 'board') { this.botTurnLock = false; return; }
+
+                    if((bot.prison || 0) > 0) {
+                        db.ref(`room_players/${currentRoom}/${currentTurnId}`).update({ prison: bot.prison - 1 });
+                        db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🔒 ${bot.name} siedzi w więzieniu i traci kolejkę!` });
+                        setTimeout(() => { this.botTurnLock = false; Board.advanceTurn(); }, 1200);
+                        return;
+                    }
+
+                    let roll = Math.floor(Math.random() * 6) + 1;
+                    let newPos = Math.min(50, (bot.boardPos || 0) + roll);
+                    let tile = BOARD_TILES[newPos] || { t: 'norm', n: `${newPos}` };
+                    let extraMsg = '';
+                    let newPrison = 0;
+
+                    if(tile.t === 'boost') {
+                        newPos = Math.min(50, newPos + 3);
+                        extraMsg = ' 🚀 (+3 pola!)';
+                    } else if(tile.t === 'back') {
+                        newPos = Math.max(0, newPos - 3);
+                        extraMsg = ' 💀 (-3 pola!)';
+                    } else if(tile.t === 'prison') {
+                        newPrison = 1;
+                        extraMsg = ' 🔒 (Trafia do Paki!)';
+                    } else if(tile.t === 'casino') {
+                        if(Math.random() < 0.5) {
+                            newPos = Math.min(50, newPos + 4);
+                            extraMsg = ' 🎰 (Wygrał w Kasynie +4 pola!)';
+                        } else {
+                            newPos = Math.max(0, newPos - 2);
+                            extraMsg = ' 🎰 (Zbankrutował w Kasynie -2 pola!)';
+                        }
+                    } else if(tile.t === 'shop' && (bot.chips || 0) >= 40) {
+                        newPos = Math.min(50, newPos + 5);
+                        extraMsg = ' 🛒 (Kupił Złotą Rurę +5 pól!)';
+                    }
+
+                    Sound.play('step');
+                    db.ref(`room_players/${currentRoom}/${currentTurnId}`).update({
+                        boardPos: newPos, prison: newPrison
+                    });
+                    db.ref(`rooms/${currentRoom}`).update({
+                        boardMsg: `🎲 ${bot.name} wyrzucił [${roll}] -> Pole ${newPos} (${tile.n})${extraMsg}`
+                    });
+
+                    setTimeout(() => {
+                        this.botTurnLock = false;
+                        if(newPos >= 50) {
+                            db.ref(`room_players/${currentRoom}/${currentTurnId}`).update({ score: 999 });
+                            db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                        } else {
+                            Board.advanceTurn();
+                        }
+                    }, 1300);
+                }, 1100);
+            }
+        };
 
         // === WYSPA PLANSZOWA XL (51 PÓL: 0..50!) ===
         const BOARD_TILES = (() => {
@@ -1274,6 +1550,7 @@
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'none';
                 document.getElementById('hudRight').style.display = 'block';
+                document.getElementById('btnSkipMinigame').style.display = 'none';
                 document.getElementById('boardHud').style.display = 'block';
                 this.visualPos = this.myPos;
                 this.rollingLock = false;
@@ -1329,6 +1606,10 @@
                 document.getElementById('boardTurnText').innerText = `TURA: ${turnName} | ŻETONY: ${LobbyCasino.chips} 🪙`;
                 document.getElementById('boardStatusMsg').innerText = RoomState.boardMsg || '';
                 document.getElementById('btnRollDice').style.display = (isMyTurn && !this.rollingLock) ? 'block' : 'none';
+
+                if(isHost && turnId && turnId.startsWith('bot_')) {
+                    BotAI.checkBoardTurn();
+                }
             },
 
             animateStepsTo(targetTileIdx, onComplete) {
@@ -1604,22 +1885,6 @@
                     });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({ turnIdx: nextIdx });
-                    // Host wykonuje automatyczną turę, gdy kolej przypada na bota.
-                    const nextId = RoomState.turnOrder[nextIdx];
-                    if(isHost && nextId && netPlayers[nextId]?.isBot) {
-                        setTimeout(async () => {
-                            if(RoomState.status !== 'board' || RoomState.turnIdx !== nextIdx) return;
-                            const snap = await db.ref(`room_players/${currentRoom}/${nextId}`).once('value');
-                            const bot = snap.val();
-                            if(!bot || !bot.isBot) return;
-                            const roll = 1 + Math.floor(Math.random()*6);
-                            const pos = Math.min(50, (bot.boardPos || 0) + roll);
-                            await db.ref(`room_players/${currentRoom}/${nextId}`).update({ boardPos: pos, score: pos >= 50 ? 999 : (bot.score || 0) });
-                            await db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🤖 ${bot.name} wyrzuca ${roll} i przechodzi na pole ${pos}!` });
-                            if(pos >= 50) db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
-                            else this.advanceTurn();
-                        }, 900);
-                    }
                 }
             },
 
@@ -1755,11 +2020,10 @@
 
                 allP.sort((a,b) => b.pos - a.pos);
                 document.getElementById('liveScoreboard').innerHTML = allP.map((p, i) =>
-                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${safeColor(p.color)}">■</span> ${escapeHTML(p.name)}</span><span class="text-yellow-400">Pole ${Number(p.pos)||0}/50</span></li>`
+                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">Pole ${p.pos}/50</span></li>`
                 ).join('');
             }
         };
-
         // === GENERATOR TEKSTUR PODŁOŻA 2.5D HD ===
         const WORLD_SIZE = 1600;
         const GroundCache = {
@@ -1782,20 +2046,20 @@
                         for(let y=0; y<WORLD_SIZE; y+=80) {
                             g.fillStyle = ((x+y)/80)%2 === 0 ? pal.c1 : pal.c2;
                             g.fillRect(x, y, 80, 80);
-                            g.fillStyle = 'rgba(255,255,255,0.03)';
+                            g.fillStyle = 'rgba(255,255,255,0.035)';
                             g.fillRect(x, y, 80, 4);
-                            g.fillStyle = 'rgba(0,0,0,0.08)';
+                            g.fillStyle = 'rgba(0,0,0,0.09)';
                             g.fillRect(x, y+76, 80, 4);
                         }
                     }
 
-                    for(let i=0; i<260; i++) {
+                    for(let i=0; i<320; i++) {
                         let rx = Math.floor(Math.random()*390)*4 + 16;
                         let ry = Math.floor(Math.random()*390)*4 + 16;
                         g.fillStyle = pal.spec;
                         g.fillRect(rx, ry, 8, 4); g.fillRect(rx+4, ry-4, 4, 8);
-                        if(i % 5 === 0) {
-                            g.fillStyle = i % 10 === 0 ? pal.fl1 : pal.fl2;
+                        if(i % 4 === 0) {
+                            g.fillStyle = i % 8 === 0 ? pal.fl1 : pal.fl2;
                             g.fillRect(rx+4, ry, 4, 4);
                         }
                     }
@@ -1886,7 +2150,7 @@
 
                     if(e.code === 'Space' && Game.me) Game.me.tryDash();
                     if(e.code === 'KeyE' && Game.me) {
-                        const emotes = ['😎', '🔥', '💀', '😂', '👑', '🎰'];
+                        const emotes = ['😎', '🔥', '💀', '😂', '👑', '⚽'];
                         Chat.sendEmote(emotes[Math.floor(Math.random()*emotes.length)]);
                     }
                 });
@@ -2002,33 +2266,8 @@
             }
         };
 
-        // Drobne, deterministyczne piksele środowiskowe — mapa żyje, ale zachowuje crisp pixel-art.
-        function drawAmbientPixels(ctx, mapName, now) {
-            const palettes = {
-                forest: ['#8ce85a', '#f6d365', '#d9f99d'],
-                cyber: ['#05d5fa', '#ff2a6d', '#a855f7'],
-                ice: ['#e0f7ff', '#05d5fa', '#9be7ff'],
-                lava: ['#ff9100', '#ff2a6d', '#ffde00']
-            };
-            const palette = palettes[mapName] || palettes.forest;
-            for(let i=0; i<72; i++) {
-                const x = (i * 197 + (i % 7) * 43) % WORLD_SIZE;
-                const y = (i * 311 + (i % 11) * 29) % WORLD_SIZE;
-                const pulse = Math.sin(now * .0018 + i * 1.7);
-                const size = i % 9 === 0 ? 7 : 3;
-                ctx.globalAlpha = .12 + (pulse + 1) * .09;
-                ctx.fillStyle = palette[i % palette.length];
-                ctx.fillRect(Math.floor(x / 4) * 4, Math.floor(y / 4) * 4, size, size);
-                if(i % 9 === 0) {
-                    ctx.globalAlpha *= .65;
-                    ctx.fillRect(Math.floor(x / 4) * 4 - 4, Math.floor(y / 4) * 4 + 4, size + 8, 2);
-                }
-            }
-            ctx.globalAlpha = 1;
-        }
-
         function drawPixelObstacle25D(ctx, o) {
-            const P = 4, wallH = 20;
+            const P = 4, wallH = 22;
             if(o.t === 'lava') {
                 ctx.fillStyle = '#6e1100'; ctx.fillRect(o.x-4, o.y-4, o.w+8, o.h+8);
                 ctx.fillStyle = '#cc2900'; ctx.fillRect(o.x, o.y, o.w, o.h);
@@ -2039,7 +2278,7 @@
                 return;
             }
 
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillStyle = 'rgba(0,0,0,0.52)';
             ctx.fillRect(o.x + 8, o.y + 10, o.w, o.h);
 
             if(o.t === 'crate') {
@@ -2080,30 +2319,23 @@
             ctx.restore();
         }
 
-        // === RYSOWANIE WIELKIEJ LALKI SQUID GAME NA GÓRZE ARENY ===
         function drawSquidDoll(ctx, state) {
             ctx.save();
             ctx.translate(800, 145);
-            // Cień pod lalką
             ctx.fillStyle = 'rgba(0,0,0,0.55)';
             ctx.beginPath(); ctx.ellipse(0, 35, 48, 18, 0, 0, Math.PI*2); ctx.fill();
 
-            // Sukienka pomarańczowo-żółta
             ctx.fillStyle = '#000'; ctx.fillRect(-32, -10, 64, 46);
             ctx.fillStyle = '#ff9100'; ctx.fillRect(-28, -6, 56, 38);
             ctx.fillStyle = '#ffde00'; ctx.fillRect(-28, -6, 56, 12);
 
-            // Głowa Lalki (Odwrócona tyłem na Zielonym, Przodem z laserowymi oczami na Czerwonym!)
             ctx.fillStyle = '#000'; ctx.fillRect(-36, -64, 72, 56);
             if(state === 'green') {
-                // Tył głowy (Czarne włosy z dwoma kucykami)
                 ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 48);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-42, -40, 10, 10); ctx.fillRect(32, -40, 10, 10);
             } else {
-                // Twarz Lalki
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-32, -60, 64, 48);
-                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 14); // grzywka
-                // Oczy (Żółte ostrzegawcze lub Czerwone zabójcze lasery!)
+                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 14);
                 ctx.fillStyle = state === 'red' ? '#ff0033' : '#ffde00';
                 ctx.fillRect(-20, -40, 12, 12);
                 ctx.fillRect(8, -40, 12, 12);
@@ -2111,13 +2343,31 @@
                     ctx.fillStyle = 'rgba(255, 0, 50, 0.35)';
                     ctx.beginPath(); ctx.arc(-14, -34, 18, 0, Math.PI*2); ctx.arc(14, -34, 18, 0, Math.PI*2); ctx.fill();
                 }
-                // Usta
                 ctx.fillStyle = '#d91656'; ctx.fillRect(-8, -22, 16, 6);
             }
             ctx.restore();
         }
 
-        // === KLASA LOKALNEGO GRACZA (OBSŁUGUJE RUCH PIESZY, SQUID GAME ORAZ FIZYKĘ GOKARTÓW!) ===
+        // === RYSOWANIE PIŁKI NOŻNEJ PIXEL-ART 2.5D ===
+        function drawPixelSoccerBall(ctx, b) {
+            ctx.save();
+            ctx.translate(Math.floor(b.x), Math.floor(b.y));
+            ctx.fillStyle = 'rgba(0,0,0,0.48)';
+            ctx.beginPath(); ctx.ellipse(0, 10, 18, 8, 0, 0, Math.PI*2); ctx.fill();
+
+            ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI*2); ctx.fill();
+            // Klasyczne czarne łaty piłkarskie
+            ctx.fillStyle = '#111';
+            ctx.fillRect(-5, -5, 10, 10);
+            ctx.fillRect(-14, -4, 5, 8);
+            ctx.fillRect(9, -4, 5, 8);
+            ctx.fillRect(-4, -14, 8, 5);
+            ctx.fillRect(-4, 9, 8, 5);
+            ctx.restore();
+        }
+
+        // === KLASA LOKALNEGO GRACZA ===
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
@@ -2126,6 +2376,8 @@
                     this.x = 300 + Math.random()*1000; this.y = 1460;
                 } else if(gm === 'race') {
                     this.x = 760 + (Math.random()*80 - 40); this.y = 1320 + (Math.random()*60 - 30);
+                } else if(gm === 'soccer') {
+                    this.x = 450 + Math.random()*700; this.y = 550 + Math.random()*500;
                 } else {
                     this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
                 }
@@ -2135,11 +2387,11 @@
                 this.anim = 0; this.muzzle = 0;
                 this.hp = gm === 'race' ? 1 : 100; this.maxHp = 100; this.shield = 0;
                 this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(gm) ? 'shotgun' : 'pistol');
-                this.fireCd = 0; this.dashCd = 0; this.dashTime = 0;
+                this.fireCd = 0; this.dashCd = 0; this.dashTime = 0; this.jumpZ = 0;
                 this.quadTime = 0; this.speedTime = 0; this.slipTimer = 0;
                 this.emote = ''; this.emoteTimer = 0;
                 this.score = 0; this.streak = 0; this.isDead = false; this.respawnTimer = 0;
-                this.passImmunity = 0;
+                this.passImmunity = 0; this.kickCd = 0;
             }
             sendEmote(em) {
                 this.emote = em; this.emoteTimer = 2.5;
@@ -2147,7 +2399,7 @@
             }
             tryDash() {
                 if(this.dashCd <= 0 && !this.isDead && RoomState.status === 'playing') {
-                    this.dashCd = 1.6; this.dashTime = 0.22;
+                    this.dashCd = 1.4; this.dashTime = 0.32;
                     Sound.play('dash');
                     FX.burst(this.x, this.y, '#05d5fa', 10, 130, 5);
                 }
@@ -2155,6 +2407,7 @@
             update(dt) {
                 const gm = RoomState.activeMinigame;
                 if(this.passImmunity > 0) this.passImmunity -= dt;
+                if(this.kickCd > 0) this.kickCd -= dt;
                 if(this.muzzle > 0) this.muzzle -= dt;
                 if(this.quadTime > 0) this.quadTime -= dt;
                 if(this.speedTime > 0) this.speedTime -= dt;
@@ -2162,7 +2415,13 @@
                 if(this.dashCd > 0) this.dashCd -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
-                // Poślizg na skórce od banana lub plamie oleju!
+                // Skok w górę podczas Zrywu (pozwala przeskakiwać wiązki w Laserowym Labiryncie!)
+                if(this.dashTime > 0) {
+                    this.jumpZ = Math.sin((this.dashTime / 0.32) * Math.PI) * 34;
+                } else {
+                    this.jumpZ = 0;
+                }
+
                 if(this.slipTimer > 0) {
                     this.slipTimer -= dt;
                     this.angle += 18 * dt;
@@ -2183,7 +2442,6 @@
                     if(this.dashTime > 0) { this.kartSpeed = 720; this.dashTime -= dt; FX.burst(this.x, this.y, '#ff9100', 2, 60, 5); }
                     else { this.kartSpeed += acc * dt; }
 
-                    // Sprawdzenie czy gokart zjechał z asfaltu na trawę (Środek toru lub pobocze)
                     let dxC = Math.abs(this.x - 800), dyC = Math.abs(this.y - 800);
                     let onGrass = (dxC < 340 && dyC < 340) || dxC > 680 || dyC > 680;
                     this.kartSpeed *= onGrass ? 0.92 : 0.982;
@@ -2193,14 +2451,13 @@
                     if(Math.abs(this.kartSpeed) > 15) {
                         this.angle += turn * (this.kartSpeed > 0 ? 1 : -1) * dt;
                         if(Math.abs(turn) > 0 && !onGrass && Math.random() < 0.4) {
-                            FX.burst(this.x, this.y, '#222222', 1, 10, 4); // Ślady opon
+                            FX.burst(this.x, this.y, '#222222', 1, 10, 4);
                         }
                     }
 
                     this.x = Math.max(70, Math.min(WORLD_SIZE-70, this.x + Math.cos(this.angle)*this.kartSpeed*dt));
                     this.y = Math.max(70, Math.min(WORLD_SIZE-70, this.y + Math.sin(this.angle)*this.kartSpeed*dt));
 
-                    // Punkty kontrolne okrążenia (0: Dół, 1: Prawo, 2: Góra, 3: Lewo)
                     let cp = -1;
                     if(this.y > 1140 && this.x > 650 && this.x < 950) cp = 0;
                     else if(this.x > 1140 && this.y > 650 && this.y < 950) cp = 1;
@@ -2212,14 +2469,13 @@
                         this.score += 5;
                         if(cp === 0) {
                             this.lap++;
-                            this.hp = this.lap; // Wykorzystujemy hp do synchronizacji numeru okrążenia nad autem
+                            this.hp = this.lap;
                             this.score += 25;
                             Sound.play('jackpot');
                             FX.text(this.x, this.y, `OKRĄŻENIE ${this.lap}!`, "#ffde00", 13);
                         }
                     }
 
-                    // Zbieranie bananów / plam oleju / dopalaczy Nitro na torze
                     Object.entries(netItems).forEach(([id, item]) => {
                         if(Math.hypot(this.x - item.x, this.y - item.y) < 36) {
                             if(item.t === 'banana') {
@@ -2238,7 +2494,7 @@
                 }
 
                 // === 2. LOGIKA POZOSTAŁYCH MINIGIER PIESZYCH ===
-                if((gm === 'meteors' || gm === 'spleef') && !this.isDead) {
+                if((gm === 'meteors' || gm === 'spleef' || gm === 'lasers') && !this.isDead) {
                     this.survTick = (this.survTick || 0) + dt;
                     if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
                 }
@@ -2276,9 +2532,8 @@
                 if(RoomState.mutator === 'drunk') { ix *= -1; iy *= -1; }
                 if(ix !== 0 && iy !== 0) { let l = Math.hypot(ix, iy); ix /= l; iy /= l; }
 
-                // === PRAWDZIWE SQUID GAME (CZERWONE, ZIELONE) ===
+                // === SQUID GAME (CZERWONE, ZIELONE) ===
                 if(gm === 'squid') {
-                    // Jeśli poruszysz się podczas Czerwonego Światła -> Lalka strzela laserem i wracasz na start!
                     if(RoomState.squidState === 'red' && (Math.hypot(ix, iy) > 0.05 || this.dashTime > 0)) {
                         Sound.play('sniper');
                         FX.laserBeam(800, 120, this.x, this.y);
@@ -2289,7 +2544,6 @@
                         this.vx = 0; this.vy = 0;
                         return;
                     }
-                    // Przekroczenie linii Mety na górze (Y < 250)
                     if(this.y < 250) {
                         this.score += 25;
                         Sound.play('jackpot');
@@ -2302,11 +2556,12 @@
                 }
 
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
-                let baseSpd = RoomState.bombHolder === myId ? 345 : 285;
+                let baseSpd = RoomState.bombHolder === myId ? 345 : 295;
+                if(gm === 'paint') baseSpd = 340;
                 if(RoomState.mutator === 'tiny') baseSpd *= 1.3;
                 if(this.speedTime > 0) baseSpd *= 1.35;
                 if(this.dashTime > 0) {
-                    baseSpd = 760; this.dashTime -= dt;
+                    baseSpd = 740; this.dashTime -= dt;
                     FX.burst(this.x, this.y, this.color, 1, 20, 5);
                 }
 
@@ -2322,8 +2577,51 @@
                 this.kx *= Math.pow(0.05, dt);
                 this.ky *= Math.pow(0.05, dt);
 
-                let activeObs = gm === 'squid' ? [] : mapObj.obstacles;
+                let noObstacleModes = ['squid', 'soccer', 'paint', 'lasers'];
+                let activeObs = noObstacleModes.includes(gm) ? [] : mapObj.obstacles;
                 this.moveSmoothCircle((this.vx + this.kx) * dt, (this.vy + this.ky) * dt, activeObs, dt);
+
+                // === NOWY TRYB: WOJNA KOLORÓW (SPLATOON TURF WAR) ===
+                if(gm === 'paint') {
+                    let tx = Math.floor(this.x / 80), ty = Math.floor(this.y / 80);
+                    if(tx >= 1 && tx <= 18 && ty >= 1 && ty <= 18) {
+                        let key = `${tx}_${ty}`;
+                        if(Game.paintGrid[key]?.owner !== myId) {
+                            Game.paintGrid[key] = { owner: myId, color: this.color };
+                            FX.burst(tx*80+40, ty*80+40, this.color, 3, 70, 5);
+                        }
+                    }
+                }
+
+                // === NOWY TRYB: PIŁKA NOŻNA (KOPANIE PIŁKI CIAŁEM LUB WŚLIZGIEM) ===
+                if(gm === 'soccer' && RoomState.ball && this.kickCd <= 0) {
+                    let dBall = Math.hypot(RoomState.ball.x - this.x, RoomState.ball.y - this.y);
+                    if(dBall < 42) {
+                        this.kickCd = 0.18;
+                        let kAngle = Math.atan2(RoomState.ball.y - this.y, RoomState.ball.x - this.x);
+                        let power = (this.dashTime > 0 || Input.down) ? 780 : 520;
+                        Sound.play('hit');
+                        FX.burst(RoomState.ball.x, RoomState.ball.y, '#ffde00', 8, 150, 5);
+                        db.ref(`events/${currentRoom}`).push({
+                            type: 'kickBall', kicker: myId,
+                            vx: Math.cos(kAngle)*power, vy: Math.sin(kAngle)*power
+                        });
+                    }
+                }
+
+                // === NOWY TRYB: LASEROWY LABIRYNT (UNIKANIE I PRZESKAKIWANIE WIĄZEK) ===
+                if(gm === 'lasers' && this.jumpZ < 14) {
+                    let hitBeam = false;
+                    Game.laserBeams.forEach(lb => {
+                        if(lb.type === 'h' && Math.abs(this.y - lb.pos) < 16) hitBeam = true;
+                        if(lb.type === 'v' && Math.abs(this.x - lb.pos) < 16) hitBeam = true;
+                    });
+                    if(hitBeam) {
+                        this.score = Math.max(0, this.score - 2);
+                        this.takeDamage(35, null, (Math.random()-0.5)*450, (Math.random()-0.5)*450);
+                        FX.text(this.x, this.y, "⚡ PORAŻENIE LASEREM!", "#ff1744", 11);
+                    }
+                }
 
                 if(gm === 'spleef') {
                     let tx = Math.floor(this.x / 80), ty = Math.floor(this.y / 80);
@@ -2366,7 +2664,8 @@
 
                 if(gm === 'sniper') this.wep = 'sniper';
 
-                if(Input.down && this.fireCd <= 0 && gm !== 'bomb' && gm !== 'squid') {
+                const nonShootingModes = ['bomb', 'squid', 'soccer', 'paint', 'lasers'];
+                if(Input.down && this.fireCd <= 0 && !nonShootingModes.includes(gm)) {
                     let w = WEAPONS[this.wep];
                     this.fireCd = w.rate; this.muzzle = 0.06;
                     Sound.play(w.snd); Cam.shake(5, 0.09);
@@ -2507,8 +2806,32 @@
 
         // === GŁÓWNA PĘTLA MINIGIER ===
         const Game = {
-            me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0, hostTickAt: 0, botThinkAt: 0,
-            hostZombies: [], hostMeteors: [], squidTimer: 0, timerDeadlineAt: 0, timerGameKey: '', finishRequested: false, lastTimerSyncAt: 0,
+            me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
+            hostZombies: [], hostMeteors: [], squidTimer: 0,
+            matchStartTime: 0, hostLastTickTime: 0, botStates: {},
+            paintGrid: {}, laserBeams: [], hostBall: {x:800, y:800, vx:0, vy:0, lastKicker: null},
+
+            // Funkcja Hosta do natychmiastowego pominięcia minigry (przycisk SKIP)
+            skipCurrentMinigame() {
+                if(!isHost || RoomState.status !== 'playing') return;
+                Sound.play('jackpot');
+                announce("⏭️ HOST POMINĄŁ MINIGRĘ!", 1400);
+                this.endMinigameRound();
+            },
+
+            endMinigameRound() {
+                if(!isHost) return;
+                let list = [{ id: myId, score: this.me ? this.me.score : 0 }];
+                Object.entries(netPlayers).forEach(([pid, p]) => list.push({ id: pid, score: p.score || 0 }));
+                list.sort((a,b) => b.score - a.score);
+                let winId = list[0].id;
+
+                if(RoomState.isPartyCampaign) {
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'card_reward', minigameWinner: winId });
+                } else {
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                }
+            },
 
             runRouletteAnimation(targetGame, targetMap, targetMutator) {
                 switchScreen(null);
@@ -2521,32 +2844,35 @@
                 ov.style.display = 'flex';
 
                 const labels = {
+                    soccer: '⚽ PIŁKA NOŻNA', paint: '🎨 WOJNA KOLORÓW', lasers: '🚨 LASEROWY UNIK',
                     race: '🏎️ WYŚCIG GOKARTÓW', squid: '🚦 SQUID GAME (LALKA)',
                     arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD',
                     crown: '👑 KRADZIEŻ KORONY', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
                     royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA', sniper: '🎯 SNAJPERZY', coins: '💎 ZŁOTA GORĄCZKA'
                 };
-                const mapNames = { forest: '🌲 Leśny Bunkier', cyber: '🟣 Cyber-Vegas', ice: '❄️ Lodowa Twierdza', lava: '🌋 Wulkaniczny Krater' };
-                const keys = Object.keys(labels);
+                const mapNames = { forest: '🌲 Leśny Bunkier HD', cyber: '🟣 Cyber-Vegas HD', ice: '❄️ Lodowa Twierdza HD', lava: '🌋 Wulkaniczny Krater HD' };
+                const allowedKeys = (RoomState.allowedGames && RoomState.allowedGames.length > 0) ? RoomState.allowedGames : Object.keys(labels);
                 let count = 0;
 
                 const spin = setInterval(() => {
                     Sound.play('tick');
-                    box.innerText = labels[keys[count % keys.length]];
+                    box.innerText = labels[allowedKeys[count % allowedKeys.length]];
                     count++;
                     if(count > 18) {
                         clearInterval(spin);
-                        box.innerText = labels[targetGame] || '🔫 ARENA PvP';
+                        box.innerText = labels[targetGame] || '⚽ PIŁKA NOŻNA';
                         mutTxt.innerText = `🤡 KLĄTWA RUNDY: ${MUTATOR_NAMES[targetMutator] || 'BRAK'}`;
-                        mapTxt.innerText = `ARENA: ${mapNames[targetMap] || 'Leśny Bunkier'}`;
+                        mapTxt.innerText = `ARENA: ${mapNames[targetMap] || 'Leśny Bunkier HD'}`;
                         Sound.play('jackpot');
                         setTimeout(() => {
                             ov.style.display = 'none';
                             if(isHost) {
+                                const dur = Number(RoomState.matchDuration) || 60;
                                 db.ref(`room_items/${currentRoom}`).remove();
                                 db.ref(`rooms/${currentRoom}`).update({
-                                    status: 'playing', timer: RoomState.matchDuration, stormR: 1100, vaultHp: 500,
+                                    status: 'playing', timer: dur, stormR: 1100, vaultHp: 500,
+                                    ball: {x:800, y:800, vx:0, vy:0},
                                     bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                                 });
                             }
@@ -2560,6 +2886,14 @@
                 document.getElementById('rouletteOverlay').style.display = 'none';
                 document.getElementById('boardHud').style.display = 'none';
 
+                const gm = RoomState.activeMinigame;
+                const dur = Number(RoomState.matchDuration) || 60;
+                RoomState.timer = dur;
+                this.matchStartTime = Date.now();
+                this.hostLastTickTime = Date.now();
+                this.paintGrid = {};
+                this.hostBall = {x:800, y:800, vx:0, vy:0, lastKicker: myId};
+
                 this.me = new LocalPlayer(
                     document.getElementById('playerName').value.trim() || "Paweł",
                     document.getElementById('playerColor').value,
@@ -2567,16 +2901,53 @@
                 );
                 this.bullets = []; this.hostZombies = []; this.hostMeteors = []; FX.parts = []; FX.texts = []; FX.decals = []; FX.rings = []; FX.lasers = [];
 
+                if(isHost) {
+                    this.botStates = {};
+                    let botUpdates = {};
+                    Object.entries(netPlayers).forEach(([pid, p], idx) => {
+                        if(pid.startsWith('bot_') || p.isBot) {
+                            let bx = 400 + Math.random()*800, by = 400 + Math.random()*800;
+                            if(gm === 'squid') { bx = 300 + Math.random()*1000; by = 1460; }
+                            else if(gm === 'race') { bx = 740 + idx*35; by = 1310 + idx*18; }
+
+                            this.botStates[pid] = {
+                                x: bx, y: by, angle: gm === 'squid' ? -Math.PI/2 : 0,
+                                hp: gm === 'race' ? 1 : 100, score: 0, isDead: false, respawn: 0,
+                                wpIdx: 0, lap: 1, anim: 0, wep: gm === 'sniper' ? 'sniper' : 'pistol',
+                                targetX: 400 + Math.random()*800, targetY: 400 + Math.random()*800
+                            };
+                            botUpdates[`${pid}/x`] = Math.round(bx);
+                            botUpdates[`${pid}/y`] = Math.round(by);
+                            botUpdates[`${pid}/hp`] = gm === 'race' ? 1 : 100;
+                            botUpdates[`${pid}/score`] = 0;
+                            botUpdates[`${pid}/isDead`] = false;
+                        }
+                    });
+                    if(Object.keys(botUpdates).length > 0) {
+                        db.ref(`room_players/${currentRoom}`).update(botUpdates);
+                    }
+                }
+
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'block';
                 document.getElementById('hudRight').style.display = 'block';
+                document.getElementById('btnSkipMinigame').style.display = isHost ? 'block' : 'none';
 
-                const gm = RoomState.activeMinigame;
                 document.getElementById('squidLightBanner').style.display = gm === 'squid' ? 'block' : 'none';
                 document.getElementById('hudMutatorBadge').innerText = `🤡 ${MUTATOR_NAMES[RoomState.mutator] || 'Normalnie'}`;
-                document.getElementById('hudWeapon').innerText = gm === 'race' ? 'POJAZD: Gokart Turbo' : (gm === 'squid' ? 'CEL: Dobiegnij do Lalki!' : (gm === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : 'BROŃ: Pistolet'));
+
+                const weaponDescriptions = {
+                    race: 'POJAZD: Gokart Turbo HD',
+                    squid: 'CEL: Dobiegnij do Lalki!',
+                    bomb: 'TRYB: OMIJAJ BOMBĘ!',
+                    soccer: 'CEL: Strzelaj gole do bramek! [SPACJA = Wślizg]',
+                    paint: 'CEL: Zamaluj najwięcej kafelków swoim kolorem!',
+                    lasers: 'CEL: Skacz nad czerwonymi laserami [SPACJA]!'
+                };
+                document.getElementById('hudWeapon').innerText = weaponDescriptions[gm] || `BROŃ: ${WEAPONS[this.me.wep].name}`;
 
                 const modeTitles = {
+                    soccer: '⚽ PIŁKA NOŻNA (PIXEL SOCCER)', paint: '🎨 WOJNA KOLORÓW (SPLATOON)', lasers: '🚨 LASEROWY LABIRYNT',
                     race: '🏎️ WYŚCIG GOKARTÓW', squid: '🚦 SQUID GAME (LALKA)',
                     arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD',
                     crown: '👑 KRADZIEŻ KORONY', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
@@ -2604,10 +2975,6 @@
                 }
 
                 this.lastTime = performance.now();
-                this.hostTickAt = this.lastTime;
-                this.timerDeadlineAt = this.lastTime + Math.max(1, Number(RoomState.matchDuration || RoomState.timer || 60)) * 1000;
-                this.timerGameKey = `${currentRoom || ''}:${gm}`;
-                this.finishRequested = false;
                 if(!this.loopId) this.loopId = requestAnimationFrame(t => this.loop(t));
             },
 
@@ -2642,53 +3009,255 @@
                 }
             },
 
+            updateBotsInMinigame(dt, gm, allActive) {
+                const waypoints = [
+                    {x: 1310, y: 1310},
+                    {x: 1310, y: 290},
+                    {x: 290,  y: 290},
+                    {x: 290,  y: 1310}
+                ];
+
+                let botDbUpdates = {};
+
+                Object.entries(this.botStates).forEach(([bid, b]) => {
+                    if(!netPlayers[bid]) return;
+
+                    if(b.isDead) {
+                        if(gm !== 'bomb') {
+                            b.respawn -= dt;
+                            if(b.respawn <= 0) {
+                                b.isDead = false; b.hp = 100;
+                                b.x = gm === 'squid' ? 300 + Math.random()*1000 : 450 + Math.random()*700;
+                                b.y = gm === 'squid' ? 1460 : 450 + Math.random()*700;
+                            }
+                        }
+                        botDbUpdates[`${bid}/isDead`] = b.isDead;
+                        botDbUpdates[`${bid}/hp`] = b.hp;
+                        return;
+                    }
+
+                    b.anim += dt * 11;
+                    let shooting = false;
+
+                    if(gm === 'race') {
+                        let wp = waypoints[b.wpIdx % 4];
+                        b.angle = Math.atan2(wp.y - b.y, wp.x - b.x);
+                        let spd = 435 + (bid.charCodeAt(4) % 70);
+                        b.x += Math.cos(b.angle) * spd * dt;
+                        b.y += Math.sin(b.angle) * spd * dt;
+
+                        if(Math.hypot(wp.x - b.x, wp.y - b.y) < 110) {
+                            b.wpIdx++;
+                            b.score += 5;
+                            if(b.wpIdx % 4 === 0) {
+                                b.lap++;
+                                b.hp = b.lap;
+                                b.score += 25;
+                            }
+                        }
+                    }
+                    else if(gm === 'soccer') {
+                        // Boty biegną za piłką i kopią ją w stronę bramek!
+                        let ball = this.hostBall;
+                        b.angle = Math.atan2(ball.y - b.y, ball.x - b.x);
+                        b.x = Math.max(150, Math.min(1450, b.x + Math.cos(b.angle) * 265 * dt));
+                        b.y = Math.max(250, Math.min(1350, b.y + Math.sin(b.angle) * 265 * dt));
+                        if(Math.hypot(ball.x - b.x, ball.y - b.y) < 42) {
+                            ball.vx = Math.cos(b.angle) * 560;
+                            ball.vy = Math.sin(b.angle) * 560;
+                            ball.lastKicker = bid;
+                        }
+                    }
+                    else if(gm === 'paint') {
+                        // Boty biegają po planszy i zamalowują kafelki swoim kolorem!
+                        if(Math.hypot(b.targetX - b.x, b.targetY - b.y) < 80 || Math.random() < 0.08) {
+                            b.targetX = 160 + Math.random()*1280;
+                            b.targetY = 160 + Math.random()*1280;
+                        }
+                        b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x);
+                        b.x = Math.max(100, Math.min(1500, b.x + Math.cos(b.angle) * 310 * dt));
+                        b.y = Math.max(100, Math.min(1500, b.y + Math.sin(b.angle) * 310 * dt));
+                        let tx = Math.floor(b.x / 80), ty = Math.floor(b.y / 80);
+                        if(tx >= 1 && tx <= 18 && ty >= 1 && ty <= 18) {
+                            this.paintGrid[`${tx}_${ty}`] = { owner: bid, color: netPlayers[bid].color };
+                        }
+                    }
+                    else if(gm === 'lasers') {
+                        if(Math.hypot(b.targetX - b.x, b.targetY - b.y) < 70 || Math.random() < 0.05) {
+                            b.targetX = 250 + Math.random()*1100;
+                            b.targetY = 250 + Math.random()*1100;
+                        }
+                        b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x);
+                        b.x += Math.cos(b.angle) * 230 * dt;
+                        b.y += Math.sin(b.angle) * 230 * dt;
+                        if(Math.random() < 0.16) b.score += 1;
+                    }
+                    else if(gm === 'squid') {
+                        b.angle = -Math.PI/2;
+                        if(RoomState.squidState === 'green') {
+                            b.y -= 240 * dt;
+                            b.x += Math.sin(b.anim)*40*dt;
+                        } else if(RoomState.squidState === 'red' && Math.random() < 0.015) {
+                            FX.laserBeam(800, 120, b.x, b.y);
+                            b.y = 1460;
+                        }
+                        if(b.y < 250) {
+                            b.score += 25;
+                            b.y = 1460;
+                            b.x = 300 + Math.random()*1000;
+                        }
+                    }
+                    else if(gm === 'koth') {
+                        let k = RoomState.koth;
+                        let d = Math.hypot(k.x - b.x, k.y - b.y);
+                        if(d > 55) {
+                            b.angle = Math.atan2(k.y - b.y, k.x - b.x);
+                            b.x += Math.cos(b.angle) * 235 * dt;
+                            b.y += Math.sin(b.angle) * 235 * dt;
+                        } else {
+                            if(Math.random() < 0.3) b.score += 1;
+                        }
+                        shooting = Math.random() < 0.35;
+                    }
+                    else if(gm === 'bomb') {
+                        if(RoomState.bombHolder === bid) {
+                            let target = allActive.find(p => p.id !== bid);
+                            if(target) {
+                                b.angle = Math.atan2(target.y - b.y, target.x - b.x);
+                                b.x += Math.cos(b.angle) * 315 * dt;
+                                b.y += Math.sin(b.angle) * 315 * dt;
+                                if(Math.hypot(target.x - b.x, target.y - b.y) < 42) {
+                                    RoomState.bombHolder = target.id;
+                                    db.ref(`rooms/${currentRoom}`).update({ bombHolder: target.id });
+                                }
+                            }
+                        } else {
+                            if(Math.hypot(b.targetX - b.x, b.targetY - b.y) < 60) {
+                                b.targetX = 250 + Math.random()*1100;
+                                b.targetY = 250 + Math.random()*1100;
+                            }
+                            b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x);
+                            b.x += Math.cos(b.angle) * 240 * dt;
+                            b.y += Math.sin(b.angle) * 240 * dt;
+                        }
+                    }
+                    else {
+                        if(Math.hypot(b.targetX - b.x, b.targetY - b.y) < 70 || Math.random() < 0.05) {
+                            b.targetX = 300 + Math.random()*1000;
+                            b.targetY = 300 + Math.random()*1000;
+                        }
+                        let moveAngle = Math.atan2(b.targetY - b.y, b.targetX - b.x);
+                        b.x = Math.max(80, Math.min(WORLD_SIZE-80, b.x + Math.cos(moveAngle) * 225 * dt));
+                        b.y = Math.max(80, Math.min(WORLD_SIZE-80, b.y + Math.sin(moveAngle) * 225 * dt));
+
+                        if(gm === 'heist') {
+                            b.angle = Math.atan2(800 - b.y, 800 - b.x);
+                            shooting = true;
+                            if(Math.random() < 0.18) b.score += 2;
+                        } else {
+                            let enemy = allActive.find(p => p.id !== bid);
+                            if(enemy) {
+                                b.angle = Math.atan2(enemy.y - b.y, enemy.x - b.x) + (Math.random()-0.5)*0.35;
+                                shooting = Math.hypot(enemy.x - b.x, enemy.y - b.y) < 550 && Math.random() < 0.45;
+                                if(shooting && enemy.id === myId && Game.me && !Game.me.isDead && Math.random() < 0.06) {
+                                    Game.me.takeDamage(12, bid);
+                                }
+                            }
+                        }
+
+                        if((gm === 'meteors' || gm === 'spleef' || gm === 'coins' || gm === 'zombies') && Math.random() < 0.15) {
+                            b.score += 1;
+                        }
+                    }
+
+                    netPlayers[bid].x = Math.round(b.x);
+                    netPlayers[bid].y = Math.round(b.y);
+                    netPlayers[bid].angle = Number(b.angle.toFixed(2));
+                    netPlayers[bid].hp = Math.round(b.hp);
+                    netPlayers[bid].score = b.score;
+                    netPlayers[bid].isDead = b.isDead;
+                    netPlayers[bid].anim = Number(b.anim.toFixed(1));
+                    netPlayers[bid].shooting = shooting;
+
+                    botDbUpdates[`${bid}/x`] = netPlayers[bid].x;
+                    botDbUpdates[`${bid}/y`] = netPlayers[bid].y;
+                    botDbUpdates[`${bid}/angle`] = netPlayers[bid].angle;
+                    botDbUpdates[`${bid}/hp`] = netPlayers[bid].hp;
+                    botDbUpdates[`${bid}/score`] = netPlayers[bid].score;
+                    botDbUpdates[`${bid}/isDead`] = netPlayers[bid].isDead;
+                    botDbUpdates[`${bid}/anim`] = netPlayers[bid].anim;
+                    botDbUpdates[`${bid}/shooting`] = shooting;
+                });
+
+                // W trybie Wojny Kolorów przeliczamy zamalowane kafelki na punkty na żywo!
+                if(gm === 'paint') {
+                    let counts = {};
+                    Object.values(this.paintGrid).forEach(cell => {
+                        counts[cell.owner] = (counts[cell.owner] || 0) + 1;
+                    });
+                    if(this.me) this.me.score = counts[myId] || 0;
+                    Object.keys(this.botStates).forEach(bid => {
+                        this.botStates[bid].score = counts[bid] || 0;
+                        botDbUpdates[`${bid}/score`] = this.botStates[bid].score;
+                    });
+                }
+
+                if(Object.keys(botDbUpdates).length > 0) {
+                    db.ref(`room_players/${currentRoom}`).update(botDbUpdates);
+                }
+            },
+
             hostTick() {
                 if(RoomState.status !== 'playing') return;
                 const gm = RoomState.activeMinigame;
-                // Odliczanie na podstawie rzeczywistego czasu, a nie liczby wywołań setInterval.
-                // Dzięki temu timer działa też przy chwilowych przycięciach przeglądarki.
-                const now = performance.now();
-                const elapsed = this.hostTickAt ? Math.max(0, (now - this.hostTickAt) / 1000) : 0.1;
-                this.hostTickAt = now;
-                // Zegar oparty na deadline, nie na liczbie ticków/Firebase snapshotów.
-                // Dzięki temu deszcz meteorów i pozostałe tryby kończą się także po przycięciu karty.
-                const timerKey = `${currentRoom || ''}:${gm}`;
-                if(!this.timerDeadlineAt || this.timerGameKey !== timerKey) {
-                    this.timerDeadlineAt = now + Math.max(1, Number(RoomState.timer || RoomState.matchDuration || 60)) * 1000;
-                    this.timerGameKey = timerKey;
-                    this.finishRequested = false;
-                }
-                RoomState.timer = Math.max(0, (this.timerDeadlineAt - now) / 1000);
 
-                // Proste boty sterowane przez hosta: biegną po mapie i zdobywają punkty.
-                Object.entries(netPlayers).forEach(([id, p]) => {
-                    if(!p.isBot || p.isDead) return;
-                    const target = this.me && !this.me.isDead ? this.me : null;
-                    const dx = target ? target.x - (p.x || 800) : Math.cos(now / 700 + (p.botIndex || 0)) * 100;
-                    const dy = target ? target.y - (p.y || 800) : Math.sin(now / 900 + (p.botIndex || 0)) * 100;
-                    const len = Math.max(1, Math.hypot(dx, dy));
-                    const speed = gm === 'race' ? 125 : (gm === 'squid' ? 145 : 95);
-                    let bx = (p.x || 800) + dx / len * speed * elapsed;
-                    let by = (p.y || 800) + dy / len * speed * elapsed;
-                    if(gm === 'squid') by = Math.max(100, by - speed * elapsed * 0.7);
-                    bx = Math.max(60, Math.min(WORLD_SIZE - 60, bx));
-                    by = Math.max(60, Math.min(WORLD_SIZE - 60, by));
-                    const nextScore = (p.score || 0) + elapsed * (gm === 'coins' || gm === 'heist' ? 2.5 : 0.8);
-                    db.ref(`room_players/${currentRoom}/${id}`).update({
-                        x: Math.round(bx), y: Math.round(by), angle: Math.atan2(dy, dx),
-                        score: Math.floor(nextScore), hp: p.hp || 100, isDead: false
-                    });
-                });
+                const nowMs = Date.now();
+                const dt = Math.min(0.5, (nowMs - (this.hostLastTickTime || nowMs)) / 1000);
+                this.hostLastTickTime = nowMs;
+
+                const totalDuration = Number(RoomState.matchDuration) || 60;
+                const elapsedSeconds = (nowMs - this.matchStartTime) / 1000;
+                RoomState.timer = Math.max(0, totalDuration - elapsedSeconds);
 
                 let allActive = [];
                 if(this.me && !this.me.isDead) allActive.push({ id: myId, x: this.me.x, y: this.me.y });
                 Object.entries(netPlayers).forEach(([id, p]) => { if(!p.isDead) allActive.push({ id, x: p.x, y: p.y }); });
 
-                if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 1.2);
+                this.updateBotsInMinigame(dt, gm, allActive);
 
-                // Sekwencja Lalki Squid Game: Zielone (3.5s) -> Żółte ostrzeżenie (1.1s) -> Czerwone (2.6s)
+                // Fizyka Piłki Nożnej (odbicia od band i sprawdzanie goli w bramkach!)
+                if(gm === 'soccer') {
+                    let b = this.hostBall;
+                    b.x += b.vx * dt;
+                    b.y += b.vy * dt;
+                    b.vx *= Math.pow(0.28, dt);
+                    b.vy *= Math.pow(0.28, dt);
+
+                    // Sprawdzenie GOLA w lewej lub prawej bramce (Y od 640 do 960)
+                    let inGoalY = (b.y > 640 && b.y < 960);
+                    if((b.x < 135 || b.x > 1465) && inGoalY) {
+                        let scorer = b.lastKicker || myId;
+                        if(scorer === myId && this.me) this.me.score += 15;
+                        else if(this.botStates[scorer]) this.botStates[scorer].score += 15;
+                        else db.ref(`events/${currentRoom}`).push({ type: 'kill', killer: scorer, pts: 15 });
+
+                        let sName = scorer === myId ? (this.me?.name || 'Ty') : (netPlayers[scorer]?.name || 'Gracz');
+                        db.ref(`events/${currentRoom}`).push({ type: 'goalScored', name: sName });
+                        b.x = 800; b.y = 800; b.vx = 0; b.vy = 0;
+                    } else {
+                        if(b.x < 140) { b.x = 140; b.vx *= -0.85; }
+                        if(b.x > 1460) { b.x = 1460; b.vx *= -0.85; }
+                        if(b.y < 220) { b.y = 220; b.vy *= -0.85; }
+                        if(b.y > 1380) { b.y = 1380; b.vy *= -0.85; }
+                    }
+                    RoomState.ball = { x: Math.round(b.x), y: Math.round(b.y), vx: Math.round(b.vx), vy: Math.round(b.vy) };
+                    db.ref(`rooms/${currentRoom}/ball`).set(RoomState.ball);
+                }
+
+                if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 14 * dt);
+
                 if(gm === 'squid') {
-                    this.squidTimer = (this.squidTimer || 0) + elapsed;
+                    this.squidTimer = (this.squidTimer || 0) + dt;
                     if(RoomState.squidState === 'green' && this.squidTimer >= 3.4) {
                         this.squidTimer = 0;
                         RoomState.squidState = 'yellow';
@@ -2704,7 +3273,6 @@
                     }
                 }
 
-                // Spawning skórek od banana i Nitro w Wyścigu lub podczas klątwy Bananów
                 if((gm === 'race' || RoomState.mutator === 'bananas') && Math.random() < 0.12 && Object.keys(netItems).length < 14) {
                     let iid = 'b_' + Math.random().toString(36).substr(2, 5);
                     db.ref(`room_items/${currentRoom}/${iid}`).set({
@@ -2724,7 +3292,7 @@
                     }
                     for(let i = this.hostMeteors.length - 1; i >= 0; i--) {
                         let m = this.hostMeteors[i];
-                        m.t -= elapsed;
+                        m.t -= dt;
                         if(m.t <= 0) {
                             db.ref(`events/${currentRoom}`).push({ type: 'meteorBoom', x: m.x, y: m.y, r: m.r });
                             this.hostMeteors.splice(i, 1);
@@ -2741,7 +3309,7 @@
                             t: Math.random() < 0.25 ? 'gem' : 'coin'
                         });
                     }
-                } else if(!['bomb', 'sniper', 'race', 'squid'].includes(gm)) {
+                } else if(!['bomb', 'sniper', 'race', 'squid', 'soccer', 'paint', 'lasers'].includes(gm)) {
                     if(Math.random() < 0.05 && Object.keys(netItems).length < 8) {
                         let pool = ['medkit', 'shield', 'quad', 'nitro', 'shotgun', 'minigun', 'sniper', 'plasma', 'bazooka'];
                         let iid = 'i_' + Math.random().toString(36).substr(2, 5);
@@ -2768,8 +3336,8 @@
                         if(target) {
                             z.a = Number(Math.atan2(target.y - z.y, target.x - z.x).toFixed(2));
                             let spd = z.t === 1 ? 175 : (z.t === 2 ? 55 : 105);
-                            z.x = Math.round(z.x + Math.cos(z.a) * spd * elapsed);
-                            z.y = Math.round(z.y + Math.sin(z.a) * spd * elapsed);
+                            z.x = Math.round(z.x + Math.cos(z.a) * spd * dt);
+                            z.y = Math.round(z.y + Math.sin(z.a) * spd * dt);
                         }
                     });
                     db.ref(`rooms/${currentRoom}`).update({ zombies: JSON.stringify(this.hostZombies) });
@@ -2778,7 +3346,8 @@
                 if(gm === 'bomb') {
                     if(allActive.length <= 1 && Object.keys(netPlayers).length >= 1) {
                         allActive.forEach(survivor => {
-                            if(survivor.id === myId) this.me.score += 50;
+                            if(survivor.id === myId && this.me) this.me.score += 50;
+                            else if(this.botStates[survivor.id]) this.botStates[survivor.id].score += 50;
                             else db.ref(`events/${currentRoom}`).push({ type: 'kill', killer: survivor.id, pts: 50 });
                         });
                         RoomState.timer = 0;
@@ -2789,18 +3358,24 @@
                                 RoomState.bombTimer = 10;
                             }
                         } else {
-                            RoomState.bombTimer -= 0.1;
+                            RoomState.bombTimer -= dt;
                             if(RoomState.bombTimer <= 0) {
-                                db.ref(`events/${currentRoom}`).push({ type: 'explode', target: RoomState.bombHolder });
+                                if(this.botStates[RoomState.bombHolder]) {
+                                    this.botStates[RoomState.bombHolder].isDead = true;
+                                    this.botStates[RoomState.bombHolder].hp = 0;
+                                    FX.explosion(this.botStates[RoomState.bombHolder].x, this.botStates[RoomState.bombHolder].y);
+                                } else {
+                                    db.ref(`events/${currentRoom}`).push({ type: 'explode', target: RoomState.bombHolder });
+                                }
                                 RoomState.bombHolder = null; RoomState.bombTimer = 10;
                             }
                         }
-                        db.ref(`rooms/${currentRoom}`).update({ bombHolder: RoomState.bombHolder, bombTimer: Number(RoomState.bombTimer.toFixed(1)) });
+                        db.ref(`rooms/${currentRoom}`).update({ bombHolder: RoomState.bombHolder, bombTimer: Number(Math.max(0, RoomState.bombTimer).toFixed(1)) });
                     }
                 }
 
                 if(gm === 'koth') {
-                    this.kothShift = (this.kothShift || 0) + elapsed;
+                    this.kothShift = (this.kothShift || 0) + dt;
                     if(this.kothShift >= 18) {
                         this.kothShift = 0;
                         RoomState.koth = { x: 350 + Math.round(Math.random()*900), y: 350 + Math.round(Math.random()*900), r: 110 };
@@ -2808,21 +3383,9 @@
                     }
                 }
 
-                if(RoomState.timer <= 0 && !this.finishRequested) {
-                    this.finishRequested = true;
-                    let list = [{ id: myId, score: this.me ? this.me.score : 0 }];
-                    Object.entries(netPlayers).forEach(([pid, p]) => list.push({ id: pid, score: p.score || 0 }));
-                    list.sort((a,b) => b.score - a.score);
-                    let winId = list[0]?.id || myId;
-                    const nextStatus = RoomState.isPartyCampaign ? 'card_reward' : 'podium';
-                    RoomState.status = nextStatus;
-                    db.ref(`rooms/${currentRoom}`).update(RoomState.isPartyCampaign
-                        ? { status: nextStatus, minigameWinner: winId, timer: 0 }
-                        : { status: nextStatus, timer: 0 });
-                } else if(RoomState.timer > 0 && (now - (this.lastTimerSyncAt || 0) >= 250)) {
-                    // Synchronizujemy HUD 4 razy na sekundę zamiast przy każdym ticku 100 ms.
-                    // Zegar lokalny nadal płynnie odlicza, a ruch/stan gry nie zależy od snapshotów timera.
-                    this.lastTimerSyncAt = now;
+                if(RoomState.timer <= 0) {
+                    this.endMinigameRound();
+                } else {
                     db.ref(`rooms/${currentRoom}`).update({ timer: Number(RoomState.timer.toFixed(1)), stormR: Math.round(RoomState.stormR) });
                 }
             },
@@ -2830,10 +3393,37 @@
             update(dt) {
                 if(!this.me) return;
                 const gm = RoomState.activeMinigame;
+
+                // Aktualizacja ruchomych wiązek w Laserowym Labiryncie
+                if(gm === 'lasers') {
+                    const t = performance.now() * 0.0012;
+                    this.laserBeams = [
+                        { type: 'h', pos: 800 + Math.sin(t * 1.3) * 520 },
+                        { type: 'h', pos: 800 + Math.cos(t * 1.7) * 480 },
+                        { type: 'v', pos: 800 + Math.sin(t * 1.5) * 520 },
+                        { type: 'v', pos: 800 + Math.cos(t * 1.1) * 480 }
+                    ];
+                }
+
+                // W trybie Wojny Kolorów zamalowujemy też kafelki pod innymi graczami sieciowymi
+                if(gm === 'paint') {
+                    Object.entries(netPlayers).forEach(([pid, p]) => {
+                        let tx = Math.floor((p.x || 0) / 80), ty = Math.floor((p.y || 0) / 80);
+                        if(tx >= 1 && tx <= 18 && ty >= 1 && ty <= 18) {
+                            this.paintGrid[`${tx}_${ty}`] = { owner: pid, color: p.color };
+                        }
+                    });
+                }
+
                 this.me.update(dt);
                 Cam.update(dt, this.me);
 
-                let obstacles = (gm === 'race' || gm === 'squid') ? [] : (MAPS[RoomState.map] || MAPS.forest).obstacles;
+                if(!isHost && RoomState.timer > 0) {
+                    RoomState.timer = Math.max(0, RoomState.timer - dt);
+                }
+
+                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers'];
+                let obstacles = noObstacleModes.includes(gm) ? [] : (MAPS[RoomState.map] || MAPS.forest).obstacles;
 
                 for(let i=this.bullets.length-1; i>=0; i--) {
                     let b = this.bullets[i];
@@ -2923,7 +3513,7 @@
                 }
 
                 Object.values(netPlayers).forEach(p => {
-                    if(p.shooting && !p.isDead && Math.random() < 0.25 && !['bomb', 'race', 'squid'].includes(gm)) {
+                    if(p.shooting && !p.isDead && Math.random() < 0.25 && !['bomb', 'race', 'squid', 'soccer', 'paint', 'lasers'].includes(gm)) {
                         let wObj = WEAPONS[p.wep] || WEAPONS.pistol;
                         this.spawnBullet(p.x, p.y, p.angle, wObj.spd, 0, 0, wObj.bType, false);
                     }
@@ -2932,12 +3522,21 @@
                 FX.update(dt);
 
                 let secs = Math.max(0, Math.ceil(RoomState.timer));
-                document.getElementById('hudTimer').innerText = gm === 'bomb' && RoomState.bombTimer
-                    ? `BOMBA: ${RoomState.bombTimer.toFixed(1)}s`
-                    : `00:${secs.toString().padStart(2,'0')}`;
+                let mins = Math.floor(secs / 60);
+                let remSecs = secs % 60;
+                document.getElementById('hudTimer').innerText = `${mins.toString().padStart(2,'0')}:${remSecs.toString().padStart(2,'0')}`;
+
+                const subTimerEl = document.getElementById('hudSubTimer');
+                if(gm === 'bomb' && RoomState.bombTimer !== undefined) {
+                    subTimerEl.classList.remove('hidden');
+                    subTimerEl.innerText = `💣 WYBUCH ZA: ${Math.max(0, RoomState.bombTimer).toFixed(1)}s`;
+                } else {
+                    subTimerEl.classList.add('hidden');
+                }
+
                 document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
                 document.getElementById('shieldBar').style.width = `${Math.min(100, (this.me.shield/50)*100)}%`;
-                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.6 - this.me.dashCd)/1.6)*100)}%`;
+                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.4 - this.me.dashCd)/1.4)*100)}%`;
 
                 let buffs = [];
                 if(this.me.quadTime > 0) buffs.push(`🔥 2X DMG (${Math.ceil(this.me.quadTime)}s)`);
@@ -2948,7 +3547,7 @@
                 Object.values(netPlayers).forEach(p => scores.push({ name: p.name, color: p.color, score: p.score || 0 }));
                 scores.sort((a,b) => b.score - a.score);
                 document.getElementById('liveScoreboard').innerHTML = scores.map((s, idx) =>
-                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${safeColor(s.color)}">■</span> ${escapeHTML(s.name)}</span><span class="text-yellow-400">${Number(s.score)||0} pkt</span></li>`
+                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score} pkt</span></li>`
                 ).join('');
             },
 
@@ -2959,19 +3558,19 @@
 
                 Cam.apply();
 
-                // 1. TŁO SPECJALNE DLA WYŚCIGU GOKARTÓW (TOR ASFALTOWY Z TARKAMI)
+                // 1. TOR WYŚCIGOWY GOKARTÓW HD (Z TARKAMI, OPONAMI I STRZAŁKAMI NITRO)
                 if(gm === 'race') {
-                    ctx.fillStyle = '#1e4620'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
-                    // Krawężniki biało-czerwone i asfaltowy owal
-                    ctx.fillStyle = '#ff2a6d'; ctx.fillRect(100, 100, 1400, 1400);
-                    ctx.fillStyle = '#2b2b36'; ctx.fillRect(120, 120, 1360, 1360);
-                    // Wyspa środkowa
+                    ctx.fillStyle = '#1b431d'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    for(let k=100; k<1500; k+=40) {
+                        ctx.fillStyle = (k/40)%2===0 ? '#ff1744' : '#ffffff';
+                        ctx.fillRect(k, 100, 40, 20); ctx.fillRect(k, 1480, 40, 20);
+                        ctx.fillRect(100, k, 20, 40); ctx.fillRect(1480, k, 20, 40);
+                    }
+                    ctx.fillStyle = '#262632'; ctx.fillRect(120, 120, 1360, 1360);
                     ctx.fillStyle = '#ffde00'; ctx.fillRect(440, 440, 720, 720);
-                    ctx.fillStyle = '#1e4620'; ctx.fillRect(460, 460, 680, 680);
-                    // Przerywana linia na środku toru
-                    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 6; ctx.setLineDash([30, 30]);
+                    ctx.fillStyle = '#1b431d'; ctx.fillRect(460, 460, 680, 680);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 6; ctx.setLineDash([32, 32]);
                     ctx.strokeRect(290, 290, 1020, 1020); ctx.setLineDash([]);
-                    // Szachownica Start/Meta na dole
                     for(let r=0; r<8; r++) {
                         ctx.fillStyle = r%2===0 ? '#fff' : '#000';
                         ctx.fillRect(780, 1140 + r*40, 20, 40);
@@ -2979,27 +3578,56 @@
                         ctx.fillRect(800, 1140 + r*40, 20, 40);
                     }
                 }
-                // 2. TŁO SPECJALNE DLA SQUID GAME (PIASZCZYSTA ARENA + CZERWONA META + LALKA)
+                // 2. STADION PIŁKARSKI PIXEL SOCCER HD
+                else if(gm === 'soccer') {
+                    for(let x=0; x<WORLD_SIZE; x+=100) {
+                        ctx.fillStyle = (x/100)%2===0 ? '#1e5c23' : '#256e2b';
+                        ctx.fillRect(x, 0, 100, WORLD_SIZE);
+                    }
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 8;
+                    ctx.strokeRect(140, 220, 1320, 1160);
+                    ctx.beginPath(); ctx.moveTo(800, 220); ctx.lineTo(800, 1380); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(800, 800, 140, 0, Math.PI*2); ctx.stroke();
+                    // Pola karne i bramki z siatką
+                    ctx.strokeRect(140, 520, 200, 560);
+                    ctx.strokeRect(1260, 520, 200, 560);
+                    ctx.fillStyle = 'rgba(5, 213, 250, 0.35)'; ctx.fillRect(70, 640, 70, 320);
+                    ctx.strokeStyle = '#05d5fa'; ctx.strokeRect(70, 640, 70, 320);
+                    ctx.fillStyle = 'rgba(255, 42, 109, 0.35)'; ctx.fillRect(1460, 640, 70, 320);
+                    ctx.strokeStyle = '#ff2a6d'; ctx.strokeRect(1460, 640, 70, 320);
+                }
+                // 3. ARENA WOJNY KOLORÓW (SPLATOON TURF WAR)
+                else if(gm === 'paint') {
+                    ctx.fillStyle = '#141421'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    for(let tx=1; tx<=18; tx++) {
+                        for(let ty=1; ty<=18; ty++) {
+                            let cell = this.paintGrid[`${tx}_${ty}`];
+                            ctx.fillStyle = cell ? cell.color : '#222236';
+                            ctx.fillRect(tx*80 + 2, ty*80 + 2, 76, 76);
+                            if(cell) {
+                                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                                ctx.fillRect(tx*80 + 6, ty*80 + 6, 68, 8);
+                            }
+                        }
+                    }
+                }
+                // 4. ARENA SQUID GAME
                 else if(gm === 'squid') {
                     ctx.fillStyle = '#d4b475'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     ctx.fillStyle = '#c4a262';
                     for(let y=0; y<WORLD_SIZE; y+=80) ctx.fillRect(0, y, WORLD_SIZE, 40);
-                    // Linia Startu na dole
                     ctx.fillStyle = '#05d5fa'; ctx.fillRect(0, 1380, WORLD_SIZE, 10);
                     ctx.fillStyle = '#fff'; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
                     ctx.fillText("LINIA STARTU - BIEGNIJ DO GÓRY NA ZIELONYM!", 800, 1420);
-                    // Czerwona Linia Mety na górze
                     ctx.fillStyle = '#ff0044'; ctx.fillRect(0, 250, WORLD_SIZE, 14);
                     ctx.fillStyle = '#ffde00'; ctx.fillText("🏁 LINIA METY (+25 PKT) 🏁", 800, 235);
                     drawSquidDoll(ctx, RoomState.squidState);
                 }
-                // 3. STANDARDOWE TŁA AREN 2.5D
+                // 5. STANDARDOWE TŁA AREN 2.5D HD
                 else {
-                    const cachedBg = GroundCache.canvases[gm === 'spleef' ? 'ice' : RoomState.map] || GroundCache.canvases.forest;
+                    const cachedBg = GroundCache.canvases[gm === 'spleef' ? 'ice' : (gm === 'lasers' ? 'cyber' : RoomState.map)] || GroundCache.canvases.forest;
                     ctx.drawImage(cachedBg, 0, 0);
                 }
-
-                drawAmbientPixels(ctx, RoomState.map, performance.now());
 
                 if(gm === 'spleef') {
                     Object.entries(RoomState.brokenIce).forEach(([key, state]) => {
@@ -3030,7 +3658,8 @@
                     ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.stroke();
                 }
 
-                if(gm !== 'race' && gm !== 'squid') {
+                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers'];
+                if(!noObstacleModes.includes(gm)) {
                     mapObj.obstacles.filter(o => o.t === 'lava').forEach(o => drawPixelObstacle25D(ctx, o));
                 }
 
@@ -3055,9 +3684,16 @@
                 });
 
                 const renderQueue = [];
-                if(gm !== 'race' && gm !== 'squid') {
+                if(!noObstacleModes.includes(gm)) {
                     mapObj.obstacles.filter(o => o.t !== 'lava').forEach(o => {
                         renderQueue.push({ y: o.y + o.h, draw: () => drawPixelObstacle25D(ctx, o) });
+                    });
+                }
+
+                if(gm === 'soccer' && RoomState.ball) {
+                    renderQueue.push({
+                        y: RoomState.ball.y,
+                        draw: () => drawPixelSoccerBall(ctx, RoomState.ball)
                     });
                 }
 
@@ -3087,32 +3723,42 @@
                 Object.entries(netPlayers).forEach(([pid, p]) => {
                     renderQueue.push({
                         y: p.y,
-                        draw: () => drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote, gm === 'crown' && RoomState.crownHolder === pid)
+                        draw: () => drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote, gm === 'crown' && RoomState.crownHolder === pid, 0)
                     });
                 });
 
                 if(this.me) {
                     renderQueue.push({
                         y: this.me.y,
-                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote, gm === 'crown' && RoomState.crownHolder === myId)
+                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote, gm === 'crown' && RoomState.crownHolder === myId, this.me.jumpZ)
                     });
                 }
 
                 renderQueue.sort((a, b) => a.y - b.y);
                 renderQueue.forEach(item => item.draw());
 
+                // Rysowanie zabójczych wiązek w Laserowym Labiryncie
+                if(gm === 'lasers') {
+                    this.laserBeams.forEach(lb => {
+                        ctx.strokeStyle = 'rgba(255, 0, 68, 0.35)'; ctx.lineWidth = 22;
+                        ctx.beginPath();
+                        if(lb.type === 'h') { ctx.moveTo(0, lb.pos); ctx.lineTo(WORLD_SIZE, lb.pos); }
+                        else { ctx.moveTo(lb.pos, 0); ctx.lineTo(lb.pos, WORLD_SIZE); }
+                        ctx.stroke();
+
+                        ctx.strokeStyle = '#ff0044'; ctx.lineWidth = 8; ctx.stroke();
+                        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+                    });
+                }
+
                 if(gm === 'meteors') {
                     netMeteors.forEach(m => {
-                        const pulse = 0.22 + (Math.sin(performance.now() * .018) + 1) * .09;
-                        ctx.fillStyle = `rgba(255, 42, 109, ${pulse})`;
+                        ctx.fillStyle = 'rgba(255, 42, 109, 0.28)';
                         ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill();
-                        ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3 + Math.floor((Math.sin(performance.now()*.02)+1)*2); ctx.stroke();
-                        ctx.strokeStyle = 'rgba(255,222,0,.85)'; ctx.lineWidth = 2;
-                        ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.arc(m.x, m.y, m.r + 9, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+                        ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.stroke();
                         let dropOffset = Math.max(0, m.t * 260);
-                        ctx.fillStyle = 'rgba(255,145,0,.25)'; ctx.fillRect(m.x - 22, m.y - dropOffset - 22, 44, 44);
-                        ctx.fillStyle = '#ff9100'; ctx.fillRect(m.x - 16, m.y - dropOffset - 16, 32, 32);
-                        ctx.fillStyle = '#ffde00'; ctx.fillRect(m.x - 6, m.y - dropOffset - 6, 12, 12);
+                        ctx.fillStyle = '#ff9100';
+                        ctx.fillRect(m.x - 16, m.y - dropOffset - 16, 32, 32);
                     });
                 }
 
@@ -3133,7 +3779,6 @@
                 FX.drawTop();
                 Cam.restore();
 
-                // Minimapa
                 const mSize = 110, mx = W - mSize - 14, my = H - mSize - 14, scale = mSize / WORLD_SIZE;
                 ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(mx, my, mSize, mSize);
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(mx, my, mSize, mSize);
@@ -3160,6 +3805,7 @@
 
             showCardRewardScreen() {
                 document.getElementById('hud').style.display = 'none';
+                document.getElementById('btnSkipMinigame').style.display = 'none';
                 document.getElementById('boardHud').style.display = 'none';
                 switchScreen('screen-cards');
 
@@ -3173,6 +3819,23 @@
                 } else {
                     document.getElementById('cardChoicesContainer').classList.add('hidden');
                     document.getElementById('cardWaitMsg').classList.remove('hidden');
+
+                    if(isHost && winId && winId.startsWith('bot_')) {
+                        setTimeout(() => {
+                            if(RoomState.status !== 'card_reward') return;
+                            let bot = netPlayers[winId];
+                            let newPos = Math.min(50, (bot?.boardPos || 0) + 3);
+                            db.ref(`room_players/${currentRoom}/${winId}`).update({ boardPos: newPos });
+                            if(newPos >= 50) {
+                                db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                            } else {
+                                db.ref(`rooms/${currentRoom}`).update({
+                                    status: 'board', turnIdx: 0,
+                                    boardMsg: `🤖 ${bot ? bot.name : 'Bot'} wygrał minigrę i wybrał kartę Turbo Skoku (+3 pola)!`
+                                });
+                            }
+                        }, 2000);
+                    }
                 }
             },
 
@@ -3193,7 +3856,7 @@
                 let unit = RoomState.isPartyCampaign ? 'POLE' : 'PKT';
                 document.getElementById('winnerSub').innerText = list.length > 0 ? `👑 WYGRYWA: ${list[0].name.toUpperCase()} (${list[0].score} ${unit})` : '';
                 document.getElementById('podiumRows').innerHTML = list.map((p, i) =>
-                    `<tr class="border-b border-gray-800"><td class="py-2">#${i+1}</td><td class="py-2"><span style="color:${safeColor(p.color)}">■</span> ${escapeHTML(p.name)}</td><td class="py-2 text-right text-yellow-400 font-bold">${Number(p.score)||0} ${unit}</td></tr>`
+                    `<tr class="border-b border-gray-800"><td class="py-2">#${i+1}</td><td class="py-2"><span style="color:${p.color}">■</span> ${p.name}</td><td class="py-2 text-right text-yellow-400 font-bold">${p.score} ${unit}</td></tr>`
                 ).join('');
 
                 document.getElementById('btnBackToLobby').style.display = isHost ? 'block' : 'none';
@@ -3202,25 +3865,33 @@
             }
         };
 
-        // === LOBBY & SYNCHRONIZACJA FIREBASE ===
+        // === LOBBY, FILTROWANIE PULI LOSOWANIA & SYNCHRONIZACJA FIREBASE ===
         const Lobby = {
             async auth() {
                 if(myId) return;
                 try { const c = await auth.signInAnonymously(); myId = c.user.uid; }
                 catch(e) { myId = 'p_' + Math.random().toString(36).substr(2, 6); }
             },
-            async createRoom() {
+            async createRoom(withBotsCount = 0) {
                 Sound.init(); showErr("Tworzenie pokoju...", true);
                 try {
                     await this.auth();
                     currentRoom = Math.random().toString(36).substr(2, 5).toUpperCase();
                     isHost = true;
                     await db.ref(`rooms/${currentRoom}`).set({
-                        status: 'lobby', mode: 'party', activeMinigame: 'arena', map: 'forest', mutatorSetting: 'random', mutator: 'none',
+                        status: 'lobby', mode: 'party', activeMinigame: 'soccer',
+                        allowedGames: ALL_MINIGAMES,
+                        map: 'forest', mutatorSetting: 'random', mutator: 'none',
                         matchDuration: 60, timer: 60, stormR: 1100, turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna XL (50 Pól)!'
                     });
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
+
+                    if(withBotsCount > 0) {
+                        for(let i=0; i<withBotsCount; i++) {
+                            await BotAI.addBot();
+                        }
+                    }
                 } catch(e) { showErr("Błąd Firebase: Ustaw reguły bazy na true/true!"); }
             },
             async joinRoom(code = null) {
@@ -3248,30 +3919,11 @@
                     document.getElementById('lobbySkinSelect').value = chosenSkin;
                     document.getElementById('btnStartMatch').style.display = isHost ? 'block' : 'none';
                     document.getElementById('clientWaitMsg').style.display = isHost ? 'none' : 'block';
+                    document.getElementById('hostBotControls').style.display = isHost ? 'flex' : 'none';
                     document.getElementById('mapSelect').disabled = !isHost;
                     document.getElementById('mutatorSelect').disabled = !isHost;
                     document.getElementById('timeSelect').disabled = !isHost;
                 } catch(e) { showErr("Błąd dołączania: " + e.message); }
-            },
-            async addBots() {
-                if(!isHost || !currentRoom) return;
-                const snap = await db.ref(`room_players/${currentRoom}`).once('value');
-                const players = snap.val() || {};
-                const existing = Object.entries(players).filter(([id, p]) => p && p.isBot);
-                const names = ['Bolek BOT', 'Koxu BOT', 'Pixel BOT', 'Turbo BOT'];
-                const colors = ['#ff2a6d', '#ffde00', '#00e676', '#b388ff'];
-                const wanted = 3;
-                for(let i=existing.length; i<wanted; i++) {
-                    const id = 'bot_' + i + '_' + currentRoom.toLowerCase();
-                    await db.ref(`room_players/${currentRoom}/${id}`).set({
-                        id, name: names[i % names.length], color: colors[i % colors.length],
-                        skin: ['ninja','cyborg','king','astro'][i % 4], isBot: true, botIndex: i,
-                        chips: 100, x: 800 + i*35, y: 800 + i*25, hp: 100, shield: 0,
-                        score: 0, boardPos: 0, prison: 0, isDead: false, wep: 'pistol'
-                    });
-                }
-                document.getElementById('btnAddBots').innerText = '🤖 BOTY GOTOWE';
-                document.getElementById('btnAddBots').disabled = true;
             },
             changeMySkinInLobby(sk) {
                 selectSkin(sk);
@@ -3282,6 +3934,38 @@
             selectMode(m) {
                 if(!isHost) return;
                 db.ref(`rooms/${currentRoom}`).update({ mode: m });
+            },
+            togglePoolGame(ev, gameKey) {
+                ev.stopPropagation();
+                if(!isHost) return announce("TYLKO HOST MOŻE ZMIENIAĆ PULĘ LOSOWANIA!", 1200);
+                Sound.play('tick');
+                let currentPool = [...(RoomState.allowedGames || ALL_MINIGAMES)];
+                if(currentPool.includes(gameKey)) {
+                    if(currentPool.length <= 1) return announce("MUSI ZOSTAĆ MINIMUM 1 MINIGRA W PULI!", 1300);
+                    currentPool = currentPool.filter(g => g !== gameKey);
+                } else {
+                    currentPool.push(gameKey);
+                }
+                db.ref(`rooms/${currentRoom}`).update({ allowedGames: currentPool });
+            },
+            setPoolPreset(presetType) {
+                if(!isHost) return;
+                Sound.play('coin');
+                const newPool = presetType === 'noshers' ? [...NO_SHOOTING_GAMES] : [...ALL_MINIGAMES];
+                db.ref(`rooms/${currentRoom}`).update({ allowedGames: newPool });
+            },
+            renderPoolBadges() {
+                const allowed = RoomState.allowedGames || ALL_MINIGAMES;
+                ALL_MINIGAMES.forEach(gk => {
+                    const badge = document.getElementById('pool-' + gk);
+                    const card = document.getElementById('m-' + gk);
+                    const isInc = allowed.includes(gk);
+                    if(badge) badge.innerText = isInc ? '☑️' : '⬜';
+                    if(card) {
+                        if(isInc) card.classList.remove('excluded');
+                        else card.classList.add('excluded');
+                    }
+                });
             },
             changeMap(mp) {
                 if(!isHost) return;
@@ -3307,23 +3991,27 @@
                     let d = snap.val();
                     RoomState.mode = d.mode || 'party';
                     RoomState.isPartyCampaign = (RoomState.mode === 'party');
-                    RoomState.activeMinigame = d.activeMinigame || 'arena';
+                    RoomState.activeMinigame = d.activeMinigame || 'soccer';
+                    RoomState.allowedGames = d.allowedGames || ALL_MINIGAMES;
                     RoomState.map = d.map || 'forest';
                     RoomState.mutatorSetting = d.mutatorSetting || 'random';
                     RoomState.mutator = d.mutator || 'none';
-                    RoomState.matchDuration = d.matchDuration || 60;
-                    RoomState.timer = d.timer ?? 60;
+                    RoomState.matchDuration = Number(d.matchDuration) || 60;
+                    if(d.timer !== undefined && !isNaN(d.timer)) RoomState.timer = Number(d.timer);
                     RoomState.bombHolder = d.bombHolder || null;
                     RoomState.bombTimer = d.bombTimer ?? 10;
                     RoomState.crownHolder = d.crownHolder || myId;
                     RoomState.squidState = d.squidState || 'green';
                     RoomState.brokenIce = d.brokenIce || {};
                     RoomState.stormR = d.stormR ?? 1100;
+                    if(d.ball) RoomState.ball = d.ball;
                     RoomState.turnOrder = d.turnOrder || [myId];
                     RoomState.turnIdx = d.turnIdx || 0;
                     RoomState.boardMsg = d.boardMsg || '';
                     RoomState.minigameWinner = d.minigameWinner || null;
                     if(d.koth) RoomState.koth = d.koth;
+
+                    this.renderPoolBadges();
 
                     const sqBanner = document.getElementById('squidLightBanner');
                     if(sqBanner) {
@@ -3374,7 +4062,7 @@
                     }
                 });
 
-                const skinIcons = { cap:'🧢', ninja:'🥷', knight:'⚔️', astro:'👨‍🚀', cyborg:'🤖', king:'👑' };
+                const skinIcons = { cap:'🧢', ninja:'🥷', knight:'⚔️', astro:'👨‍🚀', cyborg:'🤖', king:'👑', wizard:'🧙‍♂️', pirate:'🏴‍☠️', agent:'🕶️' };
                 db.ref(`room_players/${currentRoom}`).on('value', snap => {
                     let all = snap.val() || {}; netPlayers = {}; let arr = [];
                     Object.entries(all).forEach(([pid, p]) => {
@@ -3387,7 +4075,7 @@
                     });
                     document.getElementById('lobbyCount').innerText = arr.length;
                     document.getElementById('lobbyPlayerList').innerHTML = arr.map(p =>
-                        `<li class="flex justify-between items-center bg-black/40 p-1"><span>${skinIcons[p.skin]||'🧢'} <span style="color:${safeColor(p.color)}">■</span> ${escapeHTML(p.name)} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-yellow-400">${Number(p.chips ?? 100)} 🪙</span></li>`
+                        `<li class="flex justify-between items-center bg-black/40 p-1"><span>${skinIcons[p.skin]||'🧢'} <span style="color:${p.color}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-yellow-400">${p.chips ?? 100} 🪙</span></li>`
                     ).join('');
                 });
 
@@ -3399,7 +4087,7 @@
                     if(c.snd) Sound.play(c.snd);
                     const box = document.getElementById('chatMessages');
                     const d = document.createElement('div');
-                    d.innerHTML = `<span style="color:${safeColor(c.color)};font-weight:bold;">${escapeHTML(c.name)}:</span> <span class="text-gray-200">${escapeHTML(c.msg)}</span>`;
+                    d.innerHTML = `<span style="color:${c.color};font-weight:bold;">${c.name}:</span> <span class="text-gray-200">${c.msg}</span>`;
                     box.appendChild(d);
                     box.scrollTop = box.scrollHeight;
                 });
@@ -3408,8 +4096,39 @@
                     let ev = snap.val(); snap.ref.remove();
                     if(!ev || !Game.me) return;
 
-                    if(ev.type === 'hitPlayer' && ev.target === myId) {
-                        Game.me.takeDamage(ev.dmg, ev.attacker, ev.kx, ev.ky);
+                    if(isHost && ev.type === 'kickBall') {
+                        Game.hostBall.vx = ev.vx;
+                        Game.hostBall.vy = ev.vy;
+                        Game.hostBall.lastKicker = ev.kicker;
+                    }
+                    else if(ev.type === 'goalScored') {
+                        Sound.play('jackpot');
+                        Cam.shake(12, 0.3);
+                        announce(`⚽ GOOOL!! STRZELA: ${ev.name.toUpperCase()} (+15 PKT)!`, 1800);
+                    }
+                    else if(ev.type === 'hitPlayer') {
+                        if(ev.target === myId) {
+                            Game.me.takeDamage(ev.dmg, ev.attacker, ev.kx, ev.ky);
+                        } else if(isHost && Game.botStates[ev.target]) {
+                            let bState = Game.botStates[ev.target];
+                            if(!bState.isDead) {
+                                bState.hp -= ev.dmg;
+                                bState.x = Math.max(60, Math.min(WORLD_SIZE-60, bState.x + (ev.kx || 0)*0.12));
+                                bState.y = Math.max(60, Math.min(WORLD_SIZE-60, bState.y + (ev.ky || 0)*0.12));
+                                if(RoomState.activeMinigame === 'crown' && RoomState.crownHolder === ev.target && ev.attacker) {
+                                    db.ref(`rooms/${currentRoom}`).update({ crownHolder: ev.attacker });
+                                }
+                                if(bState.hp <= 0) {
+                                    bState.hp = 0; bState.isDead = true; bState.respawn = 2.5;
+                                    let bObj = netPlayers[ev.target];
+                                    db.ref(`events/${currentRoom}`).push({
+                                        type: 'kill', killer: ev.attacker,
+                                        victimName: bObj ? bObj.name : 'Bot',
+                                        victimColor: bObj ? bObj.color : '#fff', pts: 10
+                                    });
+                                }
+                            }
+                        }
                     }
                     else if(ev.type === 'meteorBoom') {
                         FX.explosion(ev.x, ev.y);
@@ -3463,6 +4182,7 @@
                 let order = [myId, ...Object.keys(netPlayers)];
                 const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
                 const chosenMut = RoomState.mutatorSetting === 'random' ? muts[Math.floor(Math.random()*muts.length)] : RoomState.mutatorSetting;
+                const dur = Number(RoomState.matchDuration) || 60;
 
                 if(RoomState.mode === 'party') {
                     Board.myPos = 0; Board.visualPos = 0; Board.myPrison = 0; Board.myCards = [];
@@ -3480,7 +4200,8 @@
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'playing', activeMinigame: RoomState.mode, mutator: chosenMut,
-                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
+                        timer: dur, stormR: 1100, ball: {x:800, y:800, vx:0, vy:0},
+                        bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                     });
                 }
             }
@@ -3496,10 +4217,10 @@
         const rParam = new URLSearchParams(window.location.search).get('room');
         if(rParam) document.getElementById('joinCode').value = rParam.toUpperCase();
 
-        document.getElementById('btnCreateRoom').onclick = () => Lobby.createRoom();
+        document.getElementById('btnCreateRoom').onclick = () => Lobby.createRoom(0);
+        document.getElementById('btnCreateSoloBots').onclick = () => Lobby.createRoom(3);
         document.getElementById('btnJoinRoom').onclick = () => Lobby.joinRoom();
         document.getElementById('btnStartMatch').onclick = () => Lobby.launchGame();
-        document.getElementById('btnAddBots').onclick = () => Lobby.addBots();
         document.getElementById('btnQuickRematch').onclick = () => Lobby.launchGame();
         document.getElementById('btnBackToLobby').onclick = () => {
             if(isHost) db.ref(`rooms/${currentRoom}`).update({ status: 'lobby' });
