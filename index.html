@@ -2,9 +2,9 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAWEŁ PYKA: JE GÓWNO</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY 50-TILES EDITION</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' rx='3' fill='%23151526'/><path fill='%23ffde00' d='M2 5h2v2h2V5h4v2h2V5h2v7H2z'/><rect x='4' y='8' width='2' height='2' fill='%23ff2a6d'/><rect x='10' y='8' width='2' height='2' fill='%2305d5fa'/><rect x='2' y='12' width='12' height='2' fill='%23ff9100'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -14,67 +14,74 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
+        :root {
+            --bg-grad: radial-gradient(circle at center, rgba(28,16,54,0.92) 0%, rgba(7,7,16,0.98) 100%);
+            --panel-grad: linear-gradient(160deg, #1d1936 0%, #0e0c1c 100%);
+        }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #05050a; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
-        #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: crosshair; image-rendering: pixelated; }
+        #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: none; image-rendering: pixelated; }
         
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(16,16,32,0.88) 0%, rgba(5,5,10,0.96) 100%); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-grad); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(8px); transition: background 0.4s; }
         .screen.active { display: flex; }
         
-        .panel { background: linear-gradient(180deg, #1b1b30 0%, #10101e 100%); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.25rem; max-width: 1120px; width: 96%; text-align: center; position: relative; max-height: 95vh; overflow-y: auto; }
-        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.7rem 1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 10px; outline: none; text-shadow: 2px 2px 0 #000; }
+        .panel { background: var(--panel-grad); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.2rem; max-width: 1160px; width: 96%; text-align: center; position: relative; max-height: 95vh; overflow-y: auto; }
+        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.65rem 0.9rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 9px; outline: none; text-shadow: 2px 2px 0 #000; }
         .btn:hover { filter: brightness(1.15); }
         .btn:active { transform: translateY(3px); box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.45), 0 1px 0 #000; }
         .btn:disabled { background: #444; color: #888; border-color: #777; cursor: not-allowed; filter: none; }
         
-        .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.55rem; width: 100%; text-align: center; font-size: 10px; }
+        .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.5rem; width: 100%; text-align: center; font-size: 9px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #151526 0%, #0c0c16 100%); padding: 7px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 4px 0 #000; }
+        .mode-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #151526 0%, #0c0c16 100%); padding: 6px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 3px 0 #000; }
         .mode-card:hover { border-color: #666699; transform: translateY(-2px); }
-        .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1e2240 0%, #121529 100%); box-shadow: inset 0 0 12px rgba(5,213,250,0.35), 0 4px 0 #000; }
+        .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1e2240 0%, #121529 100%); box-shadow: inset 0 0 12px rgba(5,213,250,0.35), 0 3px 0 #000; }
 
-        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 7px 4px; cursor: pointer; font-size: 8px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
+        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 6px 4px; cursor: pointer; font-size: 7px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
         .skin-card:hover { border-color: #777; color: #fff; }
         .skin-card.selected { border-color: #ffde00; color: #fff; background: #2b2612; transform: translateY(-2px); box-shadow: 0 0 10px rgba(255,222,0,0.4); }
 
         .reward-card { border: 4px solid #ffde00; background: linear-gradient(180deg, #25213b 0%, #151224 100%); padding: 14px; cursor: pointer; transition: transform 0.15s; width: 31%; box-shadow: 0 8px 0 #000; }
         .reward-card:hover { transform: translateY(-6px); border-color: #05d5fa; }
 
-        /* MINI AUTOMAT W LOBBY */
-        .lobby-slot-box { background: linear-gradient(180deg, #2e113d 0%, #170721 100%); border: 3px solid #ffde00; box-shadow: inset 0 0 15px rgba(255, 42, 109, 0.4), 0 4px 0 #000; padding: 10px; }
-        .mini-reel { width: 52px; height: 56px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .lobby-slot-box { background: linear-gradient(180deg, #2e113d 0%, #170721 100%); border: 3px solid #ffde00; box-shadow: inset 0 0 15px rgba(255, 42, 109, 0.4), 0 4px 0 #000; padding: 8px; }
+        .mini-reel { width: 44px; height: 48px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
         /* HUD MINIGIER */
-        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.78); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.8); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
         
         /* HUD PLANSZÓWKI */
-        #boardHud { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 45; width: 94%; max-width: 920px; display: none; pointer-events: none; }
-        .board-box { background: linear-gradient(180deg, rgba(22,22,42,0.95) 0%, rgba(12,12,24,0.95) 100%); border: 4px solid #ffde00; box-shadow: 0 0 20px rgba(255,222,0,0.25), 8px 8px 0 #000; padding: 12px 18px; pointer-events: auto; }
+        #boardHud { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 45; width: 95%; max-width: 960px; display: none; pointer-events: none; }
+        .board-box { background: linear-gradient(180deg, rgba(22,22,42,0.95) 0%, rgba(12,12,24,0.95) 100%); border: 4px solid #ffde00; box-shadow: 0 0 20px rgba(255,222,0,0.25), 8px 8px 0 #000; padding: 10px 16px; pointer-events: auto; }
 
-        /* KOSTKA 3D PIXEL ART */
+        /* KOSTKA 3D */
         #diceOverlay { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 58; display: none; flex-direction: column; align-items: center; pointer-events: none; }
         .dice-cube { width: 100px; height: 100px; background: linear-gradient(135deg, #ffffff 0%, #dcdcdc 100%); border: 6px solid #000; box-shadow: inset -8px -8px 0 #aaa, 0 0 30px #ffde00, 12px 12px 0 rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #111; }
 
-        /* AUTOMAT KASYNOWY NA PLANSZY */
-        #casinoModal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 62; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
-        .slot-machine { background: linear-gradient(180deg, #3a154d 0%, #1c0926 100%); border: 6px solid #ffde00; box-shadow: 0 0 45px #ff2a6d, 12px 12px 0 #000; padding: 24px; text-align: center; max-width: 520px; width: 92%; }
-        .slot-reel { width: 92px; height: 98px; background: linear-gradient(180deg, #e0e0e0 0%, #ffffff 50%, #cccccc 100%); border: 5px solid #000; box-shadow: inset 0 8px 10px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 42px; }
+        /* MODALE PLANSZOWE (KASYNO I SKLEP) */
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 62; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+        .slot-machine { background: linear-gradient(180deg, #3a154d 0%, #1c0926 100%); border: 6px solid #ffde00; box-shadow: 0 0 45px #ff2a6d, 12px 12px 0 #000; padding: 24px; text-align: center; max-width: 540px; width: 92%; }
+        .slot-reel { width: 90px; height: 96px; background: linear-gradient(180deg, #e0e0e0 0%, #ffffff 50%, #cccccc 100%); border: 5px solid #000; box-shadow: inset 0 8px 10px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 40px; }
 
         /* RULETKA */
         #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
 
         /* CZAT */
-        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
-        #chatMessages { height: 100px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 310px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
+        #chatMessages { height: 95px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
         .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 5px; cursor: pointer; font-size: 12px; }
         .emote-btn:hover { background: #323254; border-color: #05d5fa; transform: scale(1.15); }
 
-        #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
-        #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 22px; text-shadow: 0 0 15px #ff2a6d, 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+        /* WIRTUALNE GAŁKI NA TELEFON */
+        #mobileControls { position: absolute; bottom: 20px; right: 20px; z-index: 55; display: none; gap: 15px; pointer-events: auto; }
+        .touch-pad { width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 9px; }
 
-        .bar-wrap { width: 195px; height: 15px; border: 3px solid #fff; background: #090910; margin-top: 4px; position: relative; box-shadow: 2px 2px 0 #000; }
+        #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
+        #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 20px; text-shadow: 0 0 15px #ff2a6d, 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+
+        .bar-wrap { width: 195px; height: 14px; border: 3px solid #fff; background: #090910; margin-top: 4px; position: relative; box-shadow: 2px 2px 0 #000; }
         #hpBar { height: 100%; background: linear-gradient(90deg, #ff1744 0%, #ff616f 100%); width: 100%; transition: width 0.1s; }
         #shieldBar { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #00b0ff 0%, #80d8ff 100%); width: 0%; opacity: 0.85; }
         #dashBar { height: 100%; background: linear-gradient(90deg, #ffab00 0%, #ffea00 100%); width: 100%; }
@@ -96,10 +103,10 @@
     </div>
 
     <!-- AUTOMAT KASYNOWY NA PLANSZY -->
-    <div id="casinoModal">
+    <div id="casinoModal" class="modal-overlay">
         <div class="slot-machine">
             <div class="text-lg text-[#ffde00] mb-1" style="text-shadow: 3px 3px 0 #000;">🎰 ROYAL PIXEL CASINO 🎰</div>
-            <div class="text-[8px] text-pink-300 mb-4">Zakręć bębnami! 3 siódemki = WIELKI JACKPOT (+4 POLA)!</div>
+            <div class="text-[8px] text-pink-300 mb-4">Zakręć bębnami! 3 siódemki = WIELKI JACKPOT (+5 PÓL)!</div>
             <div class="flex justify-center gap-3 mb-5">
                 <div id="reel1" class="slot-reel">🍒</div>
                 <div id="reel2" class="slot-reel">💎</div>
@@ -110,11 +117,40 @@
         </div>
     </div>
 
-    <!-- HUD PLANSZÓWKI -->
+    <!-- SKLEPIK HANDLARZA NA PLANSZY -->
+    <div id="shopModal" class="modal-overlay">
+        <div class="slot-machine !border-[#05d5fa]">
+            <div class="text-base text-[#05d5fa] mb-1">🛒 SKLEP SZEMRANEGO HANDLARZA 🛒</div>
+            <div class="text-[8px] text-gray-300 mb-4">Wydaj swoje żetony (🪙) na potężne ulepszenia planszowe!</div>
+            <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                <div class="bg-black/60 border-2 border-yellow-400 p-2">
+                    <div class="text-xl mb-1">🚀</div>
+                    <div class="text-[8px] text-yellow-300">ZŁOTA RURA</div>
+                    <div class="text-[6px] text-gray-400 my-1">Skok o +5 pól do przodu!</div>
+                    <button class="btn !py-1 !px-2 !text-[7px] w-full" onclick="Board.buyShopItem('pipe', 40)">KUP (40 🪙)</button>
+                </div>
+                <div class="bg-black/60 border-2 border-purple-400 p-2">
+                    <div class="text-xl mb-1">🎲🎲</div>
+                    <div class="text-[8px] text-purple-300">ZŁOTA KOSTKA</div>
+                    <div class="text-[6px] text-gray-400 my-1">Karta rzutu 2-12 pól!</div>
+                    <button class="btn !py-1 !px-2 !text-[7px] w-full" onclick="Board.buyShopItem('double', 30)">KUP (30 🪙)</button>
+                </div>
+                <div class="bg-black/60 border-2 border-red-400 p-2">
+                    <div class="text-xl mb-1">🧲</div>
+                    <div class="text-[8px] text-red-300">SABOTAŻ</div>
+                    <div class="text-[6px] text-gray-400 my-1">Cofnij rywala o 4 pola!</div>
+                    <button class="btn !py-1 !px-2 !text-[7px] w-full" onclick="Board.buyShopItem('sabotage', 35)">KUP (35 🪙)</button>
+                </div>
+            </div>
+            <button class="btn !bg-gray-600 !text-[8px] w-full" onclick="Board.closeShop()">WYJDŹ ZE SKLEPU</button>
+        </div>
+    </div>
+
+    <!-- HUD PLANSZÓWKI (50 PÓL) -->
     <div id="boardHud">
-        <div class="board-box flex flex-col md:flex-row justify-between items-center gap-3">
+        <div class="board-box flex flex-col md:flex-row justify-between items-center gap-2">
             <div class="text-left">
-                <div class="text-xs text-[#ffde00] mb-1" style="text-shadow: 2px 2px 0 #000;">🏝️ WYSPA CASINO PARTY HD (CEL: POLE 30)</div>
+                <div class="text-xs text-[#ffde00] mb-1" style="text-shadow: 2px 2px 0 #000;">🏝️ WYSPA CASINO PARTY XL (META: POLE 50)</div>
                 <div id="boardTurnText" class="text-[10px] text-[#05d5fa]">Tura gracza: ---</div>
                 <div id="boardStatusMsg" class="text-[8px] text-gray-300 mt-1">Rzucajcie po kolei kostką!</div>
             </div>
@@ -127,8 +163,8 @@
 
     <!-- RULETKA MINIGIER -->
     <div id="rouletteOverlay">
-        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY MINIGIER 🎡</div>
-        <div class="text-[8px] text-yellow-300 mb-4">System talii bez powtórek – każda minigra jest inna!</div>
+        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY (12 MINIGIER) 🎡</div>
+        <div class="text-[8px] text-yellow-300 mb-4">Talia bez powtórek – za każdym razem inna rozgrywka!</div>
         <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_40px_#05d5fa] mb-4">
             🔫 ARENA PvP
         </div>
@@ -139,7 +175,8 @@
     <!-- LEWY HUD MINIGRY -->
     <div id="hud">
         <div id="hudModeTitle" class="text-xs text-[#05d5fa] mb-1">TRYB</div>
-        <div id="hudTimer" class="text-xl text-yellow-400 mb-2">01:00</div>
+        <div id="hudTimer" class="text-xl text-yellow-400 mb-1">01:00</div>
+        <div id="squidLightBanner" class="text-[9px] font-bold mb-1 hidden">🟢 ZIELONE ŚWIATŁO!</div>
         <div class="text-[7px] text-gray-300">ZDROWIE + TARCZA</div>
         <div class="bar-wrap"><div id="hpBar"></div><div id="shieldBar"></div></div>
         <div class="text-[7px] text-gray-300 mt-2">ZRYW [SPACJA]</div>
@@ -185,34 +222,43 @@
 
     <div id="uiContainer" class="ui-layer">
         
-        <!-- 1. MENU GŁÓWNE Z PODGLĄDEM BOHATERA NA ŻYWO -->
+        <!-- 1. MENU GŁÓWNE Z WYBOREM GRADIENTU I CELOWNIKA -->
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-2xl">
-                <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA JE GÓWNO</h1>
-                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY 2.5D HD ✨</h2>
+                <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
+                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (50 PÓL & 12 GIER) ✨</h2>
                 
                 <div class="flex flex-col md:flex-row gap-4 items-center mb-4">
-                    <!-- Okienko podglądu obracającej się postaci na żywo -->
                     <div class="bg-black/80 border-4 border-[#05d5fa] p-2 flex flex-col items-center shadow-[6px_6px_0_#000]">
-                        <div class="text-[7px] text-yellow-300 mb-1">PODGLĄD KLASY NA ŻYWO:</div>
-                        <canvas id="previewCanvas" width="120" height="120" class="bg-[#121222] border-2 border-gray-700"></canvas>
+                        <div class="text-[7px] text-yellow-300 mb-1">PODGLĄD KLASY & CELOWNIKA:</div>
+                        <canvas id="previewCanvas" width="125" height="125" class="bg-[#121222] border-2 border-gray-700"></canvas>
                         <div id="skinDescText" class="text-[7px] text-[#00e676] mt-1">Bluza, Słuchawki i Czapka</div>
                     </div>
 
                     <div class="flex-grow w-full">
-                        <div class="flex gap-3 mb-3">
-                            <div class="w-2/3 text-left">
-                                <label class="text-[8px] text-gray-400 block mb-1">TWÓJ PSEUDONIM:</label>
+                        <div class="grid grid-cols-3 gap-2 mb-3">
+                            <div class="text-left">
+                                <label class="text-[7px] text-gray-400 block mb-1">TWÓJ NICK:</label>
                                 <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
                             </div>
-                            <div class="w-1/3 text-left">
-                                <label class="text-[8px] text-gray-400 block mb-1">KOLOR BOHATERA:</label>
-                                <input type="color" id="playerColor" value="#05d5fa" onchange="Preview.draw()" class="w-full h-[36px] border-3 border-white cursor-pointer bg-black interactive">
+                            <div class="text-left">
+                                <label class="text-[7px] text-gray-400 block mb-1">KOLOR STROJU:</label>
+                                <input type="color" id="playerColor" value="#05d5fa" onchange="Preview.draw()" class="w-full h-[34px] border-3 border-white cursor-pointer bg-black interactive">
+                            </div>
+                            <div class="text-left">
+                                <label class="text-[7px] text-gray-400 block mb-1">CELOWNIK:</label>
+                                <select id="crosshairSelect" class="input-pixel interactive !py-1.5" onchange="Settings.changeCrosshair(this.value)">
+                                    <option value="cross">➕ Krzyżyk Pro</option>
+                                    <option value="circle">⭕ Kółko Taktyczne</option>
+                                    <option value="dot">🔴 Kropka Laser</option>
+                                    <option value="diamond">💠 Diament</option>
+                                    <option value="x">❌ X-Snajper</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="text-[8px] text-gray-400 text-left mb-1">WYBIERZ UNIKALNY MODEL POSTACI:</div>
-                        <div class="grid grid-cols-3 gap-2 interactive">
+                        <div class="grid grid-cols-3 gap-2 mb-3 interactive">
                             <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ<br><span class="text-[6px] text-gray-400">Słuchawki & Bluza</span></div>
                             <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA<br><span class="text-[6px] text-gray-400">Katany & Szal</span></div>
                             <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ<br><span class="text-[6px] text-gray-400">Zbroja & Tarcza</span></div>
@@ -220,11 +266,21 @@
                             <div class="skin-card" onclick="selectSkin('cyborg')" id="sk-cyborg">🤖 CYBORG<br><span class="text-[6px] text-gray-400">Szczypce & Radar</span></div>
                             <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL<br><span class="text-[6px] text-gray-400">Płaszcz & Korona</span></div>
                         </div>
+
+                        <div class="flex items-center justify-between bg-black/50 border border-gray-700 px-2 py-1">
+                            <span class="text-[7px] text-gray-300">🎨 MOTYW TŁA GRADIENTU:</span>
+                            <div class="flex gap-1 interactive">
+                                <button class="px-2 py-1 text-[7px] bg-purple-900 border border-white" onclick="Settings.setTheme('cyber')">Neon</button>
+                                <button class="px-2 py-1 text-[7px] bg-pink-900 border border-white" onclick="Settings.setTheme('sunset')">Sunset</button>
+                                <button class="px-2 py-1 text-[7px] bg-emerald-900 border border-white" onclick="Settings.setTheme('emerald')">Szmaragd</button>
+                                <button class="px-2 py-1 text-[7px] bg-red-950 border border-white" onclick="Settings.setTheme('crimson')">Krwawy</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-3">
-                    <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-4" id="btnCreateRoom">STWÓRZ IMPREZĘ ONLINE (HOST)</button>
+                <div class="flex flex-col gap-2.5">
+                    <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5" id="btnCreateRoom">STWÓRZ IMPREZĘ ONLINE (HOST)</button>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="WPISZ KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
                         <button class="btn !bg-gradient-to-b !from-[#05d5fa] !to-[#0097b2] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ DO GRY</button>
@@ -234,15 +290,15 @@
             </div>
         </div>
 
-        <!-- 2. LOBBY Z MINI-KASYNEM DLA OCZEKUJĄCYCH -->
+        <!-- 2. LOBBY -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
                 <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-3 gap-2">
                     <div class="text-left">
-                        <h2 class="text-base md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA (LOBBY)</h2>
-                        <span class="text-[7px] text-yellow-300">Kręć automatem w poczekalni, zmieniaj postacie i wybieraj tryby!</span>
+                        <h2 class="text-base md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL</h2>
+                        <span class="text-[7px] text-yellow-300">Plansza 50 Pól | 12 Minigier | Kasyno & Ruletka | Customowe Celowniki</span>
                     </div>
-                    <div class="flex items-center gap-3 bg-black/60 border-2 border-[#ff2a6d] px-3 py-1.5">
+                    <div class="flex items-center gap-2 bg-black/60 border-2 border-[#ff2a6d] px-3 py-1">
                         <div class="text-right">
                             <span class="text-[7px] text-gray-400 block">KOD POKOJU:</span>
                             <span id="lobbyCode" class="text-lg text-[#ffde00] font-bold tracking-widest">-----</span>
@@ -253,11 +309,10 @@
                 <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK ZAPROSZENIA DO SCHOWKA!</div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 text-left">
-                    <!-- Lewa kolumna: Gracze + Automat Kasynowy w Poczekalni + Ustawienia -->
-                    <div class="lg:col-span-4 flex flex-col gap-2.5">
-                        <!-- Lista graczy + Szybka zmiana postaci w lobby -->
-                        <div class="bg-black/60 border-2 border-gray-600 p-2.5">
-                            <div class="flex justify-between items-center mb-1.5">
+                    <!-- Lewa kolumna -->
+                    <div class="lg:col-span-4 flex flex-col gap-2">
+                        <div class="bg-black/60 border-2 border-gray-600 p-2">
+                            <div class="flex justify-between items-center mb-1">
                                 <span class="text-[8px] text-[#05d5fa]">👥 GRACZE (<span id="lobbyCount">1</span>):</span>
                                 <select id="lobbySkinSelect" class="bg-[#111] border border-yellow-400 text-[7px] text-yellow-300 p-1 interactive" onchange="Lobby.changeMySkinInLobby(this.value)">
                                     <option value="cap">🧢 Paweł</option>
@@ -268,31 +323,45 @@
                                     <option value="king">👑 Król</option>
                                 </select>
                             </div>
-                            <ul id="lobbyPlayerList" class="h-24 overflow-y-auto space-y-1.5 text-[8px]"></ul>
+                            <ul id="lobbyPlayerList" class="h-20 overflow-y-auto space-y-1 text-[8px]"></ul>
                         </div>
 
-                        <!-- AUTOMAT JEDNORĘKI BANDYTA W LOBBY (DLA ZABICIA NUDY!) -->
+                        <!-- AUTOMAT + RULETKA W LOBBY -->
                         <div class="lobby-slot-box text-center interactive">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-[8px] text-[#ffde00]">🎰 AUTOMAT POCZEKALNI</span>
+                                <span class="text-[8px] text-[#ffde00]">🎰 KASYNO LOBBY</span>
                                 <span class="text-[8px] text-[#00e676]">ŻETONY: <b id="lobbyChipsText">100</b> 🪙</span>
                             </div>
-                            <div class="flex justify-center gap-2 my-2">
+                            <div class="flex justify-center gap-2 my-1.5">
                                 <div id="lReel1" class="mini-reel">🍒</div>
                                 <div id="lReel2" class="mini-reel">7️⃣</div>
                                 <div id="lReel3" class="mini-reel">💎</div>
                             </div>
-                            <div id="lobbySlotMsg" class="text-[7px] text-pink-300 mb-2 h-3">Zakręć za 10 🪙! Jackpot ogłasza na czacie!</div>
-                            <div class="flex gap-1">
-                                <button id="btnLobbySpin" class="btn !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !py-1.5 !px-2 !text-[8px] w-full font-bold" onclick="LobbyCasino.spin()">🕹️ ZAKRĘĆ (10 🪙)</button>
-                                <button class="btn !bg-gray-700 !py-1.5 !px-2 !text-[7px]" onclick="LobbyCasino.freeChips()" title="Darmowe żetony">+50🪙</button>
+                            <div id="lobbySlotMsg" class="text-[7px] text-pink-300 mb-1.5 h-3">Kręć bębnami lub obstaw kolor ruletki!</div>
+                            <div class="flex gap-1 mb-1.5">
+                                <button id="btnLobbySpin" class="btn !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !py-1 !px-2 !text-[8px] w-full font-bold" onclick="LobbyCasino.spin()">🕹️ AUTOMAT (10🪙)</button>
+                                <button class="btn !bg-gray-700 !py-1 !px-2 !text-[7px]" onclick="LobbyCasino.freeChips()">+50🪙</button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1">
+                                <button class="btn !bg-red-600 !py-1 !px-1 !text-[6px]" onclick="LobbyCasino.betRoulette('red')">🔴 CZERW (2x)</button>
+                                <button class="btn !bg-gray-900 !py-1 !px-1 !text-[6px]" onclick="LobbyCasino.betRoulette('black')">⚫ CZARNE (2x)</button>
+                                <button class="btn !bg-green-600 !py-1 !px-1 !text-[6px]" onclick="LobbyCasino.betRoulette('green')">🟢 ZERO (10x)</button>
                             </div>
                         </div>
 
-                        <!-- Ustawienia Audio/Wideo -->
-                        <div class="bg-black/60 border-2 border-gray-600 p-2.5">
-                            <div class="text-[8px] text-yellow-400 mb-1.5 border-b border-gray-700 pb-1">⚙️ USTAWIENIA AUDIO I WIDEO</div>
-                            <div class="grid grid-cols-2 gap-1.5 text-[7px]">
+                        <!-- Ustawienia + Ukryte Pole Kodu ("sigma") -->
+                        <div class="bg-black/60 border-2 border-gray-600 p-2">
+                            <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-1">
+                                <span class="text-[7px] text-yellow-400">⚙️ OPCJE, CELOWNIK & KOD</span>
+                                <select id="lobbyCrosshair" class="bg-black border border-gray-500 text-[7px] text-cyan-300 p-0.5 interactive" onchange="Settings.changeCrosshair(this.value)">
+                                    <option value="cross">➕ Krzyżyk</option>
+                                    <option value="circle">⭕ Kółko</option>
+                                    <option value="dot">🔴 Kropka</option>
+                                    <option value="diamond">💠 Diament</option>
+                                    <option value="x">❌ X-Snajper</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1 text-[7px] mb-2">
                                 <label class="flex items-center gap-1 cursor-pointer">
                                     <input type="checkbox" id="chkMusic" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 🎵 Muzyka
                                 </label>
@@ -303,80 +372,104 @@
                                     <input type="checkbox" id="chkShake" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 💥 Wstrząsy
                                 </label>
                                 <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" id="chkCrt" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 📺 Ekran CRT
+                                    <input type="checkbox" id="chkCrt" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 📺 Filtr CRT
                                 </label>
+                            </div>
+                            <div class="flex gap-1 items-center mb-1.5">
+                                <span class="text-[6px] text-gray-400">TŁO:</span>
+                                <button class="px-1.5 py-0.5 text-[6px] bg-purple-900 border border-white" onclick="Settings.setTheme('cyber')">Neon</button>
+                                <button class="px-1.5 py-0.5 text-[6px] bg-pink-900 border border-white" onclick="Settings.setTheme('sunset')">Sunset</button>
+                                <button class="px-1.5 py-0.5 text-[6px] bg-emerald-900 border border-white" onclick="Settings.setTheme('emerald')">Las</button>
+                                <button class="px-1.5 py-0.5 text-[6px] bg-red-950 border border-white" onclick="Settings.setTheme('crimson')">Mrok</button>
+                            </div>
+                            <!-- Tajne pole kodu (nikt inny nie widzi wpisania) -->
+                            <div class="flex gap-1">
+                                <input type="password" id="secretCodeInput" placeholder="Wpisz tajny kod..." class="bg-black border border-gray-600 text-[7px] text-white px-2 py-1 flex-grow outline-none">
+                                <button class="bg-gray-800 border border-gray-500 text-[7px] px-2 py-1 text-yellow-400 cursor-pointer" onclick="Settings.redeemCode()">OK</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Prawa kolumna: Wybór trybów i map -->
+                    <!-- Prawa kolumna: 12 Trybów -->
                     <div class="lg:col-span-8 flex flex-col justify-between bg-black/40 border-2 border-gray-700 p-3">
                         <div>
-                            <div class="text-[9px] text-yellow-400 mb-2">1. GŁÓWNY TRYB IMPREZY (HOST):</div>
+                            <div class="text-[9px] text-yellow-400 mb-1.5">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3 interactive">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2.5 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
-                                    <div class="text-[9px] text-[#ffde00] mb-1">🎲 SUPER MARIO PARTY (WYSPA 30 PÓL)</div>
-                                    <div class="text-[7px] text-gray-300 leading-relaxed">Trójwymiarowa wyspa z plażą, lasem, Kasynem Vegas i wulkanem! Skacz pionkami i losuj minigry bez powtórek!</div>
+                                    <div class="text-[9px] text-[#ffde00] mb-0.5">🎲 SUPER MARIO PARTY XL (WYSPA 50 PÓL!)</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Powiększona wyspa 50 pól! Sklep Handlarza, Pojedynki 1v1, Kasyno i 12 minigier losowanych bez powtórek!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
-                                    <div class="text-[9px] text-[#00e676] mb-1">🎡 RULETKA MINIGIER (BEZ POWTÓREK)</div>
-                                    <div class="text-[7px] text-gray-300 leading-relaxed">Losuje za każdym razem inną minigrę z puli 9 trybów (tasowanie talii!).</div>
+                                    <div class="text-[9px] text-[#00e676] mb-0.5">🎡 RULETKA 12 MINIGIER (BEZ POWTÓREK)</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Koło fortuny losuje za każdym razem inną z 12 minigier (system tasowania talii!).</div>
                                 </div>
                             </div>
 
-                            <div class="text-[8px] text-gray-400 mb-1">LUB ODPAL KONKRETNĄ MINIGRĘ Z 9 DOSTĘPNYCH:</div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3 interactive">
+                            <div class="text-[7px] text-gray-400 mb-1">LUB WYBIERZ KONKRETNĄ MINIGRĘ Z 12 DOSTĘPNYCH:</div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5 mb-2.5 interactive">
                                 <div class="mode-card" onclick="Lobby.selectMode('arena')" id="m-arena">
-                                    <div class="text-[8px] text-[#ff2a6d]">🔫 ARENA PvP</div>
-                                    <div class="text-[6px] text-gray-400">Bazooki, Plazma i Dopalacze</div>
+                                    <div class="text-[7px] text-[#ff2a6d]">🔫 ARENA PvP</div>
+                                    <div class="text-[6px] text-gray-400">Bazooki & Plazma</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('spleef')" id="m-spleef">
+                                    <div class="text-[7px] text-cyan-300">🧊 KRUSZĄCY LÓD</div>
+                                    <div class="text-[6px] text-gray-400">Znikające kafelki!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('squid')" id="m-squid">
+                                    <div class="text-[7px] text-green-400">🚦 CZERWONE/ZIEL</div>
+                                    <div class="text-[6px] text-gray-400">Stój na czerwonym!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('crown')" id="m-crown">
+                                    <div class="text-[7px] text-yellow-400">👑 KRADZIEŻ KORONY</div>
+                                    <div class="text-[6px] text-gray-400">Uciekaj z koroną!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('meteors')" id="m-meteors">
-                                    <div class="text-[8px] text-orange-400">☄️ DESZCZ METEORYTÓW</div>
-                                    <div class="text-[6px] text-gray-400">Spychaj innych pod komety!</div>
+                                    <div class="text-[7px] text-orange-400">☄️ METEORYTY</div>
+                                    <div class="text-[6px] text-gray-400">Spychaj pod komety</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('heist')" id="m-heist">
-                                    <div class="text-[8px] text-yellow-300">🎰 NAPAD NA KASYNO</div>
-                                    <div class="text-[6px] text-gray-400">Rozbijaj Złoty Sejf w centrum!</div>
+                                    <div class="text-[7px] text-yellow-300">🎰 NAPAD KASYNO</div>
+                                    <div class="text-[6px] text-gray-400">Rozbijaj Złoty Sejf</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('royale')" id="m-royale">
-                                    <div class="text-[8px] text-[#ff9100]">🌪️ STREFA BURZY</div>
-                                    <div class="text-[6px] text-gray-400">Battle Royale w pierścieniu</div>
+                                    <div class="text-[7px] text-[#ff9100]">🌪️ STREFA BURZY</div>
+                                    <div class="text-[6px] text-gray-400">Kurczący pierścień</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('zombies')" id="m-zombies">
-                                    <div class="text-[8px] text-[#00e676]">🧟 HORDA ZOMBIE</div>
-                                    <div class="text-[6px] text-gray-400">Kooperacja przeciw potworom</div>
+                                    <div class="text-[7px] text-[#00e676]">🧟 HORDA ZOMBIE</div>
+                                    <div class="text-[6px] text-gray-400">Obrona Co-op</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
-                                    <div class="text-[8px] text-red-400">💣 GORĄCA BOMBA</div>
-                                    <div class="text-[6px] text-gray-400">Oddaj tykającą bombę koledze</div>
+                                    <div class="text-[7px] text-red-400">💣 GORĄCA BOMBA</div>
+                                    <div class="text-[6px] text-gray-400">Oddaj tykający lont</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('koth')" id="m-koth">
-                                    <div class="text-[8px] text-[#05d5fa]">👑 KRÓL WZGÓRZA</div>
-                                    <div class="text-[6px] text-gray-400">Kontroluj złotą strefę</div>
+                                    <div class="text-[7px] text-[#05d5fa]">👑 KRÓL WZGÓRZA</div>
+                                    <div class="text-[6px] text-gray-400">Trzymaj złotą strefę</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('sniper')" id="m-sniper">
-                                    <div class="text-[8px] text-cyan-300">🎯 SNAJPERZY (1 HIT)</div>
-                                    <div class="text-[6px] text-gray-400">1 celny strzał = Zgon!</div>
+                                    <div class="text-[7px] text-indigo-300">🎯 SNAJPERZY</div>
+                                    <div class="text-[6px] text-gray-400">1 celny strzał = Zgon</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('coins')" id="m-coins">
-                                    <div class="text-[8px] text-[#e040fb]">💎 ZŁOTA GORĄCZKA</div>
-                                    <div class="text-[6px] text-gray-400">Zbieraj klejnoty i kradnij!</div>
+                                    <div class="text-[7px] text-[#e040fb]">💎 ZŁOTA GORĄCZKA</div>
+                                    <div class="text-[6px] text-gray-400">Zbieraj diamenty</div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div class="grid grid-cols-2 gap-3 mb-2">
                                 <div>
-                                    <label class="text-[8px] text-gray-400 block mb-1">BIOM ARENY 2.5D:</label>
+                                    <label class="text-[7px] text-gray-400 block mb-1">BIOM ARENY 2.5D:</label>
                                     <select id="mapSelect" class="input-pixel interactive" onchange="Lobby.changeMap(this.value)">
-                                        <option value="forest">🌲 Leśny Bunkier (Kwiaty i Świetliki)</option>
-                                        <option value="cyber">🟣 Cyber-Vegas (Neony i Iskry)</option>
-                                        <option value="ice">❄️ Lodowa Twierdza (Śnieg i Kryształy)</option>
-                                        <option value="lava">🌋 Wulkaniczny Krater (Lawa i Żar)</option>
+                                        <option value="forest">🌲 Leśny Bunkier</option>
+                                        <option value="cyber">🟣 Cyber-Vegas</option>
+                                        <option value="ice">❄️ Lodowa Twierdza</option>
+                                        <option value="lava">🌋 Wulkaniczny Krater</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="text-[8px] text-gray-400 block mb-1">CZAS MINIGRY:</label>
+                                    <label class="text-[7px] text-gray-400 block mb-1">CZAS MINIGRY:</label>
                                     <select id="timeSelect" class="input-pixel interactive" onchange="Lobby.changeTime(this.value)">
                                         <option value="45">⏱️ 45 Sekund (Szybka)</option>
                                         <option value="60" selected>⏱️ 60 Sekund (Standard)</option>
@@ -387,8 +480,8 @@
                         </div>
 
                         <div>
-                            <button id="btnStartMatch" class="btn w-full !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-4 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
-                            <div id="clientWaitMsg" class="text-[8px] text-yellow-400 py-2 text-center animate-pulse hidden">Kręć automatem po lewej i czekaj aż Host odpali grę!</div>
+                            <button id="btnStartMatch" class="btn w-full !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
+                            <div id="clientWaitMsg" class="text-[8px] text-yellow-400 py-2 text-center animate-pulse hidden">Graj w kasynie po lewej i czekaj aż Host odpali mecz!</div>
                         </div>
                     </div>
                 </div>
@@ -407,15 +500,15 @@
                         <div class="text-[10px] text-yellow-400 mb-1">ZŁOTA KOSTKA</div>
                         <div class="text-[7px] text-gray-300 leading-relaxed">W swojej turze rzucasz dwiema kostkami (ruch o 2 do 12 pól)!</div>
                     </div>
-                    <div class="reward-card" onclick="Board.pickRewardCard('dash3')">
+                    <div class="reward-card" onclick="Board.pickRewardCard('dash4')">
                         <div class="text-2xl mb-2">🚀</div>
-                        <div class="text-[10px] text-[#00e676] mb-1">RAKIETOWY SKOK</div>
-                        <div class="text-[7px] text-gray-300 leading-relaxed">Natychmiast przesuwa Twój pionek o +3 pola do przodu!</div>
+                        <div class="text-[10px] text-[#00e676] mb-1">TURBO SKOK +4</div>
+                        <div class="text-[7px] text-gray-300 leading-relaxed">Natychmiast przesuwa Twój pionek o +4 pola do przodu!</div>
                     </div>
                     <div class="reward-card" onclick="Board.pickRewardCard('magnet')">
                         <div class="text-2xl mb-2">🧲</div>
                         <div class="text-[10px] text-[#ff2a6d] mb-1">MAGNES / SABOTAŻ</div>
-                        <div class="text-[7px] text-gray-300 leading-relaxed">Cofa lidera o 3 pola do tyłu i anuluje Twoje więzienie!</div>
+                        <div class="text-[7px] text-gray-300 leading-relaxed">Cofa lidera o 4 pola do tyłu i anuluje Twoje więzienie!</div>
                     </div>
                 </div>
 
@@ -453,9 +546,12 @@
     </div>
 
     <script>
-        // === USTAWIENIA AUDIO / WIDEO ===
+        // === USTAWIENIA, MOTYWY GRADIENTU, CELOWNIKI & TAJNY KOD "SIGMA" ===
         const Settings = {
             music: true, sfx: true, shake: true, crt: true,
+            crosshair: 'cross',
+            sigmaAim: false, // Ukryty lokalny aimbot po wpisaniu "sigma"
+
             update() {
                 this.music = document.getElementById('chkMusic').checked;
                 this.sfx = document.getElementById('chkSfx').checked;
@@ -463,8 +559,85 @@
                 this.crt = document.getElementById('chkCrt').checked;
                 const body = document.getElementById('mainBody');
                 if(this.crt) body.classList.add('crt-effect'); else body.classList.remove('crt-effect');
+            },
+            changeCrosshair(val) {
+                this.crosshair = val;
+                document.getElementById('crosshairSelect').value = val;
+                const lc = document.getElementById('lobbyCrosshair');
+                if(lc) lc.value = val;
+                Preview.draw();
+            },
+            setTheme(th) {
+                const root = document.documentElement;
+                if(th === 'cyber') {
+                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(28,16,54,0.92) 0%, rgba(7,7,16,0.98) 100%)');
+                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #1d1936 0%, #0e0c1c 100%)');
+                } else if(th === 'sunset') {
+                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(74,18,48,0.92) 0%, rgba(18,6,20,0.98) 100%)');
+                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #3b1331 0%, #17081c 100%)');
+                } else if(th === 'emerald') {
+                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(12,52,38,0.92) 0%, rgba(5,15,12,0.98) 100%)');
+                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #113328 0%, #071712 100%)');
+                } else if(th === 'crimson') {
+                    root.style.setProperty('--bg-grad', 'radial-gradient(circle at center, rgba(64,12,18,0.92) 0%, rgba(12,4,6,0.98) 100%)');
+                    root.style.setProperty('--panel-grad', 'linear-gradient(160deg, #361015 0%, #140608 100%)');
+                }
+            },
+            redeemCode() {
+                const inp = document.getElementById('secretCodeInput');
+                const val = inp.value.trim().toLowerCase();
+                inp.value = '';
+                inp.blur();
+                if(val === 'sigma') {
+                    this.sigmaAim = !this.sigmaAim;
+                    // Cichy lokalny sygnał tylko dla wpisującego
+                    inp.placeholder = this.sigmaAim ? "✓ TRYB SIGMA AKTYWNY" : "Wpisz tajny kod...";
+                    Sound.play('coin');
+                } else {
+                    inp.placeholder = "Nieznany kod!";
+                }
             }
         };
+
+        // Rysowanie Customowego Celownika na Płótnie
+        function drawCustomCrosshair(ctx, x, y, type) {
+            ctx.save();
+            ctx.translate(Math.floor(x), Math.floor(y));
+            ctx.strokeStyle = '#00ff88';
+            ctx.fillStyle = '#ff2a6d';
+            ctx.lineWidth = 2;
+
+            if(type === 'cross') {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-11, -2, 7, 4); ctx.fillRect(4, -2, 7, 4);
+                ctx.fillRect(-2, -11, 4, 7); ctx.fillRect(-2, 4, 4, 7);
+                ctx.fillStyle = '#00ff88';
+                ctx.fillRect(-10, -1, 6, 2); ctx.fillRect(4, -1, 6, 2);
+                ctx.fillRect(-1, -10, 2, 6); ctx.fillRect(-1, 4, 2, 6);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-1, -1, 2, 2);
+            } else if(type === 'circle') {
+                ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.stroke();
+                ctx.fillRect(-2, -2, 4, 4);
+            } else if(type === 'dot') {
+                ctx.fillStyle = '#000'; ctx.fillRect(-4, -4, 8, 8);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-3, -3, 6, 6);
+            } else if(type === 'diamond') {
+                ctx.rotate(Math.PI/4);
+                ctx.strokeStyle = '#ffde00';
+                ctx.strokeRect(-7, -7, 14, 14);
+                ctx.fillRect(-2, -2, 4, 4);
+            } else if(type === 'x') {
+                ctx.strokeStyle = '#ff2a6d';
+                ctx.beginPath();
+                ctx.moveTo(-8, -8); ctx.lineTo(-3, -3);
+                ctx.moveTo(8, -8); ctx.lineTo(3, -3);
+                ctx.moveTo(-8, 8); ctx.lineTo(-3, 3);
+                ctx.moveTo(8, 8); ctx.lineTo(3, 3);
+                ctx.stroke();
+                ctx.fillStyle = '#05d5fa'; ctx.fillRect(-1, -1, 2, 2);
+            }
+            ctx.restore();
+        }
 
         let chosenSkin = 'cap';
         const SKIN_DESCRIPTIONS = {
@@ -483,6 +656,7 @@
             document.getElementById('skinDescText').innerText = SKIN_DESCRIPTIONS[sk] || '';
             const lSel = document.getElementById('lobbySkinSelect');
             if(lSel) lSel.value = sk;
+            Preview.draw();
         }
 
         function switchScreen(id) {
@@ -572,7 +746,7 @@
             }
         };
 
-        // === AUTOMAT JEDNORĘKI BANDYTA W LOBBY (DLA OCZEKUJĄCYCH) ===
+        // === AUTOMAT I RULETKA W LOBBY ===
         const LobbyCasino = {
             chips: 100, spinning: false,
             freeChips() {
@@ -586,6 +760,33 @@
                 if(currentRoom && myId) {
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ chips: this.chips });
                 }
+            },
+            betRoulette(colorChoice) {
+                if(this.spinning) return;
+                Sound.init();
+                if(this.chips < 15) {
+                    document.getElementById('lobbySlotMsg').innerText = "Potrzebujesz 15 🪙! Kliknij [+50🪙]!";
+                    Sound.play('hit'); return;
+                }
+                this.chips -= 15;
+                let r = Math.random();
+                let outcome = r < 0.08 ? 'green' : (r < 0.54 ? 'red' : 'black');
+                const myName = document.getElementById('playerName').value.trim() || 'Paweł';
+                const msgEl = document.getElementById('lobbySlotMsg');
+
+                if(outcome === colorChoice) {
+                    let win = outcome === 'green' ? 150 : 30;
+                    this.chips += win;
+                    Sound.play('jackpot');
+                    msgEl.innerText = `🎡 TRAFIONO ${outcome.toUpperCase()}! +${win} 🪙!`;
+                    if(outcome === 'green' && currentRoom) {
+                        db.ref(`chat/${currentRoom}`).push({ name: '🎡 RULETKA', color: '#00e676', msg: `${myName} trafił ZIELONE ZERO (10x) i zgarnął +150 🪙!` });
+                    }
+                } else {
+                    Sound.play('tick');
+                    msgEl.innerText = `🎡 Wypadło: ${outcome.toUpperCase()}. Spróbuj ponownie!`;
+                }
+                this.syncChips();
             },
             spin() {
                 if(this.spinning) return;
@@ -630,7 +831,6 @@
                             this.chips += 60;
                             Sound.play('coin');
                             msgEl.innerText = "💎 POTRÓJNY DIAMENT! +60 🪙!";
-                            if(currentRoom) db.ref(`chat/${currentRoom}`).push({ name: '🎰 KASYNO', color: '#05d5fa', msg: `${myName} wygrał +60 🪙 na automacie!` });
                         } else if(rand < 0.65) {
                             r1.innerText = '🍒'; r2.innerText = '🍒'; r3.innerText = '🍋';
                             this.chips += 25;
@@ -661,7 +861,7 @@
         let myId = null, currentRoom = null, isHost = false;
         let netPlayers = {}, netZombies = {}, netItems = {}, netMeteors = [];
 
-        const ALL_MINIGAMES = ['arena', 'meteors', 'heist', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
+        const ALL_MINIGAMES = ['arena', 'spleef', 'squid', 'crown', 'meteors', 'heist', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
         let minigameDeck = [];
         let lastPlayedMap = '';
 
@@ -685,8 +885,9 @@
         const RoomState = {
             status: 'lobby', isPartyCampaign: true, mode: 'party', activeMinigame: 'arena',
             map: 'forest', matchDuration: 60, timer: 60, bombHolder: null, bombTimer: 10,
+            crownHolder: null, squidRed: false, brokenIce: {},
             koth: {x:800, y:800, r:110}, stormR: 1100, vaultHp: 500,
-            turnOrder: [], turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna!', minigameWinner: null
+            turnOrder: [], turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna XL (50 Pól)!', minigameWinner: null
         };
 
         // === CZAT ===
@@ -724,8 +925,8 @@
             }
         };
 
-        // === CAŁKOWICIE PRZEPROJEKTOWANE MODELE 6 KLAS BOHATERÓW (WYRAŹNIE RÓŻNE KSZTAŁTY!) ===
-        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote) {
+        // === MODELE 6 KLAS BOHATERÓW ===
+        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote, hasCrown=false) {
             const P = 3;
             ctx.save();
             ctx.translate(Math.floor(x), Math.floor(y));
@@ -739,7 +940,6 @@
                 return;
             }
 
-            // Cień na ziemi
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.beginPath(); ctx.ellipse(0, 8, 17, 9, 0, 0, Math.PI*2); ctx.fill();
 
@@ -755,124 +955,96 @@
                 ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
                 ctx.strokeRect(-7*P, -7*P, 14*P, 14*P);
             }
+            if(hasCrown) {
+                ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(0, 0, 27, 0, Math.PI*2); ctx.stroke();
+            }
 
             ctx.rotate(angle);
 
             let step = Math.round(Math.sin(anim) * 2.5) * P;
             let wave = Math.sin(performance.now() * 0.012) * P;
 
-            // Animowane buty zależne od klasy
             ctx.fillStyle = skin === 'knight' ? '#7a848c' : (skin === 'astro' ? '#e0e0e0' : '#0b0b12');
             ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
             ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
 
-            // === UNIKALNE SYLWETKI 6 KLAS BOHATERÓW ===
             if(skin === 'cap') {
-                // 1. PAWEŁ (STREETWEAR: Bluza z kapturem, czapka z daszkiem, słuchawki i okulary)
                 ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
                 ctx.fillStyle = color; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
-                // Kaptur na plecach
                 ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(-5*P, -3*P, 3*P, 6*P);
-                // Głowa + Czapka z daszkiem do przodu
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#111'; ctx.fillRect(2*P, -3*P, 4*P, 6*P); // długi daszek
+                ctx.fillStyle = '#111'; ctx.fillRect(2*P, -3*P, 4*P, 6*P);
                 ctx.fillStyle = color; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#fff'; ctx.fillRect(-2*P, -P, P, 2*P); // logo na czapce
-                // Duże słuchawki na uszach
+                ctx.fillStyle = '#fff'; ctx.fillRect(-2*P, -P, P, 2*P);
                 ctx.fillStyle = '#111'; ctx.fillRect(-P, -5*P, 3*P, 10*P);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-P, -5*P, 3*P, 2*P); ctx.fillRect(-P, 3*P, 3*P, 2*P);
             }
             else if(skin === 'ninja') {
-                // 2. CYBER-NINJA (Smukły, 2 skrzyżowane katany na plecach, powiewający długi szal!)
-                // Powiewający na wietrze szal z tyłu
                 ctx.fillStyle = color;
                 ctx.fillRect(-9*P, -2*P + wave, 5*P, 2*P);
                 ctx.fillRect(-12*P, -3*P - wave, 4*P, 2*P);
-                // Rękojeści dwóch katan wystające zza pleców
                 ctx.fillStyle = '#000';
                 ctx.fillRect(-6*P, -6*P, 3*P, 2*P); ctx.fillRect(-6*P, 4*P, 3*P, 2*P);
                 ctx.fillStyle = '#ffde00';
                 ctx.fillRect(-5*P, -6*P, P, 2*P); ctx.fillRect(-5*P, 4*P, P, 2*P);
-                // Czarny strój ninja z pancerzem
                 ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
                 ctx.fillStyle = '#191926'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
-                // Kaptur + Świecący wizjer
                 ctx.fillStyle = '#11111a'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
-                ctx.fillStyle = color; ctx.fillRect(-2*P, -3.5*P, 2*P, 7*P); // opaska
-                ctx.fillStyle = '#00e676'; ctx.fillRect(2*P, -2*P, P, 4*P); // neonowe oczy
+                ctx.fillStyle = color; ctx.fillRect(-2*P, -3.5*P, 2*P, 7*P);
+                ctx.fillStyle = '#00e676'; ctx.fillRect(2*P, -2*P, P, 4*P);
             }
             else if(skin === 'knight') {
-                // 3. RYCERZ KRZYŻOWY (Potężne stalowe naramienniki z kolcami, tarcza z boku, hełm z pióropuszem)
-                // Szerokie naramienniki
                 ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -8*P, 9*P, 16*P);
                 ctx.fillStyle = '#9aa5b1'; ctx.fillRect(-4*P, -7*P, 7*P, 14*P);
-                // Kolce na barkach
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(-2*P, -9*P, 2*P, 2*P); ctx.fillRect(-2*P, 7*P, 2*P, 2*P);
-                // Tarcza rycerska na lewym ramieniu
                 ctx.fillStyle = '#000'; ctx.fillRect(-3*P, -8*P, 6*P, 2*P);
                 ctx.fillStyle = color; ctx.fillRect(-2*P, -8*P, 4*P, P);
-                // Hełm garnczkowy ze złotym krzyżem
                 ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
                 ctx.fillStyle = '#cbd2d9'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
-                ctx.fillStyle = '#ffde00'; ctx.fillRect(2*P, -3*P, P, 6*P); // złote zdobienie
-                ctx.fillStyle = '#111'; ctx.fillRect(3*P, -2*P, P, 4*P); // szczelina wzrokowa
-                // Długi pióropusz
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(2*P, -3*P, P, 6*P);
+                ctx.fillStyle = '#111'; ctx.fillRect(3*P, -2*P, P, 4*P);
                 ctx.fillStyle = color;
                 ctx.fillRect(-8*P, -2*P + wave*0.5, 5*P, 4*P);
             }
             else if(skin === 'astro') {
-                // 4. KOSMONAUTA (Wielki plecak Jetpack z ogniem, okrągły szklany hełm ze złotą szybą)
-                // Plecak odrzutowy (Jetpack) + Płomienie z dysz
                 ctx.fillStyle = '#000'; ctx.fillRect(-8*P, -5*P, 4*P, 10*P);
                 ctx.fillStyle = '#cfd8dc'; ctx.fillRect(-7*P, -4*P, 3*P, 8*P);
                 ctx.fillStyle = '#ff9100';
                 let flame = Math.random()*3*P;
                 ctx.fillRect(-10*P - flame, -3*P, 2*P + flame, 2*P);
                 ctx.fillRect(-10*P - flame, P, 2*P + flame, 2*P);
-                // Kombinezon kosmiczny
                 ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -6*P, 9*P, 12*P);
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(-4*P, -5*P, 7*P, 10*P);
-                ctx.fillStyle = color; ctx.fillRect(-3*P, -5*P, 2*P, 10*P); // pasy
-                // Okrągła wielka kula hełmu
+                ctx.fillStyle = color; ctx.fillRect(-3*P, -5*P, 2*P, 10*P);
                 ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 5*P, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#eceff1'; ctx.beginPath(); ctx.arc(0, 0, 4.2*P, 0, Math.PI*2); ctx.fill();
-                // Złoto-błękitna szyba sferyczna
                 ctx.fillStyle = '#00b0ff'; ctx.beginPath(); ctx.arc(1.2*P, 0, 3.2*P, -Math.PI/2, Math.PI/2); ctx.fill();
-                ctx.fillStyle = '#fff'; ctx.fillRect(P, -2*P, P, P); // błysk na szkle
+                ctx.fillStyle = '#fff'; ctx.fillRect(P, -2*P, P, P);
             }
             else if(skin === 'cyborg') {
-                // 5. MECHA-CYBORG (Kanciasty pancerz, świecący rdzeń na piersi, szczypce i obracająca się antena)
                 ctx.fillStyle = '#000'; ctx.fillRect(-6*P, -7*P, 11*P, 14*P);
                 ctx.fillStyle = '#37474f'; ctx.fillRect(-5*P, -6*P, 9*P, 12*P);
                 ctx.fillStyle = color; ctx.fillRect(-4*P, -6*P, 3*P, 12*P);
-                // Świecący rdzeń reaktora
                 ctx.fillStyle = '#00e5ff'; ctx.fillRect(-2*P, -2*P, 4*P, 4*P);
-                // Głowa robota + Czerwony laserowy skaner
                 ctx.fillStyle = '#263238'; ctx.fillRect(-3*P, -3*P, 7*P, 6*P);
                 ctx.fillStyle = '#ff1744'; ctx.fillRect(2*P, -2.5*P, 2*P, 5*P);
-                // Antena na głowie
                 ctx.fillStyle = '#ffde00'; ctx.fillRect(-2*P, -P, P, 2*P);
             }
             else if(skin === 'king') {
-                // 6. KRÓL IMPREZY (Szeroki płaszcz z białym futrem w cętki, złota korona z klejnotami!)
-                // Królewski płaszcz powiewający z tyłu
                 ctx.fillStyle = '#000'; ctx.fillRect(-9*P, -7*P, 12*P, 14*P);
                 ctx.fillStyle = '#b71c1c'; ctx.fillRect(-8*P, -6*P, 10*P, 12*P);
-                // Białe futro gronostajowe na kołnierzu
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(-5*P, -7*P, 6*P, 14*P);
                 ctx.fillStyle = '#000';
                 ctx.fillRect(-4*P, -6*P, P, P); ctx.fillRect(-4*P, 5*P, P, P); ctx.fillRect(-2*P, -6*P, P, P); ctx.fillRect(-2*P, 5*P, P, P);
-                // Głowa + Wielka Złota Korona z trójzębem
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
                 ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -4*P, 6*P, 8*P);
                 ctx.fillStyle = '#ffde00'; ctx.fillRect(-4*P, -3.5*P, 4*P, 7*P);
-                // Klejnoty w koronie
                 ctx.fillStyle = '#05d5fa'; ctx.fillRect(-2*P, -2*P, P, P);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-2*P, P, P, P);
             }
 
-            // Dłonie (Szczypce dla Cyborga, Rękawice dla reszty)
             ctx.fillStyle = '#000';
             ctx.fillRect(2*P, -6*P, 3*P, 3*P);
             ctx.fillRect(3*P, 3*P, 3*P, 3*P);
@@ -880,7 +1052,6 @@
             ctx.fillRect(2*P, -5*P, 2*P, 2*P);
             ctx.fillRect(3*P, 4*P, 2*P, 2*P);
 
-            // Broń z detalami
             let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
             ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
             ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
@@ -903,9 +1074,10 @@
                 }
             }
             if(name) {
+                let prefix = isBomb ? '💣 ' : (hasCrown ? '👑 ' : '');
                 ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-                ctx.fillStyle = '#000'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x)+1, Math.floor(y - 40));
-                ctx.fillStyle = isBomb ? '#ffde00' : '#fff'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x), Math.floor(y - 41));
+                ctx.fillStyle = '#000'; ctx.fillText(prefix + name, Math.floor(x)+1, Math.floor(y - 40));
+                ctx.fillStyle = (isBomb || hasCrown) ? '#ffde00' : '#fff'; ctx.fillText(prefix + name, Math.floor(x), Math.floor(y - 41));
             }
 
             if(emote) {
@@ -914,7 +1086,7 @@
             }
         }
 
-        // === PODGLĄD OBRACAJĄCEJ SIĘ POSTACI W MENU ===
+        // === PODGLĄD W MENU ===
         const Preview = {
             angle: 0,
             init() {
@@ -930,46 +1102,59 @@
                 const pCtx = c.getContext('2d');
                 pCtx.imageSmoothingEnabled = false;
                 pCtx.fillStyle = '#121222';
-                pCtx.fillRect(0, 0, 120, 120);
+                pCtx.fillRect(0, 0, 125, 125);
                 pCtx.strokeStyle = '#1f1f38';
-                pCtx.strokeRect(10, 10, 100, 100);
+                pCtx.strokeRect(8, 8, 109, 109);
 
                 pCtx.save();
-                pCtx.translate(60, 64);
-                pCtx.scale(1.45, 1.45);
+                pCtx.translate(62, 68);
+                pCtx.scale(1.35, 1.35);
                 const col = document.getElementById('playerColor').value || '#05d5fa';
                 drawPixelHero(pCtx, 0, 0, this.angle, col, chosenSkin, '', 100, 100, 0, 'shotgun', performance.now()*0.01, false, false, 0, false, '');
                 pCtx.restore();
+
+                drawCustomCrosshair(pCtx, 102, 24, Settings.crosshair);
             }
         };
         Preview.init();
 
-        // === WYSPA PLANSZOWA 2.5D HD (30 PÓL) ===
-        const BOARD_TILES = [
-            {x:140, y:590, t:'start', n:'START'}, {x:265, y:590, t:'norm', n:'1'}, {x:390, y:590, t:'card', n:'🃏 KARTA'},
-            {x:515, y:590, t:'boost', n:'🚀 +2'}, {x:640, y:590, t:'norm', n:'4'}, {x:765, y:590, t:'casino', n:'🎰 KASYNO'},
-            {x:890, y:590, t:'norm', n:'6'}, {x:1015, y:590, t:'prison', n:'🔒 PAKA'},
-            {x:1130, y:525, t:'norm', n:'8'},
-            {x:1015, y:450, t:'back', n:'💀 -2'}, {x:890, y:450, t:'norm', n:'10'}, {x:765, y:450, t:'swap', n:'🔀 ZAMIANA'},
-            {x:640, y:450, t:'norm', n:'12'}, {x:515, y:450, t:'casino', n:'🎰 KASYNO'}, {x:390, y:450, t:'boost', n:'🚀 +2'},
-            {x:265, y:450, t:'norm', n:'15'}, {x:140, y:450, t:'prison', n:'🔒 PAKA'},
-            {x:140, y:330, t:'card', n:'🃏 KARTA'},
-            {x:265, y:310, t:'norm', n:'18'}, {x:390, y:310, t:'casino', n:'🎰 KASYNO'}, {x:515, y:310, t:'back', n:'💀 -2'},
-            {x:640, y:310, t:'swap', n:'🔀 ZAMIANA'}, {x:765, y:310, t:'boost', n:'🚀 +2'}, {x:890, y:310, t:'norm', n:'23'},
-            {x:1015, y:310, t:'prison', n:'🔒 PAKA'},
-            {x:1130, y:235, t:'norm', n:'25'}, {x:1015, y:165, t:'casino', n:'🎰 KASYNO'}, {x:875, y:165, t:'back', n:'💀 -2'},
-            {x:735, y:165, t:'card', n:'🃏 KARTA'}, {x:595, y:165, t:'back', n:'💀 -3'}, {x:440, y:165, t:'goal', n:'🏰 META!'}
-        ];
+        // === POWIĘKSZONA WYSPA PLANSZOWA XL (51 PÓL: 0..50!) ===
+        const BOARD_TILES = (() => {
+            const arr = [];
+            const rowsY = [615, 505, 395, 285, 175];
+            let idx = 0;
+            for(let r=0; r<5; r++) {
+                let cols = r === 4 ? 11 : 10;
+                for(let c=0; c<cols; c++) {
+                    let x = (r % 2 === 0)
+                        ? 125 + c * (1030 / (cols - 1))
+                        : 1155 - c * (1030 / (cols - 1));
+                    let y = rowsY[r];
+                    let t = 'norm', n = `${idx}`;
+                    if(idx === 0) { t = 'start'; n = 'START'; }
+                    else if(idx === 50) { t = 'goal'; n = '🏰 META!'; }
+                    else if([5, 14, 24, 34, 43].includes(idx)) { t = 'casino'; n = '🎰 KASYNO'; }
+                    else if([8, 19, 31, 41].includes(idx)) { t = 'shop'; n = '🛒 SKLEP'; }
+                    else if([3, 12, 22, 33, 44].includes(idx)) { t = 'boost'; n = '🚀 +3'; }
+                    else if([9, 18, 28, 38, 47, 49].includes(idx)) { t = 'back'; n = '💀 -3'; }
+                    else if([7, 16, 27, 39].includes(idx)) { t = 'prison'; n = '🔒 PAKA'; }
+                    else if([4, 15, 25, 36, 45].includes(idx)) { t = 'card'; n = '🃏 KARTA'; }
+                    else if([11, 21, 35, 46].includes(idx)) { t = 'swap'; n = '🔀 ZAMIANA'; }
+                    arr.push({ x: Math.round(x), y: Math.round(y), t, n });
+                    idx++;
+                }
+            }
+            return arr;
+        })();
 
         const ISLAND_TREES = [
-            {x:110, y:520}, {x:330, y:635}, {x:580, y:635}, {x:950, y:635},
-            {x:1160, y:440}, {x:640, y:385}, {x:200, y:385}, {x:1080, y:385}
+            {x:85, y:560}, {x:420, y:648}, {x:820, y:648}, {x:1195, y:560},
+            {x:85, y:340}, {x:1195, y:340}, {x:85, y:190}, {x:640, y:125}
         ];
 
         function drawPalmTree(ctx, x, y) {
             ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(x, y+4, 18, 8, 0, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#7a4b24'; ctx.fillRect(x-4, y-28, 8, 30);
-            ctx.fillStyle = '#9c6334'; ctx.fillRect(x-2, y-26, 4, 24);
             ctx.fillStyle = '#258022';
             ctx.fillRect(x-22, y-32, 44, 8); ctx.fillRect(x-8, y-44, 16, 26);
             ctx.fillStyle = '#38b033';
@@ -977,14 +1162,13 @@
         }
 
         function drawIslandCastle(ctx, x, y) {
-            ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x-52, y-38, 104, 65);
-            ctx.fillStyle = '#4a4e59'; ctx.fillRect(x-48, y-48, 96, 68);
-            ctx.fillStyle = '#6c7382'; ctx.fillRect(x-44, y-44, 88, 56);
+            ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x-46, y-32, 92, 56);
+            ctx.fillStyle = '#4a4e59'; ctx.fillRect(x-42, y-42, 84, 58);
+            ctx.fillStyle = '#6c7382'; ctx.fillRect(x-38, y-38, 76, 48);
             ctx.fillStyle = '#ff2a6d';
-            ctx.beginPath(); ctx.moveTo(x-52, y-48); ctx.lineTo(x-32, y-76); ctx.lineTo(x-12, y-48); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(x+12, y-48); ctx.lineTo(x+32, y-76); ctx.lineTo(x+52, y-48); ctx.fill();
-            ctx.fillStyle = '#ffde00'; ctx.fillRect(x-16, y-16, 32, 36);
-            ctx.fillStyle = '#111'; ctx.fillRect(x-12, y-12, 24, 32);
+            ctx.beginPath(); ctx.moveTo(x-46, y-42); ctx.lineTo(x-28, y-68); ctx.lineTo(x-10, y-42); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x+10, y-42); ctx.lineTo(x+28, y-68); ctx.lineTo(x+46, y-42); ctx.fill();
+            ctx.fillStyle = '#ffde00'; ctx.fillRect(x-14, y-14, 28, 30);
         }
 
         const Board = {
@@ -1007,7 +1191,7 @@
             renderCardsUI() {
                 const c = document.getElementById('myCardsContainer');
                 if(!c) return;
-                const names = { double: '🎲 2x Kostka', dash3: '🚀 +3 Pola', magnet: '🧲 Sabotaż' };
+                const names = { double: '🎲 2x Kostka', dash4: '🚀 +4 Pola', magnet: '🧲 Sabotaż' };
                 c.innerHTML = this.myCards.map((card, idx) =>
                     `<button class="btn !bg-purple-700 hover:!bg-purple-500 !p-2 !text-[8px]" onclick="Board.useCard(${idx})">${names[card] || card}</button>`
                 ).join('');
@@ -1024,11 +1208,11 @@
                 if(card === 'double') {
                     this.activeDoubleDice = true;
                     announce("🎲 AKTYWOWANO ZŁOTĄ KOSTKĘ (2-12)!", 1500);
-                } else if(card === 'dash3') {
+                } else if(card === 'dash4') {
                     this.myPrison = 0;
-                    this.animateStepsTo(Math.min(30, this.myPos + 3), () => {
+                    this.animateStepsTo(Math.min(50, this.myPos + 4), () => {
                         db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: 0 });
-                        if(this.myPos >= 30) db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                        if(this.myPos >= 50) db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
                     });
                 } else if(card === 'magnet') {
                     this.myPrison = 0;
@@ -1036,9 +1220,9 @@
                     let targets = Object.keys(netPlayers);
                     if(targets.length > 0) {
                         let tid = targets[Math.floor(Math.random()*targets.length)];
-                        let tPos = Math.max(0, (netPlayers[tid].boardPos || 0) - 3);
+                        let tPos = Math.max(0, (netPlayers[tid].boardPos || 0) - 4);
                         db.ref(`room_players/${currentRoom}/${tid}`).update({ boardPos: tPos });
-                        announce(`🧲 COFNIĘTO GRACZA ${netPlayers[tid].name} O 3 POLA!`, 1600);
+                        announce(`🧲 COFNIĘTO GRACZA ${netPlayers[tid].name} O 4 POLA!`, 1600);
                     }
                 }
             },
@@ -1048,7 +1232,7 @@
                 const turnId = RoomState.turnOrder[RoomState.turnIdx];
                 const isMyTurn = (turnId === myId);
                 let turnName = isMyTurn ? "TWOJA KOLEJ!" : (netPlayers[turnId]?.name || "Gracz");
-                document.getElementById('boardTurnText').innerText = `TURA: ${turnName}`;
+                document.getElementById('boardTurnText').innerText = `TURA: ${turnName} | ŻETONY: ${LobbyCasino.chips} 🪙`;
                 document.getElementById('boardStatusMsg').innerText = RoomState.boardMsg || '';
                 document.getElementById('btnRollDice').style.display = (isMyTurn && !this.rollingLock) ? 'block' : 'none';
             },
@@ -1068,19 +1252,19 @@
                     Sound.play('step');
 
                     const hopAnim = setInterval(() => {
-                        progress += 0.14;
+                        progress += 0.16;
                         if(progress >= 1) {
                             clearInterval(hopAnim);
                             this.myPos = nextP;
                             this.visualPos = nextP;
                             this.jumpHeight = 0;
                             db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos });
-                            setTimeout(stepLoop, 45);
+                            setTimeout(stepLoop, 35);
                         } else {
                             this.visualPos = startP + (nextP - startP) * progress;
-                            this.jumpHeight = Math.sin(progress * Math.PI) * 28;
+                            this.jumpHeight = Math.sin(progress * Math.PI) * 26;
                         }
-                    }, 20);
+                    }, 18);
                 };
                 stepLoop();
             },
@@ -1129,33 +1313,48 @@
 
                         setTimeout(() => {
                             dOv.style.display = 'none';
-                            let dest = Math.min(30, this.myPos + finalRoll);
+                            let dest = Math.min(50, this.myPos + finalRoll);
                             this.animateStepsTo(dest, () => this.triggerTileEffect(myName, finalRoll));
-                        }, 850);
+                        }, 800);
                     }
-                }, 75);
+                }, 70);
             },
 
             triggerTileEffect(myName, roll) {
                 let tile = BOARD_TILES[this.myPos];
-                let msg = `🎲 ${myName} wyrzucił [${roll}] i stanął na polu: ${tile.n}!`;
+                let msg = `🎲 ${myName} wyrzucił [${roll}] i stanął na polu ${this.myPos} (${tile.n})!`;
+
+                // Sprawdzenie Pojedynku 1v1 (czy ktoś inny stoi na tym samym polu > 0)
+                let rivalEntry = Object.entries(netPlayers).find(([pid, p]) => p.boardPos === this.myPos && this.myPos > 0 && this.myPos < 50);
+                if(rivalEntry) {
+                    let [rId, rPlayer] = rivalEntry;
+                    Sound.play('jackpot');
+                    if(Math.random() < 0.55) {
+                        announce(`⚔️ POJEDYNEK Z ${rPlayer.name}! WYGRYWASZ +2 POLA!`, 1600);
+                        db.ref(`room_players/${currentRoom}/${rId}`).update({ boardPos: Math.max(0, rPlayer.boardPos - 2) });
+                        this.animateStepsTo(Math.min(50, this.myPos + 2), () => this.finishTurnCheck(msg + ` ⚔️ Wygrał pojedynek z ${rPlayer.name}!`));
+                    } else {
+                        announce(`⚔️ POJEDYNEK Z ${rPlayer.name}! PRZEGRYWASZ -2 POLA!`, 1600);
+                        this.animateStepsTo(Math.max(0, this.myPos - 2), () => this.finishTurnCheck(msg + ` ⚔️ Przegrał pojedynek z ${rPlayer.name}!`));
+                    }
+                    return;
+                }
 
                 if(tile.t === 'boost') {
                     Sound.play('dash');
-                    announce("🚀 POLE BOOST! +2 POLA!", 1300);
-                    this.animateStepsTo(Math.min(30, this.myPos + 2), () => this.finishTurnCheck(msg + " 🚀 (+2 pola)"));
+                    announce("🚀 POLE BOOST! +3 POLA!", 1300);
+                    this.animateStepsTo(Math.min(50, this.myPos + 3), () => this.finishTurnCheck(msg + " 🚀 (+3 pola)"));
                 } else if(tile.t === 'back') {
-                    let penalty = this.myPos === 29 ? 3 : 2;
                     Sound.play('hit');
-                    announce(`💀 PUŁAPKA! -${penalty} POLA!`, 1300);
-                    this.animateStepsTo(Math.max(0, this.myPos - penalty), () => this.finishTurnCheck(msg + ` 💀 (-${penalty} pola)`));
+                    announce(`💀 PUŁAPKA! -3 POLA!`, 1300);
+                    this.animateStepsTo(Math.max(0, this.myPos - 3), () => this.finishTurnCheck(msg + ` 💀 (-3 pola)`));
                 } else if(tile.t === 'prison') {
                     this.myPrison = 1;
                     Sound.play('boom');
                     announce("🔒 TRAFIASZ DO WIĘZIENIA NA 1 TURĘ!", 1500);
                     this.finishTurnCheck(msg + " 🔒 (Więzienie!)");
                 } else if(tile.t === 'card') {
-                    const pool = ['double', 'dash3', 'magnet'];
+                    const pool = ['double', 'dash4', 'magnet'];
                     this.myCards.push(pool[Math.floor(Math.random()*pool.length)]);
                     this.renderCardsUI();
                     Sound.play('coin');
@@ -1176,10 +1375,43 @@
                         this.finishTurnCheck(msg);
                     }
                 } else if(tile.t === 'casino') {
-                    this.openSlotMachineModal(myName);
+                    this.openSlotMachineModal();
+                } else if(tile.t === 'shop') {
+                    document.getElementById('shopModal').style.display = 'flex';
                 } else {
                     this.finishTurnCheck(msg);
                 }
+            },
+
+            buyShopItem(itemType, cost) {
+                if(LobbyCasino.chips < cost) {
+                    Sound.play('hit');
+                    return announce("ZA MAŁO ŻETONÓW (🪙)!", 1200);
+                }
+                LobbyCasino.chips -= cost;
+                LobbyCasino.syncChips();
+                Sound.play('jackpot');
+                document.getElementById('shopModal').style.display = 'none';
+                const myName = document.getElementById('playerName').value.trim() || 'Paweł';
+
+                if(itemType === 'pipe') {
+                    announce("🚀 ZŁOTA RURA! +5 PÓL DO PRZODU!", 1500);
+                    this.animateStepsTo(Math.min(50, this.myPos + 5), () => this.finishTurnCheck(`🛒 ${myName} kupił Złotą Rurę (+5 pól)!`));
+                } else if(itemType === 'double') {
+                    this.myCards.push('double');
+                    this.renderCardsUI();
+                    this.finishTurnCheck(`🛒 ${myName} kupił w sklepie Złotą Kostkę!`);
+                } else if(itemType === 'sabotage') {
+                    this.myCards.push('magnet');
+                    this.renderCardsUI();
+                    this.finishTurnCheck(`🛒 ${myName} kupił w sklepie Kartę Sabotażu!`);
+                }
+            },
+
+            closeShop() {
+                document.getElementById('shopModal').style.display = 'none';
+                const myName = document.getElementById('playerName').value.trim() || 'Paweł';
+                this.finishTurnCheck(`🛒 ${myName} ominął zakupy u Handlarza.`);
             },
 
             openSlotMachineModal() {
@@ -1210,34 +1442,35 @@
                         let rollOutcome = Math.random();
                         let cMsg = '';
 
-                        if(rollOutcome < 0.30) {
+                        if(rollOutcome < 0.32) {
                             r1.innerText = '7️⃣'; r2.innerText = '7️⃣'; r3.innerText = '7️⃣';
-                            resTxt.innerText = "🎰 JACKPOT 777! +4 POLA DO PRZODU!";
+                            resTxt.innerText = "🎰 JACKPOT 777! +5 PÓL DO PRZODU!";
                             Sound.play('jackpot');
-                            cMsg = `🎰 ${myName} rozbił BANK W KASYNIE (777) i skacze +4 pola!`;
+                            cMsg = `🎰 ${myName} rozbił BANK W KASYNIE (777) i skacze +5 pól!`;
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
-                                this.animateStepsTo(Math.min(30, this.myPos + 4), () => this.finishTurnCheck(cMsg));
-                            }, 1600);
-                        } else if(rollOutcome < 0.65) {
+                                this.animateStepsTo(Math.min(50, this.myPos + 5), () => this.finishTurnCheck(cMsg));
+                            }, 1500);
+                        } else if(rollOutcome < 0.68) {
                             r1.innerText = '🃏'; r2.innerText = '🃏'; r3.innerText = '💎';
-                            resTxt.innerText = "🃏 WYGRANA! OTRZYMUJESZ ZŁOTĄ KOSTKĘ!";
+                            resTxt.innerText = "🃏 WYGRANA! OTRZYMUJESZ ZŁOTĄ KOSTKĘ + 40 🪙!";
                             Sound.play('coin');
                             this.myCards.push('double');
+                            LobbyCasino.chips += 40; LobbyCasino.syncChips();
                             this.renderCardsUI();
-                            cMsg = `🎰 ${myName} wygrał w Kasynie Kartę Złotej Kostki!`;
+                            cMsg = `🎰 ${myName} wygrał w Kasynie Złotą Kostkę i 40 🪙!`;
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
                                 this.finishTurnCheck(cMsg);
                             }, 1500);
-                        } else if(rollOutcome < 0.85) {
+                        } else if(rollOutcome < 0.86) {
                             r1.innerText = '🍒'; r2.innerText = '🍒'; r3.innerText = '🍒';
-                            resTxt.innerText = "🍒 BONUS! +2 POLA DO PRZODU!";
+                            resTxt.innerText = "🍒 BONUS! +3 POLA DO PRZODU!";
                             Sound.play('coin');
-                            cMsg = `🎰 ${myName} trafił wiśnie w Kasynie (+2 pola)!`;
+                            cMsg = `🎰 ${myName} trafił wiśnie w Kasynie (+3 pola)!`;
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
-                                this.animateStepsTo(Math.min(30, this.myPos + 2), () => this.finishTurnCheck(cMsg));
+                                this.animateStepsTo(Math.min(50, this.myPos + 3), () => this.finishTurnCheck(cMsg));
                             }, 1500);
                         } else {
                             r1.innerText = '💀'; r2.innerText = '💀'; r3.innerText = '💀';
@@ -1250,19 +1483,19 @@
                             }, 1500);
                         }
                     }
-                }, 80);
+                }, 75);
             },
 
             finishTurnCheck(msg) {
                 db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: this.myPrison });
                 db.ref(`rooms/${currentRoom}`).update({ boardMsg: msg });
 
-                if(this.myPos >= 30) {
+                if(this.myPos >= 50) {
                     if(Game.me) Game.me.score += 500;
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ score: 999 });
                     db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
                 } else {
-                    setTimeout(() => this.advanceTurn(), 1100);
+                    setTimeout(() => this.advanceTurn(), 1000);
                 }
             },
 
@@ -1282,20 +1515,21 @@
             pickRewardCard(cardType) {
                 Sound.play('coin');
                 const myName = document.getElementById('playerName').value.trim() || 'Paweł';
-                if(cardType === 'dash3') {
-                    this.myPos = Math.min(30, this.myPos + 3);
+                LobbyCasino.chips += 30; LobbyCasino.syncChips();
+                if(cardType === 'dash4') {
+                    this.myPos = Math.min(50, this.myPos + 4);
                     this.visualPos = this.myPos;
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos });
                 } else {
                     this.myCards.push(cardType);
                     this.renderCardsUI();
                 }
-                if(this.myPos >= 30) {
+                if(this.myPos >= 50) {
                     db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'board', turnIdx: 0,
-                        boardMsg: `🏆 ${myName} wybrał Kartę Nagrody! Nowa tura rzutów kostką!`
+                        boardMsg: `🏆 ${myName} odebrał nagrodę za minigrę (+30 🪙)! Nowa tura rzutów!`
                     });
                 }
             },
@@ -1318,67 +1552,64 @@
                 for(let wx=30; wx<1250; wx+=110) {
                     for(let wy=30; wy<690; wy+=85) {
                         ctx.fillRect(wx + waveShift, wy, 42, 6);
-                        ctx.fillStyle = '#2968ab';
-                        ctx.fillRect(wx + waveShift + 8, wy - 4, 20, 4);
-                        ctx.fillStyle = '#1b497d';
                     }
                 }
 
                 let foam = Math.sin(now*0.004)*4;
                 ctx.fillStyle = '#a8e6ff';
-                ctx.fillRect(52 - foam, 76 - foam, 1176 + foam*2, 604 + foam*2);
+                ctx.fillRect(48 - foam, 72 - foam, 1184 + foam*2, 610 + foam*2);
 
-                ctx.fillStyle = '#593e25'; ctx.fillRect(60, 100, 1160, 575);
-                ctx.fillStyle = '#f2d388'; ctx.fillRect(60, 82, 1160, 575);
-                ctx.fillStyle = '#e0be6e'; ctx.fillRect(70, 92, 1140, 555);
+                ctx.fillStyle = '#593e25'; ctx.fillRect(55, 95, 1170, 582);
+                ctx.fillStyle = '#f2d388'; ctx.fillRect(55, 78, 1170, 582);
+                ctx.fillStyle = '#1a4f1e'; ctx.fillRect(78, 96, 1124, 540);
+                ctx.fillStyle = '#25692b'; ctx.fillRect(84, 102, 1112, 528);
 
-                ctx.fillStyle = '#1a4f1e'; ctx.fillRect(85, 102, 1110, 460);
-                ctx.fillStyle = '#25692b'; ctx.fillRect(92, 108, 1096, 445);
+                // Strefa Las Vegas i Wulkanu na wielkiej wyspie 50 pól
+                ctx.fillStyle = '#1e0b2e'; ctx.fillRect(92, 245, 1096, 195);
+                ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.strokeRect(92, 245, 1096, 195);
 
-                ctx.fillStyle = '#1e0b2e'; ctx.fillRect(100, 250, 980, 118);
-                ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4; ctx.strokeRect(100, 250, 980, 118);
-                ctx.fillStyle = '#ffde00'; ctx.font = '10px "Press Start 2P"';
-                ctx.fillText("✨ LAS VEGAS STRIP ✨", 550, 270);
+                ctx.fillStyle = '#261417'; ctx.fillRect(92, 110, 1096, 115);
+                ctx.strokeStyle = '#ff4d00'; ctx.lineWidth = 3; ctx.strokeRect(92, 110, 1096, 115);
 
-                ctx.fillStyle = '#261417'; ctx.fillRect(370, 108, 815, 118);
-                ctx.strokeStyle = '#ff4d00'; ctx.lineWidth = 4; ctx.strokeRect(370, 108, 815, 118);
-
-                ctx.strokeStyle = '#3b2818'; ctx.lineWidth = 34; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                // Kamienny trakt łączący wszystkie 51 pól
+                ctx.strokeStyle = '#3b2818'; ctx.lineWidth = 26; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
                 ctx.beginPath();
-                BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y+6); else ctx.lineTo(t.x, t.y+6); });
+                BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y+5); else ctx.lineTo(t.x, t.y+5); });
                 ctx.stroke();
 
-                ctx.strokeStyle = '#9c7a54'; ctx.lineWidth = 26;
+                ctx.strokeStyle = '#9c7a54'; ctx.lineWidth = 20;
                 ctx.beginPath();
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y); else ctx.lineTo(t.x, t.y); });
                 ctx.stroke();
 
                 ISLAND_TREES.forEach(tr => drawPalmTree(ctx, tr.x, tr.y));
-                drawIslandCastle(ctx, 335, 155);
+                drawIslandCastle(ctx, 1165, 155);
 
+                // Rysowanie 51 kafelków 3D (0..50)
                 BOARD_TILES.forEach((t, i) => {
                     ctx.save();
                     ctx.translate(t.x, t.y);
 
                     let topCol = '#e8dcc5', sideCol = '#9e8f75', borderCol = '#2b2318';
-                    if(t.t === 'start')  { topCol = '#00e676'; sideCol = '#00994d'; }
+                    if(t.t === 'start')       { topCol = '#00e676'; sideCol = '#00994d'; }
                     else if(t.t === 'goal')   { topCol = '#ffde00'; sideCol = '#b39b00'; }
                     else if(t.t === 'boost')  { topCol = '#05d5fa'; sideCol = '#008ba3'; }
                     else if(t.t === 'back')   { topCol = '#ff2a6d'; sideCol = '#a30036'; }
                     else if(t.t === 'prison') { topCol = '#7c4dff'; sideCol = '#4615b2'; }
                     else if(t.t === 'card')   { topCol = '#e040fb'; sideCol = '#8e00b0'; }
                     else if(t.t === 'casino') { topCol = '#ff9100'; sideCol = '#b26500'; }
-                    else if(t.t === 'swap')   { topCol = '#18ffff'; sideCol = '#0095a8'; }
+                    else if(t.t === 'shop')   { topCol = '#00e5ff'; sideCol = '#00838f'; }
+                    else if(t.t === 'swap')   { topCol = '#ffd740'; sideCol = '#ff8f00'; }
 
                     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.fillRect(-42, -22, 84, 58);
+                    ctx.fillRect(-35, -18, 70, 46);
 
-                    ctx.fillStyle = borderCol; ctx.fillRect(-42, -28, 84, 58);
-                    ctx.fillStyle = sideCol;   ctx.fillRect(-39, -18, 78, 45);
-                    ctx.fillStyle = topCol;    ctx.fillRect(-39, -25, 78, 44);
-                    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(-37, -23, 74, 4);
+                    ctx.fillStyle = borderCol; ctx.fillRect(-35, -22, 70, 46);
+                    ctx.fillStyle = sideCol;   ctx.fillRect(-32, -14, 64, 35);
+                    ctx.fillStyle = topCol;    ctx.fillRect(-32, -20, 64, 34);
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(-30, -18, 60, 3);
 
-                    ctx.fillStyle = '#000'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillStyle = '#000'; ctx.font = '6px "Press Start 2P"'; ctx.textAlign = 'center';
                     ctx.fillText(t.n, 0, 0);
                     ctx.restore();
                 });
@@ -1398,27 +1629,25 @@
                 });
 
                 allP.forEach((p, idx) => {
-                    let lowIdx = Math.floor(Math.min(30, Math.max(0, p.vPos)));
-                    let highIdx = Math.min(30, lowIdx + 1);
+                    let lowIdx = Math.floor(Math.min(50, Math.max(0, p.vPos)));
+                    let highIdx = Math.min(50, lowIdx + 1);
                     let frac = p.vPos - lowIdx;
                     let t1 = BOARD_TILES[lowIdx], t2 = BOARD_TILES[highIdx];
                     let px = t1.x + (t2.x - t1.x) * frac;
                     let py = t1.y + (t2.y - t1.y) * frac;
 
-                    let ox = (idx % 2 === 0 ? -14 : 14);
-                    let oy = (idx < 2 ? -12 : 8);
-                    if(p.jump > 2) {
-                        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-                        ctx.beginPath(); ctx.ellipse(px + ox, py + oy + 8, 10, 5, 0, 0, Math.PI*2); ctx.fill();
-                    }
+                    let ox = (idx % 2 === 0 ? -12 : 12);
+                    let oy = (idx < 2 ? -10 : 8);
                     drawPixelHero(ctx, px + ox, py + oy - p.jump, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', now*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '');
                 });
 
                 ctx.restore();
 
+                drawCustomCrosshair(ctx, Input.mx, Input.my, Settings.crosshair);
+
                 allP.sort((a,b) => b.pos - a.pos);
                 document.getElementById('liveScoreboard').innerHTML = allP.map((p, i) =>
-                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">Pole ${p.pos}/30</span></li>`
+                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">Pole ${p.pos}/50</span></li>`
                 ).join('');
             }
         };
@@ -1449,10 +1678,6 @@
                             g.fillRect(x, y, 80, 4);
                             g.fillStyle = 'rgba(0,0,0,0.08)';
                             g.fillRect(x, y+76, 80, 4);
-                            if(type === 'cyber') {
-                                g.strokeStyle = 'rgba(5, 213, 250, 0.14)';
-                                g.lineWidth = 2; g.strokeRect(x+2, y+2, 76, 76);
-                            }
                         }
                     }
 
@@ -1536,7 +1761,7 @@
         window.onresize();
 
         const Input = {
-            keys: {}, mx: 0, my: 0, wx: 0, wy: 0, down: false, initialized: false,
+            keys: {}, mx: W/2, my: H/2, wx: 0, wy: 0, down: false, initialized: false,
             init() {
                 if(this.initialized) return;
                 this.initialized = true;
@@ -1579,6 +1804,7 @@
             isUp()    { return !!(this.keys['KeyW'] || this.keys['ArrowUp']    || this.keys['w']); },
             isDown()  { return !!(this.keys['KeyS'] || this.keys['ArrowDown']  || this.keys['s']); }
         };
+        Input.init();
 
         const Cam = {
             x: 0, y: 0, shkT: 0, shkI: 0,
@@ -1664,7 +1890,6 @@
                 ctx.fillStyle = '#ffde00';
                 let pulse = Math.floor(Math.sin(performance.now()*0.005)*8);
                 ctx.fillRect(o.x+24+pulse, o.y+24, 24, 24);
-                ctx.fillRect(o.x+o.w-48-pulse, o.y+o.h-44, 20, 20);
                 return;
             }
 
@@ -1677,9 +1902,6 @@
                 ctx.fillStyle = '#99622e'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
                 ctx.fillStyle = '#784a1f';
                 for(let py = o.y-wallH+P*4; py < o.y+o.h-wallH-P*2; py += P*5) ctx.fillRect(o.x+P*2, py, o.w-P*4, P);
-                ctx.fillStyle = '#ba7d43';
-                ctx.fillRect(o.x+P*2, o.y-wallH+P*2, o.w-P*4, P*2);
-                ctx.fillRect(o.x+P*2, o.y+o.h-wallH-P*3, o.w-P*4, P*2);
             } else if(o.t === 'neon') {
                 ctx.fillStyle = '#05d5fa'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
                 ctx.fillStyle = '#120924'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
@@ -1691,12 +1913,10 @@
                 ctx.fillStyle = '#0b1f0a'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h);
                 ctx.fillStyle = '#1b4718'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
                 ctx.fillStyle = '#296924'; ctx.fillRect(o.x+P*3, o.y-wallH+P*2, o.w-P*6, o.h-P*6);
-                ctx.fillStyle = '#3d8c36'; ctx.fillRect(o.x+P*5, o.y-wallH+P*3, o.w-P*10, o.h-P*11);
             } else if(o.t === 'ice') {
                 ctx.fillStyle = '#133c52'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
                 ctx.fillStyle = '#3993bd'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
                 ctx.fillStyle = '#73c7eb'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
-                ctx.fillStyle = '#c4edff'; ctx.fillRect(o.x+P*3, o.y-wallH+P*3, o.w-P*8, P*3);
             }
         }
 
@@ -1718,11 +1938,11 @@
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
-                this.x = 300 + Math.random()*1000; this.y = 300 + Math.random()*1000;
+                this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
                 this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
                 this.angle = 0; this.anim = 0; this.muzzle = 0;
                 this.hp = 100; this.maxHp = 100; this.shield = 0;
-                this.wep = RoomState.activeMinigame === 'sniper' ? 'sniper' : (RoomState.activeMinigame === 'meteors' ? 'shotgun' : 'pistol');
+                this.wep = RoomState.activeMinigame === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(RoomState.activeMinigame) ? 'shotgun' : 'pistol');
                 this.fireCd = 0; this.dashCd = 0; this.dashTime = 0;
                 this.quadTime = 0; this.speedTime = 0;
                 this.emote = ''; this.emoteTimer = 0;
@@ -1748,9 +1968,17 @@
                 if(this.speedTime > 0) this.speedTime -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
-                if(gm === 'meteors' && !this.isDead) {
+                // Punkty za przetrwanie lub trzymanie Korony
+                if((gm === 'meteors' || gm === 'spleef' || gm === 'squid') && !this.isDead) {
                     this.survTick = (this.survTick || 0) + dt;
                     if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
+                }
+                if(gm === 'crown' && RoomState.crownHolder === myId && !this.isDead) {
+                    this.crownTick = (this.crownTick || 0) + dt;
+                    if(this.crownTick >= 0.4) {
+                        this.crownTick = 0; this.score += 2;
+                        FX.text(this.x, this.y, "+2 👑", "#ffde00", 9);
+                    }
                 }
 
                 if(this.isDead) {
@@ -1758,9 +1986,9 @@
                         this.respawnTimer -= dt;
                         if(this.respawnTimer <= 0) {
                             this.isDead = false; this.hp = 100; this.shield = 0;
-                            this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
+                            this.x = 500 + Math.random()*600; this.y = 500 + Math.random()*600;
                             this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                            this.wep = gm === 'sniper' ? 'sniper' : (gm === 'meteors' ? 'shotgun' : 'pistol');
+                            this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(gm) ? 'shotgun' : 'pistol');
                             FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
                         }
                     }
@@ -1774,6 +2002,12 @@
                 if(Input.isRight()) ix += 1;
                 if(ix !== 0 && iy !== 0) { let l = Math.hypot(ix, iy); ix /= l; iy /= l; }
 
+                // Tryb Czerwone, Zielone (Squid Game) - kara za ruch na czerwonym świetle!
+                if(gm === 'squid' && RoomState.squidRed && (Math.hypot(ix, iy) > 0.1 || Input.down)) {
+                    this.takeDamage(45 * dt, null);
+                    if(Math.random() < 0.2) FX.text(this.x, this.y, "🛑 STÓJ!", "#ff2a6d", 11);
+                }
+
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
                 let baseSpd = RoomState.bombHolder === myId ? 345 : 285;
                 if(this.speedTime > 0) baseSpd *= 1.35;
@@ -1782,7 +2016,7 @@
                     FX.burst(this.x, this.y, this.color, 1, 20, 5);
                 }
 
-                if(RoomState.map === 'ice') {
+                if(RoomState.map === 'ice' || gm === 'spleef') {
                     this.vx += ix * baseSpd * 4.5 * dt;
                     this.vy += iy * baseSpd * 4.5 * dt;
                     this.vx *= 0.96; this.vy *= 0.96;
@@ -1796,8 +2030,46 @@
 
                 this.moveSmoothCircle((this.vx + this.kx) * dt, (this.vy + this.ky) * dt, mapObj.obstacles, dt);
 
+                // Kruszący się Lód (Spleef)
+                if(gm === 'spleef') {
+                    let tx = Math.floor(this.x / 80), ty = Math.floor(this.y / 80);
+                    let key = `${tx}_${ty}`;
+                    if(RoomState.brokenIce[key] === 2) {
+                        this.takeDamage(999, null);
+                    } else if(!RoomState.brokenIce[key]) {
+                        RoomState.brokenIce[key] = 1;
+                        setTimeout(() => {
+                            if(RoomState.status === 'playing') {
+                                RoomState.brokenIce[key] = 2;
+                                db.ref(`rooms/${currentRoom}/brokenIce/${key}`).set(2);
+                            }
+                        }, 850);
+                    }
+                }
+
                 if(Math.hypot(ix, iy) > 0.1) this.anim += dt * 13;
+
+                // Ciche działanie kodu "sigma" (Lokalny Aimbot na wrogów i zombie)
                 this.angle = Math.atan2(Input.wy - this.y, Input.wx - this.x);
+                if(Settings.sigmaAim) {
+                    let bestDist = 850, bestTarget = null;
+                    if(gm === 'zombies') {
+                        Object.values(netZombies).forEach(z => {
+                            let d = Math.hypot(z.x - this.x, z.y - this.y);
+                            if(d < bestDist) { bestDist = d; bestTarget = z; }
+                        });
+                    } else {
+                        Object.values(netPlayers).forEach(p => {
+                            if(!p.isDead) {
+                                let d = Math.hypot(p.x - this.x, p.y - this.y);
+                                if(d < bestDist) { bestDist = d; bestTarget = p; }
+                            }
+                        });
+                    }
+                    if(bestTarget) {
+                        this.angle = Math.atan2(bestTarget.y - this.y, bestTarget.x - this.x);
+                    }
+                }
 
                 if(this.fireCd > 0) this.fireCd -= dt;
                 if(this.dashCd > 0) this.dashCd -= dt;
@@ -1813,7 +2085,7 @@
 
                     let dmgVal = gm === 'sniper' ? 999 : (this.quadTime > 0 ? w.dmg * 2 : w.dmg);
                     for(let i=0; i<w.proj; i++) {
-                        let a = this.angle + (Math.random()-0.5)*w.spread;
+                        let a = this.angle + (Settings.sigmaAim ? 0 : (Math.random()-0.5)*w.spread);
                         Game.spawnBullet(this.x, this.y, a, w.spd, dmgVal, w.knock, w.bType, true);
                     }
                 }
@@ -1910,6 +2182,13 @@
                 this.kx += knockX; this.ky += knockY;
                 Sound.play('hit'); Cam.shake(6, 0.12);
                 FX.burst(this.x, this.y, '#d91643', 8, 160, 5);
+
+                // W trybie Kradzieży Korony trafienie przekazuje Koronę atakującemu!
+                if(RoomState.activeMinigame === 'crown' && RoomState.crownHolder === myId && attackerId) {
+                    db.ref(`rooms/${currentRoom}`).update({ crownHolder: attackerId });
+                    FX.text(this.x, this.y, "STRACONO KORONĘ!", "#ff2a6d", 12);
+                }
+
                 if(this.hp <= 0) {
                     this.hp = 0; this.isDead = true; this.respawnTimer = 2.5; this.streak = 0;
                     Sound.play('boom');
@@ -1931,7 +2210,7 @@
         // === GŁÓWNA PĘTLA MINIGIER ===
         const Game = {
             me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
-            hostZombies: [], hostMeteors: [],
+            hostZombies: [], hostMeteors: [], squidTimer: 0,
 
             runRouletteAnimation(targetGame, targetMap) {
                 switchScreen(null);
@@ -1943,7 +2222,8 @@
                 ov.style.display = 'flex';
 
                 const labels = {
-                    arena: '🔫 ARENA PvP', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
+                    arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD', squid: '🚦 CZERWONE, ZIELONE',
+                    crown: '👑 KRADZIEŻ KORONY', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
                     royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA', sniper: '🎯 SNAJPERZY', coins: '💎 ZŁOTA GORĄCZKA'
                 };
@@ -1965,12 +2245,13 @@
                             if(isHost) {
                                 db.ref(`room_items/${currentRoom}`).remove();
                                 db.ref(`rooms/${currentRoom}`).update({
-                                    status: 'playing', timer: RoomState.matchDuration, stormR: 1100, vaultHp: 500, bombHolder: null, zombies: "[]", meteors: "[]"
+                                    status: 'playing', timer: RoomState.matchDuration, stormR: 1100, vaultHp: 500,
+                                    bombHolder: null, crownHolder: myId, squidRed: false, brokenIce: {}, zombies: "[]", meteors: "[]"
                                 });
                             }
                         }, 1500);
                     }
-                }, 105);
+                }, 100);
             },
 
             startMatch() {
@@ -1990,10 +2271,12 @@
                 document.getElementById('hudRight').style.display = 'block';
 
                 const gm = RoomState.activeMinigame;
+                document.getElementById('squidLightBanner').style.display = gm === 'squid' ? 'block' : 'none';
                 document.getElementById('hudWeapon').innerText = gm === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : (gm === 'sniper' ? 'BROŃ: Snajperka (1 HIT)' : 'BROŃ: Pistolet');
 
                 const modeTitles = {
-                    arena: '🔫 ARENA PvP', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
+                    arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD', squid: '🚦 CZERWONE, ZIELONE',
+                    crown: '👑 KRADZIEŻ KORONY', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
                     royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA',
                     sniper: '🎯 TYLKO SNAJPERKI', coins: '💎 ZŁOTA GORĄCZKA'
@@ -2062,6 +2345,16 @@
                 Object.entries(netPlayers).forEach(([id, p]) => { if(!p.isDead) allActive.push({ id, x: p.x, y: p.y }); });
 
                 if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 1.2);
+
+                // Tryb Squid Game (Zmiana światła co kilka sekund)
+                if(gm === 'squid') {
+                    this.squidTimer = (this.squidTimer || 0) + 0.1;
+                    if(this.squidTimer >= (RoomState.squidRed ? 2.8 : 4.5)) {
+                        this.squidTimer = 0;
+                        RoomState.squidRed = !RoomState.squidRed;
+                        db.ref(`rooms/${currentRoom}`).update({ squidRed: RoomState.squidRed });
+                    }
+                }
 
                 if(gm === 'meteors') {
                     if(Math.random() < 0.35 && this.hostMeteors.length < 10) {
@@ -2221,7 +2514,7 @@
 
                     if(!b.isMine) continue;
 
-                    if(['arena', 'meteors', 'heist', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
+                    if(['arena', 'spleef', 'squid', 'crown', 'meteors', 'heist', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
                         for(let [pid, p] of Object.entries(netPlayers)) {
                             if(!p.isDead && Math.hypot(b.x - p.x, b.y - p.y) < 22) {
                                 if(b.bType === 'rocket') {
@@ -2229,8 +2522,8 @@
                                     this.bullets.splice(i,1); break;
                                 }
                                 let angle = Math.atan2(b.vy, b.vx);
-                                let appliedDmg = (gm === 'koth' || gm === 'meteors') ? 6 : b.dmg;
-                                let appliedKnock = gm === 'meteors' ? b.knock * 1.45 : b.knock;
+                                let appliedDmg = (gm === 'koth' || gm === 'meteors' || gm === 'spleef') ? 6 : b.dmg;
+                                let appliedKnock = (gm === 'meteors' || gm === 'spleef') ? b.knock * 1.5 : b.knock;
                                 db.ref(`events/${currentRoom}`).push({
                                     type: 'hitPlayer', target: pid, attacker: myId,
                                     dmg: appliedDmg,
@@ -2306,8 +2599,24 @@
 
                 Cam.apply();
 
-                const cachedBg = GroundCache.canvases[RoomState.map] || GroundCache.canvases.forest;
+                const cachedBg = GroundCache.canvases[gm === 'spleef' ? 'ice' : RoomState.map] || GroundCache.canvases.forest;
                 ctx.drawImage(cachedBg, 0, 0);
+
+                // Rysowanie pękających i dziurawych kafelków w trybie Kruszący się Lód (Spleef)
+                if(gm === 'spleef') {
+                    Object.entries(RoomState.brokenIce).forEach(([key, state]) => {
+                        let [tx, ty] = key.split('_').map(Number);
+                        if(state === 1) {
+                            ctx.fillStyle = 'rgba(255, 145, 0, 0.45)';
+                            ctx.fillRect(tx*80, ty*80, 80, 80);
+                        } else if(state === 2) {
+                            ctx.fillStyle = '#071426';
+                            ctx.fillRect(tx*80, ty*80, 80, 80);
+                            ctx.strokeStyle = '#05d5fa'; ctx.lineWidth = 2;
+                            ctx.strokeRect(tx*80+2, ty*80+2, 76, 76);
+                        }
+                    });
+                }
 
                 FX.drawDecals();
 
@@ -2375,14 +2684,14 @@
                 Object.entries(netPlayers).forEach(([pid, p]) => {
                     renderQueue.push({
                         y: p.y,
-                        draw: () => drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote)
+                        draw: () => drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote, gm === 'crown' && RoomState.crownHolder === pid)
                     });
                 });
 
                 if(this.me) {
                     renderQueue.push({
                         y: this.me.y,
-                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote)
+                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote, gm === 'crown' && RoomState.crownHolder === myId)
                     });
                 }
 
@@ -2417,6 +2726,7 @@
                 FX.drawTop();
                 Cam.restore();
 
+                // Minimapa
                 const mSize = 110, mx = W - mSize - 14, my = H - mSize - 14, scale = mSize / WORLD_SIZE;
                 ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(mx, my, mSize, mSize);
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(mx, my, mSize, mSize);
@@ -2430,6 +2740,9 @@
                     ctx.fillStyle = '#fff';
                     ctx.fillRect(mx + this.me.x*scale - 3, my + this.me.y*scale - 3, 6, 6);
                 }
+
+                // Rysowanie wybranego Celownika (Crosshair) na wierzchu ekranu
+                drawCustomCrosshair(ctx, Input.mx, Input.my, Settings.crosshair);
             },
 
             loop(time) {
@@ -2498,7 +2811,7 @@
                     isHost = true;
                     await db.ref(`rooms/${currentRoom}`).set({
                         status: 'lobby', mode: 'party', activeMinigame: 'arena', map: 'forest',
-                        matchDuration: 60, timer: 60, stormR: 1100, turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna!'
+                        matchDuration: 60, timer: 60, stormR: 1100, turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna XL (50 Pól)!'
                     });
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
@@ -2569,12 +2882,21 @@
                     RoomState.timer = d.timer ?? 60;
                     RoomState.bombHolder = d.bombHolder || null;
                     RoomState.bombTimer = d.bombTimer ?? 10;
+                    RoomState.crownHolder = d.crownHolder || myId;
+                    RoomState.squidRed = !!d.squidRed;
+                    RoomState.brokenIce = d.brokenIce || {};
                     RoomState.stormR = d.stormR ?? 1100;
                     RoomState.turnOrder = d.turnOrder || [myId];
                     RoomState.turnIdx = d.turnIdx || 0;
                     RoomState.boardMsg = d.boardMsg || '';
                     RoomState.minigameWinner = d.minigameWinner || null;
                     if(d.koth) RoomState.koth = d.koth;
+
+                    const sqBanner = document.getElementById('squidLightBanner');
+                    if(sqBanner) {
+                        sqBanner.innerText = RoomState.squidRed ? "🛑 CZERWONE ŚWIATŁO! (STÓJ!)" : "🟢 ZIELONE ŚWIATŁO! (BIEGNIJ!)";
+                        sqBanner.className = `text-[9px] font-bold mb-1 ${RoomState.squidRed ? 'text-red-500 animate-pulse' : 'text-green-400'}`;
+                    }
 
                     document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
                     document.getElementById('m-' + RoomState.mode)?.classList.add('selected');
@@ -2704,7 +3026,7 @@
                     db.ref(`room_players/${currentRoom}`).update(pUpdates);
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'board', turnOrder: order, turnIdx: 0,
-                        boardMsg: '🎲 Rozpoczynamy wyścig do pola 30! Rzucajcie po kolei kostką!'
+                        boardMsg: '🎲 Rozpoczynamy wyścig do pola 50! Rzucajcie po kolei kostką!'
                     });
                 } else if(RoomState.mode === 'roulette') {
                     const pickedGame = drawNextUniqueMinigame();
@@ -2713,7 +3035,7 @@
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'playing', activeMinigame: RoomState.mode,
-                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, zombies: "[]", meteors: "[]"
+                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, crownHolder: myId, squidRed: false, brokenIce: {}, zombies: "[]", meteors: "[]"
                     });
                 }
             }
