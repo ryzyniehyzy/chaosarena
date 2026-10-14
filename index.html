@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAWEŁ PYKA: SUPER PIXEL PARTY HD</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY 2.5D HD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -20,8 +20,8 @@
         .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(16,16,32,0.88) 0%, rgba(5,5,10,0.96) 100%); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
         .screen.active { display: flex; }
         
-        .panel { background: linear-gradient(180deg, #1b1b30 0%, #10101e 100%); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.5rem; max-width: 1060px; width: 96%; text-align: center; position: relative; max-height: 94vh; overflow-y: auto; }
-        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.75rem 1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 10px; outline: none; text-shadow: 2px 2px 0 #000; }
+        .panel { background: linear-gradient(180deg, #1b1b30 0%, #10101e 100%); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.25rem; max-width: 1120px; width: 96%; text-align: center; position: relative; max-height: 95vh; overflow-y: auto; }
+        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.7rem 1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 10px; outline: none; text-shadow: 2px 2px 0 #000; }
         .btn:hover { filter: brightness(1.15); }
         .btn:active { transform: translateY(3px); box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.45), 0 1px 0 #000; }
         .btn:disabled { background: #444; color: #888; border-color: #777; cursor: not-allowed; filter: none; }
@@ -29,18 +29,23 @@
         .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.55rem; width: 100%; text-align: center; font-size: 10px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #151526 0%, #0c0c16 100%); padding: 8px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 4px 0 #000; }
+        .mode-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #151526 0%, #0c0c16 100%); padding: 7px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 4px 0 #000; }
         .mode-card:hover { border-color: #666699; transform: translateY(-2px); }
         .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1e2240 0%, #121529 100%); box-shadow: inset 0 0 12px rgba(5,213,250,0.35), 0 4px 0 #000; }
 
-        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 7px; cursor: pointer; font-size: 8px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
-        .skin-card.selected { border-color: #ffde00; color: #fff; background: #2b2612; transform: translateY(-2px); }
+        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 7px 4px; cursor: pointer; font-size: 8px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
+        .skin-card:hover { border-color: #777; color: #fff; }
+        .skin-card.selected { border-color: #ffde00; color: #fff; background: #2b2612; transform: translateY(-2px); box-shadow: 0 0 10px rgba(255,222,0,0.4); }
 
         .reward-card { border: 4px solid #ffde00; background: linear-gradient(180deg, #25213b 0%, #151224 100%); padding: 14px; cursor: pointer; transition: transform 0.15s; width: 31%; box-shadow: 0 8px 0 #000; }
         .reward-card:hover { transform: translateY(-6px); border-color: #05d5fa; }
 
+        /* MINI AUTOMAT W LOBBY */
+        .lobby-slot-box { background: linear-gradient(180deg, #2e113d 0%, #170721 100%); border: 3px solid #ffde00; box-shadow: inset 0 0 15px rgba(255, 42, 109, 0.4), 0 4px 0 #000; padding: 10px; }
+        .mini-reel { width: 52px; height: 56px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+
         /* HUD MINIGIER */
-        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.75); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.78); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
         
         /* HUD PLANSZÓWKI */
@@ -51,7 +56,7 @@
         #diceOverlay { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 58; display: none; flex-direction: column; align-items: center; pointer-events: none; }
         .dice-cube { width: 100px; height: 100px; background: linear-gradient(135deg, #ffffff 0%, #dcdcdc 100%); border: 6px solid #000; box-shadow: inset -8px -8px 0 #aaa, 0 0 30px #ffde00, 12px 12px 0 rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #111; }
 
-        /* AUTOMAT KASYNOWY */
+        /* AUTOMAT KASYNOWY NA PLANSZY */
         #casinoModal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 62; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
         .slot-machine { background: linear-gradient(180deg, #3a154d 0%, #1c0926 100%); border: 6px solid #ffde00; box-shadow: 0 0 45px #ff2a6d, 12px 12px 0 #000; padding: 24px; text-align: center; max-width: 520px; width: 92%; }
         .slot-reel { width: 92px; height: 98px; background: linear-gradient(180deg, #e0e0e0 0%, #ffffff 50%, #cccccc 100%); border: 5px solid #000; box-shadow: inset 0 8px 10px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 42px; }
@@ -60,8 +65,8 @@
         #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
 
         /* CZAT */
-        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 20, 0.93); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
-        #chatMessages { height: 105px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
+        #chatMessages { height: 100px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
         .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 5px; cursor: pointer; font-size: 12px; }
         .emote-btn:hover { background: #323254; border-color: #05d5fa; transform: scale(1.15); }
 
@@ -89,7 +94,7 @@
         <div id="diceSubText" class="text-xs text-[#ffde00] mt-3 bg-black/90 px-4 py-2 border-2 border-white shadow-[4px_4px_0_#000]">RZUCANIE...</div>
     </div>
 
-    <!-- AUTOMAT KASYNOWY -->
+    <!-- AUTOMAT KASYNOWY NA PLANSZY -->
     <div id="casinoModal">
         <div class="slot-machine">
             <div class="text-lg text-[#ffde00] mb-1" style="text-shadow: 3px 3px 0 #000;">🎰 ROYAL PIXEL CASINO 🎰</div>
@@ -179,31 +184,42 @@
 
     <div id="uiContainer" class="ui-layer">
         
-        <!-- 1. MENU GŁÓWNE -->
+        <!-- 1. MENU GŁÓWNE Z PODGLĄDEM BOHATERA NA ŻYWO -->
         <div id="screen-menu" class="screen active">
-            <div class="panel !max-w-xl">
+            <div class="panel !max-w-2xl">
                 <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-xs text-yellow-400 mb-5 tracking-wider">✨ SUPER PIXEL PARTY 2.5D HD ✨</h2>
+                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY 2.5D HD ✨</h2>
                 
-                <div class="flex gap-3 mb-4">
-                    <div class="w-2/3 text-left">
-                        <label class="text-[8px] text-gray-400 block mb-1">TWÓJ PSEUDONIM:</label>
-                        <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
+                <div class="flex flex-col md:flex-row gap-4 items-center mb-4">
+                    <!-- Okienko podglądu obracającej się postaci na żywo -->
+                    <div class="bg-black/80 border-4 border-[#05d5fa] p-2 flex flex-col items-center shadow-[6px_6px_0_#000]">
+                        <div class="text-[7px] text-yellow-300 mb-1">PODGLĄD KLASY NA ŻYWO:</div>
+                        <canvas id="previewCanvas" width="120" height="120" class="bg-[#121222] border-2 border-gray-700"></canvas>
+                        <div id="skinDescText" class="text-[7px] text-[#00e676] mt-1">Bluza, Słuchawki i Czapka</div>
                     </div>
-                    <div class="w-1/3 text-left">
-                        <label class="text-[8px] text-gray-400 block mb-1">KOLOR BOHATERA:</label>
-                        <input type="color" id="playerColor" value="#05d5fa" class="w-full h-[36px] border-3 border-white cursor-pointer bg-black interactive">
-                    </div>
-                </div>
 
-                <div class="text-[8px] text-gray-400 text-left mb-1">WYBIERZ SWOJEGO BOHATERA PIXEL-ART:</div>
-                <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-5 interactive">
-                    <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ</div>
-                    <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA</div>
-                    <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ</div>
-                    <div class="skin-card" onclick="selectSkin('astro')" id="sk-astro">👨‍🚀 KOSMOS</div>
-                    <div class="skin-card" onclick="selectSkin('cyborg')" id="sk-cyborg">🤖 CYBORG</div>
-                    <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL</div>
+                    <div class="flex-grow w-full">
+                        <div class="flex gap-3 mb-3">
+                            <div class="w-2/3 text-left">
+                                <label class="text-[8px] text-gray-400 block mb-1">TWÓJ PSEUDONIM:</label>
+                                <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
+                            </div>
+                            <div class="w-1/3 text-left">
+                                <label class="text-[8px] text-gray-400 block mb-1">KOLOR BOHATERA:</label>
+                                <input type="color" id="playerColor" value="#05d5fa" onchange="Preview.draw()" class="w-full h-[36px] border-3 border-white cursor-pointer bg-black interactive">
+                            </div>
+                        </div>
+
+                        <div class="text-[8px] text-gray-400 text-left mb-1">WYBIERZ UNIKALNY MODEL POSTACI:</div>
+                        <div class="grid grid-cols-3 gap-2 interactive">
+                            <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ<br><span class="text-[6px] text-gray-400">Słuchawki & Bluza</span></div>
+                            <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA<br><span class="text-[6px] text-gray-400">Katany & Szal</span></div>
+                            <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ<br><span class="text-[6px] text-gray-400">Zbroja & Tarcza</span></div>
+                            <div class="skin-card" onclick="selectSkin('astro')" id="sk-astro">👨‍🚀 KOSMOS<br><span class="text-[6px] text-gray-400">Szklany Hełm & Jet</span></div>
+                            <div class="skin-card" onclick="selectSkin('cyborg')" id="sk-cyborg">🤖 CYBORG<br><span class="text-[6px] text-gray-400">Szczypce & Radar</span></div>
+                            <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL<br><span class="text-[6px] text-gray-400">Płaszcz & Korona</span></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex flex-col gap-3">
@@ -217,65 +233,93 @@
             </div>
         </div>
 
-        <!-- 2. LOBBY -->
+        <!-- 2. LOBBY Z MINI-KASYNEM DLA OCZEKUJĄCYCH -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
-                <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-3 mb-4 gap-2">
+                <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-3 gap-2">
                     <div class="text-left">
-                        <h2 class="text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA 2.5D</h2>
-                        <span class="text-[8px] text-yellow-300">Nowa grafika 2.5D z cieniami, pogodą i efektami świetlnymi!</span>
+                        <h2 class="text-base md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA (LOBBY)</h2>
+                        <span class="text-[7px] text-yellow-300">Kręć automatem w poczekalni, zmieniaj postacie i wybieraj tryby!</span>
                     </div>
-                    <div class="flex items-center gap-3 bg-black/60 border-2 border-[#ff2a6d] px-4 py-2">
+                    <div class="flex items-center gap-3 bg-black/60 border-2 border-[#ff2a6d] px-3 py-1.5">
                         <div class="text-right">
                             <span class="text-[7px] text-gray-400 block">KOD POKOJU:</span>
-                            <span id="lobbyCode" class="text-xl text-[#ffde00] font-bold tracking-widest">-----</span>
+                            <span id="lobbyCode" class="text-lg text-[#ffde00] font-bold tracking-widest">-----</span>
                         </div>
                         <button class="btn !bg-indigo-600 !p-2 !text-[8px] interactive" id="btnCopyLink">🔗 KOPIUJ LINK</button>
                     </div>
                 </div>
                 <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK ZAPROSZENIA DO SCHOWKA!</div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 text-left">
-                    <div class="lg:col-span-4 flex flex-col gap-3">
-                        <div class="bg-black/60 border-2 border-gray-600 p-3">
-                            <div class="text-[9px] text-[#05d5fa] mb-2">👥 EKIPA W POKOJU (<span id="lobbyCount">1</span>):</div>
-                            <ul id="lobbyPlayerList" class="h-36 overflow-y-auto space-y-2 text-[9px]"></ul>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 text-left">
+                    <!-- Lewa kolumna: Gracze + Automat Kasynowy w Poczekalni + Ustawienia -->
+                    <div class="lg:col-span-4 flex flex-col gap-2.5">
+                        <!-- Lista graczy + Szybka zmiana postaci w lobby -->
+                        <div class="bg-black/60 border-2 border-gray-600 p-2.5">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="text-[8px] text-[#05d5fa]">👥 GRACZE (<span id="lobbyCount">1</span>):</span>
+                                <select id="lobbySkinSelect" class="bg-[#111] border border-yellow-400 text-[7px] text-yellow-300 p-1 interactive" onchange="Lobby.changeMySkinInLobby(this.value)">
+                                    <option value="cap">🧢 Paweł</option>
+                                    <option value="ninja">🥷 Ninja</option>
+                                    <option value="knight">⚔️ Rycerz</option>
+                                    <option value="astro">👨‍🚀 Kosmos</option>
+                                    <option value="cyborg">🤖 Cyborg</option>
+                                    <option value="king">👑 Król</option>
+                                </select>
+                            </div>
+                            <ul id="lobbyPlayerList" class="h-24 overflow-y-auto space-y-1.5 text-[8px]"></ul>
                         </div>
 
-                        <div class="bg-black/60 border-2 border-gray-600 p-3">
-                            <div class="text-[9px] text-yellow-400 mb-2 border-b border-gray-700 pb-1">⚙️ USTAWIENIA AUDIO I WIDEO</div>
-                            <div class="space-y-2 text-[8px]">
-                                <label class="flex justify-between items-center cursor-pointer">
-                                    <span>🎵 Muzyka Chiptune:</span>
-                                    <input type="checkbox" id="chkMusic" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                        <!-- AUTOMAT JEDNORĘKI BANDYTA W LOBBY (DLA ZABICIA NUDY!) -->
+                        <div class="lobby-slot-box text-center interactive">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[8px] text-[#ffde00]">🎰 AUTOMAT POCZEKALNI</span>
+                                <span class="text-[8px] text-[#00e676]">ŻETONY: <b id="lobbyChipsText">100</b> 🪙</span>
+                            </div>
+                            <div class="flex justify-center gap-2 my-2">
+                                <div id="lReel1" class="mini-reel">🍒</div>
+                                <div id="lReel2" class="mini-reel">7️⃣</div>
+                                <div id="lReel3" class="mini-reel">💎</div>
+                            </div>
+                            <div id="lobbySlotMsg" class="text-[7px] text-pink-300 mb-2 h-3">Zakręć za 10 🪙! Jackpot ogłasza na czacie!</div>
+                            <div class="flex gap-1">
+                                <button id="btnLobbySpin" class="btn !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !py-1.5 !px-2 !text-[8px] w-full font-bold" onclick="LobbyCasino.spin()">🕹️ ZAKRĘĆ (10 🪙)</button>
+                                <button class="btn !bg-gray-700 !py-1.5 !px-2 !text-[7px]" onclick="LobbyCasino.freeChips()" title="Darmowe żetony">+50🪙</button>
+                            </div>
+                        </div>
+
+                        <!-- Ustawienia Audio/Wideo -->
+                        <div class="bg-black/60 border-2 border-gray-600 p-2.5">
+                            <div class="text-[8px] text-yellow-400 mb-1.5 border-b border-gray-700 pb-1">⚙️ USTAWIENIA AUDIO I WIDEO</div>
+                            <div class="grid grid-cols-2 gap-1.5 text-[7px]">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="chkMusic" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 🎵 Muzyka
                                 </label>
-                                <label class="flex justify-between items-center cursor-pointer">
-                                    <span>🔊 Efekty Dźwiękowe (SFX):</span>
-                                    <input type="checkbox" id="chkSfx" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="chkSfx" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 🔊 Dźwięki
                                 </label>
-                                <label class="flex justify-between items-center cursor-pointer">
-                                    <span>💥 Trzęsienie Ekranu:</span>
-                                    <input type="checkbox" id="chkShake" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="chkShake" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 💥 Wstrząsy
                                 </label>
-                                <label class="flex justify-between items-center cursor-pointer">
-                                    <span>📺 Filtr Retro CRT:</span>
-                                    <input type="checkbox" id="chkCrt" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="chkCrt" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 📺 Ekran CRT
                                 </label>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Prawa kolumna: Wybór trybów i map -->
                     <div class="lg:col-span-8 flex flex-col justify-between bg-black/40 border-2 border-gray-700 p-3">
                         <div>
                             <div class="text-[9px] text-yellow-400 mb-2">1. GŁÓWNY TRYB IMPREZY (HOST):</div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
-                                    <div class="text-[10px] text-[#ffde00] mb-1">🎲 SUPER MARIO PARTY (WYSPA 30 PÓL)</div>
+                                    <div class="text-[9px] text-[#ffde00] mb-1">🎲 SUPER MARIO PARTY (WYSPA 30 PÓL)</div>
                                     <div class="text-[7px] text-gray-300 leading-relaxed">Trójwymiarowa wyspa z plażą, lasem, Kasynem Vegas i wulkanem! Skacz pionkami i losuj minigry bez powtórek!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
-                                    <div class="text-[10px] text-[#00e676] mb-1">🎡 RULETKA MINIGIER (BEZ POWTÓREK)</div>
+                                    <div class="text-[9px] text-[#00e676] mb-1">🎡 RULETKA MINIGIER (BEZ POWTÓREK)</div>
                                     <div class="text-[7px] text-gray-300 leading-relaxed">Losuje za każdym razem inną minigrę z puli 9 trybów (tasowanie talii!).</div>
                                 </div>
                             </div>
@@ -343,7 +387,7 @@
 
                         <div>
                             <button id="btnStartMatch" class="btn w-full !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-4 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
-                            <div id="clientWaitMsg" class="text-[9px] text-yellow-400 py-3 text-center animate-pulse hidden">Host konfiguruje ustawienia imprezy...</div>
+                            <div id="clientWaitMsg" class="text-[8px] text-yellow-400 py-2 text-center animate-pulse hidden">Kręć automatem po lewej i czekaj aż Host odpali grę!</div>
                         </div>
                     </div>
                 </div>
@@ -422,10 +466,22 @@
         };
 
         let chosenSkin = 'cap';
+        const SKIN_DESCRIPTIONS = {
+            cap: 'Bluza z kapturem, Słuchawki i Czapka',
+            ninja: 'Skrzyżowane Katany i Powiewający Szal',
+            knight: 'Stalowe Naramienniki, Tarcza i Pióropusz',
+            astro: 'Szklany Hełm i Odrzutowy Jetpack',
+            cyborg: 'Mechaniczne Szczypce i Laserowy Radar',
+            king: 'Królewski Płaszcz z Futrem i Złota Korona'
+        };
+
         function selectSkin(sk) {
             chosenSkin = sk;
             document.querySelectorAll('.skin-card').forEach(el => el.classList.remove('selected'));
             document.getElementById('sk-' + sk)?.classList.add('selected');
+            document.getElementById('skinDescText').innerText = SKIN_DESCRIPTIONS[sk] || '';
+            const lSel = document.getElementById('lobbySkinSelect');
+            if(lSel) lSel.value = sk;
         }
 
         function switchScreen(id) {
@@ -515,6 +571,79 @@
             }
         };
 
+        // === AUTOMAT JEDNORĘKI BANDYTA W LOBBY (DLA OCZEKUJĄCYCH) ===
+        const LobbyCasino = {
+            chips: 100, spinning: false,
+            freeChips() {
+                Sound.init(); Sound.play('coin');
+                this.chips += 50;
+                this.syncChips();
+                document.getElementById('lobbySlotMsg').innerText = "Otrzymano +50 darmowych żetonów!";
+            },
+            syncChips() {
+                document.getElementById('lobbyChipsText').innerText = this.chips;
+                if(currentRoom && myId) {
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ chips: this.chips });
+                }
+            },
+            spin() {
+                if(this.spinning) return;
+                Sound.init();
+                if(this.chips < 10) {
+                    document.getElementById('lobbySlotMsg').innerText = "Brak żetonów! Kliknij [+50🪙] obok!";
+                    Sound.play('hit');
+                    return;
+                }
+                this.chips -= 10;
+                this.syncChips();
+                this.spinning = true;
+                document.getElementById('btnLobbySpin').disabled = true;
+
+                const syms = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+                const r1 = document.getElementById('lReel1'), r2 = document.getElementById('lReel2'), r3 = document.getElementById('lReel3');
+                const msgEl = document.getElementById('lobbySlotMsg');
+                msgEl.innerText = "Losowanie...";
+                let ticks = 0;
+
+                const timer = setInterval(() => {
+                    Sound.play('tick');
+                    r1.innerText = syms[Math.floor(Math.random()*syms.length)];
+                    r2.innerText = syms[Math.floor(Math.random()*syms.length)];
+                    r3.innerText = syms[Math.floor(Math.random()*syms.length)];
+                    ticks++;
+                    if(ticks > 14) {
+                        clearInterval(timer);
+                        this.spinning = false;
+                        document.getElementById('btnLobbySpin').disabled = false;
+
+                        let rand = Math.random();
+                        const myName = document.getElementById('playerName').value.trim() || 'Paweł';
+                        if(rand < 0.14) {
+                            r1.innerText = '7️⃣'; r2.innerText = '7️⃣'; r3.innerText = '7️⃣';
+                            this.chips += 150;
+                            Sound.play('jackpot');
+                            msgEl.innerText = "🔥 JACKPOT 777! WYGRYWASZ +150 🪙!";
+                            if(currentRoom) db.ref(`chat/${currentRoom}`).push({ name: '🎰 KASYNO', color: '#ffde00', msg: `${myName} TRAFIŁ JACKPOT 777 (+150 🪙)!` });
+                        } else if(rand < 0.36) {
+                            r1.innerText = '💎'; r2.innerText = '💎'; r3.innerText = '💎';
+                            this.chips += 60;
+                            Sound.play('coin');
+                            msgEl.innerText = "💎 POTRÓJNY DIAMENT! +60 🪙!";
+                            if(currentRoom) db.ref(`chat/${currentRoom}`).push({ name: '🎰 KASYNO', color: '#05d5fa', msg: `${myName} wygrał +60 🪙 na automacie!` });
+                        } else if(rand < 0.65) {
+                            r1.innerText = '🍒'; r2.innerText = '🍒'; r3.innerText = '🍋';
+                            this.chips += 25;
+                            Sound.play('coin');
+                            msgEl.innerText = "🍒 DWIE WIŚNIE! +25 🪙!";
+                        } else {
+                            msgEl.innerText = "Pudło! Spróbuj jeszcze raz!";
+                        }
+                        this.syncChips();
+                    }
+                }, 70);
+            }
+        };
+
         // === FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
@@ -594,7 +723,227 @@
             }
         };
 
-        // === WYSPA PLANSZOWA 2.5D HD (30 PÓL + BOGATE DEKORACJE) ===
+        // === CAŁKOWICIE PRZEPROJEKTOWANE MODELE 6 KLAS BOHATERÓW (WYRAŹNIE RÓŻNE KSZTAŁTY!) ===
+        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote) {
+            const P = 3;
+            ctx.save();
+            ctx.translate(Math.floor(x), Math.floor(y));
+
+            if(isDead) {
+                ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6, 16, 8, 0, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(-3*P, -3*P, 6*P, 5*P);
+                ctx.fillStyle = '#000'; ctx.fillRect(-2*P, -1*P, P, P); ctx.fillRect(P, -1*P, P, P);
+                ctx.restore();
+                return;
+            }
+
+            // Cień na ziemi
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath(); ctx.ellipse(0, 8, 17, 9, 0, 0, Math.PI*2); ctx.fill();
+
+            if(quad) {
+                ctx.fillStyle = 'rgba(224, 64, 251, 0.35)';
+                ctx.beginPath(); ctx.arc(0, 0, 28, 0, Math.PI*2); ctx.fill();
+            }
+            if(shield > 0) {
+                ctx.strokeStyle = '#05d5fa'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(0, 0, 23, 0, Math.PI*2); ctx.stroke();
+            }
+            if(isBomb) {
+                ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
+                ctx.strokeRect(-7*P, -7*P, 14*P, 14*P);
+            }
+
+            ctx.rotate(angle);
+
+            let step = Math.round(Math.sin(anim) * 2.5) * P;
+            let wave = Math.sin(performance.now() * 0.012) * P;
+
+            // Animowane buty zależne od klasy
+            ctx.fillStyle = skin === 'knight' ? '#7a848c' : (skin === 'astro' ? '#e0e0e0' : '#0b0b12');
+            ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
+            ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
+
+            // === UNIKALNE SYLWETKI 6 KLAS BOHATERÓW ===
+            if(skin === 'cap') {
+                // 1. PAWEŁ (STREETWEAR: Bluza z kapturem, czapka z daszkiem, słuchawki i okulary)
+                ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
+                ctx.fillStyle = color; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
+                // Kaptur na plecach
+                ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(-5*P, -3*P, 3*P, 6*P);
+                // Głowa + Czapka z daszkiem do przodu
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#111'; ctx.fillRect(2*P, -3*P, 4*P, 6*P); // długi daszek
+                ctx.fillStyle = color; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#fff'; ctx.fillRect(-2*P, -P, P, 2*P); // logo na czapce
+                // Duże słuchawki na uszach
+                ctx.fillStyle = '#111'; ctx.fillRect(-P, -5*P, 3*P, 10*P);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-P, -5*P, 3*P, 2*P); ctx.fillRect(-P, 3*P, 3*P, 2*P);
+            }
+            else if(skin === 'ninja') {
+                // 2. CYBER-NINJA (Smukły, 2 skrzyżowane katany na plecach, powiewający długi szal!)
+                // Powiewający na wietrze szal z tyłu
+                ctx.fillStyle = color;
+                ctx.fillRect(-9*P, -2*P + wave, 5*P, 2*P);
+                ctx.fillRect(-12*P, -3*P - wave, 4*P, 2*P);
+                // Rękojeści dwóch katan wystające zza pleców
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-6*P, -6*P, 3*P, 2*P); ctx.fillRect(-6*P, 4*P, 3*P, 2*P);
+                ctx.fillStyle = '#ffde00';
+                ctx.fillRect(-5*P, -6*P, P, 2*P); ctx.fillRect(-5*P, 4*P, P, 2*P);
+                // Czarny strój ninja z pancerzem
+                ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
+                ctx.fillStyle = '#191926'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
+                // Kaptur + Świecący wizjer
+                ctx.fillStyle = '#11111a'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
+                ctx.fillStyle = color; ctx.fillRect(-2*P, -3.5*P, 2*P, 7*P); // opaska
+                ctx.fillStyle = '#00e676'; ctx.fillRect(2*P, -2*P, P, 4*P); // neonowe oczy
+            }
+            else if(skin === 'knight') {
+                // 3. RYCERZ KRZYŻOWY (Potężne stalowe naramienniki z kolcami, tarcza z boku, hełm z pióropuszem)
+                // Szerokie naramienniki
+                ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -8*P, 9*P, 16*P);
+                ctx.fillStyle = '#9aa5b1'; ctx.fillRect(-4*P, -7*P, 7*P, 14*P);
+                // Kolce na barkach
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(-2*P, -9*P, 2*P, 2*P); ctx.fillRect(-2*P, 7*P, 2*P, 2*P);
+                // Tarcza rycerska na lewym ramieniu
+                ctx.fillStyle = '#000'; ctx.fillRect(-3*P, -8*P, 6*P, 2*P);
+                ctx.fillStyle = color; ctx.fillRect(-2*P, -8*P, 4*P, P);
+                // Hełm garnczkowy ze złotym krzyżem
+                ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
+                ctx.fillStyle = '#cbd2d9'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(2*P, -3*P, P, 6*P); // złote zdobienie
+                ctx.fillStyle = '#111'; ctx.fillRect(3*P, -2*P, P, 4*P); // szczelina wzrokowa
+                // Długi pióropusz
+                ctx.fillStyle = color;
+                ctx.fillRect(-8*P, -2*P + wave*0.5, 5*P, 4*P);
+            }
+            else if(skin === 'astro') {
+                // 4. KOSMONAUTA (Wielki plecak Jetpack z ogniem, okrągły szklany hełm ze złotą szybą)
+                // Plecak odrzutowy (Jetpack) + Płomienie z dysz
+                ctx.fillStyle = '#000'; ctx.fillRect(-8*P, -5*P, 4*P, 10*P);
+                ctx.fillStyle = '#cfd8dc'; ctx.fillRect(-7*P, -4*P, 3*P, 8*P);
+                ctx.fillStyle = '#ff9100';
+                let flame = Math.random()*3*P;
+                ctx.fillRect(-10*P - flame, -3*P, 2*P + flame, 2*P);
+                ctx.fillRect(-10*P - flame, P, 2*P + flame, 2*P);
+                // Kombinezon kosmiczny
+                ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -6*P, 9*P, 12*P);
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(-4*P, -5*P, 7*P, 10*P);
+                ctx.fillStyle = color; ctx.fillRect(-3*P, -5*P, 2*P, 10*P); // pasy
+                // Okrągła wielka kula hełmu
+                ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 5*P, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#eceff1'; ctx.beginPath(); ctx.arc(0, 0, 4.2*P, 0, Math.PI*2); ctx.fill();
+                // Złoto-błękitna szyba sferyczna
+                ctx.fillStyle = '#00b0ff'; ctx.beginPath(); ctx.arc(1.2*P, 0, 3.2*P, -Math.PI/2, Math.PI/2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.fillRect(P, -2*P, P, P); // błysk na szkle
+            }
+            else if(skin === 'cyborg') {
+                // 5. MECHA-CYBORG (Kanciasty pancerz, świecący rdzeń na piersi, szczypce i obracająca się antena)
+                ctx.fillStyle = '#000'; ctx.fillRect(-6*P, -7*P, 11*P, 14*P);
+                ctx.fillStyle = '#37474f'; ctx.fillRect(-5*P, -6*P, 9*P, 12*P);
+                ctx.fillStyle = color; ctx.fillRect(-4*P, -6*P, 3*P, 12*P);
+                // Świecący rdzeń reaktora
+                ctx.fillStyle = '#00e5ff'; ctx.fillRect(-2*P, -2*P, 4*P, 4*P);
+                // Głowa robota + Czerwony laserowy skaner
+                ctx.fillStyle = '#263238'; ctx.fillRect(-3*P, -3*P, 7*P, 6*P);
+                ctx.fillStyle = '#ff1744'; ctx.fillRect(2*P, -2.5*P, 2*P, 5*P);
+                // Antena na głowie
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(-2*P, -P, P, 2*P);
+            }
+            else if(skin === 'king') {
+                // 6. KRÓL IMPREZY (Szeroki płaszcz z białym futrem w cętki, złota korona z klejnotami!)
+                // Królewski płaszcz powiewający z tyłu
+                ctx.fillStyle = '#000'; ctx.fillRect(-9*P, -7*P, 12*P, 14*P);
+                ctx.fillStyle = '#b71c1c'; ctx.fillRect(-8*P, -6*P, 10*P, 12*P);
+                // Białe futro gronostajowe na kołnierzu
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(-5*P, -7*P, 6*P, 14*P);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-4*P, -6*P, P, P); ctx.fillRect(-4*P, 5*P, P, P); ctx.fillRect(-2*P, -6*P, P, P); ctx.fillRect(-2*P, 5*P, P, P);
+                // Głowa + Wielka Złota Korona z trójzębem
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
+                ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -4*P, 6*P, 8*P);
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(-4*P, -3.5*P, 4*P, 7*P);
+                // Klejnoty w koronie
+                ctx.fillStyle = '#05d5fa'; ctx.fillRect(-2*P, -2*P, P, P);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-2*P, P, P, P);
+            }
+
+            // Dłonie (Szczypce dla Cyborga, Rękawice dla reszty)
+            ctx.fillStyle = '#000';
+            ctx.fillRect(2*P, -6*P, 3*P, 3*P);
+            ctx.fillRect(3*P, 3*P, 3*P, 3*P);
+            ctx.fillStyle = skin === 'cyborg' ? '#90a4ae' : (skin === 'knight' ? '#cbd2d9' : '#ffcca3');
+            ctx.fillRect(2*P, -5*P, 2*P, 2*P);
+            ctx.fillRect(3*P, 4*P, 2*P, 2*P);
+
+            // Broń z detalami
+            let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
+            ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
+            ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
+            ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
+
+            if(muzzle > 0) {
+                ctx.fillStyle = '#ffde00';
+                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 5, 0, Math.PI*2); ctx.fill();
+            }
+
+            ctx.restore();
+
+            if(hp < maxHp || shield > 0) {
+                ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(x - 18), Math.floor(y - 36), 36, 6);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 35), Math.floor(34 * Math.max(0, hp/maxHp)), 4);
+                if(shield > 0) {
+                    ctx.fillStyle = '#05d5fa'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 35), Math.floor(34 * Math.min(1, shield/50)), 4);
+                }
+            }
+            if(name) {
+                ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
+                ctx.fillStyle = '#000'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x)+1, Math.floor(y - 40));
+                ctx.fillStyle = isBomb ? '#ffde00' : '#fff'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x), Math.floor(y - 41));
+            }
+
+            if(emote) {
+                ctx.font = '16px sans-serif';
+                ctx.fillText(emote, Math.floor(x), Math.floor(y - 54));
+            }
+        }
+
+        // === PODGLĄD OBRACAJĄCEJ SIĘ POSTACI W MENU ===
+        const Preview = {
+            angle: 0,
+            init() {
+                setInterval(() => {
+                    if(!document.getElementById('screen-menu').classList.contains('active')) return;
+                    this.angle += 0.04;
+                    this.draw();
+                }, 40);
+            },
+            draw() {
+                const c = document.getElementById('previewCanvas');
+                if(!c) return;
+                const pCtx = c.getContext('2d');
+                pCtx.imageSmoothingEnabled = false;
+                pCtx.fillStyle = '#121222';
+                pCtx.fillRect(0, 0, 120, 120);
+                pCtx.strokeStyle = '#1f1f38';
+                pCtx.strokeRect(10, 10, 100, 100);
+
+                pCtx.save();
+                pCtx.translate(60, 64);
+                pCtx.scale(1.45, 1.45);
+                const col = document.getElementById('playerColor').value || '#05d5fa';
+                drawPixelHero(pCtx, 0, 0, this.angle, col, chosenSkin, '', 100, 100, 0, 'shotgun', performance.now()*0.01, false, false, 0, false, '');
+                pCtx.restore();
+            }
+        };
+        Preview.init();
+
+        // === WYSPA PLANSZOWA 2.5D HD (30 PÓL) ===
         const BOARD_TILES = [
             {x:140, y:590, t:'start', n:'START'}, {x:265, y:590, t:'norm', n:'1'}, {x:390, y:590, t:'card', n:'🃏 KARTA'},
             {x:515, y:590, t:'boost', n:'🚀 +2'}, {x:640, y:590, t:'norm', n:'4'}, {x:765, y:590, t:'casino', n:'🎰 KASYNO'},
@@ -612,8 +961,8 @@
         ];
 
         const ISLAND_TREES = [
-            {x:110, y:520, t:'palm'}, {x:330, y:635, t:'palm'}, {x:580, y:635, t:'palm'}, {x:950, y:635, t:'palm'},
-            {x:1160, y:440, t:'pine'}, {x:640, y:385, t:'pine'}, {x:200, y:385, t:'pine'}, {x:1080, y:385, t:'pine'}
+            {x:110, y:520}, {x:330, y:635}, {x:580, y:635}, {x:950, y:635},
+            {x:1160, y:440}, {x:640, y:385}, {x:200, y:385}, {x:1080, y:385}
         ];
 
         function drawPalmTree(ctx, x, y) {
@@ -630,11 +979,9 @@
             ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x-52, y-38, 104, 65);
             ctx.fillStyle = '#4a4e59'; ctx.fillRect(x-48, y-48, 96, 68);
             ctx.fillStyle = '#6c7382'; ctx.fillRect(x-44, y-44, 88, 56);
-            // Wieżyczki
             ctx.fillStyle = '#ff2a6d';
             ctx.beginPath(); ctx.moveTo(x-52, y-48); ctx.lineTo(x-32, y-76); ctx.lineTo(x-12, y-48); ctx.fill();
             ctx.beginPath(); ctx.moveTo(x+12, y-48); ctx.lineTo(x+32, y-76); ctx.lineTo(x+52, y-48); ctx.fill();
-            // Złota brama
             ctx.fillStyle = '#ffde00'; ctx.fillRect(x-16, y-16, 32, 36);
             ctx.fillStyle = '#111'; ctx.fillRect(x-12, y-12, 24, 32);
         }
@@ -954,7 +1301,6 @@
 
             drawBoard(ctx) {
                 const now = performance.now();
-                // Głęboki ocean z gradientem
                 const seaGrad = ctx.createLinearGradient(0, 0, 0, H);
                 seaGrad.addColorStop(0, '#07162c');
                 seaGrad.addColorStop(1, '#0f2c52');
@@ -966,7 +1312,6 @@
                 ctx.translate((W - 1280*scale)/2, (H - 720*scale)/2 + 28);
                 ctx.scale(scale, scale);
 
-                // Fale morskie
                 ctx.fillStyle = '#1b497d';
                 let waveShift = Math.sin(now*0.003)*14;
                 for(let wx=30; wx<1250; wx+=110) {
@@ -978,32 +1323,25 @@
                     }
                 }
 
-                // Piana morska i klif wyspy 2.5D
                 let foam = Math.sin(now*0.004)*4;
                 ctx.fillStyle = '#a8e6ff';
                 ctx.fillRect(52 - foam, 76 - foam, 1176 + foam*2, 604 + foam*2);
 
-                // Podstawa klifu 3D
                 ctx.fillStyle = '#593e25'; ctx.fillRect(60, 100, 1160, 575);
-                // Złota plaża
                 ctx.fillStyle = '#f2d388'; ctx.fillRect(60, 82, 1160, 575);
                 ctx.fillStyle = '#e0be6e'; ctx.fillRect(70, 92, 1140, 555);
 
-                // Zielona murawa wyspy
                 ctx.fillStyle = '#1a4f1e'; ctx.fillRect(85, 102, 1110, 460);
                 ctx.fillStyle = '#25692b'; ctx.fillRect(92, 108, 1096, 445);
 
-                // Dzielnica Kasyna (Las Vegas Strip)
                 ctx.fillStyle = '#1e0b2e'; ctx.fillRect(100, 250, 980, 118);
                 ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4; ctx.strokeRect(100, 250, 980, 118);
                 ctx.fillStyle = '#ffde00'; ctx.font = '10px "Press Start 2P"';
                 ctx.fillText("✨ LAS VEGAS STRIP ✨", 550, 270);
 
-                // Strefa Wulkaniczna na północy
                 ctx.fillStyle = '#261417'; ctx.fillRect(370, 108, 815, 118);
                 ctx.strokeStyle = '#ff4d00'; ctx.lineWidth = 4; ctx.strokeRect(370, 108, 815, 118);
 
-                // Kamienny trakt łączący pola
                 ctx.strokeStyle = '#3b2818'; ctx.lineWidth = 34; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
                 ctx.beginPath();
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y+6); else ctx.lineTo(t.x, t.y+6); });
@@ -1014,11 +1352,9 @@
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y); else ctx.lineTo(t.x, t.y); });
                 ctx.stroke();
 
-                // Dekoracje na wyspie (Palmy i Zamek na mecie)
                 ISLAND_TREES.forEach(tr => drawPalmTree(ctx, tr.x, tr.y));
                 drawIslandCastle(ctx, 335, 155);
 
-                // Rysowanie trójwymiarowych kafelków pól (0..30)
                 BOARD_TILES.forEach((t, i) => {
                     ctx.save();
                     ctx.translate(t.x, t.y);
@@ -1033,17 +1369,12 @@
                     else if(t.t === 'casino') { topCol = '#ff9100'; sideCol = '#b26500'; }
                     else if(t.t === 'swap')   { topCol = '#18ffff'; sideCol = '#0095a8'; }
 
-                    // Cień pod kafelkiem
                     ctx.fillStyle = 'rgba(0,0,0,0.5)';
                     ctx.fillRect(-42, -22, 84, 58);
 
-                    // Bok 3D kafelka (grubość kamienia)
                     ctx.fillStyle = borderCol; ctx.fillRect(-42, -28, 84, 58);
                     ctx.fillStyle = sideCol;   ctx.fillRect(-39, -18, 78, 45);
-
-                    // Górna tafla kafelka
                     ctx.fillStyle = topCol;    ctx.fillRect(-39, -25, 78, 44);
-                    // Odblask na górnej krawędzi
                     ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(-37, -23, 74, 4);
 
                     ctx.fillStyle = '#000'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign = 'center';
@@ -1051,7 +1382,6 @@
                     ctx.restore();
                 });
 
-                // Pionki graczy
                 let allP = [{
                     id: myId, name: document.getElementById('playerName').value || 'Ty',
                     color: document.getElementById('playerColor').value, skin: chosenSkin,
@@ -1076,7 +1406,6 @@
 
                     let ox = (idx % 2 === 0 ? -14 : 14);
                     let oy = (idx < 2 ? -12 : 8);
-                    // Cień na kafelku podczas skoku
                     if(p.jump > 2) {
                         ctx.fillStyle = 'rgba(0,0,0,0.4)';
                         ctx.beginPath(); ctx.ellipse(px + ox, py + oy + 8, 10, 5, 0, 0, Math.PI*2); ctx.fill();
@@ -1093,7 +1422,7 @@
             }
         };
 
-        // === GENERATOR TEKSTUR PODŁOŻA 2.5D HD (OFFSCREEN CACHE) ===
+        // === GENERATOR TEKSTUR PODŁOŻA 2.5D HD ===
         const WORLD_SIZE = 1600;
         const GroundCache = {
             canvases: {},
@@ -1111,7 +1440,6 @@
                         lava:   { c1: '#1a1215', c2: '#22171b', spec: '#332228', fl1: '#ff4d00', fl2: '#ff9100' }
                     }[type];
 
-                    // Kafelki z fazowaniem krawędzi
                     for(let x=0; x<WORLD_SIZE; x+=80) {
                         for(let y=0; y<WORLD_SIZE; y+=80) {
                             g.fillStyle = ((x+y)/80)%2 === 0 ? pal.c1 : pal.c2;
@@ -1127,7 +1455,6 @@
                         }
                     }
 
-                    // Detale podłoża (Kępki trawy, kwiatki, kamyki, pęknięcia lawy)
                     for(let i=0; i<260; i++) {
                         let rx = Math.floor(Math.random()*390)*4 + 16;
                         let ry = Math.floor(Math.random()*390)*4 + 16;
@@ -1144,7 +1471,6 @@
         };
         GroundCache.buildAll();
 
-        // Cząsteczki Pogodowe (Świetliki, Śnieg, Żar)
         const Weather = {
             dots: Array.from({length: 55}, () => ({ x: Math.random()*WORLD_SIZE, y: Math.random()*WORLD_SIZE, s: Math.random()*3+2, sp: Math.random()*25+15, p: Math.random()*6 })),
             updateAndDraw(ctx, dt, mapType) {
@@ -1328,7 +1654,6 @@
             }
         };
 
-        // === RYSOWANIE PRZESZKÓD 2.5D Z GŁĘBIĄ I ŚCIANĄ PRZEDNIĄ ===
         function drawPixelObstacle25D(ctx, o) {
             const P = 4, wallH = 20;
             if(o.t === 'lava') {
@@ -1342,19 +1667,15 @@
                 return;
             }
 
-            // Cień rzucany na ziemię
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.fillRect(o.x + 8, o.y + 10, o.w, o.h);
 
             if(o.t === 'crate') {
-                // Przednia ciemniejsza ściana 2.5D
                 ctx.fillStyle = '#1f1004'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
                 ctx.fillStyle = '#593414'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
-                // Górna oświetlona pokrywa skrzyni
                 ctx.fillStyle = '#99622e'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
                 ctx.fillStyle = '#784a1f';
                 for(let py = o.y-wallH+P*4; py < o.y+o.h-wallH-P*2; py += P*5) ctx.fillRect(o.x+P*2, py, o.w-P*4, P);
-                // Jasna ramka + ukośna belka
                 ctx.fillStyle = '#ba7d43';
                 ctx.fillRect(o.x+P*2, o.y-wallH+P*2, o.w-P*4, P*2);
                 ctx.fillRect(o.x+P*2, o.y+o.h-wallH-P*3, o.w-P*4, P*2);
@@ -1365,7 +1686,6 @@
                 ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
                 ctx.strokeRect(o.x+12, o.y-wallH+12, o.w-24, o.h-24);
             } else if(o.t === 'tree') {
-                // Pień na dole + trójwarstwowa korona drzewa
                 ctx.fillStyle = '#472810'; ctx.fillRect(o.x + o.w/2 - 14, o.y + o.h - 24, 28, 24);
                 ctx.fillStyle = '#0b1f0a'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h);
                 ctx.fillStyle = '#1b4718'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
@@ -1376,121 +1696,6 @@
                 ctx.fillStyle = '#3993bd'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
                 ctx.fillStyle = '#73c7eb'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
                 ctx.fillStyle = '#c4edff'; ctx.fillRect(o.x+P*3, o.y-wallH+P*3, o.w-P*8, P*3);
-            }
-        }
-
-        // === RYSOWANIE BOHATERA PIXEL-ART HD ===
-        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote) {
-            const P = 3;
-            ctx.save();
-            ctx.translate(Math.floor(x), Math.floor(y));
-
-            if(isDead) {
-                ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6, 16, 8, 0, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
-                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(-3*P, -3*P, 6*P, 5*P);
-                ctx.fillStyle = '#000'; ctx.fillRect(-2*P, -1*P, P, P); ctx.fillRect(P, -1*P, P, P);
-                ctx.restore();
-                return;
-            }
-
-            // Elipsoidalny miękki cień pod butami
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.beginPath(); ctx.ellipse(0, 8, 16, 9, 0, 0, Math.PI*2); ctx.fill();
-
-            if(quad) {
-                ctx.fillStyle = 'rgba(224, 64, 251, 0.35)';
-                ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI*2); ctx.fill();
-            }
-            if(shield > 0) {
-                ctx.strokeStyle = '#05d5fa'; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI*2); ctx.stroke();
-            }
-            if(isBomb) {
-                ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
-                ctx.strokeRect(-7*P, -7*P, 14*P, 14*P);
-            }
-
-            ctx.rotate(angle);
-
-            let step = Math.round(Math.sin(anim) * 2.2) * P;
-            ctx.fillStyle = '#0b0b12';
-            ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
-            ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
-
-            // Korpus z cieniowaniem
-            ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
-            ctx.fillStyle = skin === 'knight' ? '#8c969e' : (skin === 'ninja' ? '#1c1c28' : color);
-            ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
-            ctx.fillStyle = 'rgba(255,255,255,0.22)';
-            ctx.fillRect(-3*P, -4*P, 3*P, 8*P);
-
-            // Dłonie
-            ctx.fillStyle = '#000';
-            ctx.fillRect(2*P, -5*P, 3*P, 3*P);
-            ctx.fillRect(3*P, 2*P, 3*P, 3*P);
-            ctx.fillStyle = '#ffcca3';
-            ctx.fillRect(2*P, -4*P, 2*P, 2*P);
-            ctx.fillRect(3*P, 3*P, 2*P, 2*P);
-
-            // Broń z detalami
-            let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
-            ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
-            ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
-            ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
-
-            if(muzzle > 0) {
-                ctx.fillStyle = '#ffde00';
-                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#fff';
-                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 5, 0, Math.PI*2); ctx.fill();
-            }
-
-            // Głowa i Nakrycie głowy
-            ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
-
-            if(skin === 'cap') {
-                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#111'; ctx.fillRect(P, -3*P, 4*P, 6*P);
-                ctx.fillStyle = color; ctx.fillRect(-3*P, -3*P, 4*P, 6*P);
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(-2*P, -P, P, 2*P);
-            } else if(skin === 'ninja') {
-                ctx.fillStyle = '#181824'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#ffcca3'; ctx.fillRect(0, -2*P, 2*P, 4*P);
-                ctx.fillStyle = color; ctx.fillRect(-2*P, -3*P, 2*P, 6*P);
-            } else if(skin === 'knight') {
-                ctx.fillStyle = '#b0bac2'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#222'; ctx.fillRect(P, -2*P, P, 4*P);
-                ctx.fillStyle = color; ctx.fillRect(-5*P, -P, 3*P, 2*P);
-            } else if(skin === 'astro') {
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#ffaa00'; ctx.fillRect(0, -2*P, 2*P, 4*P);
-                ctx.fillStyle = '#fff'; ctx.fillRect(P, -2*P, P, P);
-            } else if(skin === 'cyborg') {
-                ctx.fillStyle = '#5c6bc0'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(P, -2*P, 2*P, 4*P);
-            } else if(skin === 'king') {
-                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#ffde00'; ctx.fillRect(-3*P, -3*P, 3*P, 6*P);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-2*P, 0, P, P);
-            }
-
-            ctx.restore();
-
-            if(hp < maxHp || shield > 0) {
-                ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(x - 18), Math.floor(y - 34), 36, 6);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 33), Math.floor(34 * Math.max(0, hp/maxHp)), 4);
-                if(shield > 0) {
-                    ctx.fillStyle = '#05d5fa'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 33), Math.floor(34 * Math.min(1, shield/50)), 4);
-                }
-            }
-            ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-            ctx.fillStyle = '#000'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x)+1, Math.floor(y - 37));
-            ctx.fillStyle = isBomb ? '#ffde00' : '#fff'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x), Math.floor(y - 38));
-
-            if(emote) {
-                ctx.font = '16px sans-serif';
-                ctx.fillText(emote, Math.floor(x), Math.floor(y - 52));
             }
         }
 
@@ -2100,7 +2305,6 @@
 
                 Cam.apply();
 
-                // Tekstura podłoża z pamięci podręcznej Offscreen
                 const cachedBg = GroundCache.canvases[RoomState.map] || GroundCache.canvases.forest;
                 ctx.drawImage(cachedBg, 0, 0);
 
@@ -2118,10 +2322,8 @@
                     ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.stroke();
                 }
 
-                // Lawa rysowana na poziomie ziemi
                 mapObj.obstacles.filter(o => o.t === 'lava').forEach(o => drawPixelObstacle25D(ctx, o));
 
-                // Przedmioty leżące na ziemi (z unoszeniem i poświatą)
                 let floatOff = Math.sin(performance.now()*0.006)*4;
                 Object.values(netItems).forEach(item => {
                     ctx.save(); ctx.translate(Math.floor(item.x), Math.floor(item.y + floatOff));
@@ -2141,7 +2343,6 @@
                     ctx.restore();
                 });
 
-                // Sortowanie głębi 2.5D (Y-Sorting dla przeszkód, graczy i zombiaków)
                 const renderQueue = [];
                 mapObj.obstacles.filter(o => o.t !== 'lava').forEach(o => {
                     renderQueue.push({ y: o.y + o.h, draw: () => drawPixelObstacle25D(ctx, o) });
@@ -2187,7 +2388,6 @@
                 renderQueue.sort((a, b) => a.y - b.y);
                 renderQueue.forEach(item => item.draw());
 
-                // Cienie i komety w Deszczu Meteorytów
                 if(gm === 'meteors') {
                     netMeteors.forEach(m => {
                         ctx.fillStyle = 'rgba(255, 42, 109, 0.28)';
@@ -2199,7 +2399,6 @@
                     });
                 }
 
-                // Pociski z poświatą
                 this.bullets.forEach(b => {
                     let bCol = b.bType === 'bounce' ? '#05d5fa' : (b.bType === 'rocket' ? '#ff5252' : '#ffde00');
                     ctx.fillStyle = bCol;
@@ -2210,7 +2409,6 @@
                     ctx.fillStyle = bCol; ctx.fillRect(Math.floor(b.x-3), Math.floor(b.y-3), 6, 6);
                 });
 
-                // Cząsteczki pogodowe biomu
                 Weather.updateAndDraw(ctx, dt || 0.016, RoomState.map);
 
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
@@ -2218,7 +2416,6 @@
                 FX.drawTop();
                 Cam.restore();
 
-                // Minimapa
                 const mSize = 110, mx = W - mSize - 14, my = H - mSize - 14, scale = mSize / WORLD_SIZE;
                 ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(mx, my, mSize, mSize);
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(mx, my, mSize, mSize);
@@ -2319,7 +2516,7 @@
                     const pRef = db.ref(`room_players/${currentRoom}/${myId}`);
                     await pRef.set({
                         id: myId, name: document.getElementById('playerName').value.trim() || "Paweł",
-                        color: document.getElementById('playerColor').value, skin: chosenSkin,
+                        color: document.getElementById('playerColor').value, skin: chosenSkin, chips: LobbyCasino.chips,
                         x: 800, y: 800, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false, wep: 'pistol'
                     });
                     pRef.onDisconnect().remove();
@@ -2328,11 +2525,18 @@
                     this.listen();
                     switchScreen('screen-lobby');
                     document.getElementById('lobbyCode').innerText = currentRoom;
+                    document.getElementById('lobbySkinSelect').value = chosenSkin;
                     document.getElementById('btnStartMatch').style.display = isHost ? 'block' : 'none';
                     document.getElementById('clientWaitMsg').style.display = isHost ? 'none' : 'block';
                     document.getElementById('mapSelect').disabled = !isHost;
                     document.getElementById('timeSelect').disabled = !isHost;
                 } catch(e) { showErr("Błąd dołączania: " + e.message); }
+            },
+            changeMySkinInLobby(sk) {
+                selectSkin(sk);
+                if(currentRoom && myId) {
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ skin: sk });
+                }
             },
             selectMode(m) {
                 if(!isHost) return;
@@ -2405,6 +2609,7 @@
                     }
                 });
 
+                const skinIcons = { cap:'🧢', ninja:'🥷', knight:'⚔️', astro:'👨‍🚀', cyborg:'🤖', king:'👑' };
                 db.ref(`room_players/${currentRoom}`).on('value', snap => {
                     let all = snap.val() || {}; netPlayers = {}; let arr = [];
                     Object.entries(all).forEach(([pid, p]) => {
@@ -2417,7 +2622,7 @@
                     });
                     document.getElementById('lobbyCount').innerText = arr.length;
                     document.getElementById('lobbyPlayerList').innerHTML = arr.map(p =>
-                        `<li class="flex justify-between items-center bg-black/40 p-1"><span><span style="color:${p.color}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-gray-400">${p.skin||'cap'}</span></li>`
+                        `<li class="flex justify-between items-center bg-black/40 p-1"><span>${skinIcons[p.skin]||'🧢'} <span style="color:${p.color}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-yellow-400">${p.chips ?? 100} 🪙</span></li>`
                     ).join('');
                 });
 
