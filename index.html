@@ -83,6 +83,35 @@
         #dashBar { height: 100%; background: linear-gradient(90deg, #ffab00 0%, #ffea00 100%); width: 100%; }
 
         .crt-effect::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
+
+        /* DOPRACOWANY PIXEL-ART: neonowe krawędzie, wejścia paneli i żywe przyciski */
+        @keyframes pixelPanelIn { from { opacity: 0; transform: translateY(14px) scale(.985); filter: brightness(.7); } to { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); } }
+        @keyframes pixelNeonPulse { 0%,100% { box-shadow: 0 0 0 3px #000, 0 0 12px rgba(5,213,250,.12), 8px 8px 0 #000; } 50% { box-shadow: 0 0 0 3px #000, 0 0 24px rgba(5,213,250,.3), 8px 8px 0 #000; } }
+        @keyframes pixelBtnShine { 0%,70%,100% { background-position: 150% 0; } 35% { background-position: -50% 0; } }
+        @keyframes pixelFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        .screen.active .panel { animation: pixelPanelIn .28s steps(5,end) both, pixelNeonPulse 4s ease-in-out infinite; }
+        .btn { background-image: linear-gradient(110deg, transparent 0%, transparent 42%, rgba(255,255,255,.18) 50%, transparent 58%, transparent 100%), linear-gradient(180deg, #ff3877 0%, #d91656 100%); background-size: 240% 100%, 100% 100%; animation: pixelBtnShine 6s linear infinite; }
+        .mode-card, .skin-card, .reward-card, .lobby-slot-box { transition: transform .16s steps(3,end), filter .16s, box-shadow .16s; }
+        .mode-card:hover, .skin-card:hover { filter: brightness(1.18); box-shadow: 0 0 0 2px rgba(5,213,250,.35), 0 5px 0 #000; }
+        .reward-card:hover { animation: pixelFloat .45s steps(3,end) infinite; }
+        #hud { border-color: #ffde00; box-shadow: 0 0 0 3px #000, 0 0 18px rgba(255,222,0,.18), 6px 6px 0 #000; }
+        #hudTimer { color: #ffde00; text-shadow: 2px 2px #000, 0 0 12px rgba(255,222,0,.45); }
+        #centerAnnouncement { animation: pixelFloat .55s steps(3,end) infinite; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; } }
+        /* Dodatkowy szlif: głębia paneli, wyraźne stany interakcji i wygoda na małych ekranach. */
+        .panel { background-image: radial-gradient(circle at 12% 0%, rgba(5,213,250,.09), transparent 32%), var(--panel-grad); }
+        .btn:focus-visible, .mode-card:focus-visible, .skin-card:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #ffde00; outline-offset: 3px; }
+        .btn, .mode-card, .skin-card { -webkit-tap-highlight-color: transparent; }
+        #chatWidget, .board-box, #hud { backdrop-filter: blur(5px); }
+        #hudTimer { font-variant-numeric: tabular-nums; }
+        @media (max-width: 640px) {
+            .panel { width: 98%; padding: .7rem; border-width: 3px; max-height: 97vh; }
+            .screen.active .panel { animation: pixelPanelIn .2s steps(4,end) both; }
+            #chatWidget { width: min(280px, calc(100vw - 20px)); left: 8px; bottom: 8px; }
+            #hud { top: 8px; left: 8px; padding: 7px 9px; }
+            #hudRight { top: 8px; right: 8px; }
+            #centerAnnouncement { max-width: 94vw; font-size: clamp(12px, 4vw, 20px); }
+        }
     </style>
 </head>
 <body id="mainBody" class="crt-effect">
@@ -175,7 +204,6 @@
         <div id="hudModeTitle" class="text-xs text-[#05d5fa] mb-1">TRYB</div>
         <div id="hudMutatorBadge" class="text-[8px] text-yellow-300 bg-purple-950 border border-yellow-400 px-2 py-0.5 mb-1 inline-block"></div>
         <div id="hudTimer" class="text-xl text-yellow-400 mb-1">01:00</div>
-        <div id="hudSubTimer" class="text-[9px] text-red-400 mb-1 hidden"></div>
         <div id="squidLightBanner" class="text-[10px] font-bold mb-1 hidden">🟢 ZIELONE ŚWIATŁO!</div>
         <div class="text-[7px] text-gray-300">ZDROWIE + TARCZA</div>
         <div class="bar-wrap"><div id="hpBar"></div><div id="shieldBar"></div></div>
@@ -225,7 +253,7 @@
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-2xl">
                 <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (BOTY AI + GOKARTY HD + SQUID GAME) ✨</h2>
+                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (SQUID GAME + WYŚCIGI + MEMY) ✨</h2>
                 
                 <div class="flex flex-col md:flex-row gap-4 items-center mb-4">
                     <div class="bg-black/80 border-4 border-[#05d5fa] p-2 flex flex-col items-center shadow-[6px_6px_0_#000]">
@@ -279,10 +307,7 @@
                 </div>
 
                 <div class="flex flex-col gap-2.5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5" id="btnCreateRoom">🌐 STWÓRZ POKÓJ ONLINE</button>
-                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !text-xs !py-3.5 font-bold" id="btnCreateSoloBots">🤖 GRAJ SOLO Z 3 BOTAMI!</button>
-                    </div>
+                    <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5" id="btnCreateRoom">STWÓRZ IMPREZĘ ONLINE (HOST)</button>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="WPISZ KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
                         <button class="btn !bg-gradient-to-b !from-[#05d5fa] !to-[#0097b2] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ DO GRY</button>
@@ -298,7 +323,7 @@
                 <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-2.5 gap-2">
                     <div class="text-left">
                         <h2 class="text-base md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL</h2>
-                        <span class="text-[7px] text-yellow-300">Plansza 50 Pól | Gokarty Pixel-Art | Boty AI | Naprawiony Zegar Minigier!</span>
+                        <span class="text-[7px] text-yellow-300">Plansza 50 Pól | Wyścigi Gokartów | Prawdziwe Squid Game | Śmieszne Klątwy!</span>
                     </div>
                     <div class="flex items-center gap-2 bg-black/60 border-2 border-[#ff2a6d] px-3 py-1">
                         <div class="text-right">
@@ -316,6 +341,7 @@
                         <div class="bg-black/60 border-2 border-gray-600 p-2">
                             <div class="flex justify-between items-center mb-1">
                                 <span class="text-[8px] text-[#05d5fa]">👥 GRACZE (<span id="lobbyCount">1</span>):</span>
+                                 <button id="btnAddBots" class="btn !bg-indigo-600 !py-1 !px-2 !text-[7px]" type="button">🤖 DODAJ BOTY</button>
                                 <select id="lobbySkinSelect" class="bg-[#111] border border-yellow-400 text-[7px] text-yellow-300 p-1 interactive" onchange="Lobby.changeMySkinInLobby(this.value)">
                                     <option value="cap">🧢 Paweł</option>
                                     <option value="ninja">🥷 Ninja</option>
@@ -326,11 +352,6 @@
                                 </select>
                             </div>
                             <ul id="lobbyPlayerList" class="h-20 overflow-y-auto space-y-1 text-[8px]"></ul>
-                            <!-- Panel Zarządzania Botami dla Hosta -->
-                            <div id="hostBotControls" class="flex gap-1 mt-1.5 pt-1.5 border-t border-gray-700 hidden interactive">
-                                <button class="btn !bg-emerald-700 hover:!bg-emerald-600 !py-1 !px-2 !text-[7px] w-1/2" onclick="BotAI.addBot()">+🤖 DODAJ BOTA</button>
-                                <button class="btn !bg-red-800 hover:!bg-red-700 !py-1 !px-2 !text-[7px] w-1/2" onclick="BotAI.removeBot()">-🤖 USUŃ BOTA</button>
-                            </div>
                         </div>
 
                         <!-- AUTOMAT + RULETKA W LOBBY -->
@@ -462,10 +483,6 @@
                                     <div class="text-[7px] text-indigo-300">🎯 SNAJPERZY</div>
                                     <div class="text-[6px] text-gray-400">1 celny strzał = Zgon</div>
                                 </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('coins')" id="m-coins">
-                                    <div class="text-[7px] text-amber-300">💎 ZŁOTA GORĄCZKA</div>
-                                    <div class="text-[6px] text-gray-400">Zbieraj diamenty i monety</div>
-                                </div>
                             </div>
 
                             <div class="grid grid-cols-3 gap-2 mb-2">
@@ -565,6 +582,7 @@
         </div>
 
     </div>
+
     <script>
         // === USTAWIENIA, MOTYWY, CELOWNIKI & TAJNY KOD "SIGMA" ===
         const Settings = {
@@ -695,6 +713,15 @@
             el.className = `bg-black/90 border-2 p-2 text-[8px] mt-3 ${isWarn ? 'border-yellow-400 text-yellow-300' : 'border-red-500 text-red-400'}`;
         }
 
+        // Bezpieczne wstawianie danych graczy do HTML (nick/czat nie mogą być kodem HTML).
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+        function safeColor(value, fallback = '#ffffff') {
+            const c = String(value || '');
+            return /^#[0-9a-fA-F]{6}$/.test(c) ? c : fallback;
+        }
+
         function announce(txt, dur = 1800) {
             const el = document.getElementById('centerAnnouncement');
             el.innerText = txt; el.style.display = 'block';
@@ -705,7 +732,7 @@
             const box = document.getElementById('killFeed');
             const item = document.createElement('div');
             item.className = 'bg-black/85 border border-gray-500 px-3 py-1 text-[8px] text-white shadow-[3px_3px_0_#000]';
-            item.innerHTML = `<span style="color:${killerColor}">${killerName}</span> 💥 <span style="color:${victimColor}">${victimName}</span>`;
+            item.innerHTML = `<span style="color:${safeColor(killerColor)}">${escapeHTML(killerName)}</span> 💥 <span style="color:${safeColor(victimColor)}">${escapeHTML(victimName)}</span>`;
             box.appendChild(item);
             setTimeout(() => item.remove(), 3500);
         }
@@ -762,6 +789,7 @@
                 else if(type === 'jackpot') { o.type='square'; o.frequency.setValueAtTime(523, t); o.frequency.setValueAtTime(659, t+0.1); o.frequency.setValueAtTime(784, t+0.2); o.frequency.setValueAtTime(1046, t+0.3); g.gain.setValueAtTime(0.08, t); g.gain.linearRampToValueAtTime(0.01, t+0.5); o.start(t); o.stop(t+0.5); }
                 else if(type === 'tick') { o.type='sine'; o.frequency.setValueAtTime(750, t); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.005, t+0.04); o.start(t); o.stop(t+0.04); }
                 else if(type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(100, t); o.frequency.exponentialRampToValueAtTime(15, t+0.45); g.gain.setValueAtTime(0.16, t); g.gain.linearRampToValueAtTime(0.01, t+0.45); o.start(t); o.stop(t+0.45); }
+                // Śmieszne dźwięki Meme Soundboard
                 else if(type === 'fart') { o.type='sawtooth'; o.frequency.setValueAtTime(110, t); o.frequency.linearRampToValueAtTime(42, t+0.38); g.gain.setValueAtTime(0.14, t); g.gain.linearRampToValueAtTime(0.01, t+0.38); o.start(t); o.stop(t+0.38); }
                 else if(type === 'horn') { o.type='sawtooth'; o.frequency.setValueAtTime(466, t); g.gain.setValueAtTime(0.14, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.42); o.start(t); o.stop(t+0.42); }
                 else if(type === 'honk') { o.type='triangle'; o.frequency.setValueAtTime(520, t); o.frequency.setValueAtTime(380, t+0.1); o.frequency.setValueAtTime(580, t+0.2); g.gain.setValueAtTime(0.12, t); g.gain.linearRampToValueAtTime(0.01, t+0.32); o.start(t); o.stop(t+0.32); }
@@ -969,110 +997,38 @@
             }
         };
 
-        // === NOWY, ULEPSZONY GOKART WYŚCIGOWY PIXEL-ART 2.5D HD ===
+        // === RYSOWANIE GOKARTA WYŚCIGOWEGO PIXEL-ART ===
         function drawPixelKart(ctx, x, y, angle, color, skin, name, lap) {
-            const P = 2; // Rozmiar piksela dla ostrości detali
             ctx.save();
             ctx.translate(Math.floor(x), Math.floor(y));
-
-            // Cień 2.5D pod gokartem
-            ctx.fillStyle = 'rgba(0,0,0,0.55)';
-            ctx.beginPath(); ctx.ellipse(0, 7, 28, 16, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath(); ctx.ellipse(0, 6, 24, 14, 0, 0, Math.PI*2); ctx.fill();
 
             ctx.rotate(angle);
-
-            // Płomienie Nitro z podwójnego wydechu (animowane)
-            if(Math.sin(performance.now()*0.05) > 0) {
-                ctx.fillStyle = '#ff2a6d';
-                ctx.fillRect(-16*P, -5*P, 4*P, 2*P);
-                ctx.fillRect(-16*P, 3*P, 4*P, 2*P);
-                ctx.fillStyle = '#ffde00';
-                ctx.fillRect(-14*P, -4.5*P, 2*P, P);
-                ctx.fillRect(-14*P, 3.5*P, 2*P, P);
-            }
-
-            // Chromowane rury wydechowe z tyłu
-            ctx.fillStyle = '#90a4ae';
-            ctx.fillRect(-12*P, -5*P, 3*P, 2.5*P);
-            ctx.fillRect(-12*P, 2.5*P, 3*P, 2.5*P);
-
-            // 4 Szerokie Opony Wyścigowe z bieżnikiem i felgami
-            const wheels = [
-                {wx: -10*P, wy: -10*P}, // Tył Lewo
-                {wx: -10*P, wy: 6*P},   // Tył Prawo
-                {wx: 4*P,   wy: -10*P}, // Przód Lewo
-                {wx: 4*P,   wy: 6*P}    // Przód Prawo
-            ];
-            wheels.forEach(w => {
-                ctx.fillStyle = '#09090d';
-                ctx.fillRect(w.wx, w.wy, 6*P, 4*P);
-                ctx.fillStyle = '#262633'; // Bieżnik
-                ctx.fillRect(w.wx + P, w.wy + P, 4*P, 2*P);
-                ctx.fillStyle = '#ffde00'; // Złota felga
-                ctx.fillRect(w.wx + 2*P, w.wy + P, 2*P, 2*P);
-            });
-
-            // Stalowa rama podwozia i boczne osłony (Sidepody)
-            ctx.fillStyle = '#000';
-            ctx.fillRect(-11*P, -7*P, 23*P, 14*P);
-            ctx.fillStyle = '#1f242d';
-            ctx.fillRect(-9*P, -6*P, 19*P, 12*P);
-
-            // Karoseria wyścigowa w kolorze gracza (Pixel-Art Shading)
-            ctx.fillStyle = color;
-            ctx.fillRect(-8*P, -5*P, 18*P, 10*P);
-            ctx.fillRect(8*P, -4*P, 4*P, 8*P); // Nos gokarta
-
-            // Cieniowanie i połysk lakieru 2.5D
-            ctx.fillStyle = 'rgba(255,255,255,0.28)';
-            ctx.fillRect(-7*P, -5*P, 16*P, 2*P);
-            ctx.fillStyle = 'rgba(0,0,0,0.28)';
-            ctx.fillRect(-7*P, 3*P, 16*P, 2*P);
-
-            // Centralne podwójne pasy wyścigowe (Racing Stripes)
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(-8*P, -1.5*P, 20*P, P);
-            ctx.fillRect(-8*P, 0.5*P, 20*P, P);
-
-            // Przedni zderzak aerodynamiczny
-            ctx.fillStyle = '#000';
-            ctx.fillRect(11*P, -6*P, 3*P, 12*P);
+            // Opony gokarta
+            ctx.fillStyle = '#111';
+            ctx.fillRect(-18, -16, 12, 6); ctx.fillRect(8, -16, 12, 6);
+            ctx.fillRect(-18, 10, 12, 6);  ctx.fillRect(8, 10, 12, 6);
+            // Spojler i zderzak
+            ctx.fillStyle = '#222';
+            ctx.fillRect(-24, -12, 6, 24);
             ctx.fillStyle = '#ffde00';
-            ctx.fillRect(11.5*P, -5*P, 1.5*P, 10*P);
-
-            // Tylny spojler karbonowy z bocznymi lotkami
-            ctx.fillStyle = '#000';
-            ctx.fillRect(-12*P, -7*P, 4*P, 14*P);
-            ctx.fillStyle = '#ff2a6d';
-            ctx.fillRect(-11.5*P, -6*P, 2.5*P, 12*P);
-
-            // Kubełkowy fotel kierowcy i kierownica
-            ctx.fillStyle = '#111118';
-            ctx.fillRect(-5*P, -4*P, 7*P, 8*P);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(3*P, -2.5*P, 2*P, 5*P); // Kierownica
-
-            // Ręce kierowcy na kierownicy
-            ctx.fillStyle = '#ffcca3';
-            ctx.fillRect(2*P, -3*P, 2*P, 1.5*P);
-            ctx.fillRect(2*P, 1.5*P, 2*P, 1.5*P);
-
-            // Głowa kierowcy w kasku wyścigowym Pixel-Art z wizjerem
-            ctx.fillStyle = '#000';
-            ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
-            ctx.fillStyle = '#ffffff'; // Skorupa kasku
-            ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-            ctx.fillStyle = color; // Pasek na kasku
-            ctx.fillRect(-3*P, -1*P, 4*P, 2*P);
-            ctx.fillStyle = '#05d5fa'; // Szybka / Wizjer z przodu kasku
-            ctx.fillRect(1*P, -2.5*P, 2*P, 5*P);
-
+            ctx.fillRect(20, -10, 5, 20);
+            // Karoseria wyścigowa
+            ctx.fillStyle = '#000'; ctx.fillRect(-18, -12, 40, 24);
+            ctx.fillStyle = color;  ctx.fillRect(-16, -10, 36, 20);
+            // Białe pasy wyścigowe
+            ctx.fillStyle = '#fff'; ctx.fillRect(-16, -3, 36, 6);
+            // Fotel i głowa kierowcy w kasku
+            ctx.fillStyle = '#111'; ctx.fillRect(-8, -7, 14, 14);
+            ctx.fillStyle = '#ffcca3'; ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(-2, 0, 7, Math.PI/2, -Math.PI/2); ctx.fill();
             ctx.restore();
 
             if(name) {
                 ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-                ctx.fillStyle = '#000'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x)+1, Math.floor(y - 30));
-                ctx.fillStyle = '#ffde00'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x), Math.floor(y - 31));
+                ctx.fillStyle = '#000'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x)+1, Math.floor(y - 26));
+                ctx.fillStyle = '#ffde00'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x), Math.floor(y - 27));
             }
         }
 
@@ -1154,6 +1110,7 @@
                 }
             }
 
+            // Głowa (powiększona 2.2x jeśli aktywna klątwa WIELKIE GŁOWY!)
             if(RoomState.status === 'playing' && RoomState.mutator === 'bighead') {
                 ctx.scale(2.15, 2.15);
             }
@@ -1254,117 +1211,6 @@
             }
         };
         Preview.init();
-
-        // === SZTUCZNA INTELIGENCJA BOTÓW (ZARZĄDZANIE, PLANSZA I MINIGRY) ===
-        const BOT_PRESETS = [
-            { name: '🤖 Bot Kuba',  color: '#ff2a6d', skin: 'ninja' },
-            { name: '🤖 Bot Sigma', color: '#00e676', skin: 'cyborg' },
-            { name: '🤖 Bot Król',  color: '#ffde00', skin: 'king' },
-            { name: '🤖 Bot Astro', color: '#e040fb', skin: 'astro' },
-            { name: '🤖 Bot Rycerz',color: '#ff9100', skin: 'knight' }
-        ];
-
-        const BotAI = {
-            botTurnLock: false,
-
-            async addBot() {
-                if(!isHost || !currentRoom) return;
-                Sound.init();
-                const existingBots = Object.keys(netPlayers).filter(id => id.startsWith('bot_'));
-                if(existingBots.length >= 5) return announce("MAKSYMALNIE 5 BOTÓW!", 1200);
-                const preset = BOT_PRESETS[existingBots.length % BOT_PRESETS.length];
-                const botId = 'bot_' + Math.random().toString(36).substr(2, 5);
-
-                await db.ref(`room_players/${currentRoom}/${botId}`).set({
-                    id: botId, isBot: true, name: preset.name, color: preset.color, skin: preset.skin,
-                    chips: 100, x: 600 + Math.round(Math.random()*400), y: 600 + Math.round(Math.random()*400),
-                    angle: 0, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false,
-                    wep: 'pistol', anim: 0, shooting: false, quad: false, emote: ''
-                });
-                Sound.play('coin');
-            },
-
-            async removeBot() {
-                if(!isHost || !currentRoom) return;
-                const existingBots = Object.keys(netPlayers).filter(id => id.startsWith('bot_'));
-                if(existingBots.length === 0) return;
-                const lastBotId = existingBots[existingBots.length - 1];
-                await db.ref(`room_players/${currentRoom}/${lastBotId}`).remove();
-                Sound.play('hit');
-            },
-
-            // Obsługa tury Bota na Planszy 50 Pól
-            checkBoardTurn() {
-                if(!isHost || RoomState.status !== 'board' || this.botTurnLock) return;
-                const currentTurnId = RoomState.turnOrder[RoomState.turnIdx];
-                if(!currentTurnId || !currentTurnId.startsWith('bot_')) return;
-
-                const bot = netPlayers[currentTurnId];
-                if(!bot) {
-                    Board.advanceTurn();
-                    return;
-                }
-
-                this.botTurnLock = true;
-                setTimeout(() => {
-                    if(RoomState.status !== 'board') { this.botTurnLock = false; return; }
-
-                    // Sprawdzenie czy bot siedzi w więzieniu
-                    if((bot.prison || 0) > 0) {
-                        db.ref(`room_players/${currentRoom}/${currentTurnId}`).update({ prison: bot.prison - 1 });
-                        db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🔒 ${bot.name} siedzi w więzieniu i traci kolejkę!` });
-                        setTimeout(() => { this.botTurnLock = false; Board.advanceTurn(); }, 1200);
-                        return;
-                    }
-
-                    let roll = Math.floor(Math.random() * 6) + 1;
-                    let newPos = Math.min(50, (bot.boardPos || 0) + roll);
-                    let tile = BOARD_TILES[newPos] || { t: 'norm', n: `${newPos}` };
-                    let extraMsg = '';
-                    let newPrison = 0;
-
-                    if(tile.t === 'boost') {
-                        newPos = Math.min(50, newPos + 3);
-                        extraMsg = ' 🚀 (+3 pola!)';
-                    } else if(tile.t === 'back') {
-                        newPos = Math.max(0, newPos - 3);
-                        extraMsg = ' 💀 (-3 pola!)';
-                    } else if(tile.t === 'prison') {
-                        newPrison = 1;
-                        extraMsg = ' 🔒 (Trafia do Paki!)';
-                    } else if(tile.t === 'casino') {
-                        if(Math.random() < 0.5) {
-                            newPos = Math.min(50, newPos + 4);
-                            extraMsg = ' 🎰 (Wygrał w Kasynie +4 pola!)';
-                        } else {
-                            newPos = Math.max(0, newPos - 2);
-                            extraMsg = ' 🎰 (Zbankrutował w Kasynie -2 pola!)';
-                        }
-                    } else if(tile.t === 'shop' && (bot.chips || 0) >= 40) {
-                        newPos = Math.min(50, newPos + 5);
-                        extraMsg = ' 🛒 (Kupił Złotą Rurę +5 pól!)';
-                    }
-
-                    Sound.play('step');
-                    db.ref(`room_players/${currentRoom}/${currentTurnId}`).update({
-                        boardPos: newPos, prison: newPrison
-                    });
-                    db.ref(`rooms/${currentRoom}`).update({
-                        boardMsg: `🎲 ${bot.name} wyrzucił [${roll}] -> Pole ${newPos} (${tile.n})${extraMsg}`
-                    });
-
-                    setTimeout(() => {
-                        this.botTurnLock = false;
-                        if(newPos >= 50) {
-                            db.ref(`room_players/${currentRoom}/${currentTurnId}`).update({ score: 999 });
-                            db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
-                        } else {
-                            Board.advanceTurn();
-                        }
-                    }, 1300);
-                }, 1100);
-            }
-        };
 
         // === WYSPA PLANSZOWA XL (51 PÓL: 0..50!) ===
         const BOARD_TILES = (() => {
@@ -1483,11 +1329,6 @@
                 document.getElementById('boardTurnText').innerText = `TURA: ${turnName} | ŻETONY: ${LobbyCasino.chips} 🪙`;
                 document.getElementById('boardStatusMsg').innerText = RoomState.boardMsg || '';
                 document.getElementById('btnRollDice').style.display = (isMyTurn && !this.rollingLock) ? 'block' : 'none';
-
-                // Jeśli aktualna tura należy do Bota, Host automatycznie wykonuje rzut za Bota
-                if(isHost && turnId && turnId.startsWith('bot_')) {
-                    BotAI.checkBoardTurn();
-                }
             },
 
             animateStepsTo(targetTileIdx, onComplete) {
@@ -1763,6 +1604,22 @@
                     });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({ turnIdx: nextIdx });
+                    // Host wykonuje automatyczną turę, gdy kolej przypada na bota.
+                    const nextId = RoomState.turnOrder[nextIdx];
+                    if(isHost && nextId && netPlayers[nextId]?.isBot) {
+                        setTimeout(async () => {
+                            if(RoomState.status !== 'board' || RoomState.turnIdx !== nextIdx) return;
+                            const snap = await db.ref(`room_players/${currentRoom}/${nextId}`).once('value');
+                            const bot = snap.val();
+                            if(!bot || !bot.isBot) return;
+                            const roll = 1 + Math.floor(Math.random()*6);
+                            const pos = Math.min(50, (bot.boardPos || 0) + roll);
+                            await db.ref(`room_players/${currentRoom}/${nextId}`).update({ boardPos: pos, score: pos >= 50 ? 999 : (bot.score || 0) });
+                            await db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🤖 ${bot.name} wyrzuca ${roll} i przechodzi na pole ${pos}!` });
+                            if(pos >= 50) db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                            else this.advanceTurn();
+                        }, 900);
+                    }
                 }
             },
 
@@ -1898,10 +1755,11 @@
 
                 allP.sort((a,b) => b.pos - a.pos);
                 document.getElementById('liveScoreboard').innerHTML = allP.map((p, i) =>
-                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">Pole ${p.pos}/50</span></li>`
+                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${safeColor(p.color)}">■</span> ${escapeHTML(p.name)}</span><span class="text-yellow-400">Pole ${Number(p.pos)||0}/50</span></li>`
                 ).join('');
             }
         };
+
         // === GENERATOR TEKSTUR PODŁOŻA 2.5D HD ===
         const WORLD_SIZE = 1600;
         const GroundCache = {
@@ -2144,6 +2002,31 @@
             }
         };
 
+        // Drobne, deterministyczne piksele środowiskowe — mapa żyje, ale zachowuje crisp pixel-art.
+        function drawAmbientPixels(ctx, mapName, now) {
+            const palettes = {
+                forest: ['#8ce85a', '#f6d365', '#d9f99d'],
+                cyber: ['#05d5fa', '#ff2a6d', '#a855f7'],
+                ice: ['#e0f7ff', '#05d5fa', '#9be7ff'],
+                lava: ['#ff9100', '#ff2a6d', '#ffde00']
+            };
+            const palette = palettes[mapName] || palettes.forest;
+            for(let i=0; i<72; i++) {
+                const x = (i * 197 + (i % 7) * 43) % WORLD_SIZE;
+                const y = (i * 311 + (i % 11) * 29) % WORLD_SIZE;
+                const pulse = Math.sin(now * .0018 + i * 1.7);
+                const size = i % 9 === 0 ? 7 : 3;
+                ctx.globalAlpha = .12 + (pulse + 1) * .09;
+                ctx.fillStyle = palette[i % palette.length];
+                ctx.fillRect(Math.floor(x / 4) * 4, Math.floor(y / 4) * 4, size, size);
+                if(i % 9 === 0) {
+                    ctx.globalAlpha *= .65;
+                    ctx.fillRect(Math.floor(x / 4) * 4 - 4, Math.floor(y / 4) * 4 + 4, size + 8, 2);
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+
         function drawPixelObstacle25D(ctx, o) {
             const P = 4, wallH = 20;
             if(o.t === 'lava') {
@@ -2201,20 +2084,26 @@
         function drawSquidDoll(ctx, state) {
             ctx.save();
             ctx.translate(800, 145);
+            // Cień pod lalką
             ctx.fillStyle = 'rgba(0,0,0,0.55)';
             ctx.beginPath(); ctx.ellipse(0, 35, 48, 18, 0, 0, Math.PI*2); ctx.fill();
 
+            // Sukienka pomarańczowo-żółta
             ctx.fillStyle = '#000'; ctx.fillRect(-32, -10, 64, 46);
             ctx.fillStyle = '#ff9100'; ctx.fillRect(-28, -6, 56, 38);
             ctx.fillStyle = '#ffde00'; ctx.fillRect(-28, -6, 56, 12);
 
+            // Głowa Lalki (Odwrócona tyłem na Zielonym, Przodem z laserowymi oczami na Czerwonym!)
             ctx.fillStyle = '#000'; ctx.fillRect(-36, -64, 72, 56);
             if(state === 'green') {
+                // Tył głowy (Czarne włosy z dwoma kucykami)
                 ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 48);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-42, -40, 10, 10); ctx.fillRect(32, -40, 10, 10);
             } else {
+                // Twarz Lalki
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-32, -60, 64, 48);
-                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 14);
+                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 14); // grzywka
+                // Oczy (Żółte ostrzegawcze lub Czerwone zabójcze lasery!)
                 ctx.fillStyle = state === 'red' ? '#ff0033' : '#ffde00';
                 ctx.fillRect(-20, -40, 12, 12);
                 ctx.fillRect(8, -40, 12, 12);
@@ -2222,12 +2111,13 @@
                     ctx.fillStyle = 'rgba(255, 0, 50, 0.35)';
                     ctx.beginPath(); ctx.arc(-14, -34, 18, 0, Math.PI*2); ctx.arc(14, -34, 18, 0, Math.PI*2); ctx.fill();
                 }
+                // Usta
                 ctx.fillStyle = '#d91656'; ctx.fillRect(-8, -22, 16, 6);
             }
             ctx.restore();
         }
 
-        // === KLASA LOKALNEGO GRACZA ===
+        // === KLASA LOKALNEGO GRACZA (OBSŁUGUJE RUCH PIESZY, SQUID GAME ORAZ FIZYKĘ GOKARTÓW!) ===
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
@@ -2272,6 +2162,7 @@
                 if(this.dashCd > 0) this.dashCd -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
+                // Poślizg na skórce od banana lub plamie oleju!
                 if(this.slipTimer > 0) {
                     this.slipTimer -= dt;
                     this.angle += 18 * dt;
@@ -2292,6 +2183,7 @@
                     if(this.dashTime > 0) { this.kartSpeed = 720; this.dashTime -= dt; FX.burst(this.x, this.y, '#ff9100', 2, 60, 5); }
                     else { this.kartSpeed += acc * dt; }
 
+                    // Sprawdzenie czy gokart zjechał z asfaltu na trawę (Środek toru lub pobocze)
                     let dxC = Math.abs(this.x - 800), dyC = Math.abs(this.y - 800);
                     let onGrass = (dxC < 340 && dyC < 340) || dxC > 680 || dyC > 680;
                     this.kartSpeed *= onGrass ? 0.92 : 0.982;
@@ -2301,13 +2193,14 @@
                     if(Math.abs(this.kartSpeed) > 15) {
                         this.angle += turn * (this.kartSpeed > 0 ? 1 : -1) * dt;
                         if(Math.abs(turn) > 0 && !onGrass && Math.random() < 0.4) {
-                            FX.burst(this.x, this.y, '#222222', 1, 10, 4);
+                            FX.burst(this.x, this.y, '#222222', 1, 10, 4); // Ślady opon
                         }
                     }
 
                     this.x = Math.max(70, Math.min(WORLD_SIZE-70, this.x + Math.cos(this.angle)*this.kartSpeed*dt));
                     this.y = Math.max(70, Math.min(WORLD_SIZE-70, this.y + Math.sin(this.angle)*this.kartSpeed*dt));
 
+                    // Punkty kontrolne okrążenia (0: Dół, 1: Prawo, 2: Góra, 3: Lewo)
                     let cp = -1;
                     if(this.y > 1140 && this.x > 650 && this.x < 950) cp = 0;
                     else if(this.x > 1140 && this.y > 650 && this.y < 950) cp = 1;
@@ -2319,13 +2212,14 @@
                         this.score += 5;
                         if(cp === 0) {
                             this.lap++;
-                            this.hp = this.lap;
+                            this.hp = this.lap; // Wykorzystujemy hp do synchronizacji numeru okrążenia nad autem
                             this.score += 25;
                             Sound.play('jackpot');
                             FX.text(this.x, this.y, `OKRĄŻENIE ${this.lap}!`, "#ffde00", 13);
                         }
                     }
 
+                    // Zbieranie bananów / plam oleju / dopalaczy Nitro na torze
                     Object.entries(netItems).forEach(([id, item]) => {
                         if(Math.hypot(this.x - item.x, this.y - item.y) < 36) {
                             if(item.t === 'banana') {
@@ -2384,6 +2278,7 @@
 
                 // === PRAWDZIWE SQUID GAME (CZERWONE, ZIELONE) ===
                 if(gm === 'squid') {
+                    // Jeśli poruszysz się podczas Czerwonego Światła -> Lalka strzela laserem i wracasz na start!
                     if(RoomState.squidState === 'red' && (Math.hypot(ix, iy) > 0.05 || this.dashTime > 0)) {
                         Sound.play('sniper');
                         FX.laserBeam(800, 120, this.x, this.y);
@@ -2394,6 +2289,7 @@
                         this.vx = 0; this.vy = 0;
                         return;
                     }
+                    // Przekroczenie linii Mety na górze (Y < 250)
                     if(this.y < 250) {
                         this.score += 25;
                         Sound.play('jackpot');
@@ -2609,11 +2505,10 @@
             }
         }
 
-        // === GŁÓWNA PĘTLA MINIGIER (Z NAPRAWIONYM ZEGAREM CZASU RZECZYWISTEGO Date.now() I SYMULACJĄ BOTÓW) ===
+        // === GŁÓWNA PĘTLA MINIGIER ===
         const Game = {
-            me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
-            hostZombies: [], hostMeteors: [], squidTimer: 0,
-            matchStartTime: 0, hostLastTickTime: 0, botStates: {},
+            me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0, hostTickAt: 0, botThinkAt: 0,
+            hostZombies: [], hostMeteors: [], squidTimer: 0, timerDeadlineAt: 0, timerGameKey: '', finishRequested: false, lastTimerSyncAt: 0,
 
             runRouletteAnimation(targetGame, targetMap, targetMutator) {
                 switchScreen(null);
@@ -2649,10 +2544,9 @@
                         setTimeout(() => {
                             ov.style.display = 'none';
                             if(isHost) {
-                                const dur = Number(RoomState.matchDuration) || 60;
                                 db.ref(`room_items/${currentRoom}`).remove();
                                 db.ref(`rooms/${currentRoom}`).update({
-                                    status: 'playing', timer: dur, stormR: 1100, vaultHp: 500,
+                                    status: 'playing', timer: RoomState.matchDuration, stormR: 1100, vaultHp: 500,
                                     bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                                 });
                             }
@@ -2666,12 +2560,6 @@
                 document.getElementById('rouletteOverlay').style.display = 'none';
                 document.getElementById('boardHud').style.display = 'none';
 
-                const gm = RoomState.activeMinigame;
-                const dur = Number(RoomState.matchDuration) || 60;
-                RoomState.timer = dur;
-                this.matchStartTime = Date.now();
-                this.hostLastTickTime = Date.now();
-
                 this.me = new LocalPlayer(
                     document.getElementById('playerName').value.trim() || "Paweł",
                     document.getElementById('playerColor').value,
@@ -2679,38 +2567,11 @@
                 );
                 this.bullets = []; this.hostZombies = []; this.hostMeteors = []; FX.parts = []; FX.texts = []; FX.decals = []; FX.rings = []; FX.lasers = [];
 
-                // Inicjalizacja pozycji i stanów Botów na starcie minigry (przez Hosta)
-                if(isHost) {
-                    this.botStates = {};
-                    let botUpdates = {};
-                    Object.entries(netPlayers).forEach(([pid, p], idx) => {
-                        if(pid.startsWith('bot_') || p.isBot) {
-                            let bx = 400 + Math.random()*800, by = 400 + Math.random()*800;
-                            if(gm === 'squid') { bx = 300 + Math.random()*1000; by = 1460; }
-                            else if(gm === 'race') { bx = 740 + idx*35; by = 1310 + idx*18; }
-
-                            this.botStates[pid] = {
-                                x: bx, y: by, angle: gm === 'squid' ? -Math.PI/2 : 0,
-                                hp: gm === 'race' ? 1 : 100, score: 0, isDead: false, respawn: 0,
-                                wpIdx: 0, lap: 1, anim: 0, wep: gm === 'sniper' ? 'sniper' : 'pistol',
-                                targetX: 400 + Math.random()*800, targetY: 400 + Math.random()*800
-                            };
-                            botUpdates[`${pid}/x`] = Math.round(bx);
-                            botUpdates[`${pid}/y`] = Math.round(by);
-                            botUpdates[`${pid}/hp`] = gm === 'race' ? 1 : 100;
-                            botUpdates[`${pid}/score`] = 0;
-                            botUpdates[`${pid}/isDead`] = false;
-                        }
-                    });
-                    if(Object.keys(botUpdates).length > 0) {
-                        db.ref(`room_players/${currentRoom}`).update(botUpdates);
-                    }
-                }
-
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'block';
                 document.getElementById('hudRight').style.display = 'block';
 
+                const gm = RoomState.activeMinigame;
                 document.getElementById('squidLightBanner').style.display = gm === 'squid' ? 'block' : 'none';
                 document.getElementById('hudMutatorBadge').innerText = `🤡 ${MUTATOR_NAMES[RoomState.mutator] || 'Normalnie'}`;
                 document.getElementById('hudWeapon').innerText = gm === 'race' ? 'POJAZD: Gokart Turbo' : (gm === 'squid' ? 'CEL: Dobiegnij do Lalki!' : (gm === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : 'BROŃ: Pistolet'));
@@ -2743,6 +2604,10 @@
                 }
 
                 this.lastTime = performance.now();
+                this.hostTickAt = this.lastTime;
+                this.timerDeadlineAt = this.lastTime + Math.max(1, Number(RoomState.matchDuration || RoomState.timer || 60)) * 1000;
+                this.timerGameKey = `${currentRoom || ''}:${gm}`;
+                this.finishRequested = false;
                 if(!this.loopId) this.loopId = requestAnimationFrame(t => this.loop(t));
             },
 
@@ -2777,190 +2642,53 @@
                 }
             },
 
-            // Symulacja sztucznej inteligencji Botów w trakcie minigier (wykonywana przez Hosta)
-            updateBotsInMinigame(dt, gm, allActive) {
-                const waypoints = [
-                    {x: 1310, y: 1310}, // Prawy dół toru
-                    {x: 1310, y: 290},  // Prawa góra toru
-                    {x: 290,  y: 290},  // Lewa góra toru
-                    {x: 290,  y: 1310}  // Lewy dół toru (meta)
-                ];
-
-                let botDbUpdates = {};
-
-                Object.entries(this.botStates).forEach(([bid, b]) => {
-                    if(!netPlayers[bid]) return;
-
-                    if(b.isDead) {
-                        if(gm !== 'bomb') {
-                            b.respawn -= dt;
-                            if(b.respawn <= 0) {
-                                b.isDead = false; b.hp = 100;
-                                b.x = gm === 'squid' ? 300 + Math.random()*1000 : 450 + Math.random()*700;
-                                b.y = gm === 'squid' ? 1460 : 450 + Math.random()*700;
-                            }
-                        }
-                        botDbUpdates[`${bid}/isDead`] = b.isDead;
-                        botDbUpdates[`${bid}/hp`] = b.hp;
-                        return;
-                    }
-
-                    b.anim += dt * 11;
-                    let shooting = false;
-
-                    // 1. Boty w Wyścigu Gokartów
-                    if(gm === 'race') {
-                        let wp = waypoints[b.wpIdx % 4];
-                        let targetAngle = Math.atan2(wp.y - b.y, wp.x - b.x);
-                        b.angle = targetAngle;
-                        let spd = 430 + (bid.charCodeAt(4) % 70);
-                        b.x += Math.cos(b.angle) * spd * dt;
-                        b.y += Math.sin(b.angle) * spd * dt;
-
-                        if(Math.hypot(wp.x - b.x, wp.y - b.y) < 110) {
-                            b.wpIdx++;
-                            b.score += 5;
-                            if(b.wpIdx % 4 === 0) {
-                                b.lap++;
-                                b.hp = b.lap;
-                                b.score += 25;
-                            }
-                        }
-                    }
-                    // 2. Boty w Squid Game (Zatrzymują się na Żółtym i Czerwonym Świetle!)
-                    else if(gm === 'squid') {
-                        b.angle = -Math.PI/2;
-                        if(RoomState.squidState === 'green') {
-                            b.y -= 240 * dt;
-                            b.x += Math.sin(b.anim)*40*dt;
-                        } else if(RoomState.squidState === 'red' && Math.random() < 0.015) {
-                            // Rzadka pomyłka bota na czerwonym świetle -> eliminacja laserem
-                            FX.laserBeam(800, 120, b.x, b.y);
-                            b.y = 1460;
-                        }
-                        if(b.y < 250) {
-                            b.score += 25;
-                            b.y = 1460;
-                            b.x = 300 + Math.random()*1000;
-                        }
-                    }
-                    // 3. Boty w Królu Wzgórza (Biegną do złotej strefy)
-                    else if(gm === 'koth') {
-                        let k = RoomState.koth;
-                        let d = Math.hypot(k.x - b.x, k.y - b.y);
-                        if(d > 55) {
-                            b.angle = Math.atan2(k.y - b.y, k.x - b.x);
-                            b.x += Math.cos(b.angle) * 235 * dt;
-                            b.y += Math.sin(b.angle) * 235 * dt;
-                        } else {
-                            if(Math.random() < 0.3) b.score += 1;
-                        }
-                        shooting = Math.random() < 0.35;
-                    }
-                    // 4. Boty w Gorącej Bombie (Gonią graczy gdy mają bombę, uciekają gdy jej nie mają)
-                    else if(gm === 'bomb') {
-                        if(RoomState.bombHolder === bid) {
-                            let target = allActive.find(p => p.id !== bid);
-                            if(target) {
-                                b.angle = Math.atan2(target.y - b.y, target.x - b.x);
-                                b.x += Math.cos(b.angle) * 315 * dt;
-                                b.y += Math.sin(b.angle) * 315 * dt;
-                                if(Math.hypot(target.x - b.x, target.y - b.y) < 42) {
-                                    RoomState.bombHolder = target.id;
-                                    db.ref(`rooms/${currentRoom}`).update({ bombHolder: target.id });
-                                }
-                            }
-                        } else {
-                            if(Math.hypot(b.targetX - b.x, b.targetY - b.y) < 60) {
-                                b.targetX = 250 + Math.random()*1100;
-                                b.targetY = 250 + Math.random()*1100;
-                            }
-                            b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x);
-                            b.x += Math.cos(b.angle) * 240 * dt;
-                            b.y += Math.sin(b.angle) * 240 * dt;
-                        }
-                    }
-                    // 5. Boty na Arenach Strzeleckich / Zombie / Złotej Gorączce
-                    else {
-                        if(Math.hypot(b.targetX - b.x, b.targetY - b.y) < 70 || Math.random() < 0.05) {
-                            b.targetX = 300 + Math.random()*1000;
-                            b.targetY = 300 + Math.random()*1000;
-                        }
-                        let moveAngle = Math.atan2(b.targetY - b.y, b.targetX - b.x);
-                        b.x = Math.max(80, Math.min(WORLD_SIZE-80, b.x + Math.cos(moveAngle) * 225 * dt));
-                        b.y = Math.max(80, Math.min(WORLD_SIZE-80, b.y + Math.sin(moveAngle) * 225 * dt));
-
-                        // Celowanie w najbliższego wroga lub sejfu
-                        if(gm === 'heist') {
-                            b.angle = Math.atan2(800 - b.y, 800 - b.x);
-                            shooting = true;
-                            if(Math.random() < 0.18) b.score += 2;
-                        } else {
-                            let enemy = allActive.find(p => p.id !== bid);
-                            if(enemy) {
-                                b.angle = Math.atan2(enemy.y - b.y, enemy.x - b.x) + (Math.random()-0.5)*0.35;
-                                shooting = Math.hypot(enemy.x - b.x, enemy.y - b.y) < 550 && Math.random() < 0.45;
-                                // Okazjonalne trafienie gracza przez Bota
-                                if(shooting && enemy.id === myId && Game.me && !Game.me.isDead && Math.random() < 0.06) {
-                                    Game.me.takeDamage(12, bid);
-                                }
-                            }
-                        }
-
-                        if((gm === 'meteors' || gm === 'spleef' || gm === 'coins' || gm === 'zombies') && Math.random() < 0.15) {
-                            b.score += 1;
-                        }
-                    }
-
-                    // Aktualizacja danych bota w lokalnym obiekcie i w Firebase
-                    netPlayers[bid].x = Math.round(b.x);
-                    netPlayers[bid].y = Math.round(b.y);
-                    netPlayers[bid].angle = Number(b.angle.toFixed(2));
-                    netPlayers[bid].hp = Math.round(b.hp);
-                    netPlayers[bid].score = b.score;
-                    netPlayers[bid].isDead = b.isDead;
-                    netPlayers[bid].anim = Number(b.anim.toFixed(1));
-                    netPlayers[bid].shooting = shooting;
-
-                    botDbUpdates[`${bid}/x`] = netPlayers[bid].x;
-                    botDbUpdates[`${bid}/y`] = netPlayers[bid].y;
-                    botDbUpdates[`${bid}/angle`] = netPlayers[bid].angle;
-                    botDbUpdates[`${bid}/hp`] = netPlayers[bid].hp;
-                    botDbUpdates[`${bid}/score`] = netPlayers[bid].score;
-                    botDbUpdates[`${bid}/isDead`] = netPlayers[bid].isDead;
-                    botDbUpdates[`${bid}/anim`] = netPlayers[bid].anim;
-                    botDbUpdates[`${bid}/shooting`] = shooting;
-                });
-
-                if(Object.keys(botDbUpdates).length > 0) {
-                    db.ref(`room_players/${currentRoom}`).update(botDbUpdates);
-                }
-            },
-
             hostTick() {
                 if(RoomState.status !== 'playing') return;
                 const gm = RoomState.activeMinigame;
+                // Odliczanie na podstawie rzeczywistego czasu, a nie liczby wywołań setInterval.
+                // Dzięki temu timer działa też przy chwilowych przycięciach przeglądarki.
+                const now = performance.now();
+                const elapsed = this.hostTickAt ? Math.max(0, (now - this.hostTickAt) / 1000) : 0.1;
+                this.hostTickAt = now;
+                // Zegar oparty na deadline, nie na liczbie ticków/Firebase snapshotów.
+                // Dzięki temu deszcz meteorów i pozostałe tryby kończą się także po przycięciu karty.
+                const timerKey = `${currentRoom || ''}:${gm}`;
+                if(!this.timerDeadlineAt || this.timerGameKey !== timerKey) {
+                    this.timerDeadlineAt = now + Math.max(1, Number(RoomState.timer || RoomState.matchDuration || 60)) * 1000;
+                    this.timerGameKey = timerKey;
+                    this.finishRequested = false;
+                }
+                RoomState.timer = Math.max(0, (this.timerDeadlineAt - now) / 1000);
 
-                // NAPRAWIONY ZEGAR: Obliczany bezpośrednio z czasu rzeczywistego Date.now()!
-                const nowMs = Date.now();
-                const dt = Math.min(0.5, (nowMs - (this.hostLastTickTime || nowMs)) / 1000);
-                this.hostLastTickTime = nowMs;
-
-                const totalDuration = Number(RoomState.matchDuration) || 60;
-                const elapsedSeconds = (nowMs - this.matchStartTime) / 1000;
-                RoomState.timer = Math.max(0, totalDuration - elapsedSeconds);
+                // Proste boty sterowane przez hosta: biegną po mapie i zdobywają punkty.
+                Object.entries(netPlayers).forEach(([id, p]) => {
+                    if(!p.isBot || p.isDead) return;
+                    const target = this.me && !this.me.isDead ? this.me : null;
+                    const dx = target ? target.x - (p.x || 800) : Math.cos(now / 700 + (p.botIndex || 0)) * 100;
+                    const dy = target ? target.y - (p.y || 800) : Math.sin(now / 900 + (p.botIndex || 0)) * 100;
+                    const len = Math.max(1, Math.hypot(dx, dy));
+                    const speed = gm === 'race' ? 125 : (gm === 'squid' ? 145 : 95);
+                    let bx = (p.x || 800) + dx / len * speed * elapsed;
+                    let by = (p.y || 800) + dy / len * speed * elapsed;
+                    if(gm === 'squid') by = Math.max(100, by - speed * elapsed * 0.7);
+                    bx = Math.max(60, Math.min(WORLD_SIZE - 60, bx));
+                    by = Math.max(60, Math.min(WORLD_SIZE - 60, by));
+                    const nextScore = (p.score || 0) + elapsed * (gm === 'coins' || gm === 'heist' ? 2.5 : 0.8);
+                    db.ref(`room_players/${currentRoom}/${id}`).update({
+                        x: Math.round(bx), y: Math.round(by), angle: Math.atan2(dy, dx),
+                        score: Math.floor(nextScore), hp: p.hp || 100, isDead: false
+                    });
+                });
 
                 let allActive = [];
                 if(this.me && !this.me.isDead) allActive.push({ id: myId, x: this.me.x, y: this.me.y });
                 Object.entries(netPlayers).forEach(([id, p]) => { if(!p.isDead) allActive.push({ id, x: p.x, y: p.y }); });
 
-                // Aktualizacja AI Botów
-                this.updateBotsInMinigame(dt, gm, allActive);
+                if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 1.2);
 
-                if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 14 * dt);
-
+                // Sekwencja Lalki Squid Game: Zielone (3.5s) -> Żółte ostrzeżenie (1.1s) -> Czerwone (2.6s)
                 if(gm === 'squid') {
-                    this.squidTimer = (this.squidTimer || 0) + dt;
+                    this.squidTimer = (this.squidTimer || 0) + elapsed;
                     if(RoomState.squidState === 'green' && this.squidTimer >= 3.4) {
                         this.squidTimer = 0;
                         RoomState.squidState = 'yellow';
@@ -2976,6 +2704,7 @@
                     }
                 }
 
+                // Spawning skórek od banana i Nitro w Wyścigu lub podczas klątwy Bananów
                 if((gm === 'race' || RoomState.mutator === 'bananas') && Math.random() < 0.12 && Object.keys(netItems).length < 14) {
                     let iid = 'b_' + Math.random().toString(36).substr(2, 5);
                     db.ref(`room_items/${currentRoom}/${iid}`).set({
@@ -2995,7 +2724,7 @@
                     }
                     for(let i = this.hostMeteors.length - 1; i >= 0; i--) {
                         let m = this.hostMeteors[i];
-                        m.t -= dt;
+                        m.t -= elapsed;
                         if(m.t <= 0) {
                             db.ref(`events/${currentRoom}`).push({ type: 'meteorBoom', x: m.x, y: m.y, r: m.r });
                             this.hostMeteors.splice(i, 1);
@@ -3039,8 +2768,8 @@
                         if(target) {
                             z.a = Number(Math.atan2(target.y - z.y, target.x - z.x).toFixed(2));
                             let spd = z.t === 1 ? 175 : (z.t === 2 ? 55 : 105);
-                            z.x = Math.round(z.x + Math.cos(z.a) * spd * dt);
-                            z.y = Math.round(z.y + Math.sin(z.a) * spd * dt);
+                            z.x = Math.round(z.x + Math.cos(z.a) * spd * elapsed);
+                            z.y = Math.round(z.y + Math.sin(z.a) * spd * elapsed);
                         }
                     });
                     db.ref(`rooms/${currentRoom}`).update({ zombies: JSON.stringify(this.hostZombies) });
@@ -3049,8 +2778,7 @@
                 if(gm === 'bomb') {
                     if(allActive.length <= 1 && Object.keys(netPlayers).length >= 1) {
                         allActive.forEach(survivor => {
-                            if(survivor.id === myId && this.me) this.me.score += 50;
-                            else if(this.botStates[survivor.id]) this.botStates[survivor.id].score += 50;
+                            if(survivor.id === myId) this.me.score += 50;
                             else db.ref(`events/${currentRoom}`).push({ type: 'kill', killer: survivor.id, pts: 50 });
                         });
                         RoomState.timer = 0;
@@ -3061,24 +2789,18 @@
                                 RoomState.bombTimer = 10;
                             }
                         } else {
-                            RoomState.bombTimer -= dt;
+                            RoomState.bombTimer -= 0.1;
                             if(RoomState.bombTimer <= 0) {
-                                if(this.botStates[RoomState.bombHolder]) {
-                                    this.botStates[RoomState.bombHolder].isDead = true;
-                                    this.botStates[RoomState.bombHolder].hp = 0;
-                                    FX.explosion(this.botStates[RoomState.bombHolder].x, this.botStates[RoomState.bombHolder].y);
-                                } else {
-                                    db.ref(`events/${currentRoom}`).push({ type: 'explode', target: RoomState.bombHolder });
-                                }
+                                db.ref(`events/${currentRoom}`).push({ type: 'explode', target: RoomState.bombHolder });
                                 RoomState.bombHolder = null; RoomState.bombTimer = 10;
                             }
                         }
-                        db.ref(`rooms/${currentRoom}`).update({ bombHolder: RoomState.bombHolder, bombTimer: Number(Math.max(0, RoomState.bombTimer).toFixed(1)) });
+                        db.ref(`rooms/${currentRoom}`).update({ bombHolder: RoomState.bombHolder, bombTimer: Number(RoomState.bombTimer.toFixed(1)) });
                     }
                 }
 
                 if(gm === 'koth') {
-                    this.kothShift = (this.kothShift || 0) + dt;
+                    this.kothShift = (this.kothShift || 0) + elapsed;
                     if(this.kothShift >= 18) {
                         this.kothShift = 0;
                         RoomState.koth = { x: 350 + Math.round(Math.random()*900), y: 350 + Math.round(Math.random()*900), r: 110 };
@@ -3086,18 +2808,21 @@
                     }
                 }
 
-                if(RoomState.timer <= 0) {
+                if(RoomState.timer <= 0 && !this.finishRequested) {
+                    this.finishRequested = true;
                     let list = [{ id: myId, score: this.me ? this.me.score : 0 }];
                     Object.entries(netPlayers).forEach(([pid, p]) => list.push({ id: pid, score: p.score || 0 }));
                     list.sort((a,b) => b.score - a.score);
-                    let winId = list[0].id;
-
-                    if(RoomState.isPartyCampaign) {
-                        db.ref(`rooms/${currentRoom}`).update({ status: 'card_reward', minigameWinner: winId });
-                    } else {
-                        db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
-                    }
-                } else {
+                    let winId = list[0]?.id || myId;
+                    const nextStatus = RoomState.isPartyCampaign ? 'card_reward' : 'podium';
+                    RoomState.status = nextStatus;
+                    db.ref(`rooms/${currentRoom}`).update(RoomState.isPartyCampaign
+                        ? { status: nextStatus, minigameWinner: winId, timer: 0 }
+                        : { status: nextStatus, timer: 0 });
+                } else if(RoomState.timer > 0 && (now - (this.lastTimerSyncAt || 0) >= 250)) {
+                    // Synchronizujemy HUD 4 razy na sekundę zamiast przy każdym ticku 100 ms.
+                    // Zegar lokalny nadal płynnie odlicza, a ruch/stan gry nie zależy od snapshotów timera.
+                    this.lastTimerSyncAt = now;
                     db.ref(`rooms/${currentRoom}`).update({ timer: Number(RoomState.timer.toFixed(1)), stormR: Math.round(RoomState.stormR) });
                 }
             },
@@ -3107,11 +2832,6 @@
                 const gm = RoomState.activeMinigame;
                 this.me.update(dt);
                 Cam.update(dt, this.me);
-
-                // Płynne odliczanie zegara również po stronie klienta (gdyby pakiet sieciowy się opóźnił)
-                if(!isHost && RoomState.timer > 0) {
-                    RoomState.timer = Math.max(0, RoomState.timer - dt);
-                }
 
                 let obstacles = (gm === 'race' || gm === 'squid') ? [] : (MAPS[RoomState.map] || MAPS.forest).obstacles;
 
@@ -3211,20 +2931,10 @@
 
                 FX.update(dt);
 
-                // Wyświetlanie zawsze działającego głównego zegara + dodatkowego licznika bomby
                 let secs = Math.max(0, Math.ceil(RoomState.timer));
-                let mins = Math.floor(secs / 60);
-                let remSecs = secs % 60;
-                document.getElementById('hudTimer').innerText = `${mins.toString().padStart(2,'0')}:${remSecs.toString().padStart(2,'0')}`;
-
-                const subTimerEl = document.getElementById('hudSubTimer');
-                if(gm === 'bomb' && RoomState.bombTimer !== undefined) {
-                    subTimerEl.classList.remove('hidden');
-                    subTimerEl.innerText = `💣 WYBUCH ZA: ${Math.max(0, RoomState.bombTimer).toFixed(1)}s`;
-                } else {
-                    subTimerEl.classList.add('hidden');
-                }
-
+                document.getElementById('hudTimer').innerText = gm === 'bomb' && RoomState.bombTimer
+                    ? `BOMBA: ${RoomState.bombTimer.toFixed(1)}s`
+                    : `00:${secs.toString().padStart(2,'0')}`;
                 document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
                 document.getElementById('shieldBar').style.width = `${Math.min(100, (this.me.shield/50)*100)}%`;
                 document.getElementById('dashBar').style.width = `${Math.max(0, ((1.6 - this.me.dashCd)/1.6)*100)}%`;
@@ -3238,7 +2948,7 @@
                 Object.values(netPlayers).forEach(p => scores.push({ name: p.name, color: p.color, score: p.score || 0 }));
                 scores.sort((a,b) => b.score - a.score);
                 document.getElementById('liveScoreboard').innerHTML = scores.map((s, idx) =>
-                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score} pkt</span></li>`
+                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${safeColor(s.color)}">■</span> ${escapeHTML(s.name)}</span><span class="text-yellow-400">${Number(s.score)||0} pkt</span></li>`
                 ).join('');
             },
 
@@ -3249,14 +2959,19 @@
 
                 Cam.apply();
 
+                // 1. TŁO SPECJALNE DLA WYŚCIGU GOKARTÓW (TOR ASFALTOWY Z TARKAMI)
                 if(gm === 'race') {
                     ctx.fillStyle = '#1e4620'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    // Krawężniki biało-czerwone i asfaltowy owal
                     ctx.fillStyle = '#ff2a6d'; ctx.fillRect(100, 100, 1400, 1400);
                     ctx.fillStyle = '#2b2b36'; ctx.fillRect(120, 120, 1360, 1360);
+                    // Wyspa środkowa
                     ctx.fillStyle = '#ffde00'; ctx.fillRect(440, 440, 720, 720);
                     ctx.fillStyle = '#1e4620'; ctx.fillRect(460, 460, 680, 680);
+                    // Przerywana linia na środku toru
                     ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 6; ctx.setLineDash([30, 30]);
                     ctx.strokeRect(290, 290, 1020, 1020); ctx.setLineDash([]);
+                    // Szachownica Start/Meta na dole
                     for(let r=0; r<8; r++) {
                         ctx.fillStyle = r%2===0 ? '#fff' : '#000';
                         ctx.fillRect(780, 1140 + r*40, 20, 40);
@@ -3264,21 +2979,27 @@
                         ctx.fillRect(800, 1140 + r*40, 20, 40);
                     }
                 }
+                // 2. TŁO SPECJALNE DLA SQUID GAME (PIASZCZYSTA ARENA + CZERWONA META + LALKA)
                 else if(gm === 'squid') {
                     ctx.fillStyle = '#d4b475'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     ctx.fillStyle = '#c4a262';
                     for(let y=0; y<WORLD_SIZE; y+=80) ctx.fillRect(0, y, WORLD_SIZE, 40);
+                    // Linia Startu na dole
                     ctx.fillStyle = '#05d5fa'; ctx.fillRect(0, 1380, WORLD_SIZE, 10);
                     ctx.fillStyle = '#fff'; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
                     ctx.fillText("LINIA STARTU - BIEGNIJ DO GÓRY NA ZIELONYM!", 800, 1420);
+                    // Czerwona Linia Mety na górze
                     ctx.fillStyle = '#ff0044'; ctx.fillRect(0, 250, WORLD_SIZE, 14);
                     ctx.fillStyle = '#ffde00'; ctx.fillText("🏁 LINIA METY (+25 PKT) 🏁", 800, 235);
                     drawSquidDoll(ctx, RoomState.squidState);
                 }
+                // 3. STANDARDOWE TŁA AREN 2.5D
                 else {
                     const cachedBg = GroundCache.canvases[gm === 'spleef' ? 'ice' : RoomState.map] || GroundCache.canvases.forest;
                     ctx.drawImage(cachedBg, 0, 0);
                 }
+
+                drawAmbientPixels(ctx, RoomState.map, performance.now());
 
                 if(gm === 'spleef') {
                     Object.entries(RoomState.brokenIce).forEach(([key, state]) => {
@@ -3382,12 +3103,16 @@
 
                 if(gm === 'meteors') {
                     netMeteors.forEach(m => {
-                        ctx.fillStyle = 'rgba(255, 42, 109, 0.28)';
+                        const pulse = 0.22 + (Math.sin(performance.now() * .018) + 1) * .09;
+                        ctx.fillStyle = `rgba(255, 42, 109, ${pulse})`;
                         ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill();
-                        ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.stroke();
+                        ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3 + Math.floor((Math.sin(performance.now()*.02)+1)*2); ctx.stroke();
+                        ctx.strokeStyle = 'rgba(255,222,0,.85)'; ctx.lineWidth = 2;
+                        ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.arc(m.x, m.y, m.r + 9, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
                         let dropOffset = Math.max(0, m.t * 260);
-                        ctx.fillStyle = '#ff9100';
-                        ctx.fillRect(m.x - 16, m.y - dropOffset - 16, 32, 32);
+                        ctx.fillStyle = 'rgba(255,145,0,.25)'; ctx.fillRect(m.x - 22, m.y - dropOffset - 22, 44, 44);
+                        ctx.fillStyle = '#ff9100'; ctx.fillRect(m.x - 16, m.y - dropOffset - 16, 32, 32);
+                        ctx.fillStyle = '#ffde00'; ctx.fillRect(m.x - 6, m.y - dropOffset - 6, 12, 12);
                     });
                 }
 
@@ -3448,24 +3173,6 @@
                 } else {
                     document.getElementById('cardChoicesContainer').classList.add('hidden');
                     document.getElementById('cardWaitMsg').classList.remove('hidden');
-
-                    // Jeśli wygrał Bot, Host automatycznie odbiera dla niego nagrodę (+3 pola) po 2 sekundach
-                    if(isHost && winId && winId.startsWith('bot_')) {
-                        setTimeout(() => {
-                            if(RoomState.status !== 'card_reward') return;
-                            let bot = netPlayers[winId];
-                            let newPos = Math.min(50, (bot?.boardPos || 0) + 3);
-                            db.ref(`room_players/${currentRoom}/${winId}`).update({ boardPos: newPos });
-                            if(newPos >= 50) {
-                                db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
-                            } else {
-                                db.ref(`rooms/${currentRoom}`).update({
-                                    status: 'board', turnIdx: 0,
-                                    boardMsg: `🤖 ${bot ? bot.name : 'Bot'} wygrał minigrę i wybrał kartę Turbo Skoku (+3 pola)!`
-                                });
-                            }
-                        }, 2000);
-                    }
                 }
             },
 
@@ -3486,7 +3193,7 @@
                 let unit = RoomState.isPartyCampaign ? 'POLE' : 'PKT';
                 document.getElementById('winnerSub').innerText = list.length > 0 ? `👑 WYGRYWA: ${list[0].name.toUpperCase()} (${list[0].score} ${unit})` : '';
                 document.getElementById('podiumRows').innerHTML = list.map((p, i) =>
-                    `<tr class="border-b border-gray-800"><td class="py-2">#${i+1}</td><td class="py-2"><span style="color:${p.color}">■</span> ${p.name}</td><td class="py-2 text-right text-yellow-400 font-bold">${p.score} ${unit}</td></tr>`
+                    `<tr class="border-b border-gray-800"><td class="py-2">#${i+1}</td><td class="py-2"><span style="color:${safeColor(p.color)}">■</span> ${escapeHTML(p.name)}</td><td class="py-2 text-right text-yellow-400 font-bold">${Number(p.score)||0} ${unit}</td></tr>`
                 ).join('');
 
                 document.getElementById('btnBackToLobby').style.display = isHost ? 'block' : 'none';
@@ -3502,7 +3209,7 @@
                 try { const c = await auth.signInAnonymously(); myId = c.user.uid; }
                 catch(e) { myId = 'p_' + Math.random().toString(36).substr(2, 6); }
             },
-            async createRoom(withBotsCount = 0) {
+            async createRoom() {
                 Sound.init(); showErr("Tworzenie pokoju...", true);
                 try {
                     await this.auth();
@@ -3514,12 +3221,6 @@
                     });
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
-
-                    if(withBotsCount > 0) {
-                        for(let i=0; i<withBotsCount; i++) {
-                            await BotAI.addBot();
-                        }
-                    }
                 } catch(e) { showErr("Błąd Firebase: Ustaw reguły bazy na true/true!"); }
             },
             async joinRoom(code = null) {
@@ -3547,11 +3248,30 @@
                     document.getElementById('lobbySkinSelect').value = chosenSkin;
                     document.getElementById('btnStartMatch').style.display = isHost ? 'block' : 'none';
                     document.getElementById('clientWaitMsg').style.display = isHost ? 'none' : 'block';
-                    document.getElementById('hostBotControls').style.display = isHost ? 'flex' : 'none';
                     document.getElementById('mapSelect').disabled = !isHost;
                     document.getElementById('mutatorSelect').disabled = !isHost;
                     document.getElementById('timeSelect').disabled = !isHost;
                 } catch(e) { showErr("Błąd dołączania: " + e.message); }
+            },
+            async addBots() {
+                if(!isHost || !currentRoom) return;
+                const snap = await db.ref(`room_players/${currentRoom}`).once('value');
+                const players = snap.val() || {};
+                const existing = Object.entries(players).filter(([id, p]) => p && p.isBot);
+                const names = ['Bolek BOT', 'Koxu BOT', 'Pixel BOT', 'Turbo BOT'];
+                const colors = ['#ff2a6d', '#ffde00', '#00e676', '#b388ff'];
+                const wanted = 3;
+                for(let i=existing.length; i<wanted; i++) {
+                    const id = 'bot_' + i + '_' + currentRoom.toLowerCase();
+                    await db.ref(`room_players/${currentRoom}/${id}`).set({
+                        id, name: names[i % names.length], color: colors[i % colors.length],
+                        skin: ['ninja','cyborg','king','astro'][i % 4], isBot: true, botIndex: i,
+                        chips: 100, x: 800 + i*35, y: 800 + i*25, hp: 100, shield: 0,
+                        score: 0, boardPos: 0, prison: 0, isDead: false, wep: 'pistol'
+                    });
+                }
+                document.getElementById('btnAddBots').innerText = '🤖 BOTY GOTOWE';
+                document.getElementById('btnAddBots').disabled = true;
             },
             changeMySkinInLobby(sk) {
                 selectSkin(sk);
@@ -3591,8 +3311,8 @@
                     RoomState.map = d.map || 'forest';
                     RoomState.mutatorSetting = d.mutatorSetting || 'random';
                     RoomState.mutator = d.mutator || 'none';
-                    RoomState.matchDuration = Number(d.matchDuration) || 60;
-                    if(d.timer !== undefined && !isNaN(d.timer)) RoomState.timer = Number(d.timer);
+                    RoomState.matchDuration = d.matchDuration || 60;
+                    RoomState.timer = d.timer ?? 60;
                     RoomState.bombHolder = d.bombHolder || null;
                     RoomState.bombTimer = d.bombTimer ?? 10;
                     RoomState.crownHolder = d.crownHolder || myId;
@@ -3667,7 +3387,7 @@
                     });
                     document.getElementById('lobbyCount').innerText = arr.length;
                     document.getElementById('lobbyPlayerList').innerHTML = arr.map(p =>
-                        `<li class="flex justify-between items-center bg-black/40 p-1"><span>${skinIcons[p.skin]||'🧢'} <span style="color:${p.color}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-yellow-400">${p.chips ?? 100} 🪙</span></li>`
+                        `<li class="flex justify-between items-center bg-black/40 p-1"><span>${skinIcons[p.skin]||'🧢'} <span style="color:${safeColor(p.color)}">■</span> ${escapeHTML(p.name)} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-yellow-400">${Number(p.chips ?? 100)} 🪙</span></li>`
                     ).join('');
                 });
 
@@ -3679,7 +3399,7 @@
                     if(c.snd) Sound.play(c.snd);
                     const box = document.getElementById('chatMessages');
                     const d = document.createElement('div');
-                    d.innerHTML = `<span style="color:${c.color};font-weight:bold;">${c.name}:</span> <span class="text-gray-200">${c.msg}</span>`;
+                    d.innerHTML = `<span style="color:${safeColor(c.color)};font-weight:bold;">${escapeHTML(c.name)}:</span> <span class="text-gray-200">${escapeHTML(c.msg)}</span>`;
                     box.appendChild(d);
                     box.scrollTop = box.scrollHeight;
                 });
@@ -3688,29 +3408,8 @@
                     let ev = snap.val(); snap.ref.remove();
                     if(!ev || !Game.me) return;
 
-                    if(ev.type === 'hitPlayer') {
-                        if(ev.target === myId) {
-                            Game.me.takeDamage(ev.dmg, ev.attacker, ev.kx, ev.ky);
-                        } else if(isHost && Game.botStates[ev.target]) {
-                            let bState = Game.botStates[ev.target];
-                            if(!bState.isDead) {
-                                bState.hp -= ev.dmg;
-                                bState.x = Math.max(60, Math.min(WORLD_SIZE-60, bState.x + (ev.kx || 0)*0.12));
-                                bState.y = Math.max(60, Math.min(WORLD_SIZE-60, bState.y + (ev.ky || 0)*0.12));
-                                if(RoomState.activeMinigame === 'crown' && RoomState.crownHolder === ev.target && ev.attacker) {
-                                    db.ref(`rooms/${currentRoom}`).update({ crownHolder: ev.attacker });
-                                }
-                                if(bState.hp <= 0) {
-                                    bState.hp = 0; bState.isDead = true; bState.respawn = 2.5;
-                                    let bObj = netPlayers[ev.target];
-                                    db.ref(`events/${currentRoom}`).push({
-                                        type: 'kill', killer: ev.attacker,
-                                        victimName: bObj ? bObj.name : 'Bot',
-                                        victimColor: bObj ? bObj.color : '#fff', pts: 10
-                                    });
-                                }
-                            }
-                        }
+                    if(ev.type === 'hitPlayer' && ev.target === myId) {
+                        Game.me.takeDamage(ev.dmg, ev.attacker, ev.kx, ev.ky);
                     }
                     else if(ev.type === 'meteorBoom') {
                         FX.explosion(ev.x, ev.y);
@@ -3764,7 +3463,6 @@
                 let order = [myId, ...Object.keys(netPlayers)];
                 const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
                 const chosenMut = RoomState.mutatorSetting === 'random' ? muts[Math.floor(Math.random()*muts.length)] : RoomState.mutatorSetting;
-                const dur = Number(RoomState.matchDuration) || 60;
 
                 if(RoomState.mode === 'party') {
                     Board.myPos = 0; Board.visualPos = 0; Board.myPrison = 0; Board.myCards = [];
@@ -3782,7 +3480,7 @@
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'playing', activeMinigame: RoomState.mode, mutator: chosenMut,
-                        timer: dur, stormR: 1100, bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
+                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                     });
                 }
             }
@@ -3798,10 +3496,10 @@
         const rParam = new URLSearchParams(window.location.search).get('room');
         if(rParam) document.getElementById('joinCode').value = rParam.toUpperCase();
 
-        document.getElementById('btnCreateRoom').onclick = () => Lobby.createRoom(0);
-        document.getElementById('btnCreateSoloBots').onclick = () => Lobby.createRoom(3);
+        document.getElementById('btnCreateRoom').onclick = () => Lobby.createRoom();
         document.getElementById('btnJoinRoom').onclick = () => Lobby.joinRoom();
         document.getElementById('btnStartMatch').onclick = () => Lobby.launchGame();
+        document.getElementById('btnAddBots').onclick = () => Lobby.addBots();
         document.getElementById('btnQuickRematch').onclick = () => Lobby.launchGame();
         document.getElementById('btnBackToLobby').onclick = () => {
             if(isHost) db.ref(`rooms/${currentRoom}`).update({ status: 'lobby' });
