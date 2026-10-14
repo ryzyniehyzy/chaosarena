@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAWEŁ PYKA: PIXEL ARENA ULTIMATE</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -13,95 +13,159 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #060609; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #07070c; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: crosshair; image-rendering: pixelated; }
         
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(6, 6, 12, 0.92); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(5px); }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(7, 7, 14, 0.92); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
         .screen.active { display: flex; }
         
-        .panel { background-color: #141420; border: 4px solid #fff; box-shadow: 10px 10px 0px 0px #000; padding: 1.4rem; max-width: 880px; width: 95%; text-align: center; position: relative; }
-        .btn { background-color: #ff2a6d; border: 4px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5); color: #fff; padding: 0.75rem 1.1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s; font-family: inherit; font-size: 10px; outline: none; }
+        .panel { background-color: #151525; border: 4px solid #fff; box-shadow: 12px 12px 0px 0px #000; padding: 1.5rem; max-width: 1020px; width: 96%; text-align: center; position: relative; max-height: 94vh; overflow-y: auto; }
+        .btn { background-color: #ff2a6d; border: 3px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5); color: #fff; padding: 0.75rem 1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, background-color 0.1s; font-family: inherit; font-size: 10px; outline: none; }
         .btn:hover { background-color: #ff5286; }
         .btn:active { transform: translateY(3px); }
+        .btn:disabled { background-color: #444; color: #888; border-color: #777; cursor: not-allowed; }
         
-        .input-pixel { background-color: #090910; border: 4px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.55rem; width: 100%; text-align: center; font-size: 10px; }
+        .input-pixel { background-color: #090912; border: 3px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.55rem; width: 100%; text-align: center; font-size: 10px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { border: 3px solid #2d2d44; background: #0c0c14; padding: 7px; cursor: pointer; transition: all 0.12s; text-align: left; }
-        .mode-card:hover { border-color: #666688; }
-        .mode-card.selected { border-color: #05d5fa; background: #17172a; box-shadow: inset 0 0 0 2px #05d5fa; }
+        .mode-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 9px; cursor: pointer; transition: all 0.12s; text-align: left; }
+        .mode-card:hover { border-color: #666699; }
+        .mode-card.selected { border-color: #05d5fa; background: #191932; box-shadow: inset 0 0 0 2px #05d5fa; }
 
-        .skin-card { border: 3px solid #2d2d44; background: #0c0c14; padding: 6px; cursor: pointer; font-size: 8px; color: #aaa; }
-        .skin-card.selected { border-color: #ffde00; color: #fff; background: #242012; }
+        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 7px; cursor: pointer; font-size: 8px; color: #aaa; transition: all 0.1s; }
+        .skin-card.selected { border-color: #ffde00; color: #fff; background: #262210; }
 
+        .reward-card { border: 4px solid #ffde00; background: #1a1829; padding: 14px; cursor: pointer; transition: transform 0.15s; width: 31%; }
+        .reward-card:hover { transform: translateY(-6px); background: #27243d; border-color: #05d5fa; }
+
+        /* HUD MINIGIER */
         #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
-        #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
-        #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 45; color: #ffde00; font-size: 24px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
-        #musicToggle { position: absolute; bottom: 14px; left: 14px; z-index: 60; pointer-events: auto; }
+        
+        /* HUD PLANSZÓWKI (MARIO PARTY) */
+        #boardHud { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 45; width: 92%; max-width: 850px; display: none; pointer-events: none; }
+        .board-box { background: rgba(15, 15, 28, 0.92); border: 4px solid #fff; box-shadow: 8px 8px 0 #000; padding: 14px; pointer-events: auto; }
 
-        .bar-wrap { width: 210px; height: 15px; border: 3px solid #fff; background: #111; margin-top: 4px; position: relative; }
+        /* CZAT I EMOTKI */
+        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 18, 0.9); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
+        #chatMessages { height: 115px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+        .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 5px; cursor: pointer; font-size: 12px; border-radius: 2px; }
+        .emote-btn:hover { background: #323254; border-color: #05d5fa; }
+
+        /* KOŁO RULETKI */
+        #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+
+        #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
+        #centerAnnouncement { position: absolute; top: 22%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 22px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+
+        .bar-wrap { width: 200px; height: 15px; border: 3px solid #fff; background: #111; margin-top: 4px; position: relative; }
         #hpBar { height: 100%; background: #ff2a6d; width: 100%; transition: width 0.1s; }
-        #shieldBar { position: absolute; top: 0; left: 0; height: 100%; background: #05d5fa; width: 0%; opacity: 0.8; transition: width 0.1s; }
+        #shieldBar { position: absolute; top: 0; left: 0; height: 100%; background: #05d5fa; width: 0%; opacity: 0.8; }
         #dashBar { height: 100%; background: #ffde00; width: 100%; }
 
-        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
+        .crt-effect::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
     </style>
 </head>
-<body class="crt">
+<body id="mainBody" class="crt-effect">
 
     <canvas id="gameCanvas"></canvas>
 
     <div id="centerAnnouncement">START!</div>
     <div id="killFeed"></div>
 
-    <!-- PRZYCISK MUZYKI W TLE -->
-    <button id="musicToggle" class="btn !bg-[#222238] hover:!bg-[#333355] !p-2 !text-[8px]" onclick="Sound.toggleMusic()">🎵 MUZYKA: WŁ</button>
+    <!-- HUD PLANSZÓWKI (MARIO PARTY) -->
+    <div id="boardHud">
+        <div class="board-box flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="text-left">
+                <div class="text-xs text-[#ffde00] mb-1">🎲 PLANSZA SUPER PIXEL PARTY (CEL: POLE 25)</div>
+                <div id="boardTurnText" class="text-[10px] text-[#05d5fa]">Tura gracza: ---</div>
+                <div id="boardStatusMsg" class="text-[8px] text-gray-300 mt-1">Rzucajcie po kolei kostką, a potem walczcie w minigrze!</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div id="myCardsContainer" class="flex gap-1"></div>
+                <button id="btnRollDice" class="btn !bg-[#00c853] hover:!bg-[#2ee578] !text-xs !py-3 !px-5 hidden" onclick="Board.rollDice()">🎲 RZUĆ KOSTKĄ!</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- LEWY HUD -->
+    <!-- NAKŁADKA RULETKI LOSUJĄCEJ MINIGRĘ -->
+    <div id="rouletteOverlay">
+        <div class="text-xl text-[#05d5fa] mb-3">🎰 LOSOWANIE NASTĘPNEJ MINIGRY! 🎰</div>
+        <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_30px_#ff2a6d] mb-4">
+            🔫 ARENA PvP
+        </div>
+        <div id="rouletteSub" class="text-[10px] text-gray-300">Zwycięzca minigry wybierze 1 z 3 Kart Wspomagających na planszę!</div>
+    </div>
+
+    <!-- LEWY HUD MINIGRY -->
     <div id="hud">
         <div id="hudModeTitle" class="text-sm text-[#05d5fa] mb-1">TRYB</div>
-        <div id="hudTimer" class="text-2xl text-yellow-400 mb-2">01:30</div>
+        <div id="hudTimer" class="text-2xl text-yellow-400 mb-2">01:00</div>
         <div class="text-[8px] text-gray-300">ZDROWIE + TARCZA</div>
         <div class="bar-wrap"><div id="hpBar"></div><div id="shieldBar"></div></div>
         <div class="text-[8px] text-gray-300 mt-2">ZRYW [SPACJA]</div>
         <div class="bar-wrap !h-3"><div id="dashBar"></div></div>
         <div id="hudWeapon" class="text-[9px] text-yellow-300 mt-2">BROŃ: Pistolet</div>
         <div id="hudBuffs" class="text-[8px] text-[#e040fb] mt-1"></div>
-        <div class="text-[7px] text-gray-400 mt-2">[E] Emotka | [SPACJA] Dash</div>
     </div>
 
     <!-- PRAWY HUD -->
     <div id="hudRight">
-        <div class="bg-black/80 border-3 border-white p-3 min-w-[205px]">
-            <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING NA ŻYWO</div>
+        <div class="bg-black/80 border-3 border-white p-3 min-w-[210px]">
+            <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING GRACZY</div>
             <ul id="liveScoreboard" class="text-[8px] space-y-2"></ul>
+        </div>
+    </div>
+
+    <!-- CZAT NA ŻYWO + PASEK 10 EMOTEK -->
+    <div id="chatWidget">
+        <div class="bg-[#1b1b2f] px-2 py-1 flex justify-between items-center border-b-2 border-gray-600">
+            <span class="text-[8px] text-[#05d5fa]">💬 CZAT I EMOTKI</span>
+            <button class="text-[8px] text-gray-300 cursor-pointer" onclick="Chat.toggleMinimize()">[_]</button>
+        </div>
+        <div id="chatBody">
+            <div class="flex justify-between bg-[#11111d] p-1 border-b border-gray-700">
+                <button class="emote-btn" onclick="Chat.sendEmote('😎')">😎</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('🔥')">🔥</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('💀')">💀</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('😂')">😂</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('👑')">👑</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('🤡')">🤡</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('❤️')">❤️</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('🤬')">🤬</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('👀')">👀</button>
+                <button class="emote-btn" onclick="Chat.sendEmote('🎉')">🎉</button>
+            </div>
+            <div id="chatMessages"></div>
+            <form id="chatForm" class="flex border-t-2 border-gray-600">
+                <input type="text" id="chatInput" placeholder="Napisz wiadomość [ENTER]..." class="bg-black text-white p-2 text-[8px] flex-grow outline-none" maxlength="60">
+                <button type="submit" class="bg-[#05d5fa] text-black px-2 text-[8px] font-bold cursor-pointer">WYŚLIJ</button>
+            </form>
         </div>
     </div>
 
     <div id="uiContainer" class="ui-layer">
         
-        <!-- MENU GŁÓWNE -->
+        <!-- 1. EKRAN MENU GŁÓWNEGO -->
         <div id="screen-menu" class="screen active">
-            <div class="panel !max-w-lg">
+            <div class="panel !max-w-xl">
                 <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-[10px] text-yellow-400 mb-4 tracking-wider">PIXEL ARENA: ULTIMATE EDITION</h2>
+                <h2 class="text-xs text-yellow-400 mb-5 tracking-wider">🎲 SUPER PIXEL PARTY EDITION 🎲</h2>
                 
-                <div class="flex gap-3 mb-3">
+                <div class="flex gap-3 mb-4">
                     <div class="w-2/3 text-left">
                         <label class="text-[8px] text-gray-400 block mb-1">TWÓJ PSEUDONIM:</label>
                         <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
                     </div>
                     <div class="w-1/3 text-left">
-                        <label class="text-[8px] text-gray-400 block mb-1">KOLOR:</label>
-                        <input type="color" id="playerColor" value="#05d5fa" class="w-full h-[36px] border-4 border-white cursor-pointer bg-black interactive">
+                        <label class="text-[8px] text-gray-400 block mb-1">KOLOR PIONKA:</label>
+                        <input type="color" id="playerColor" value="#05d5fa" class="w-full h-[36px] border-3 border-white cursor-pointer bg-black interactive">
                     </div>
                 </div>
 
-                <!-- 6 Skórek Pixel-Art -->
-                <div class="text-[8px] text-gray-400 text-left mb-1">WYBIERZ POSTAĆ PIXEL-ART:</div>
-                <div class="grid grid-cols-3 gap-2 mb-4 interactive">
+                <div class="text-[8px] text-gray-400 text-left mb-1">WYBIERZ SWOJEGO BOHATERA PIXEL-ART:</div>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-5 interactive">
                     <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ</div>
                     <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA</div>
                     <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ</div>
@@ -110,96 +174,178 @@
                     <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL</div>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <button class="btn w-full interactive !bg-[#00c853] hover:!bg-[#2ee578]" id="btnCreateRoom">STWÓRZ IMPREZĘ (HOST)</button>
+                <div class="flex flex-col gap-3">
+                    <button class="btn w-full interactive !bg-[#00c853] hover:!bg-[#2ee578] !text-xs !py-4" id="btnCreateRoom">STWÓRZ IMPREZĘ ONLINE (HOST)</button>
                     <div class="flex gap-2">
-                        <input type="text" id="joinCode" placeholder="KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
-                        <button class="btn !bg-[#05d5fa] !text-black hover:!bg-[#5ce3fc] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ</button>
+                        <input type="text" id="joinCode" placeholder="WPISZ KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
+                        <button class="btn !bg-[#05d5fa] !text-black hover:!bg-[#5ce3fc] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ DO GRY</button>
                     </div>
                 </div>
                 <div id="menuError" class="bg-black/90 border-2 border-red-500 p-2 text-[8px] text-yellow-400 mt-3 hidden"></div>
             </div>
         </div>
 
-        <!-- LOBBY -->
+        <!-- 2. ROZBUDOWANE LOBBY (CENTRUM DOWODZENIA + USTAWIENIA) -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
-                <div class="flex justify-between items-center border-b-4 border-white pb-2 mb-3">
+                <!-- Nagłówek Lobby -->
+                <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-3 mb-4 gap-2">
                     <div class="text-left">
-                        <h2 class="text-base text-[#05d5fa]">LOBBY DRUŻYNY</h2>
-                        <span class="text-[7px] text-gray-400">7 Trybów | Bazooki, Plazma, Dopalacze i Radar!</span>
+                        <h2 class="text-lg text-[#05d5fa]">🏰 CENTRUM IMPREZY (LOBBY)</h2>
+                        <span class="text-[8px] text-yellow-300">Grajcie w Mario Party na planszy lub odpalajcie szybkie minigry!</span>
                     </div>
-                    <div class="text-right">
-                        <span class="text-[7px] text-gray-400 block">KOD POKOJU:</span>
-                        <span id="lobbyCode" class="text-2xl text-[#ff2a6d] font-bold tracking-widest">-----</span>
+                    <div class="flex items-center gap-3 bg-black/60 border-2 border-[#ff2a6d] px-4 py-2">
+                        <div class="text-right">
+                            <span class="text-[7px] text-gray-400 block">KOD POKOJU:</span>
+                            <span id="lobbyCode" class="text-xl text-[#ffde00] font-bold tracking-widest">-----</span>
+                        </div>
+                        <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 !text-[8px] interactive" id="btnCopyLink">🔗 KOPIUJ LINK</button>
                     </div>
                 </div>
+                <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK ZAPROSZENIA DO SCHOWKA!</div>
 
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="w-full md:w-4/12 flex flex-col">
-                        <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 !text-[8px] w-full mb-2 interactive" id="btnCopyLink">🔗 SKOPIUJ LINK DLA KOLEGI</button>
-                        <div id="copyAlert" class="text-[7px] text-green-400 mb-2 hidden">SKOPIOWANO LINK!</div>
-                        
-                        <div class="text-[8px] text-gray-400 text-left mb-1">GRACZE (<span id="lobbyCount">1</span>):</div>
-                        <ul id="lobbyPlayerList" class="bg-black/60 border-2 border-gray-600 h-48 overflow-y-auto p-2 text-[9px] text-left space-y-2 flex-grow"></ul>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 text-left">
+                    <!-- Kolumna 1: Lista Graczy + Ustawienia Dźwięku/Grafiki (4/12) -->
+                    <div class="lg:col-span-4 flex flex-col gap-3">
+                        <div class="bg-black/60 border-2 border-gray-600 p-3">
+                            <div class="text-[9px] text-[#05d5fa] mb-2">👥 EKIPA W POKOJU (<span id="lobbyCount">1</span>):</div>
+                            <ul id="lobbyPlayerList" class="h-36 overflow-y-auto space-y-2 text-[9px]"></ul>
+                        </div>
+
+                        <!-- Panel Ustawień Gracza -->
+                        <div class="bg-black/60 border-2 border-gray-600 p-3">
+                            <div class="text-[9px] text-yellow-400 mb-2 border-b border-gray-700 pb-1">⚙️ USTAWIENIA GRY I DŹWIĘKU</div>
+                            <div class="space-y-2 text-[8px]">
+                                <label class="flex justify-between items-center cursor-pointer">
+                                    <span>🎵 Muzyka Chiptune:</span>
+                                    <input type="checkbox" id="chkMusic" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                                </label>
+                                <label class="flex justify-between items-center cursor-pointer">
+                                    <span>🔊 Efekty Dźwiękowe (SFX):</span>
+                                    <input type="checkbox" id="chkSfx" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                                </label>
+                                <label class="flex justify-between items-center cursor-pointer">
+                                    <span>💥 Trzęsienie Ekranu:</span>
+                                    <input type="checkbox" id="chkShake" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                                </label>
+                                <label class="flex justify-between items-center cursor-pointer">
+                                    <span>📺 Filtr Retro CRT:</span>
+                                    <input type="checkbox" id="chkCrt" checked onchange="Settings.update()" class="w-4 h-4 accent-[#05d5fa]">
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="w-full md:w-8/12 flex flex-col justify-between">
+                    <!-- Kolumna 2: Wybór Głównego Trybu i Minigier (8/12) -->
+                    <div class="lg:col-span-8 flex flex-col justify-between bg-black/40 border-2 border-gray-700 p-3">
                         <div>
-                            <div class="text-[8px] text-gray-400 text-left mb-1">TRYB ROZGRYWKI (HOST):</div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3 interactive">
-                                <div class="mode-card selected" onclick="Lobby.selectMode('arena')" id="m-arena">
-                                    <div class="text-[8px] text-[#ff2a6d] mb-1">🔫 ARENA PvP</div>
-                                    <div class="text-[6px] text-gray-400">Rozwałka, Bazooki, Plazma i Power-Upy!</div>
+                            <div class="text-[9px] text-yellow-400 mb-2">1. WYBIERZ RODZAJ ROZGRYWKI (DECUDUJE HOST):</div>
+                            
+                            <!-- Główny Baner Mario Party + Ruletka -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3 interactive">
+                                <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
+                                    <div class="text-[10px] text-[#ffde00] mb-1">🎲 SUPER MARIO PARTY (PLANSZA!)</div>
+                                    <div class="text-[7px] text-gray-300 leading-relaxed">Rzucajcie kostką na planszy 25 pól! Po każdej turze ruletka losuje minigrę, a zwycięzca wybiera 1 z 3 Kart!</div>
                                 </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('royale')" id="m-royale">
-                                    <div class="text-[8px] text-[#ffde00] mb-1">🌪️ STREFA BURZY</div>
-                                    <div class="text-[6px] text-gray-400">Kurczący się pierścień i walka w centrum!</div>
-                                </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('zombies')" id="m-zombies">
-                                    <div class="text-[8px] text-[#00e676] mb-1">🧟 HORDA ZOMBIE</div>
-                                    <div class="text-[6px] text-gray-400">Kooperacja przeciwko potworom!</div>
-                                </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
-                                    <div class="text-[8px] text-[#ff9100] mb-1">💣 GORĄCA BOMBA</div>
-                                    <div class="text-[6px] text-gray-400">Dotknij kolegę, by oddać tykający ładunek!</div>
-                                </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('koth')" id="m-koth">
-                                    <div class="text-[8px] text-[#05d5fa] mb-1">👑 KRÓL WZGÓRZA</div>
-                                    <div class="text-[6px] text-gray-400">Trzymaj złotą strefę i wypychaj innych!</div>
-                                </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('sniper')" id="m-sniper">
-                                    <div class="text-[8px] text-[#00e5ff] mb-1">🎯 SNAJPERZY</div>
-                                    <div class="text-[6px] text-gray-400">1 celny strzał = Natychmiastowy zgon!</div>
-                                </div>
-                                <div class="mode-card col-span-2 md:col-span-3" onclick="Lobby.selectMode('coins')" id="m-coins">
-                                    <div class="text-[8px] text-[#e040fb] mb-1">💎 GORĄCZKA ZŁOTA (COIN RUSH)</div>
-                                    <div class="text-[6px] text-gray-400">Zbieraj diamenty na mapie! Zastrzel kolegę, aby ukraść mu połowę skarbu!</div>
+                                <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
+                                    <div class="text-[10px] text-[#00e676] mb-1">🎰 LOSOWA RULETKA MINIGIER</div>
+                                    <div class="text-[7px] text-gray-300 leading-relaxed">Nie wiesz w co grać? Zakręć kołem fortuny, które wylosuje Wam tryb oraz mapę!</div>
                                 </div>
                             </div>
 
-                            <div class="text-[8px] text-gray-400 text-left mb-1">MAPA PIXEL-ART:</div>
-                            <select id="mapSelect" class="input-pixel interactive mb-3" onchange="Lobby.changeMap(this.value)">
-                                <option value="forest">🌲 Leśny Bunkier (Skrzynie i Sosny)</option>
-                                <option value="cyber">🟣 Cyber-Miasto (Neonowa Siatka i Lasery)</option>
-                                <option value="ice">❄️ Lodowa Twierdza (Śliski Lód i Kryształy)</option>
-                                <option value="lava">🌋 Wulkaniczny Krater (Ciemny Bazalt i Lawa)</option>
-                            </select>
+                            <div class="text-[8px] text-gray-400 mb-1">LUB WYBIERZ KONKRETNĄ MINIGRĘ BEZ PLANSZY:</div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3 interactive">
+                                <div class="mode-card" onclick="Lobby.selectMode('arena')" id="m-arena">
+                                    <div class="text-[8px] text-[#ff2a6d]">🔫 ARENA PvP</div>
+                                    <div class="text-[6px] text-gray-400">Bazooki, Plazma i Power-Upy</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('royale')" id="m-royale">
+                                    <div class="text-[8px] text-[#ff9100]">🌪️ STREFA BURZY</div>
+                                    <div class="text-[6px] text-gray-400">Battle Royale w pierścieniu</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('zombies')" id="m-zombies">
+                                    <div class="text-[8px] text-[#00e676]">🧟 HORDA ZOMBIE</div>
+                                    <div class="text-[6px] text-gray-400">Kooperacja przeciw potworom</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
+                                    <div class="text-[8px] text-yellow-300">💣 GORĄCA BOMBA</div>
+                                    <div class="text-[6px] text-gray-400">Oddaj bombę zanim wybuchnie</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('koth')" id="m-koth">
+                                    <div class="text-[8px] text-[#05d5fa]">👑 KRÓL WZGÓRZA</div>
+                                    <div class="text-[6px] text-gray-400">Trzymaj strefę i spychaj innych</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('sniper')" id="m-sniper">
+                                    <div class="text-[8px] text-cyan-300">🎯 SNAJPERZY</div>
+                                    <div class="text-[6px] text-gray-400">1 celny strzał = Zgon!</div>
+                                </div>
+                                <div class="mode-card col-span-2 md:col-span-3" onclick="Lobby.selectMode('coins')" id="m-coins">
+                                    <div class="text-[8px] text-[#e040fb]">💎 GORĄCZKA ZŁOTA (ZBIERAJ KLEJNOTY I KRADNIJ INNYM)</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="text-[8px] text-gray-400 block mb-1">BIOM ARENY PIXEL-ART:</label>
+                                    <select id="mapSelect" class="input-pixel interactive" onchange="Lobby.changeMap(this.value)">
+                                        <option value="forest">🌲 Leśny Bunkier</option>
+                                        <option value="cyber">🟣 Cyber-Neon</option>
+                                        <option value="ice">❄️ Lodowa Twierdza</option>
+                                        <option value="lava">🌋 Wulkaniczny Krater</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[8px] text-gray-400 block mb-1">CZAS MINIGRY:</label>
+                                    <select id="timeSelect" class="input-pixel interactive" onchange="Lobby.changeTime(this.value)">
+                                        <option value="45">⏱️ 45 Sekund (Szybka)</option>
+                                        <option value="60" selected>⏱️ 60 Sekund (Standard)</option>
+                                        <option value="90">⏱️ 90 Sekund (Długa)</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
-                            <button id="btnStartMatch" class="btn w-full !bg-[#00c853] hover:!bg-[#2ee578] interactive hidden">ROZPOCZNIJ BITWĘ!</button>
-                            <div id="clientWaitMsg" class="text-[9px] text-yellow-400 py-2 animate-pulse hidden">Czekaj aż Host uruchomi rundę...</div>
+                            <button id="btnStartMatch" class="btn w-full !bg-[#00c853] hover:!bg-[#2ee578] !text-xs !py-4 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
+                            <div id="clientWaitMsg" class="text-[9px] text-yellow-400 py-3 text-center animate-pulse hidden">Host konfiguruje ustawienia imprezy...</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PODIUM -->
+        <!-- 3. EKRAN NAGRODY PO MINIGRZE W MARIO PARTY (WYBÓR 1 Z 3 KART) -->
+        <div id="screen-cards" class="screen">
+            <div class="panel !max-w-2xl">
+                <h2 class="text-xl text-[#ffde00] mb-1">🎉 KONIEC MINIGRY! 🎉</h2>
+                <div id="cardWinnerText" class="text-xs text-[#05d5fa] mb-4">Zwycięzca wybiera 1 z 3 Kart Wspomagających na Planszę!</div>
+
+                <div id="cardChoicesContainer" class="flex justify-between gap-3 mb-4 hidden">
+                    <div class="reward-card" onclick="Board.pickRewardCard('double')">
+                        <div class="text-2xl mb-2">🎲🎲</div>
+                        <div class="text-[10px] text-yellow-400 mb-1">ZŁOTA KOSTKA</div>
+                        <div class="text-[7px] text-gray-300 leading-relaxed">W swojej turze rzucasz dwiema kostkami (ruch o 2 do 12 pól)!</div>
+                    </div>
+                    <div class="reward-card" onclick="Board.pickRewardCard('dash3')">
+                        <div class="text-2xl mb-2">🚀</div>
+                        <div class="text-[10px] text-[#00e676] mb-1">RAKIETOWY SKOK</div>
+                        <div class="text-[7px] text-gray-300 leading-relaxed">Natychmiast przesuwa Twój pionek o +3 pola do przodu bez czekania!</div>
+                    </div>
+                    <div class="reward-card" onclick="Board.pickRewardCard('sabotage')">
+                        <div class="text-2xl mb-2">💣</div>
+                        <div class="text-[10px] text-[#ff2a6d] mb-1">SABOTAŻ WROGA</div>
+                        <div class="text-[7px] text-gray-300 leading-relaxed">Cofa lidera (lub losowego rywala) o 3 pola do tyłu i zdejmuje Twoje więzienie!</div>
+                    </div>
+                </div>
+
+                <div id="cardWaitMsg" class="text-[9px] text-yellow-300 py-4 animate-pulse">Czekaj aż zwycięzca minigry wybierze swoją Kartę Nagrody...</div>
+            </div>
+        </div>
+
+        <!-- 4. EKRAN PODSUMOWANIA / PODIUM KOŃCOWE -->
         <div id="screen-podium" class="screen">
             <div class="panel !max-w-xl">
-                <h2 class="text-2xl text-yellow-400 mb-1">🏆 PODSUMOWANIE 🏆</h2>
+                <h2 class="text-2xl text-yellow-400 mb-1">🏆 WIELKI FINAŁ 🏆</h2>
                 <div id="winnerSub" class="text-xs text-[#05d5fa] mb-4">ZWYCIĘZCA: ---</div>
 
                 <div class="bg-black/70 border-2 border-gray-600 p-3 mb-4 max-h-52 overflow-y-auto">
@@ -217,7 +363,7 @@
 
                 <div class="flex gap-2">
                     <button id="btnBackToLobby" class="btn w-1/2 !bg-[#05d5fa] !text-black interactive hidden">WRÓĆ DO LOBBY</button>
-                    <button id="btnQuickRematch" class="btn w-1/2 !bg-[#00c853] interactive hidden">SZYBKI REWANŻ</button>
+                    <button id="btnQuickRematch" class="btn w-1/2 !bg-[#00c853] interactive hidden">ZAGRAJ PONOWNIE</button>
                     <div id="podiumWait" class="text-[9px] text-yellow-400 w-full py-2 animate-pulse hidden">Host wybiera co dalej...</div>
                 </div>
             </div>
@@ -226,7 +372,19 @@
     </div>
 
     <script>
-        // === UI & KOMUNIKATY ===
+        // === USTAWIENIA LOKALNE (AUDIO / WIDEO) ===
+        const Settings = {
+            music: true, sfx: true, shake: true, crt: true,
+            update() {
+                this.music = document.getElementById('chkMusic').checked;
+                this.sfx = document.getElementById('chkSfx').checked;
+                this.shake = document.getElementById('chkShake').checked;
+                this.crt = document.getElementById('chkCrt').checked;
+                const body = document.getElementById('mainBody');
+                if(this.crt) body.classList.add('crt-effect'); else body.classList.remove('crt-effect');
+            }
+        };
+
         let chosenSkin = 'cap';
         function selectSkin(sk) {
             chosenSkin = sk;
@@ -252,7 +410,7 @@
             el.className = `bg-black/90 border-2 p-2 text-[8px] mt-3 ${isWarn ? 'border-yellow-400 text-yellow-300' : 'border-red-500 text-red-400'}`;
         }
 
-        function announce(txt, dur = 1600) {
+        function announce(txt, dur = 1800) {
             const el = document.getElementById('centerAnnouncement');
             el.innerText = txt; el.style.display = 'block';
             if(dur > 0) setTimeout(() => el.style.display = 'none', dur);
@@ -267,9 +425,9 @@
             setTimeout(() => item.remove(), 3500);
         }
 
-        // === SYNTEZATOR DŹWIĘKÓW + GENERATOR MUZYKI CHIPTUNE W TLE ===
+        // === SYNTEZATOR DŹWIĘKÓW I MUZYKI ===
         const Sound = {
-            ctx: null, musicOn: true, musicTimer: null, step: 0,
+            ctx: null, musicTimer: null, step: 0,
             init() {
                 if(!this.ctx) {
                     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -277,40 +435,33 @@
                 }
                 if(this.ctx.state === 'suspended') this.ctx.resume();
             },
-            toggleMusic() {
-                this.init();
-                this.musicOn = !this.musicOn;
-                document.getElementById('musicToggle').innerText = `🎵 MUZYKA: ${this.musicOn ? 'WŁ' : 'WYŁ'}`;
-            },
             startMusicLoop() {
                 if(this.musicTimer) return;
                 const bassNotes = [110, 110, 130.8, 146.8, 98, 98, 130.8, 164.8];
                 const leadNotes = [440, 0, 523.2, 587.3, 659.2, 0, 523.2, 440];
                 this.musicTimer = setInterval(() => {
-                    if(!this.musicOn || !this.ctx || RoomState.status !== 'playing') return;
+                    if(!Settings.music || !this.ctx || (RoomState.status !== 'playing' && RoomState.status !== 'board')) return;
                     const t = this.ctx.currentTime;
-                    // Bas
                     let bFreq = bassNotes[this.step % bassNotes.length];
                     const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
                     osc.type = 'triangle'; osc.frequency.setValueAtTime(bFreq, t);
-                    g.gain.setValueAtTime(0.025, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+                    g.gain.setValueAtTime(0.022, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
                     osc.connect(g); g.connect(this.ctx.destination);
                     osc.start(t); osc.stop(t + 0.19);
 
-                    // Melodia co drugi krok
                     let lFreq = leadNotes[this.step % leadNotes.length];
                     if(lFreq > 0 && this.step % 2 === 0) {
                         const lOsc = this.ctx.createOscillator(), lg = this.ctx.createGain();
                         lOsc.type = 'sine'; lOsc.frequency.setValueAtTime(lFreq, t);
-                        lg.gain.setValueAtTime(0.015, t); lg.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+                        lg.gain.setValueAtTime(0.014, t); lg.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
                         lOsc.connect(lg); lg.connect(this.ctx.destination);
-                        lOsc.start(t); lOsc.stop(t + 0.26);
+                        lOsc.start(t); lOsc.stop(t + 0.25);
                     }
                     this.step++;
                 }, 220);
             },
             play(type) {
-                if(!this.ctx) return;
+                if(!this.ctx || !Settings.sfx) return;
                 const o = this.ctx.createOscillator(), g = this.ctx.createGain();
                 o.connect(g); g.connect(this.ctx.destination);
                 const t = this.ctx.currentTime;
@@ -321,6 +472,7 @@
                 else if(type === 'hit') { o.type='triangle'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(35, t+0.08); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.08); o.start(t); o.stop(t+0.08); }
                 else if(type === 'dash') { o.type='sine'; o.frequency.setValueAtTime(280, t); o.frequency.linearRampToValueAtTime(620, t+0.11); g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0.01, t+0.11); o.start(t); o.stop(t+0.11); }
                 else if(type === 'coin') { o.type='square'; o.frequency.setValueAtTime(587, t); o.frequency.setValueAtTime(880, t+0.06); g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0.01, t+0.16); o.start(t); o.stop(t+0.16); }
+                else if(type === 'tick') { o.type='sine'; o.frequency.setValueAtTime(750, t); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.005, t+0.04); o.start(t); o.stop(t+0.04); }
                 else if(type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(100, t); o.frequency.exponentialRampToValueAtTime(15, t+0.45); g.gain.setValueAtTime(0.16, t); g.gain.linearRampToValueAtTime(0.01, t+0.45); o.start(t); o.stop(t+0.45); }
             }
         };
@@ -340,7 +492,288 @@
 
         let myId = null, currentRoom = null, isHost = false;
         let netPlayers = {}, netZombies = {}, netItems = {};
-        const RoomState = { status: 'lobby', mode: 'arena', map: 'forest', timer: 90, bombHolder: null, bombTimer: 10, koth: {x:800, y:800, r:110}, stormR: 1100 };
+        const RoomState = {
+            status: 'lobby', isPartyCampaign: true, mode: 'party', activeMinigame: 'arena',
+            map: 'forest', matchDuration: 60, timer: 60, bombHolder: null, bombTimer: 10,
+            koth: {x:800, y:800, r:110}, stormR: 1100,
+            turnOrder: [], turnIdx: 0, boardMsg: 'Rozpoczynamy imprezę!', minigameWinner: null
+        };
+
+        // === SYSTEM CZATU I EMOTEK ===
+        const Chat = {
+            minimized: false,
+            init() {
+                document.getElementById('chatWidget').style.display = 'flex';
+                document.getElementById('chatForm').onsubmit = e => {
+                    e.preventDefault();
+                    const inp = document.getElementById('chatInput');
+                    const txt = inp.value.trim();
+                    if(!txt || !currentRoom) return;
+                    inp.value = '';
+                    inp.blur();
+                    db.ref(`chat/${currentRoom}`).push({
+                        name: document.getElementById('playerName').value.trim() || 'Paweł',
+                        color: document.getElementById('playerColor').value,
+                        msg: txt
+                    });
+                };
+            },
+            toggleMinimize() {
+                this.minimized = !this.minimized;
+                document.getElementById('chatBody').style.display = this.minimized ? 'none' : 'block';
+            },
+            sendEmote(em) {
+                Sound.init();
+                if(Game.me) Game.me.sendEmote(em);
+                if(currentRoom) {
+                    db.ref(`chat/${currentRoom}`).push({
+                        name: document.getElementById('playerName').value.trim() || 'Paweł',
+                        color: document.getElementById('playerColor').value,
+                        msg: `pokazuje emotkę: ${em}`
+                    });
+                }
+            }
+        };
+
+        // === PLANSZÓWKA (SUPER MARIO PARTY MODE - 26 PÓL) ===
+        const BOARD_TILES = [
+            {x:180, y:560, t:'start', n:'START'}, {x:310, y:560, t:'norm', n:'1'}, {x:440, y:560, t:'card', n:'🃏 KARTA'},
+            {x:570, y:560, t:'norm', n:'3'}, {x:700, y:560, t:'boost', n:'🚀 +2'}, {x:830, y:560, t:'norm', n:'5'},
+            {x:960, y:560, t:'prison', n:'🔒 WIĘZIENIE'}, {x:1090, y:560, t:'norm', n:'7'}, {x:1090, y:430, t:'back', n:'💀 -2'},
+            {x:960, y:430, t:'norm', n:'9'}, {x:830, y:430, t:'card', n:'🃏 KARTA'}, {x:700, y:430, t:'norm', n:'11'},
+            {x:570, y:430, t:'boost', n:'🚀 +2'}, {x:440, y:430, t:'norm', n:'13'}, {x:310, y:430, t:'prison', n:'🔒 WIĘZIENIE'},
+            {x:180, y:430, t:'norm', n:'15'}, {x:180, y:290, t:'card', n:'🃏 KARTA'}, {x:310, y:290, t:'norm', n:'17'},
+            {x:440, y:290, t:'back', n:'💀 -2'}, {x:570, y:290, t:'norm', n:'19'}, {x:700, y:290, t:'boost', n:'🚀 +2'},
+            {x:830, y:290, t:'prison', n:'🔒 WIĘZIENIE'}, {x:960, y:290, t:'back', n:'💀 -2'}, {x:1090, y:290, t:'norm', n:'23'},
+            {x:1090, y:160, t:'back', n:'💀 -2'}, {x:960, y:160, t:'goal', n:'🏰 META'}
+        ];
+
+        const Board = {
+            myPos: 0, myPrison: 0, myCards: [], activeDoubleDice: false, rollingLock: false,
+
+            initBoardView() {
+                switchScreen(null);
+                document.getElementById('hud').style.display = 'none';
+                document.getElementById('hudRight').style.display = 'block';
+                document.getElementById('boardHud').style.display = 'block';
+                this.rollingLock = false;
+                this.renderCardsUI();
+                this.updateTurnUI();
+                if(!Game.loopId) { Game.lastTime = performance.now(); Game.loopId = requestAnimationFrame(t => Game.loop(t)); }
+            },
+
+            renderCardsUI() {
+                const c = document.getElementById('myCardsContainer');
+                if(!c) return;
+                const names = { double: '🎲 2x Kostka', dash3: '🚀 +3 Pola', sabotage: '💣 Sabotaż' };
+                c.innerHTML = this.myCards.map((card, idx) =>
+                    `<button class="btn !bg-purple-700 hover:!bg-purple-500 !p-2 !text-[8px]" onclick="Board.useCard(${idx})">${names[card] || card}</button>`
+                ).join('');
+            },
+
+            useCard(idx) {
+                const currentTurnId = RoomState.turnOrder[RoomState.turnIdx];
+                if(currentTurnId !== myId) return announce("CZEKAJ NA SWOJĄ TURĘ!", 1200);
+                const card = this.myCards[idx];
+                this.myCards.splice(idx, 1);
+                this.renderCardsUI();
+                Sound.play('coin');
+
+                if(card === 'double') {
+                    this.activeDoubleDice = true;
+                    announce("🎲 AKTYWOWANO ZŁOTĄ KOSTKĘ (2-12)!", 1500);
+                } else if(card === 'dash3') {
+                    this.myPrison = 0;
+                    this.myPos = Math.min(25, this.myPos + 3);
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: 0 });
+                    announce("🚀 SKOK O +3 POLA!", 1400);
+                    if(this.myPos >= 25) db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                } else if(card === 'sabotage') {
+                    this.myPrison = 0;
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ prison: 0 });
+                    let targets = Object.keys(netPlayers);
+                    if(targets.length > 0) {
+                        let tid = targets[Math.floor(Math.random()*targets.length)];
+                        let tPos = Math.max(0, (netPlayers[tid].boardPos || 0) - 3);
+                        db.ref(`room_players/${currentRoom}/${tid}`).update({ boardPos: tPos });
+                        announce(`💣 COFNIĘTO GRACZA ${netPlayers[tid].name} O 3 POLA!`, 1600);
+                    }
+                }
+            },
+
+            updateTurnUI() {
+                if(RoomState.status !== 'board') return;
+                const turnId = RoomState.turnOrder[RoomState.turnIdx];
+                const isMyTurn = (turnId === myId);
+                let turnName = isMyTurn ? "TWOJA KOLEJ!" : (netPlayers[turnId]?.name || "Gracz");
+                document.getElementById('boardTurnText').innerText = `TURA: ${turnName}`;
+                document.getElementById('boardStatusMsg').innerText = RoomState.boardMsg || '';
+                document.getElementById('btnRollDice').style.display = (isMyTurn && !this.rollingLock) ? 'block' : 'none';
+            },
+
+            rollDice() {
+                if(this.rollingLock) return;
+                this.rollingLock = true;
+                document.getElementById('btnRollDice').style.display = 'none';
+                Sound.init();
+
+                const myName = document.getElementById('playerName').value.trim() || 'Paweł';
+
+                // Sprawdzenie więzienia
+                if(this.myPrison > 0) {
+                    this.myPrison--;
+                    Sound.play('hit');
+                    announce("🔒 SIEDZISZ W WIĘZIENIU! TRACISZ TURĘ!", 1800);
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ prison: this.myPrison });
+                    db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🔒 ${myName} odsiaduje wyrok w więzieniu i traci kolejkę!` });
+                    setTimeout(() => this.advanceTurn(), 1900);
+                    return;
+                }
+
+                let maxRoll = this.activeDoubleDice ? 12 : 6;
+                let minRoll = this.activeDoubleDice ? 2 : 1;
+                this.activeDoubleDice = false;
+
+                let roll = Math.floor(Math.random() * (maxRoll - minRoll + 1)) + minRoll;
+                Sound.play('coin');
+                announce(`🎲 WYRZUCONO: ${roll}!`, 1400);
+
+                this.myPos = Math.min(25, this.myPos + roll);
+                let tile = BOARD_TILES[this.myPos];
+                let msg = `🎲 ${myName} wyrzuca [${roll}] i staje na polu ${tile.n}!`;
+
+                setTimeout(() => {
+                    if(tile.t === 'boost') {
+                        this.myPos = Math.min(25, this.myPos + 2);
+                        msg += ` 🚀 BOOST +2 POLA!`;
+                        Sound.play('dash');
+                    } else if(tile.t === 'back') {
+                        this.myPos = Math.max(0, this.myPos - 2);
+                        msg += ` 💀 PUŁAPKA -2 POLA!`;
+                        Sound.play('hit');
+                    } else if(tile.t === 'prison') {
+                        this.myPrison = 1;
+                        msg += ` 🔒 TRAFIA DO WIĘZIENIA NA 1 TURĘ!`;
+                        Sound.play('boom');
+                    } else if(tile.t === 'card') {
+                        const pool = ['double', 'dash3', 'sabotage'];
+                        const newC = pool[Math.floor(Math.random()*pool.length)];
+                        this.myCards.push(newC);
+                        this.renderCardsUI();
+                        msg += ` 🃏 ZDOBYWA KARTĘ WSPOMAGAJĄCĄ!`;
+                        Sound.play('coin');
+                    }
+
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos, prison: this.myPrison });
+                    db.ref(`rooms/${currentRoom}`).update({ boardMsg: msg });
+
+                    if(this.myPos >= 25) {
+                        if(Game.me) Game.me.score += 500;
+                        db.ref(`room_players/${currentRoom}/${myId}`).update({ score: 999 });
+                        db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                    } else {
+                        setTimeout(() => this.advanceTurn(), 1300);
+                    }
+                }, 900);
+            },
+
+            advanceTurn() {
+                let nextIdx = RoomState.turnIdx + 1;
+                if(nextIdx >= RoomState.turnOrder.length) {
+                    // Wszyscy rzucili kostką -> uruchamiamy Ruletkę Minigier!
+                    const games = ['arena', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
+                    const maps = ['forest', 'cyber', 'ice', 'lava'];
+                    const pickedGame = games[Math.floor(Math.random()*games.length)];
+                    const pickedMap = maps[Math.floor(Math.random()*maps.length)];
+                    db.ref(`rooms/${currentRoom}`).update({
+                        status: 'roulette', activeMinigame: pickedGame, map: pickedMap, turnIdx: 0
+                    });
+                } else {
+                    db.ref(`rooms/${currentRoom}`).update({ turnIdx: nextIdx });
+                }
+            },
+
+            pickRewardCard(cardType) {
+                Sound.play('coin');
+                if(cardType === 'dash3') {
+                    this.myPos = Math.min(25, this.myPos + 3);
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos });
+                } else {
+                    this.myCards.push(cardType);
+                    this.renderCardsUI();
+                }
+                const myName = document.getElementById('playerName').value.trim() || 'Paweł';
+                if(this.myPos >= 25) {
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                } else {
+                    db.ref(`rooms/${currentRoom}`).update({
+                        status: 'board', turnIdx: 0,
+                        boardMsg: `🏆 ${myName} odebrał Kartę za wygraną minigrę! Nowa runda rzutów!`
+                    });
+                }
+            },
+
+            drawBoard(ctx) {
+                ctx.fillStyle = '#0d1322';
+                ctx.fillRect(0, 0, W, H);
+
+                ctx.save();
+                // Centrowanie planszy 1280x720
+                let scale = Math.min(W / 1320, H / 760);
+                ctx.translate((W - 1280*scale)/2, (H - 720*scale)/2 + 30);
+                ctx.scale(scale, scale);
+
+                // Tło wyspy pixel-art
+                ctx.fillStyle = '#1b3826'; ctx.fillRect(80, 90, 1120, 560);
+                ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 6; ctx.strokeRect(80, 90, 1120, 560);
+
+                // Ścieżki łączące pola
+                ctx.strokeStyle = '#6e5233'; ctx.lineWidth = 28;
+                ctx.beginPath();
+                BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y); else ctx.lineTo(t.x, t.y); });
+                ctx.stroke();
+
+                // Rysowanie poszczególnych pól (0..25)
+                BOARD_TILES.forEach((t, i) => {
+                    ctx.save();
+                    ctx.translate(t.x, t.y);
+                    ctx.fillStyle = '#000'; ctx.fillRect(-44, -34, 88, 68);
+                    let col = '#d4c29a';
+                    if(t.t === 'start') col = '#00e676';
+                    else if(t.t === 'goal') col = '#ffde00';
+                    else if(t.t === 'boost') col = '#05d5fa';
+                    else if(t.t === 'back') col = '#ff2a6d';
+                    else if(t.t === 'prison') col = '#6c5ce7';
+                    else if(t.t === 'card') col = '#e040fb';
+
+                    ctx.fillStyle = col; ctx.fillRect(-40, -30, 80, 60);
+                    ctx.fillStyle = '#000'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText(t.n, 0, 4);
+                    ctx.restore();
+                });
+
+                // Rysowanie pionków graczy na polach
+                let allP = [{ id: myId, name: document.getElementById('playerName').value || 'Ty', color: document.getElementById('playerColor').value, skin: chosenSkin, pos: this.myPos, prison: this.myPrison }];
+                Object.entries(netPlayers).forEach(([pid, p]) => {
+                    allP.push({ id: pid, name: p.name, color: p.color, skin: p.skin || 'cap', pos: p.boardPos || 0, prison: p.prison || 0 });
+                });
+
+                allP.forEach((p, idx) => {
+                    let tile = BOARD_TILES[Math.min(25, p.pos)] || BOARD_TILES[0];
+                    let ox = (idx % 2 === 0 ? -16 : 16);
+                    let oy = (idx < 2 ? -14 : 14);
+                    drawPixelHero(ctx, tile.x + ox, tile.y + oy, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', performance.now()*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '');
+                });
+
+                ctx.restore();
+
+                // Aktualizacja tabeli po prawej (według pola na planszy)
+                allP.sort((a,b) => b.pos - a.pos);
+                document.getElementById('liveScoreboard').innerHTML = allP.map((p, i) =>
+                    `<li class="flex justify-between"><span>#${i+1} <span style="color:${p.color}">■</span> ${p.name}</span><span class="text-yellow-400">Pole ${p.pos}/25</span></li>`
+                ).join('');
+            }
+        };
 
         // === MAPY I PRZESZKODY PIXEL-ART ===
         const WORLD_SIZE = 1600;
@@ -385,7 +818,6 @@
             }
         };
 
-        // === 6 BRONI (W TYM BAZOOKA I PLAZMA RYKOSZETUJĄCA) ===
         const WEAPONS = {
             pistol:  { name: 'Pistolet',  rate: 0.23, dmg: 22, proj: 1, spread: 0.04, spd: 1300, knock: 150, snd: 'shoot', bType: 'norm' },
             shotgun: { name: 'Strzelba',  rate: 0.68, dmg: 18, proj: 6, spread: 0.28, spd: 1150, knock: 340, snd: 'shotgun', bType: 'norm' },
@@ -417,9 +849,9 @@
                     if(e.key) this.keys[e.key.toLowerCase()] = true;
 
                     if(e.code === 'Space' && Game.me) Game.me.tryDash();
-                    if((e.code === 'KeyE' || e.key === '1' || e.key === '2' || e.key === '3') && Game.me) {
-                        const emotes = ['😎', '🔥', '💀', '😂'];
-                        Game.me.sendEmote(emotes[Math.floor(Math.random()*emotes.length)]);
+                    if(e.code === 'KeyE' && Game.me) {
+                        const emotes = ['😎', '🔥', '💀', '😂', '👑', '🎉'];
+                        Chat.sendEmote(emotes[Math.floor(Math.random()*emotes.length)]);
                     }
                 });
 
@@ -430,11 +862,12 @@
 
                 window.addEventListener('blur', () => { this.keys = {}; this.down = false; });
                 window.addEventListener('mousemove', e => { this.mx = e.clientX; this.my = e.clientY; });
-                window.addEventListener('mousedown', () => {
+                window.addEventListener('mousedown', e => {
                     Sound.init();
-                    const tag = document.activeElement ? document.activeElement.tagName : '';
-                    if(tag !== 'INPUT' && tag !== 'SELECT' && document.activeElement) document.activeElement.blur();
-                    this.down = true;
+                    if(e.target.tagName === 'CANVAS') {
+                        if(document.activeElement) document.activeElement.blur();
+                        this.down = true;
+                    }
                 });
                 window.addEventListener('mouseup', () => { this.down = false; });
             },
@@ -452,7 +885,7 @@
                 Input.wx = Input.mx + this.x; Input.wy = Input.my + this.y;
                 if(this.shkT > 0) this.shkT -= dt;
             },
-            shake(i, d) { this.shkI = i; this.shkT = d; },
+            shake(i, d) { if(!Settings.shake) return; this.shkI = i; this.shkT = d; },
             apply() {
                 ctx.save();
                 let ox = this.shkT > 0 ? (Math.random()-0.5)*this.shkI : 0;
@@ -514,7 +947,6 @@
             }
         };
 
-        // === RYSOWANIE PRZESZKÓD PIXEL-ART ===
         function drawPixelObstacle(ctx, o) {
             const P = 4;
             if(o.t === 'lava') {
@@ -554,7 +986,6 @@
             }
         }
 
-        // === RYSOWANIE BOHATERA PIXEL-ART ===
         function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote) {
             const P = 3;
             ctx.save();
@@ -568,7 +999,6 @@
                 return;
             }
 
-            // Aura Quad Damage lub Tarczy
             if(quad) {
                 ctx.fillStyle = 'rgba(224, 64, 251, 0.35)';
                 ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI*2); ctx.fill();
@@ -634,10 +1064,10 @@
                 ctx.fillStyle = '#ffaa00'; ctx.fillRect(0, -2*P, 2*P, 4*P);
             } else if(skin === 'cyborg') {
                 ctx.fillStyle = '#5c6bc0'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(P, -2*P, 2*P, 4*P); // Laserowe oko
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(P, -2*P, 2*P, 4*P);
             } else if(skin === 'king') {
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#ffde00'; ctx.fillRect(-3*P, -3*P, 3*P, 6*P); // Złota korona
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(-3*P, -3*P, 3*P, 6*P);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-2*P, 0, P, P);
             }
 
@@ -674,7 +1104,7 @@
             ctx.restore();
         }
 
-        // === KLASA LOKALNEGO GRACZA ===
+        // === KLASA GRACZA W MINIGRZE ===
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
@@ -682,7 +1112,7 @@
                 this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
                 this.angle = 0; this.anim = 0; this.muzzle = 0;
                 this.hp = 100; this.maxHp = 100; this.shield = 0;
-                this.wep = RoomState.mode === 'sniper' ? 'sniper' : 'pistol';
+                this.wep = RoomState.activeMinigame === 'sniper' ? 'sniper' : 'pistol';
                 this.fireCd = 0; this.dashCd = 0; this.dashTime = 0;
                 this.quadTime = 0; this.speedTime = 0;
                 this.emote = ''; this.emoteTimer = 0;
@@ -690,17 +1120,18 @@
                 this.passImmunity = 0;
             }
             sendEmote(em) {
-                this.emote = em; this.emoteTimer = 2.2;
+                this.emote = em; this.emoteTimer = 2.5;
                 FX.text(this.x, this.y - 20, em, '#fff', 14);
             }
             tryDash() {
-                if(this.dashCd <= 0 && !this.isDead) {
+                if(this.dashCd <= 0 && !this.isDead && RoomState.status === 'playing') {
                     this.dashCd = 1.7; this.dashTime = 0.16;
                     Sound.play('dash');
                     FX.burst(this.x, this.y, '#05d5fa', 10, 130, 5);
                 }
             }
             update(dt) {
+                const gm = RoomState.activeMinigame;
                 if(this.passImmunity > 0) this.passImmunity -= dt;
                 if(this.muzzle > 0) this.muzzle -= dt;
                 if(this.quadTime > 0) this.quadTime -= dt;
@@ -708,13 +1139,13 @@
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
                 if(this.isDead) {
-                    if(RoomState.mode !== 'bomb') {
+                    if(gm !== 'bomb') {
                         this.respawnTimer -= dt;
                         if(this.respawnTimer <= 0) {
                             this.isDead = false; this.hp = 100; this.shield = 0;
                             this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
                             this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                            this.wep = RoomState.mode === 'sniper' ? 'sniper' : 'pistol';
+                            this.wep = gm === 'sniper' ? 'sniper' : 'pistol';
                             FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
                         }
                     }
@@ -756,32 +1187,27 @@
                 if(this.fireCd > 0) this.fireCd -= dt;
                 if(this.dashCd > 0) this.dashCd -= dt;
 
-                if(RoomState.mode === 'sniper') this.wep = 'sniper';
+                if(gm === 'sniper') this.wep = 'sniper';
 
-                // Strzelanie
-                if(Input.down && this.fireCd <= 0 && RoomState.mode !== 'bomb') {
+                if(Input.down && this.fireCd <= 0 && gm !== 'bomb') {
                     let w = WEAPONS[this.wep];
                     this.fireCd = w.rate; this.muzzle = 0.06;
                     Sound.play(w.snd); Cam.shake(5, 0.09);
                     this.kx -= Math.cos(this.angle) * (w.knock * 0.55);
                     this.ky -= Math.sin(this.angle) * (w.knock * 0.55);
 
-                    let dmgVal = RoomState.mode === 'sniper' ? 999 : (this.quadTime > 0 ? w.dmg * 2 : w.dmg);
+                    let dmgVal = gm === 'sniper' ? 999 : (this.quadTime > 0 ? w.dmg * 2 : w.dmg);
                     for(let i=0; i<w.proj; i++) {
                         let a = this.angle + (Math.random()-0.5)*w.spread;
                         Game.spawnBullet(this.x, this.y, a, w.spd, dmgVal, w.knock, w.bType, true);
                     }
                 }
 
-                // Obrażenia od Burzy (Tryb Royale)
-                if(RoomState.mode === 'royale') {
-                    if(Math.hypot(this.x - 800, this.y - 800) > RoomState.stormR) {
-                        this.takeDamage(18 * dt, null);
-                    }
+                if(gm === 'royale' && Math.hypot(this.x - 800, this.y - 800) > RoomState.stormR) {
+                    this.takeDamage(18 * dt, null);
                 }
 
-                // Przekazywanie Gorącej Bomby
-                if(RoomState.mode === 'bomb' && RoomState.bombHolder === myId && this.passImmunity <= 0) {
+                if(gm === 'bomb' && RoomState.bombHolder === myId && this.passImmunity <= 0) {
                     Object.entries(netPlayers).forEach(([pid, p]) => {
                         if(!p.isDead && Math.hypot(this.x - p.x, this.y - p.y) < 42) {
                             this.passImmunity = 1.0;
@@ -792,8 +1218,7 @@
                     });
                 }
 
-                // Król Wzgórza
-                if(RoomState.mode === 'koth') {
+                if(gm === 'koth') {
                     let k = RoomState.koth;
                     if(Math.hypot(this.x - k.x, this.y - k.y) < k.r) {
                         this.kothTick = (this.kothTick || 0) + dt;
@@ -804,7 +1229,6 @@
                     }
                 }
 
-                // Zbieranie przedmiotów, broni i dopalaczy
                 Object.entries(netItems).forEach(([id, item]) => {
                     if(Math.hypot(this.x - item.x, this.y - item.y) < 32) {
                         Sound.play('coin');
@@ -824,7 +1248,7 @@
                         } else if(item.t === 'nitro') {
                             this.speedTime = 8.0;
                             FX.text(this.x, this.y, "NITRO SPEED!", "#ffde00", 11);
-                        } else if(WEAPONS[item.t] && RoomState.mode !== 'sniper') {
+                        } else if(WEAPONS[item.t] && gm !== 'sniper') {
                             this.wep = item.t;
                             FX.text(this.x, this.y, WEAPONS[this.wep].name.toUpperCase(), "#05d5fa", 11);
                             document.getElementById('hudWeapon').innerText = `BROŃ: ${WEAPONS[this.wep].name}`;
@@ -876,7 +1300,7 @@
                     Sound.play('boom');
                     FX.text(this.x, this.y, "ZGON!", "#ff2a6d", 14);
 
-                    if(RoomState.mode === 'coins') {
+                    if(RoomState.activeMinigame === 'coins') {
                         let lost = Math.floor(this.score / 2);
                         this.score -= lost;
                         if(attackerId && attackerId !== myId) {
@@ -889,13 +1313,51 @@
             }
         }
 
-        // === SILNIK ROZGRYWKI ===
+        // === SILNIK GRY I RULETKI ===
         const Game = {
             me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
             hostZombies: [],
 
+            runRouletteAnimation(targetGame) {
+                switchScreen(null);
+                document.getElementById('boardHud').style.display = 'none';
+                document.getElementById('hud').style.display = 'none';
+                const ov = document.getElementById('rouletteOverlay');
+                const box = document.getElementById('rouletteBox');
+                ov.style.display = 'flex';
+
+                const labels = {
+                    arena: '🔫 ARENA PvP', royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
+                    bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA', sniper: '🎯 SNAJPERZY', coins: '💎 ZŁOTA GORĄCZKA'
+                };
+                const keys = Object.keys(labels);
+                let count = 0;
+                const spin = setInterval(() => {
+                    Sound.play('tick');
+                    box.innerText = labels[keys[count % keys.length]];
+                    count++;
+                    if(count > 18) {
+                        clearInterval(spin);
+                        box.innerText = labels[targetGame] || '🔫 ARENA PvP';
+                        Sound.play('coin');
+                        setTimeout(() => {
+                            ov.style.display = 'none';
+                            if(isHost) {
+                                db.ref(`room_items/${currentRoom}`).remove();
+                                db.ref(`rooms/${currentRoom}`).update({
+                                    status: 'playing', timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, zombies: "[]"
+                                });
+                            }
+                        }, 1400);
+                    }
+                }, 110);
+            },
+
             startMatch() {
                 Input.init();
+                document.getElementById('rouletteOverlay').style.display = 'none';
+                document.getElementById('boardHud').style.display = 'none';
+
                 this.me = new LocalPlayer(
                     document.getElementById('playerName').value.trim() || "Paweł",
                     document.getElementById('playerColor').value,
@@ -906,19 +1368,21 @@
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'block';
                 document.getElementById('hudRight').style.display = 'block';
-                document.getElementById('hudWeapon').innerText = RoomState.mode === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : (RoomState.mode === 'sniper' ? 'BROŃ: Snajperka (1 HIT)' : 'BROŃ: Pistolet');
+
+                const gm = RoomState.activeMinigame;
+                document.getElementById('hudWeapon').innerText = gm === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : (gm === 'sniper' ? 'BROŃ: Snajperka (1 HIT)' : 'BROŃ: Pistolet');
 
                 const modeTitles = {
                     arena: '🔫 ARENA PvP', royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA',
                     sniper: '🎯 TYLKO SNAJPERKI', coins: '💎 ZŁOTA GORĄCZKA'
                 };
-                document.getElementById('hudModeTitle').innerText = modeTitles[RoomState.mode] || 'ARENA';
-                announce(modeTitles[RoomState.mode], 1800);
+                document.getElementById('hudModeTitle').innerText = modeTitles[gm] || 'ARENA';
+                announce(modeTitles[gm], 1800);
 
                 if(this.syncId) clearInterval(this.syncId);
                 this.syncId = setInterval(() => {
-                    if(!currentRoom || !this.me) return;
+                    if(!currentRoom || !this.me || RoomState.status !== 'playing') return;
                     db.ref(`room_players/${currentRoom}/${myId}`).update({
                         x: Math.round(this.me.x), y: Math.round(this.me.y), angle: Number(this.me.angle.toFixed(2)),
                         hp: Math.round(this.me.hp), shield: Math.round(this.me.shield), score: this.me.score, isDead: this.me.isDead,
@@ -958,7 +1422,7 @@
                         });
                     }
                 });
-                if(RoomState.mode === 'zombies') {
+                if(RoomState.activeMinigame === 'zombies') {
                     Object.entries(netZombies).forEach(([zid, z]) => {
                         if(Math.hypot(z.x - rx, z.y - ry) < 135) {
                             db.ref(`events/${currentRoom}`).push({ type: 'hitZombie', zid, dmg: 90, attacker: myId });
@@ -969,27 +1433,25 @@
 
             hostTick() {
                 if(RoomState.status !== 'playing') return;
+                const gm = RoomState.activeMinigame;
                 RoomState.timer -= 0.1;
 
                 let allActive = [];
                 if(this.me && !this.me.isDead) allActive.push({ id: myId, x: this.me.x, y: this.me.y });
                 Object.entries(netPlayers).forEach(([id, p]) => { if(!p.isDead) allActive.push({ id, x: p.x, y: p.y }); });
 
-                if(RoomState.mode === 'royale') {
-                    RoomState.stormR = Math.max(160, RoomState.stormR - 1.1);
-                }
+                if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 1.2);
 
-                // Spawning skrzynek, broni i dopalaczy
-                if(RoomState.mode === 'coins') {
-                    if(Math.random() < 0.16 && Object.keys(netItems).length < 18) {
+                if(gm === 'coins') {
+                    if(Math.random() < 0.18 && Object.keys(netItems).length < 18) {
                         let iid = 'c_' + Math.random().toString(36).substr(2, 5);
                         db.ref(`room_items/${currentRoom}/${iid}`).set({
                             x: 160 + Math.round(Math.random()*1280), y: 160 + Math.round(Math.random()*1280),
                             t: Math.random() < 0.25 ? 'gem' : 'coin'
                         });
                     }
-                } else if(RoomState.mode !== 'bomb' && RoomState.mode !== 'sniper') {
-                    if(Math.random() < 0.045 && Object.keys(netItems).length < 8) {
+                } else if(gm !== 'bomb' && gm !== 'sniper') {
+                    if(Math.random() < 0.05 && Object.keys(netItems).length < 8) {
                         let pool = ['medkit', 'shield', 'quad', 'nitro', 'shotgun', 'minigun', 'sniper', 'plasma', 'bazooka'];
                         let iid = 'i_' + Math.random().toString(36).substr(2, 5);
                         db.ref(`room_items/${currentRoom}/${iid}`).set({
@@ -999,7 +1461,7 @@
                     }
                 }
 
-                if(RoomState.mode === 'zombies') {
+                if(gm === 'zombies') {
                     if(this.hostZombies.length < 18 && Math.random() < 0.28) {
                         let edge = Math.random()*Math.PI*2;
                         let type = Math.random() < 0.25 ? 1 : (Math.random() < 0.12 ? 2 : 0);
@@ -1022,7 +1484,7 @@
                     db.ref(`rooms/${currentRoom}`).update({ zombies: JSON.stringify(this.hostZombies) });
                 }
 
-                if(RoomState.mode === 'bomb') {
+                if(gm === 'bomb') {
                     if(allActive.length <= 1 && Object.keys(netPlayers).length >= 1) {
                         allActive.forEach(survivor => {
                             if(survivor.id === myId) this.me.score += 50;
@@ -1046,7 +1508,7 @@
                     }
                 }
 
-                if(RoomState.mode === 'koth') {
+                if(gm === 'koth') {
                     this.kothShift = (this.kothShift || 0) + 0.1;
                     if(this.kothShift >= 18) {
                         this.kothShift = 0;
@@ -1056,7 +1518,17 @@
                 }
 
                 if(RoomState.timer <= 0) {
-                    db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                    // Wyłonienie zwycięzcy minigry
+                    let list = [{ id: myId, score: this.me ? this.me.score : 0 }];
+                    Object.entries(netPlayers).forEach(([pid, p]) => list.push({ id: pid, score: p.score || 0 }));
+                    list.sort((a,b) => b.score - a.score);
+                    let winId = list[0].id;
+
+                    if(RoomState.isPartyCampaign) {
+                        db.ref(`rooms/${currentRoom}`).update({ status: 'card_reward', minigameWinner: winId });
+                    } else {
+                        db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
+                    }
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({ timer: Number(RoomState.timer.toFixed(1)), stormR: Math.round(RoomState.stormR) });
                 }
@@ -1064,6 +1536,7 @@
 
             update(dt) {
                 if(!this.me) return;
+                const gm = RoomState.activeMinigame;
                 this.me.update(dt);
                 Cam.update(dt, this.me);
 
@@ -1074,9 +1547,7 @@
                     let prevX = b.x, prevY = b.y;
                     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
 
-                    if(b.bType === 'rocket' && Math.random() < 0.6) {
-                        FX.burst(b.x, b.y, '#888888', 1, 30, 5);
-                    }
+                    if(b.bType === 'rocket' && Math.random() < 0.6) FX.burst(b.x, b.y, '#888888', 1, 30, 5);
 
                     let hitObs = obstacles.find(o => o.t !== 'lava' && b.x > o.x && b.x < o.x+o.w && b.y > o.y && b.y < o.y+o.h);
                     let outBounds = b.x < 10 || b.x > WORLD_SIZE-10 || b.y < 10 || b.y > WORLD_SIZE-10;
@@ -1101,7 +1572,7 @@
 
                     if(!b.isMine) continue;
 
-                    if(['arena', 'royale', 'koth', 'sniper', 'coins'].includes(RoomState.mode)) {
+                    if(['arena', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
                         for(let [pid, p] of Object.entries(netPlayers)) {
                             if(!p.isDead && Math.hypot(b.x - p.x, b.y - p.y) < 22) {
                                 if(b.bType === 'rocket') {
@@ -1109,7 +1580,7 @@
                                     this.bullets.splice(i,1); break;
                                 }
                                 let angle = Math.atan2(b.vy, b.vx);
-                                let appliedDmg = RoomState.mode === 'koth' ? 6 : b.dmg;
+                                let appliedDmg = gm === 'koth' ? 6 : b.dmg;
                                 db.ref(`events/${currentRoom}`).push({
                                     type: 'hitPlayer', target: pid, attacker: myId,
                                     dmg: appliedDmg,
@@ -1123,7 +1594,7 @@
                         }
                     }
 
-                    if(RoomState.mode === 'zombies') {
+                    if(gm === 'zombies') {
                         for(let [zid, z] of Object.entries(netZombies)) {
                             if(Math.hypot(b.x - z.x, b.y - z.y) < 24) {
                                 if(b.bType === 'rocket') {
@@ -1140,7 +1611,7 @@
                     }
                 }
 
-                if(RoomState.mode === 'zombies' && !this.me.isDead) {
+                if(gm === 'zombies' && !this.me.isDead) {
                     Object.values(netZombies).forEach(z => {
                         if(Math.hypot(this.me.x - z.x, this.me.y - z.y) < 30) {
                             this.me.takeDamage(25 * dt, null);
@@ -1149,7 +1620,7 @@
                 }
 
                 Object.values(netPlayers).forEach(p => {
-                    if(p.shooting && !p.isDead && Math.random() < 0.25 && RoomState.mode !== 'bomb') {
+                    if(p.shooting && !p.isDead && Math.random() < 0.25 && gm !== 'bomb') {
                         let wObj = WEAPONS[p.wep] || WEAPONS.pistol;
                         this.spawnBullet(p.x, p.y, p.angle, wObj.spd, 0, 0, wObj.bType, false);
                     }
@@ -1158,7 +1629,7 @@
                 FX.update(dt);
 
                 let secs = Math.max(0, Math.ceil(RoomState.timer));
-                document.getElementById('hudTimer').innerText = RoomState.mode === 'bomb' && RoomState.bombTimer
+                document.getElementById('hudTimer').innerText = gm === 'bomb' && RoomState.bombTimer
                     ? `BOMBA: ${RoomState.bombTimer.toFixed(1)}s`
                     : `00:${secs.toString().padStart(2,'0')}`;
                 document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
@@ -1174,11 +1645,12 @@
                 Object.values(netPlayers).forEach(p => scores.push({ name: p.name, color: p.color, score: p.score || 0 }));
                 scores.sort((a,b) => b.score - a.score);
                 document.getElementById('liveScoreboard').innerHTML = scores.map((s, idx) =>
-                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score}</span></li>`
+                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score} pkt</span></li>`
                 ).join('');
             },
 
             draw() {
+                const gm = RoomState.activeMinigame;
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
                 ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, W, H);
 
@@ -1199,14 +1671,14 @@
 
                 FX.drawDecals();
 
-                if(RoomState.mode === 'koth' && RoomState.koth) {
+                if(gm === 'koth' && RoomState.koth) {
                     let k = RoomState.koth;
                     ctx.fillStyle = 'rgba(255, 222, 0, 0.22)';
                     ctx.beginPath(); ctx.arc(k.x, k.y, k.r, 0, Math.PI*2); ctx.fill();
                     ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 4; ctx.stroke();
                 }
 
-                if(RoomState.mode === 'royale') {
+                if(gm === 'royale') {
                     ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 10;
                     ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.stroke();
                 }
@@ -1215,7 +1687,6 @@
 
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
 
-                // Przedmioty, dopalacze i klejnoty
                 Object.values(netItems).forEach(item => {
                     ctx.save(); ctx.translate(Math.floor(item.x), Math.floor(item.y));
                     ctx.fillStyle = '#000'; ctx.fillRect(-13, -13, 26, 26);
@@ -1232,7 +1703,7 @@
                     ctx.restore();
                 });
 
-                if(RoomState.mode === 'zombies') {
+                if(gm === 'zombies') {
                     Object.values(netZombies).forEach(z => drawPixelZombie(ctx, z));
                 }
 
@@ -1253,15 +1724,11 @@
                 FX.drawTop();
                 Cam.restore();
 
-                // === MINIMAPA / RADAR W PRAWYM DOLNYM ROGU ===
-                const mSize = 115, mx = W - mSize - 14, my = H - mSize - 14, scale = mSize / WORLD_SIZE;
+                // Minimapa w prawym dolnym rogu
+                const mSize = 110, mx = W - mSize - 14, my = H - mSize - 14, scale = mSize / WORLD_SIZE;
                 ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(mx, my, mSize, mSize);
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(mx, my, mSize, mSize);
 
-                if(RoomState.mode === 'koth' && RoomState.koth) {
-                    ctx.fillStyle = 'rgba(255,222,0,0.5)';
-                    ctx.beginPath(); ctx.arc(mx + RoomState.koth.x*scale, my + RoomState.koth.y*scale, RoomState.koth.r*scale, 0, Math.PI*2); ctx.fill();
-                }
                 Object.values(netPlayers).forEach(p => {
                     if(p.isDead) return;
                     ctx.fillStyle = p.color || '#f00';
@@ -1276,22 +1743,46 @@
             loop(time) {
                 let dt = Math.min((time - this.lastTime)/1000, 0.1); this.lastTime = time;
                 if(RoomState.status === 'playing') { this.update(dt); this.draw(); }
+                else if(RoomState.status === 'board') { Board.drawBoard(ctx); }
                 this.loopId = requestAnimationFrame(t => this.loop(t));
+            },
+
+            showCardRewardScreen() {
+                document.getElementById('hud').style.display = 'none';
+                document.getElementById('boardHud').style.display = 'none';
+                switchScreen('screen-cards');
+
+                const winId = RoomState.minigameWinner;
+                const winName = winId === myId ? (document.getElementById('playerName').value || 'Ty') : (netPlayers[winId]?.name || 'Gracz');
+                document.getElementById('cardWinnerText').innerText = `🏆 MINIGRĘ WYGRYWA: ${winName.toUpperCase()}!`;
+
+                if(winId === myId) {
+                    document.getElementById('cardChoicesContainer').classList.remove('hidden');
+                    document.getElementById('cardWaitMsg').classList.add('hidden');
+                } else {
+                    document.getElementById('cardChoicesContainer').classList.add('hidden');
+                    document.getElementById('cardWaitMsg').classList.remove('hidden');
+                }
             },
 
             showPodium() {
                 switchScreen('screen-podium');
                 document.getElementById('hud').style.display = 'none';
                 document.getElementById('hudRight').style.display = 'none';
+                document.getElementById('boardHud').style.display = 'none';
 
                 let list = [];
-                if(this.me) list.push({ name: this.me.name, color: this.me.color, score: this.me.score });
-                Object.values(netPlayers).forEach(p => list.push({ name: p.name, color: p.color, score: p.score || 0 }));
+                let myVal = RoomState.isPartyCampaign ? Board.myPos : (this.me ? this.me.score : 0);
+                list.push({ name: document.getElementById('playerName').value || 'Paweł', color: document.getElementById('playerColor').value, score: myVal });
+                Object.values(netPlayers).forEach(p => {
+                    list.push({ name: p.name, color: p.color, score: RoomState.isPartyCampaign ? (p.boardPos || 0) : (p.score || 0) });
+                });
                 list.sort((a,b) => b.score - a.score);
 
-                document.getElementById('winnerSub').innerText = list.length > 0 ? `👑 WYGRYWA: ${list[0].name.toUpperCase()} (${list[0].score} PKT)` : '';
+                let unit = RoomState.isPartyCampaign ? 'POLE' : 'PKT';
+                document.getElementById('winnerSub').innerText = list.length > 0 ? `👑 WYGRYWA: ${list[0].name.toUpperCase()} (${list[0].score} ${unit})` : '';
                 document.getElementById('podiumRows').innerHTML = list.map((p, i) =>
-                    `<tr class="border-b border-gray-800"><td class="py-2">#${i+1}</td><td class="py-2"><span style="color:${p.color}">■</span> ${p.name}</td><td class="py-2 text-right text-yellow-400 font-bold">${p.score} PKT</td></tr>`
+                    `<tr class="border-b border-gray-800"><td class="py-2">#${i+1}</td><td class="py-2"><span style="color:${p.color}">■</span> ${p.name}</td><td class="py-2 text-right text-yellow-400 font-bold">${p.score} ${unit}</td></tr>`
                 ).join('');
 
                 document.getElementById('btnBackToLobby').style.display = isHost ? 'block' : 'none';
@@ -1300,7 +1791,7 @@
             }
         };
 
-        // === LOBBY & SYNCHRONIZACJA ===
+        // === LOBBY & SYNCHRONIZACJA FIREBASE ===
         const Lobby = {
             async auth() {
                 if(myId) return;
@@ -1313,7 +1804,10 @@
                     await this.auth();
                     currentRoom = Math.random().toString(36).substr(2, 5).toUpperCase();
                     isHost = true;
-                    await db.ref(`rooms/${currentRoom}`).set({ status: 'lobby', mode: 'arena', map: 'forest', timer: 90, stormR: 1100 });
+                    await db.ref(`rooms/${currentRoom}`).set({
+                        status: 'lobby', mode: 'party', activeMinigame: 'arena', map: 'forest',
+                        matchDuration: 60, timer: 60, stormR: 1100, turnIdx: 0, boardMsg: 'Witajcie na Planszy!'
+                    });
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
                     await this.joinRoom(currentRoom);
                 } catch(e) { showErr("Błąd Firebase: Ustaw reguły bazy na true/true!"); }
@@ -1332,16 +1826,18 @@
                     await pRef.set({
                         id: myId, name: document.getElementById('playerName').value.trim() || "Paweł",
                         color: document.getElementById('playerColor').value, skin: chosenSkin,
-                        x: 800, y: 800, hp: 100, shield: 0, score: 0, isDead: false, wep: 'pistol'
+                        x: 800, y: 800, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false, wep: 'pistol'
                     });
                     pRef.onDisconnect().remove();
 
+                    Chat.init();
                     this.listen();
                     switchScreen('screen-lobby');
                     document.getElementById('lobbyCode').innerText = currentRoom;
                     document.getElementById('btnStartMatch').style.display = isHost ? 'block' : 'none';
                     document.getElementById('clientWaitMsg').style.display = isHost ? 'none' : 'block';
                     document.getElementById('mapSelect').disabled = !isHost;
+                    document.getElementById('timeSelect').disabled = !isHost;
                 } catch(e) { showErr("Błąd dołączania: " + e.message); }
             },
             selectMode(m) {
@@ -1352,26 +1848,39 @@
                 if(!isHost) return;
                 db.ref(`rooms/${currentRoom}`).update({ map: mp });
             },
+            changeTime(tm) {
+                if(!isHost) return;
+                db.ref(`rooms/${currentRoom}`).update({ matchDuration: Number(tm) });
+            },
             listen() {
                 db.ref(`rooms/${currentRoom}`).off();
                 db.ref(`room_players/${currentRoom}`).off();
                 db.ref(`room_items/${currentRoom}`).off();
                 db.ref(`events/${currentRoom}`).off();
+                db.ref(`chat/${currentRoom}`).off();
 
                 db.ref(`rooms/${currentRoom}`).on('value', snap => {
                     if(!snap.exists()) return location.reload();
                     let d = snap.val();
-                    RoomState.mode = d.mode || 'arena';
+                    RoomState.mode = d.mode || 'party';
+                    RoomState.isPartyCampaign = (RoomState.mode === 'party');
+                    RoomState.activeMinigame = d.activeMinigame || 'arena';
                     RoomState.map = d.map || 'forest';
-                    RoomState.timer = d.timer ?? 90;
+                    RoomState.matchDuration = d.matchDuration || 60;
+                    RoomState.timer = d.timer ?? 60;
                     RoomState.bombHolder = d.bombHolder || null;
                     RoomState.bombTimer = d.bombTimer ?? 10;
                     RoomState.stormR = d.stormR ?? 1100;
+                    RoomState.turnOrder = d.turnOrder || [myId];
+                    RoomState.turnIdx = d.turnIdx || 0;
+                    RoomState.boardMsg = d.boardMsg || '';
+                    RoomState.minigameWinner = d.minigameWinner || null;
                     if(d.koth) RoomState.koth = d.koth;
 
                     document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
                     document.getElementById('m-' + RoomState.mode)?.classList.add('selected');
                     document.getElementById('mapSelect').value = RoomState.map;
+                    document.getElementById('timeSelect').value = RoomState.matchDuration;
 
                     if(d.zombies) {
                         try {
@@ -1382,13 +1891,20 @@
 
                     if(RoomState.status !== d.status) {
                         RoomState.status = d.status;
-                        if(d.status === 'playing') Game.startMatch();
+                        if(d.status === 'board') Board.initBoardView();
+                        else if(d.status === 'roulette') Game.runRouletteAnimation(RoomState.activeMinigame);
+                        else if(d.status === 'playing') Game.startMatch();
+                        else if(d.status === 'card_reward') Game.showCardRewardScreen();
                         else if(d.status === 'podium') Game.showPodium();
                         else if(d.status === 'lobby') {
                             switchScreen('screen-lobby');
                             document.getElementById('hud').style.display = 'none';
                             document.getElementById('hudRight').style.display = 'none';
+                            document.getElementById('boardHud').style.display = 'none';
                         }
+                    } else if(RoomState.status === 'board') {
+                        Board.rollingLock = false;
+                        Board.updateTurnUI();
                     }
                 });
 
@@ -1396,15 +1912,26 @@
                     let all = snap.val() || {}; netPlayers = {}; let arr = [];
                     Object.entries(all).forEach(([pid, p]) => {
                         if(pid !== myId) netPlayers[pid] = p;
+                        else if(p.boardPos !== undefined) Board.myPos = p.boardPos;
                         arr.push(p);
                     });
                     document.getElementById('lobbyCount').innerText = arr.length;
                     document.getElementById('lobbyPlayerList').innerHTML = arr.map(p =>
-                        `<li><span style="color:${p.color}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</li>`
+                        `<li class="flex justify-between items-center bg-black/40 p-1"><span><span style="color:${p.color}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-gray-400">${p.skin||'cap'}</span></li>`
                     ).join('');
                 });
 
                 db.ref(`room_items/${currentRoom}`).on('value', snap => { netItems = snap.val() || {}; });
+
+                db.ref(`chat/${currentRoom}`).limitToLast(25).on('child_added', snap => {
+                    let c = snap.val();
+                    if(!c) return;
+                    const box = document.getElementById('chatMessages');
+                    const d = document.createElement('div');
+                    d.innerHTML = `<span style="color:${c.color};font-weight:bold;">${c.name}:</span> <span class="text-gray-200">${c.msg}</span>`;
+                    box.appendChild(d);
+                    box.scrollTop = box.scrollHeight;
+                });
 
                 db.ref(`events/${currentRoom}`).on('child_added', snap => {
                     let ev = snap.val(); snap.ref.remove();
@@ -1423,7 +1950,6 @@
                             Game.me.streak += 1;
                             let sMsg = Game.me.streak === 2 ? "DOUBLE KILL!" : (Game.me.streak === 3 ? "TRIPLE KILL!" : (Game.me.streak >= 4 ? "RAMPAGE!!" : `+${ev.pts || 10} PKT!`));
                             FX.text(Game.me.x, Game.me.y, sMsg, "#ffde00", 14);
-                            if(Game.me.streak >= 2) announce(sMsg, 1100);
                         }
                     }
                     else if(ev.type === 'explode' && ev.target === myId) {
@@ -1445,7 +1971,28 @@
             launchGame() {
                 if(!isHost) return;
                 db.ref(`room_items/${currentRoom}`).remove();
-                db.ref(`rooms/${currentRoom}`).update({ status: 'playing', timer: 90, stormR: 1100, bombHolder: null, zombies: "[]" });
+                let order = [myId, ...Object.keys(netPlayers)];
+
+                if(RoomState.mode === 'party') {
+                    // Reset pozycji na planszy przy nowym meczu Party
+                    Board.myPos = 0; Board.myPrison = 0; Board.myCards = [];
+                    let pUpdates = {};
+                    order.forEach(pid => { pUpdates[`${pid}/boardPos`] = 0; pUpdates[`${pid}/prison`] = 0; pUpdates[`${pid}/score`] = 0; });
+                    db.ref(`room_players/${currentRoom}`).update(pUpdates);
+                    db.ref(`rooms/${currentRoom}`).update({
+                        status: 'board', turnOrder: order, turnIdx: 0,
+                        boardMsg: '🎲 Runda 1! Rzucajcie po kolei kostką!'
+                    });
+                } else if(RoomState.mode === 'roulette') {
+                    const games = ['arena', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
+                    const picked = games[Math.floor(Math.random()*games.length)];
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'roulette', activeMinigame: picked });
+                } else {
+                    db.ref(`rooms/${currentRoom}`).update({
+                        status: 'playing', activeMinigame: RoomState.mode,
+                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, zombies: "[]"
+                    });
+                }
             }
         };
 
