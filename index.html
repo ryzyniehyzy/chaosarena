@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAWEŁ PYKA: SUPER PIXEL PARTY - CASINO EDITION</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY HD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -13,66 +13,67 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #06060b; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #05050a; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: crosshair; image-rendering: pixelated; }
         
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(6, 6, 12, 0.92); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(16,16,32,0.88) 0%, rgba(5,5,10,0.96) 100%); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); }
         .screen.active { display: flex; }
         
-        .panel { background-color: #151526; border: 4px solid #fff; box-shadow: 12px 12px 0px 0px #000; padding: 1.5rem; max-width: 1060px; width: 96%; text-align: center; position: relative; max-height: 94vh; overflow-y: auto; }
-        .btn { background-color: #ff2a6d; border: 3px solid #fff; box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5); color: #fff; padding: 0.75rem 1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, background-color 0.1s; font-family: inherit; font-size: 10px; outline: none; }
-        .btn:hover { background-color: #ff5286; }
-        .btn:active { transform: translateY(3px); }
+        .panel { background: linear-gradient(180deg, #1b1b30 0%, #10101e 100%); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.5rem; max-width: 1060px; width: 96%; text-align: center; position: relative; max-height: 94vh; overflow-y: auto; }
+        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.75rem 1rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 10px; outline: none; text-shadow: 2px 2px 0 #000; }
+        .btn:hover { filter: brightness(1.15); }
+        .btn:active { transform: translateY(3px); box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.45), 0 1px 0 #000; }
+        .btn:disabled { background: #444; color: #888; border-color: #777; cursor: not-allowed; filter: none; }
         
-        .input-pixel { background-color: #090912; border: 3px solid #fff; color: #fff; outline: none; font-family: inherit; padding: 0.55rem; width: 100%; text-align: center; font-size: 10px; }
+        .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.55rem; width: 100%; text-align: center; font-size: 10px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 8px; cursor: pointer; transition: all 0.12s; text-align: left; }
-        .mode-card:hover { border-color: #666699; }
-        .mode-card.selected { border-color: #05d5fa; background: #191932; box-shadow: inset 0 0 0 2px #05d5fa; }
+        .mode-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #151526 0%, #0c0c16 100%); padding: 8px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 4px 0 #000; }
+        .mode-card:hover { border-color: #666699; transform: translateY(-2px); }
+        .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1e2240 0%, #121529 100%); box-shadow: inset 0 0 12px rgba(5,213,250,0.35), 0 4px 0 #000; }
 
-        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 7px; cursor: pointer; font-size: 8px; color: #aaa; transition: all 0.1s; }
-        .skin-card.selected { border-color: #ffde00; color: #fff; background: #262210; }
+        .skin-card { border: 3px solid #2d2d48; background: #0d0d18; padding: 7px; cursor: pointer; font-size: 8px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
+        .skin-card.selected { border-color: #ffde00; color: #fff; background: #2b2612; transform: translateY(-2px); }
 
-        .reward-card { border: 4px solid #ffde00; background: #1a1829; padding: 14px; cursor: pointer; transition: transform 0.15s; width: 31%; }
-        .reward-card:hover { transform: translateY(-6px); background: #27243d; border-color: #05d5fa; }
+        .reward-card { border: 4px solid #ffde00; background: linear-gradient(180deg, #25213b 0%, #151224 100%); padding: 14px; cursor: pointer; transition: transform 0.15s; width: 31%; box-shadow: 0 8px 0 #000; }
+        .reward-card:hover { transform: translateY(-6px); border-color: #05d5fa; }
 
         /* HUD MINIGIER */
-        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.75); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
         
         /* HUD PLANSZÓWKI */
-        #boardHud { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 45; width: 94%; max-width: 900px; display: none; pointer-events: none; }
-        .board-box { background: rgba(14, 14, 28, 0.94); border: 4px solid #ffde00; box-shadow: 8px 8px 0 #000; padding: 12px 16px; pointer-events: auto; }
+        #boardHud { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 45; width: 94%; max-width: 920px; display: none; pointer-events: none; }
+        .board-box { background: linear-gradient(180deg, rgba(22,22,42,0.95) 0%, rgba(12,12,24,0.95) 100%); border: 4px solid #ffde00; box-shadow: 0 0 20px rgba(255,222,0,0.25), 8px 8px 0 #000; padding: 12px 18px; pointer-events: auto; }
 
-        /* KOSTKA 3D PIXEL ART NA ŚRODKU */
+        /* KOSTKA 3D PIXEL ART */
         #diceOverlay { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 58; display: none; flex-direction: column; align-items: center; pointer-events: none; }
-        .dice-cube { width: 96px; height: 96px; background: #fff; border: 6px solid #000; box-shadow: inset -8px -8px 0 #ccc, 10px 10px 0 rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; font-size: 38px; color: #111; }
+        .dice-cube { width: 100px; height: 100px; background: linear-gradient(135deg, #ffffff 0%, #dcdcdc 100%); border: 6px solid #000; box-shadow: inset -8px -8px 0 #aaa, 0 0 30px #ffde00, 12px 12px 0 rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #111; }
 
-        /* AUTOMAT KASYNOWY (JEDNORĘKI BANDYTA) */
+        /* AUTOMAT KASYNOWY */
         #casinoModal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 62; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
-        .slot-machine { background: #2b1138; border: 6px solid #ffde00; box-shadow: 0 0 35px #ff2a6d, 12px 12px 0 #000; padding: 24px; text-align: center; max-width: 520px; width: 92%; }
-        .slot-reel { width: 90px; height: 95px; background: #fff; border: 5px solid #000; box-shadow: inset 0 6px 8px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+        .slot-machine { background: linear-gradient(180deg, #3a154d 0%, #1c0926 100%); border: 6px solid #ffde00; box-shadow: 0 0 45px #ff2a6d, 12px 12px 0 #000; padding: 24px; text-align: center; max-width: 520px; width: 92%; }
+        .slot-reel { width: 92px; height: 98px; background: linear-gradient(180deg, #e0e0e0 0%, #ffffff 50%, #cccccc 100%); border: 5px solid #000; box-shadow: inset 0 8px 10px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 42px; }
 
-        /* KOŁO FORTUNY RULETKI */
+        /* RULETKA */
         #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
 
-        /* CZAT I EMOTKI */
-        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 18, 0.92); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
-        #chatMessages { height: 110px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+        /* CZAT */
+        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 320px; background: rgba(10, 10, 20, 0.93); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
+        #chatMessages { height: 105px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
         .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 5px; cursor: pointer; font-size: 12px; }
-        .emote-btn:hover { background: #323254; border-color: #05d5fa; }
+        .emote-btn:hover { background: #323254; border-color: #05d5fa; transform: scale(1.15); }
 
         #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
-        #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 22px; text-shadow: 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+        #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 22px; text-shadow: 0 0 15px #ff2a6d, 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
 
-        .bar-wrap { width: 200px; height: 15px; border: 3px solid #fff; background: #111; margin-top: 4px; position: relative; }
-        #hpBar { height: 100%; background: #ff2a6d; width: 100%; transition: width 0.1s; }
-        #shieldBar { position: absolute; top: 0; left: 0; height: 100%; background: #05d5fa; width: 0%; opacity: 0.8; }
-        #dashBar { height: 100%; background: #ffde00; width: 100%; }
+        .bar-wrap { width: 195px; height: 15px; border: 3px solid #fff; background: #090910; margin-top: 4px; position: relative; box-shadow: 2px 2px 0 #000; }
+        #hpBar { height: 100%; background: linear-gradient(90deg, #ff1744 0%, #ff616f 100%); width: 100%; transition: width 0.1s; }
+        #shieldBar { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #00b0ff 0%, #80d8ff 100%); width: 0%; opacity: 0.85; }
+        #dashBar { height: 100%; background: linear-gradient(90deg, #ffab00 0%, #ffea00 100%); width: 100%; }
 
-        .crt-effect::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
+        .crt-effect::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
     </style>
 </head>
 <body id="mainBody" class="crt-effect">
@@ -82,17 +83,17 @@
     <div id="centerAnnouncement">START!</div>
     <div id="killFeed"></div>
 
-    <!-- ANIMOWANA KOSTKA NA ŚRODKU EKRANU -->
+    <!-- KOSTKA 3D -->
     <div id="diceOverlay">
         <div id="diceBox" class="dice-cube">🎲</div>
-        <div id="diceSubText" class="text-xs text-[#ffde00] mt-3 bg-black/80 px-3 py-1 border border-white">LOSOWANIE...</div>
+        <div id="diceSubText" class="text-xs text-[#ffde00] mt-3 bg-black/90 px-4 py-2 border-2 border-white shadow-[4px_4px_0_#000]">RZUCANIE...</div>
     </div>
 
-    <!-- AUTOMAT JEDNORĘKI BANDYTA (POLE KASYNA) -->
+    <!-- AUTOMAT KASYNOWY -->
     <div id="casinoModal">
         <div class="slot-machine">
-            <div class="text-lg text-[#ffde00] mb-1">🎰 ROYAL PIXEL CASINO 🎰</div>
-            <div class="text-[8px] text-pink-300 mb-4">Zakręć automatem! 3 takie same symbole = WIELKI JACKPOT!</div>
+            <div class="text-lg text-[#ffde00] mb-1" style="text-shadow: 3px 3px 0 #000;">🎰 ROYAL PIXEL CASINO 🎰</div>
+            <div class="text-[8px] text-pink-300 mb-4">Zakręć bębnami! 3 siódemki = WIELKI JACKPOT (+4 POLA)!</div>
             <div class="flex justify-center gap-3 mb-5">
                 <div id="reel1" class="slot-reel">🍒</div>
                 <div id="reel2" class="slot-reel">💎</div>
@@ -103,53 +104,53 @@
         </div>
     </div>
 
-    <!-- HUD PLANSZÓWKI (MARIO PARTY) -->
+    <!-- HUD PLANSZÓWKI -->
     <div id="boardHud">
         <div class="board-box flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="text-left">
-                <div class="text-xs text-[#ffde00] mb-1">🏝️ WYSPA CASINO PARTY (META: POLE 30)</div>
+                <div class="text-xs text-[#ffde00] mb-1" style="text-shadow: 2px 2px 0 #000;">🏝️ WYSPA CASINO PARTY HD (CEL: POLE 30)</div>
                 <div id="boardTurnText" class="text-[10px] text-[#05d5fa]">Tura gracza: ---</div>
                 <div id="boardStatusMsg" class="text-[8px] text-gray-300 mt-1">Rzucajcie po kolei kostką!</div>
             </div>
             <div class="flex items-center gap-2">
                 <div id="myCardsContainer" class="flex gap-1"></div>
-                <button id="btnRollDice" class="btn !bg-[#00c853] hover:!bg-[#2ee578] !text-xs !py-3 !px-5 hidden" onclick="Board.rollDice()">🎲 RZUĆ KOSTKĄ!</button>
+                <button id="btnRollDice" class="btn !bg-[#00c853] !text-xs !py-3 !px-5 hidden" onclick="Board.rollDice()">🎲 RZUĆ KOSTKĄ!</button>
             </div>
         </div>
     </div>
 
-    <!-- RULETKA LOSUJĄCA MINIGRĘ (BEZ POWTÓREK) -->
+    <!-- RULETKA MINIGIER -->
     <div id="rouletteOverlay">
-        <div class="text-lg text-[#05d5fa] mb-2">🎡 KOŁO FORTUNY MINIGIER (BEZ POWTÓREK!) 🎡</div>
-        <div class="text-[8px] text-yellow-300 mb-4">Każda minigra w puli jest unikalna aż do wyczerpania talii!</div>
-        <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_35px_#05d5fa] mb-4">
+        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY MINIGIER 🎡</div>
+        <div class="text-[8px] text-yellow-300 mb-4">System talii bez powtórek – każda minigra jest inna!</div>
+        <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_40px_#05d5fa] mb-4">
             🔫 ARENA PvP
         </div>
         <div id="rouletteMapText" class="text-xs text-[#00e676] mb-2">BIOM: Leśny Bunkier</div>
-        <div class="text-[9px] text-gray-400">Zwycięzca minigry wybierze 1 z 3 Kart Kasynowych!</div>
+        <div class="text-[9px] text-gray-400">Zwycięzca minigry wybierze 1 z 3 Kart Wspomagających!</div>
     </div>
 
     <!-- LEWY HUD MINIGRY -->
     <div id="hud">
-        <div id="hudModeTitle" class="text-sm text-[#05d5fa] mb-1">TRYB</div>
-        <div id="hudTimer" class="text-2xl text-yellow-400 mb-2">01:00</div>
-        <div class="text-[8px] text-gray-300">ZDROWIE + TARCZA</div>
+        <div id="hudModeTitle" class="text-xs text-[#05d5fa] mb-1">TRYB</div>
+        <div id="hudTimer" class="text-xl text-yellow-400 mb-2">01:00</div>
+        <div class="text-[7px] text-gray-300">ZDROWIE + TARCZA</div>
         <div class="bar-wrap"><div id="hpBar"></div><div id="shieldBar"></div></div>
-        <div class="text-[8px] text-gray-300 mt-2">ZRYW [SPACJA]</div>
-        <div class="bar-wrap !h-3"><div id="dashBar"></div></div>
-        <div id="hudWeapon" class="text-[9px] text-yellow-300 mt-2">BROŃ: Pistolet</div>
+        <div class="text-[7px] text-gray-300 mt-2">ZRYW [SPACJA]</div>
+        <div class="bar-wrap !h-2.5"><div id="dashBar"></div></div>
+        <div id="hudWeapon" class="text-[8px] text-yellow-300 mt-2">BROŃ: Pistolet</div>
         <div id="hudBuffs" class="text-[8px] text-[#e040fb] mt-1"></div>
     </div>
 
     <!-- PRAWY HUD -->
     <div id="hudRight">
-        <div class="bg-black/80 border-3 border-white p-3 min-w-[215px]">
-            <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">TABELA WYNIKÓW</div>
+        <div class="bg-black/85 border-3 border-white p-3 min-w-[215px] shadow-[6px_6px_0_#000]">
+            <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING GRACZY</div>
             <ul id="liveScoreboard" class="text-[8px] space-y-2"></ul>
         </div>
     </div>
 
-    <!-- CZAT NA ŻYWO + EMOTKI -->
+    <!-- CZAT -->
     <div id="chatWidget">
         <div class="bg-[#1b1b2f] px-2 py-1 flex justify-between items-center border-b-2 border-gray-600">
             <span class="text-[8px] text-[#05d5fa]">💬 CZAT I EMOTKI</span>
@@ -182,7 +183,7 @@
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-xl">
                 <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-xs text-yellow-400 mb-5 tracking-wider">🎰 SUPER PIXEL PARTY & CASINO 🎰</h2>
+                <h2 class="text-xs text-yellow-400 mb-5 tracking-wider">✨ SUPER PIXEL PARTY 2.5D HD ✨</h2>
                 
                 <div class="flex gap-3 mb-4">
                     <div class="w-2/3 text-left">
@@ -190,7 +191,7 @@
                         <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
                     </div>
                     <div class="w-1/3 text-left">
-                        <label class="text-[8px] text-gray-400 block mb-1">KOLOR PIONKA:</label>
+                        <label class="text-[8px] text-gray-400 block mb-1">KOLOR BOHATERA:</label>
                         <input type="color" id="playerColor" value="#05d5fa" class="w-full h-[36px] border-3 border-white cursor-pointer bg-black interactive">
                     </div>
                 </div>
@@ -206,10 +207,10 @@
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button class="btn w-full interactive !bg-[#00c853] hover:!bg-[#2ee578] !text-xs !py-4" id="btnCreateRoom">STWÓRZ IMPREZĘ ONLINE (HOST)</button>
+                    <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-4" id="btnCreateRoom">STWÓRZ IMPREZĘ ONLINE (HOST)</button>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="WPISZ KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
-                        <button class="btn !bg-[#05d5fa] !text-black hover:!bg-[#5ce3fc] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ DO GRY</button>
+                        <button class="btn !bg-gradient-to-b !from-[#05d5fa] !to-[#0097b2] w-1/2 interactive" id="btnJoinRoom">DOŁĄCZ DO GRY</button>
                     </div>
                 </div>
                 <div id="menuError" class="bg-black/90 border-2 border-red-500 p-2 text-[8px] text-yellow-400 mt-3 hidden"></div>
@@ -221,15 +222,15 @@
             <div class="panel">
                 <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-3 mb-4 gap-2">
                     <div class="text-left">
-                        <h2 class="text-lg text-[#05d5fa]">🎰 CENTRUM IMPREZY & KASYNA (LOBBY)</h2>
-                        <span class="text-[8px] text-yellow-300">9 Unikalnych Minigier (Zero Powtórek!) + Nowa Wyspa 30 Pól z Kasynem!</span>
+                        <h2 class="text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA 2.5D</h2>
+                        <span class="text-[8px] text-yellow-300">Nowa grafika 2.5D z cieniami, pogodą i efektami świetlnymi!</span>
                     </div>
                     <div class="flex items-center gap-3 bg-black/60 border-2 border-[#ff2a6d] px-4 py-2">
                         <div class="text-right">
                             <span class="text-[7px] text-gray-400 block">KOD POKOJU:</span>
                             <span id="lobbyCode" class="text-xl text-[#ffde00] font-bold tracking-widest">-----</span>
                         </div>
-                        <button class="btn !bg-indigo-600 hover:!bg-indigo-500 !p-2 !text-[8px] interactive" id="btnCopyLink">🔗 KOPIUJ LINK</button>
+                        <button class="btn !bg-indigo-600 !p-2 !text-[8px] interactive" id="btnCopyLink">🔗 KOPIUJ LINK</button>
                     </div>
                 </div>
                 <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK ZAPROSZENIA DO SCHOWKA!</div>
@@ -266,16 +267,16 @@
 
                     <div class="lg:col-span-8 flex flex-col justify-between bg-black/40 border-2 border-gray-700 p-3">
                         <div>
-                            <div class="text-[9px] text-yellow-400 mb-2">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
+                            <div class="text-[9px] text-yellow-400 mb-2">1. GŁÓWNY TRYB IMPREZY (HOST):</div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
                                     <div class="text-[10px] text-[#ffde00] mb-1">🎲 SUPER MARIO PARTY (WYSPA 30 PÓL)</div>
-                                    <div class="text-[7px] text-gray-300 leading-relaxed">Skacz pionkami po polach, graj na Automacie w Kasynie, zamieniaj się miejscami i losuj 9 różnych minigier bez powtórek!</div>
+                                    <div class="text-[7px] text-gray-300 leading-relaxed">Trójwymiarowa wyspa z plażą, lasem, Kasynem Vegas i wulkanem! Skacz pionkami i losuj minigry bez powtórek!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
-                                    <div class="text-[10px] text-[#00e676] mb-1">🎡 RULETKA MINIGIER (TASOWANIE TALII)</div>
-                                    <div class="text-[7px] text-gray-300 leading-relaxed">Losuje za każdym razem inną minigrę z puli 9 trybów (zero powtórek pod rząd!).</div>
+                                    <div class="text-[10px] text-[#00e676] mb-1">🎡 RULETKA MINIGIER (BEZ POWTÓREK)</div>
+                                    <div class="text-[7px] text-gray-300 leading-relaxed">Losuje za każdym razem inną minigrę z puli 9 trybów (tasowanie talii!).</div>
                                 </div>
                             </div>
 
@@ -321,12 +322,12 @@
 
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
-                                    <label class="text-[8px] text-gray-400 block mb-1">BIOM ARENY:</label>
+                                    <label class="text-[8px] text-gray-400 block mb-1">BIOM ARENY 2.5D:</label>
                                     <select id="mapSelect" class="input-pixel interactive" onchange="Lobby.changeMap(this.value)">
-                                        <option value="forest">🌲 Leśny Bunkier</option>
-                                        <option value="cyber">🟣 Cyber-Vegas (Kasyno)</option>
-                                        <option value="ice">❄️ Lodowa Twierdza</option>
-                                        <option value="lava">🌋 Wulkaniczny Krater</option>
+                                        <option value="forest">🌲 Leśny Bunkier (Kwiaty i Świetliki)</option>
+                                        <option value="cyber">🟣 Cyber-Vegas (Neony i Iskry)</option>
+                                        <option value="ice">❄️ Lodowa Twierdza (Śnieg i Kryształy)</option>
+                                        <option value="lava">🌋 Wulkaniczny Krater (Lawa i Żar)</option>
                                     </select>
                                 </div>
                                 <div>
@@ -341,7 +342,7 @@
                         </div>
 
                         <div>
-                            <button id="btnStartMatch" class="btn w-full !bg-[#00c853] hover:!bg-[#2ee578] !text-xs !py-4 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
+                            <button id="btnStartMatch" class="btn w-full !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-4 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
                             <div id="clientWaitMsg" class="text-[9px] text-yellow-400 py-3 text-center animate-pulse hidden">Host konfiguruje ustawienia imprezy...</div>
                         </div>
                     </div>
@@ -454,7 +455,7 @@
         function addKillFeed(killerName, victimName, killerColor, victimColor) {
             const box = document.getElementById('killFeed');
             const item = document.createElement('div');
-            item.className = 'bg-black/80 border border-gray-600 px-3 py-1 text-[8px] text-white';
+            item.className = 'bg-black/85 border border-gray-500 px-3 py-1 text-[8px] text-white shadow-[3px_3px_0_#000]';
             item.innerHTML = `<span style="color:${killerColor}">${killerName}</span> 💥 <span style="color:${victimColor}">${victimName}</span>`;
             box.appendChild(item);
             setTimeout(() => item.remove(), 3500);
@@ -530,7 +531,6 @@
         let myId = null, currentRoom = null, isHost = false;
         let netPlayers = {}, netZombies = {}, netItems = {}, netMeteors = [];
 
-        // Talia Minigier bez powtórek (Shuffle Bag)
         const ALL_MINIGAMES = ['arena', 'meteors', 'heist', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
         let minigameDeck = [];
         let lastPlayedMap = '';
@@ -594,28 +594,50 @@
             }
         };
 
-        // === NOWA WYSPA PLANSZOWA (30 PÓL + 4 BIOMY + KASYNO + ZAMIANA) ===
+        // === WYSPA PLANSZOWA 2.5D HD (30 PÓL + BOGATE DEKORACJE) ===
         const BOARD_TILES = [
-            // Rząd 1 (Plaża Południowa: 0..7)
             {x:140, y:590, t:'start', n:'START'}, {x:265, y:590, t:'norm', n:'1'}, {x:390, y:590, t:'card', n:'🃏 KARTA'},
             {x:515, y:590, t:'boost', n:'🚀 +2'}, {x:640, y:590, t:'norm', n:'4'}, {x:765, y:590, t:'casino', n:'🎰 KASYNO'},
             {x:890, y:590, t:'norm', n:'6'}, {x:1015, y:590, t:'prison', n:'🔒 PAKA'},
-            // Zakręt Prawy
             {x:1130, y:525, t:'norm', n:'8'},
-            // Rząd 2 (Leśna Dżungla: 9..16)
             {x:1015, y:450, t:'back', n:'💀 -2'}, {x:890, y:450, t:'norm', n:'10'}, {x:765, y:450, t:'swap', n:'🔀 ZAMIANA'},
             {x:640, y:450, t:'norm', n:'12'}, {x:515, y:450, t:'casino', n:'🎰 KASYNO'}, {x:390, y:450, t:'boost', n:'🚀 +2'},
             {x:265, y:450, t:'norm', n:'15'}, {x:140, y:450, t:'prison', n:'🔒 PAKA'},
-            // Zakręt Lewy
             {x:140, y:330, t:'card', n:'🃏 KARTA'},
-            // Rząd 3 (Neonowe Las Vegas: 18..24)
             {x:265, y:310, t:'norm', n:'18'}, {x:390, y:310, t:'casino', n:'🎰 KASYNO'}, {x:515, y:310, t:'back', n:'💀 -2'},
             {x:640, y:310, t:'swap', n:'🔀 ZAMIANA'}, {x:765, y:310, t:'boost', n:'🚀 +2'}, {x:890, y:310, t:'norm', n:'23'},
             {x:1015, y:310, t:'prison', n:'🔒 PAKA'},
-            // Zakręt Finałowy (Wulkaniczny Zamek: 25..30)
             {x:1130, y:235, t:'norm', n:'25'}, {x:1015, y:165, t:'casino', n:'🎰 KASYNO'}, {x:875, y:165, t:'back', n:'💀 -2'},
             {x:735, y:165, t:'card', n:'🃏 KARTA'}, {x:595, y:165, t:'back', n:'💀 -3'}, {x:440, y:165, t:'goal', n:'🏰 META!'}
         ];
+
+        const ISLAND_TREES = [
+            {x:110, y:520, t:'palm'}, {x:330, y:635, t:'palm'}, {x:580, y:635, t:'palm'}, {x:950, y:635, t:'palm'},
+            {x:1160, y:440, t:'pine'}, {x:640, y:385, t:'pine'}, {x:200, y:385, t:'pine'}, {x:1080, y:385, t:'pine'}
+        ];
+
+        function drawPalmTree(ctx, x, y) {
+            ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(x, y+4, 18, 8, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#7a4b24'; ctx.fillRect(x-4, y-28, 8, 30);
+            ctx.fillStyle = '#9c6334'; ctx.fillRect(x-2, y-26, 4, 24);
+            ctx.fillStyle = '#258022';
+            ctx.fillRect(x-22, y-32, 44, 8); ctx.fillRect(x-8, y-44, 16, 26);
+            ctx.fillStyle = '#38b033';
+            ctx.fillRect(x-18, y-34, 36, 5); ctx.fillRect(x-6, y-42, 12, 18);
+        }
+
+        function drawIslandCastle(ctx, x, y) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x-52, y-38, 104, 65);
+            ctx.fillStyle = '#4a4e59'; ctx.fillRect(x-48, y-48, 96, 68);
+            ctx.fillStyle = '#6c7382'; ctx.fillRect(x-44, y-44, 88, 56);
+            // Wieżyczki
+            ctx.fillStyle = '#ff2a6d';
+            ctx.beginPath(); ctx.moveTo(x-52, y-48); ctx.lineTo(x-32, y-76); ctx.lineTo(x-12, y-48); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x+12, y-48); ctx.lineTo(x+32, y-76); ctx.lineTo(x+52, y-48); ctx.fill();
+            // Złota brama
+            ctx.fillStyle = '#ffde00'; ctx.fillRect(x-16, y-16, 32, 36);
+            ctx.fillStyle = '#111'; ctx.fillRect(x-12, y-12, 24, 32);
+        }
 
         const Board = {
             myPos: 0, visualPos: 0, jumpHeight: 0,
@@ -683,7 +705,6 @@
                 document.getElementById('btnRollDice').style.display = (isMyTurn && !this.rollingLock) ? 'block' : 'none';
             },
 
-            // Płynna animacja skakania pionka pole po polu
             animateStepsTo(targetTileIdx, onComplete) {
                 const stepLoop = () => {
                     if(this.myPos === targetTileIdx) {
@@ -706,12 +727,12 @@
                             this.visualPos = nextP;
                             this.jumpHeight = 0;
                             db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos });
-                            setTimeout(stepLoop, 50);
+                            setTimeout(stepLoop, 45);
                         } else {
                             this.visualPos = startP + (nextP - startP) * progress;
-                            this.jumpHeight = Math.sin(progress * Math.PI) * 26;
+                            this.jumpHeight = Math.sin(progress * Math.PI) * 28;
                         }
-                    }, 22);
+                    }, 20);
                 };
                 stepLoop();
             },
@@ -739,7 +760,6 @@
                 this.activeDoubleDice = false;
                 let finalRoll = Math.floor(Math.random() * (maxRoll - minRoll + 1)) + minRoll;
 
-                // Animacja kręcącej się kostki 3D na środku ekranu
                 const dOv = document.getElementById('diceOverlay');
                 const dBox = document.getElementById('diceBox');
                 const dSub = document.getElementById('diceSubText');
@@ -808,14 +828,13 @@
                         this.finishTurnCheck(msg);
                     }
                 } else if(tile.t === 'casino') {
-                    // Otwieramy Automat Jednorękiego Bandyty!
                     this.openSlotMachineModal(myName);
                 } else {
                     this.finishTurnCheck(msg);
                 }
             },
 
-            openSlotMachineModal(myName) {
+            openSlotMachineModal() {
                 const modal = document.getElementById('casinoModal');
                 const btn = document.getElementById('btnSpinSlot');
                 document.getElementById('slotResultText').innerText = "Pociągnij za dźwignię automatu!";
@@ -902,7 +921,6 @@
             advanceTurn() {
                 let nextIdx = RoomState.turnIdx + 1;
                 if(nextIdx >= RoomState.turnOrder.length) {
-                    // Wszyscy wykonali ruch -> losujemy UNIKALNĄ minigrę i biom!
                     const pickedGame = drawNextUniqueMinigame();
                     const pickedMap = drawNextUniqueMap();
                     db.ref(`rooms/${currentRoom}`).update({
@@ -935,8 +953,12 @@
             },
 
             drawBoard(ctx) {
-                // Animowane morze z falami Pixel-Art
-                ctx.fillStyle = '#0c223d';
+                const now = performance.now();
+                // Głęboki ocean z gradientem
+                const seaGrad = ctx.createLinearGradient(0, 0, 0, H);
+                seaGrad.addColorStop(0, '#07162c');
+                seaGrad.addColorStop(1, '#0f2c52');
+                ctx.fillStyle = seaGrad;
                 ctx.fillRect(0, 0, W, H);
 
                 ctx.save();
@@ -944,54 +966,92 @@
                 ctx.translate((W - 1280*scale)/2, (H - 720*scale)/2 + 28);
                 ctx.scale(scale, scale);
 
-                // Fale na wodzie
-                ctx.fillStyle = '#15365e';
-                let waveShift = Math.sin(performance.now()*0.003)*12;
-                for(let wx=40; wx<1240; wx+=120) {
-                    for(let wy=40; wy<680; wy+=90) {
-                        ctx.fillRect(wx + waveShift, wy, 36, 6);
+                // Fale morskie
+                ctx.fillStyle = '#1b497d';
+                let waveShift = Math.sin(now*0.003)*14;
+                for(let wx=30; wx<1250; wx+=110) {
+                    for(let wy=30; wy<690; wy+=85) {
+                        ctx.fillRect(wx + waveShift, wy, 42, 6);
+                        ctx.fillStyle = '#2968ab';
+                        ctx.fillRect(wx + waveShift + 8, wy - 4, 20, 4);
+                        ctx.fillStyle = '#1b497d';
                     }
                 }
 
-                // Złota plaża wyspy
-                ctx.fillStyle = '#e6c875'; ctx.fillRect(65, 85, 1150, 580);
-                // Zielona wyspa główna
-                ctx.fillStyle = '#1e4620'; ctx.fillRect(85, 105, 1110, 540);
-                // Strefa Las Vegas (Fioletowy dywan kasynowy pośrodku)
-                ctx.fillStyle = '#291536'; ctx.fillRect(105, 255, 960, 110);
-                // Strefa Wulkanu na północy
-                ctx.fillStyle = '#2b1b1e'; ctx.fillRect(380, 115, 800, 110);
+                // Piana morska i klif wyspy 2.5D
+                let foam = Math.sin(now*0.004)*4;
+                ctx.fillStyle = '#a8e6ff';
+                ctx.fillRect(52 - foam, 76 - foam, 1176 + foam*2, 604 + foam*2);
 
-                ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 6; ctx.strokeRect(65, 85, 1150, 580);
+                // Podstawa klifu 3D
+                ctx.fillStyle = '#593e25'; ctx.fillRect(60, 100, 1160, 575);
+                // Złota plaża
+                ctx.fillStyle = '#f2d388'; ctx.fillRect(60, 82, 1160, 575);
+                ctx.fillStyle = '#e0be6e'; ctx.fillRect(70, 92, 1140, 555);
 
-                // Ścieżka między polami
-                ctx.strokeStyle = '#8c673a'; ctx.lineWidth = 26;
+                // Zielona murawa wyspy
+                ctx.fillStyle = '#1a4f1e'; ctx.fillRect(85, 102, 1110, 460);
+                ctx.fillStyle = '#25692b'; ctx.fillRect(92, 108, 1096, 445);
+
+                // Dzielnica Kasyna (Las Vegas Strip)
+                ctx.fillStyle = '#1e0b2e'; ctx.fillRect(100, 250, 980, 118);
+                ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4; ctx.strokeRect(100, 250, 980, 118);
+                ctx.fillStyle = '#ffde00'; ctx.font = '10px "Press Start 2P"';
+                ctx.fillText("✨ LAS VEGAS STRIP ✨", 550, 270);
+
+                // Strefa Wulkaniczna na północy
+                ctx.fillStyle = '#261417'; ctx.fillRect(370, 108, 815, 118);
+                ctx.strokeStyle = '#ff4d00'; ctx.lineWidth = 4; ctx.strokeRect(370, 108, 815, 118);
+
+                // Kamienny trakt łączący pola
+                ctx.strokeStyle = '#3b2818'; ctx.lineWidth = 34; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.beginPath();
+                BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y+6); else ctx.lineTo(t.x, t.y+6); });
+                ctx.stroke();
+
+                ctx.strokeStyle = '#9c7a54'; ctx.lineWidth = 26;
                 ctx.beginPath();
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y); else ctx.lineTo(t.x, t.y); });
                 ctx.stroke();
 
-                // Rysowanie 31 pól (0..30)
+                // Dekoracje na wyspie (Palmy i Zamek na mecie)
+                ISLAND_TREES.forEach(tr => drawPalmTree(ctx, tr.x, tr.y));
+                drawIslandCastle(ctx, 335, 155);
+
+                // Rysowanie trójwymiarowych kafelków pól (0..30)
                 BOARD_TILES.forEach((t, i) => {
                     ctx.save();
                     ctx.translate(t.x, t.y);
-                    ctx.fillStyle = '#000'; ctx.fillRect(-42, -30, 84, 60);
-                    let col = '#dfd0b8';
-                    if(t.t === 'start') col = '#00e676';
-                    else if(t.t === 'goal') col = '#ffde00';
-                    else if(t.t === 'boost') col = '#05d5fa';
-                    else if(t.t === 'back') col = '#ff2a6d';
-                    else if(t.t === 'prison') col = '#6c5ce7';
-                    else if(t.t === 'card') col = '#e040fb';
-                    else if(t.t === 'casino') col = '#ff9100';
-                    else if(t.t === 'swap') col = '#00e5ff';
 
-                    ctx.fillStyle = col; ctx.fillRect(-38, -26, 76, 52);
+                    let topCol = '#e8dcc5', sideCol = '#9e8f75', borderCol = '#2b2318';
+                    if(t.t === 'start')  { topCol = '#00e676'; sideCol = '#00994d'; }
+                    else if(t.t === 'goal')   { topCol = '#ffde00'; sideCol = '#b39b00'; }
+                    else if(t.t === 'boost')  { topCol = '#05d5fa'; sideCol = '#008ba3'; }
+                    else if(t.t === 'back')   { topCol = '#ff2a6d'; sideCol = '#a30036'; }
+                    else if(t.t === 'prison') { topCol = '#7c4dff'; sideCol = '#4615b2'; }
+                    else if(t.t === 'card')   { topCol = '#e040fb'; sideCol = '#8e00b0'; }
+                    else if(t.t === 'casino') { topCol = '#ff9100'; sideCol = '#b26500'; }
+                    else if(t.t === 'swap')   { topCol = '#18ffff'; sideCol = '#0095a8'; }
+
+                    // Cień pod kafelkiem
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.fillRect(-42, -22, 84, 58);
+
+                    // Bok 3D kafelka (grubość kamienia)
+                    ctx.fillStyle = borderCol; ctx.fillRect(-42, -28, 84, 58);
+                    ctx.fillStyle = sideCol;   ctx.fillRect(-39, -18, 78, 45);
+
+                    // Górna tafla kafelka
+                    ctx.fillStyle = topCol;    ctx.fillRect(-39, -25, 78, 44);
+                    // Odblask na górnej krawędzi
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(-37, -23, 74, 4);
+
                     ctx.fillStyle = '#000'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign = 'center';
-                    ctx.fillText(t.n, 0, 3);
+                    ctx.fillText(t.n, 0, 0);
                     ctx.restore();
                 });
 
-                // Interpolacja pozycji pionków dla płynnego ruchu
+                // Pionki graczy
                 let allP = [{
                     id: myId, name: document.getElementById('playerName').value || 'Ty',
                     color: document.getElementById('playerColor').value, skin: chosenSkin,
@@ -1002,7 +1062,7 @@
                     let targetP = p.boardPos || 0;
                     if(this.netVisualPos[pid] === undefined) this.netVisualPos[pid] = targetP;
                     this.netVisualPos[pid] += (targetP - this.netVisualPos[pid]) * 0.18;
-                    let netJump = Math.abs(targetP - this.netVisualPos[pid]) > 0.1 ? Math.abs(Math.sin(performance.now()*0.015))*18 : 0;
+                    let netJump = Math.abs(targetP - this.netVisualPos[pid]) > 0.1 ? Math.abs(Math.sin(now*0.015))*20 : 0;
                     allP.push({ id: pid, name: p.name, color: p.color, skin: p.skin || 'cap', vPos: this.netVisualPos[pid], jump: netJump, pos: targetP, prison: p.prison || 0 });
                 });
 
@@ -1015,8 +1075,13 @@
                     let py = t1.y + (t2.y - t1.y) * frac;
 
                     let ox = (idx % 2 === 0 ? -14 : 14);
-                    let oy = (idx < 2 ? -10 : 10) - p.jump;
-                    drawPixelHero(ctx, px + ox, py + oy, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', performance.now()*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '');
+                    let oy = (idx < 2 ? -12 : 8);
+                    // Cień na kafelku podczas skoku
+                    if(p.jump > 2) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                        ctx.beginPath(); ctx.ellipse(px + ox, py + oy + 8, 10, 5, 0, 0, Math.PI*2); ctx.fill();
+                    }
+                    drawPixelHero(ctx, px + ox, py + oy - p.jump, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', now*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '');
                 });
 
                 ctx.restore();
@@ -1028,16 +1093,78 @@
             }
         };
 
-        // === MAPY I PRZESZKODY MINIGIER ===
+        // === GENERATOR TEKSTUR PODŁOŻA 2.5D HD (OFFSCREEN CACHE) ===
         const WORLD_SIZE = 1600;
-        const propDecorations = [];
-        for(let i=0; i<95; i++) {
-            propDecorations.push({ x: Math.floor(Math.random()*38)*40 + 20, y: Math.floor(Math.random()*38)*40 + 20 });
-        }
+        const GroundCache = {
+            canvases: {},
+            buildAll() {
+                ['forest', 'cyber', 'ice', 'lava'].forEach(type => {
+                    const c = document.createElement('canvas');
+                    c.width = WORLD_SIZE; c.height = WORLD_SIZE;
+                    const g = c.getContext('2d');
+                    g.imageSmoothingEnabled = false;
+
+                    const pal = {
+                        forest: { c1: '#1b3818', c2: '#163014', spec: '#285223', fl1: '#ffde00', fl2: '#ff5286' },
+                        cyber:  { c1: '#0c071a', c2: '#130b29', spec: '#23144a', fl1: '#05d5fa', fl2: '#ff2a6d' },
+                        ice:    { c1: '#bce3f7', c2: '#abd8f0', spec: '#d9f2ff', fl1: '#ffffff', fl2: '#7fd1fc' },
+                        lava:   { c1: '#1a1215', c2: '#22171b', spec: '#332228', fl1: '#ff4d00', fl2: '#ff9100' }
+                    }[type];
+
+                    // Kafelki z fazowaniem krawędzi
+                    for(let x=0; x<WORLD_SIZE; x+=80) {
+                        for(let y=0; y<WORLD_SIZE; y+=80) {
+                            g.fillStyle = ((x+y)/80)%2 === 0 ? pal.c1 : pal.c2;
+                            g.fillRect(x, y, 80, 80);
+                            g.fillStyle = 'rgba(255,255,255,0.03)';
+                            g.fillRect(x, y, 80, 4);
+                            g.fillStyle = 'rgba(0,0,0,0.08)';
+                            g.fillRect(x, y+76, 80, 4);
+                            if(type === 'cyber') {
+                                g.strokeStyle = 'rgba(5, 213, 250, 0.14)';
+                                g.lineWidth = 2; g.strokeRect(x+2, y+2, 76, 76);
+                            }
+                        }
+                    }
+
+                    // Detale podłoża (Kępki trawy, kwiatki, kamyki, pęknięcia lawy)
+                    for(let i=0; i<260; i++) {
+                        let rx = Math.floor(Math.random()*390)*4 + 16;
+                        let ry = Math.floor(Math.random()*390)*4 + 16;
+                        g.fillStyle = pal.spec;
+                        g.fillRect(rx, ry, 8, 4); g.fillRect(rx+4, ry-4, 4, 8);
+                        if(i % 5 === 0) {
+                            g.fillStyle = i % 10 === 0 ? pal.fl1 : pal.fl2;
+                            g.fillRect(rx+4, ry, 4, 4);
+                        }
+                    }
+                    this.canvases[type] = c;
+                });
+            }
+        };
+        GroundCache.buildAll();
+
+        // Cząsteczki Pogodowe (Świetliki, Śnieg, Żar)
+        const Weather = {
+            dots: Array.from({length: 55}, () => ({ x: Math.random()*WORLD_SIZE, y: Math.random()*WORLD_SIZE, s: Math.random()*3+2, sp: Math.random()*25+15, p: Math.random()*6 })),
+            updateAndDraw(ctx, dt, mapType) {
+                const col = mapType === 'ice' ? '#ffffff' : (mapType === 'lava' ? '#ff6d00' : (mapType === 'cyber' ? '#05d5fa' : '#d4ff59'));
+                ctx.fillStyle = col;
+                this.dots.forEach(d => {
+                    d.p += dt * 2;
+                    d.y += (mapType === 'lava' ? -d.sp : d.sp) * dt;
+                    d.x += Math.sin(d.p) * 18 * dt;
+                    if(d.y > WORLD_SIZE) d.y = 0; if(d.y < 0) d.y = WORLD_SIZE;
+                    ctx.globalAlpha = 0.45 + Math.sin(d.p)*0.35;
+                    ctx.fillRect(Math.floor(d.x), Math.floor(d.y), d.s, d.s);
+                });
+                ctx.globalAlpha = 1;
+            }
+        };
 
         const MAPS = {
             forest: {
-                bg: '#1c3619', tileAlt: '#172e14', friction: 0.82,
+                friction: 0.82,
                 obstacles: [
                     {x:320, y:320, w:120, h:120, t:'crate'}, {x:1160, y:320, w:120, h:120, t:'crate'},
                     {x:320, y:1160, w:120, h:120, t:'crate'}, {x:1160, y:1160, w:120, h:120, t:'crate'},
@@ -1045,21 +1172,21 @@
                 ]
             },
             cyber: {
-                bg: '#120924', tileAlt: '#1b0e36', friction: 0.85,
+                friction: 0.85,
                 obstacles: [
                     {x:340, y:340, w:130, h:90, t:'neon'}, {x:1130, y:340, w:130, h:90, t:'neon'},
                     {x:340, y:1170, w:130, h:90, t:'neon'}, {x:1130, y:1170, w:130, h:90, t:'neon'}
                 ]
             },
             ice: {
-                bg: '#b8e0f5', tileAlt: '#a5d4ed', friction: 0.96,
+                friction: 0.96,
                 obstacles: [
                     {x:380, y:380, w:160, h:80, t:'ice'}, {x:1060, y:380, w:160, h:80, t:'ice'},
                     {x:380, y:1140, w:160, h:80, t:'ice'}, {x:1060, y:1140, w:160, h:80, t:'ice'}
                 ]
             },
             lava: {
-                bg: '#1c1518', tileAlt: '#241b1f', friction: 0.82,
+                friction: 0.82,
                 obstacles: [
                     {x:300, y:300, w:140, h:140, t:'lava'}, {x:1160, y:300, w:140, h:140, t:'lava'},
                     {x:300, y:1160, w:140, h:140, t:'lava'}, {x:1160, y:1160, w:140, h:140, t:'lava'}
@@ -1154,12 +1281,12 @@
             },
             explosion(x, y) {
                 Sound.play('boom'); Cam.shake(14, 0.25);
-                this.rings.push({ x, y, r: 10, maxR: 135, l: 0.25, m: 0.25 });
-                this.burst(x, y, '#ff9100', 18, 280, 8);
-                this.burst(x, y, '#ffde00', 10, 180, 6);
+                this.rings.push({ x, y, r: 10, maxR: 140, l: 0.28, m: 0.28 });
+                this.burst(x, y, '#ff9100', 20, 290, 8);
+                this.burst(x, y, '#ffde00', 12, 190, 6);
             },
             text(x, y, txt, c='#fff', s=11) {
-                this.texts.push({ x: x+(Math.random()*16-8), y: y-22, txt, c, s, l: 0.8, m: 0.8 });
+                this.texts.push({ x: x+(Math.random()*16-8), y: y-22, txt, c, s, l: 0.85, m: 0.85 });
             },
             update(dt) {
                 for(let i=this.parts.length-1; i>=0; i--) {
@@ -1191,58 +1318,85 @@
                 });
                 this.parts.forEach(p => { ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, p.l/p.m); ctx.fillRect(Math.floor(p.x-p.s/2), Math.floor(p.y-p.s/2), p.s, p.s); });
                 ctx.globalAlpha = 1; ctx.textAlign = 'center';
-                this.texts.forEach(t => { ctx.fillStyle = t.c; ctx.globalAlpha = Math.max(0, t.l/t.m); ctx.font = `${t.s}px "Press Start 2P"`; ctx.fillText(t.txt, Math.floor(t.x), Math.floor(t.y)); });
+                this.texts.forEach(t => {
+                    ctx.globalAlpha = Math.max(0, t.l/t.m);
+                    ctx.font = `${t.s}px "Press Start 2P"`;
+                    ctx.fillStyle = '#000'; ctx.fillText(t.txt, Math.floor(t.x)+2, Math.floor(t.y)+2);
+                    ctx.fillStyle = t.c; ctx.fillText(t.txt, Math.floor(t.x), Math.floor(t.y));
+                });
                 ctx.globalAlpha = 1;
             }
         };
 
-        function drawPixelObstacle(ctx, o) {
-            const P = 4;
+        // === RYSOWANIE PRZESZKÓD 2.5D Z GŁĘBIĄ I ŚCIANĄ PRZEDNIĄ ===
+        function drawPixelObstacle25D(ctx, o) {
+            const P = 4, wallH = 20;
             if(o.t === 'lava') {
-                ctx.fillStyle = '#b31b00'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#ff4d00'; ctx.fillRect(o.x+P*2, o.y+P*2, o.w-P*4, o.h-P*4);
+                ctx.fillStyle = '#6e1100'; ctx.fillRect(o.x-4, o.y-4, o.w+8, o.h+8);
+                ctx.fillStyle = '#cc2900'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.fillStyle = '#ff6600'; ctx.fillRect(o.x+8, o.y+8, o.w-16, o.h-16);
                 ctx.fillStyle = '#ffde00';
-                let pulse = Math.floor(Math.sin(performance.now()*0.005)*P*2);
-                ctx.fillRect(o.x+P*5+pulse, o.y+P*5, P*6, P*6);
+                let pulse = Math.floor(Math.sin(performance.now()*0.005)*8);
+                ctx.fillRect(o.x+24+pulse, o.y+24, 24, 24);
+                ctx.fillRect(o.x+o.w-48-pulse, o.y+o.h-44, 20, 20);
                 return;
             }
+
+            // Cień rzucany na ziemię
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.fillRect(o.x+P*2, o.y+P*2, o.w, o.h);
+            ctx.fillRect(o.x + 8, o.y + 10, o.w, o.h);
 
             if(o.t === 'crate') {
-                ctx.fillStyle = '#261405'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#8c5828'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
-                ctx.fillStyle = '#6e4219';
-                for(let py = o.y+P*4; py < o.y+o.h-P*2; py += P*5) ctx.fillRect(o.x+P*2, py, o.w-P*4, P);
+                // Przednia ciemniejsza ściana 2.5D
+                ctx.fillStyle = '#1f1004'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
+                ctx.fillStyle = '#593414'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
+                // Górna oświetlona pokrywa skrzyni
+                ctx.fillStyle = '#99622e'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#784a1f';
+                for(let py = o.y-wallH+P*4; py < o.y+o.h-wallH-P*2; py += P*5) ctx.fillRect(o.x+P*2, py, o.w-P*4, P);
+                // Jasna ramka + ukośna belka
+                ctx.fillStyle = '#ba7d43';
+                ctx.fillRect(o.x+P*2, o.y-wallH+P*2, o.w-P*4, P*2);
+                ctx.fillRect(o.x+P*2, o.y+o.h-wallH-P*3, o.w-P*4, P*2);
             } else if(o.t === 'neon') {
-                ctx.fillStyle = '#ffde00'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#240d3b'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(o.x+P*3, o.y+P*3, o.w-P*6, P*2);
+                ctx.fillStyle = '#05d5fa'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
+                ctx.fillStyle = '#120924'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
+                ctx.fillStyle = '#221242'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
+                ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
+                ctx.strokeRect(o.x+12, o.y-wallH+12, o.w-24, o.h-24);
             } else if(o.t === 'tree') {
-                ctx.fillStyle = '#0d1f0c'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#1f4e1c'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
-                ctx.fillStyle = '#2d6e28'; ctx.fillRect(o.x+P*3, o.y+P*3, o.w-P*6, o.h-P*6);
+                // Pień na dole + trójwarstwowa korona drzewa
+                ctx.fillStyle = '#472810'; ctx.fillRect(o.x + o.w/2 - 14, o.y + o.h - 24, 28, 24);
+                ctx.fillStyle = '#0b1f0a'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h);
+                ctx.fillStyle = '#1b4718'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#296924'; ctx.fillRect(o.x+P*3, o.y-wallH+P*2, o.w-P*6, o.h-P*6);
+                ctx.fillStyle = '#3d8c36'; ctx.fillRect(o.x+P*5, o.y-wallH+P*3, o.w-P*10, o.h-P*11);
             } else if(o.t === 'ice') {
-                ctx.fillStyle = '#1d4f66'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#5bc0eb'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
-            } else {
-                ctx.fillStyle = '#141013'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#3d3338'; ctx.fillRect(o.x+P, o.y+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#133c52'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
+                ctx.fillStyle = '#3993bd'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
+                ctx.fillStyle = '#73c7eb'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
+                ctx.fillStyle = '#c4edff'; ctx.fillRect(o.x+P*3, o.y-wallH+P*3, o.w-P*8, P*3);
             }
         }
 
+        // === RYSOWANIE BOHATERA PIXEL-ART HD ===
         function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote) {
             const P = 3;
             ctx.save();
             ctx.translate(Math.floor(x), Math.floor(y));
 
             if(isDead) {
+                ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6, 16, 8, 0, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
-                ctx.fillStyle = '#ddd'; ctx.fillRect(-3*P, -3*P, 6*P, 5*P);
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(-3*P, -3*P, 6*P, 5*P);
                 ctx.fillStyle = '#000'; ctx.fillRect(-2*P, -1*P, P, P); ctx.fillRect(P, -1*P, P, P);
                 ctx.restore();
                 return;
             }
+
+            // Elipsoidalny miękki cień pod butami
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath(); ctx.ellipse(0, 8, 16, 9, 0, 0, Math.PI*2); ctx.fill();
 
             if(quad) {
                 ctx.fillStyle = 'rgba(224, 64, 251, 0.35)';
@@ -1252,10 +1406,6 @@
                 ctx.strokeStyle = '#05d5fa'; ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI*2); ctx.stroke();
             }
-
-            ctx.fillStyle = 'rgba(0,0,0,0.45)';
-            ctx.fillRect(-5*P, -4*P, 10*P, 9*P);
-
             if(isBomb) {
                 ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
                 ctx.strokeRect(-7*P, -7*P, 14*P, 14*P);
@@ -1263,15 +1413,19 @@
 
             ctx.rotate(angle);
 
-            let step = Math.round(Math.sin(anim) * 2) * P;
-            ctx.fillStyle = '#111';
+            let step = Math.round(Math.sin(anim) * 2.2) * P;
+            ctx.fillStyle = '#0b0b12';
             ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
             ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
 
+            // Korpus z cieniowaniem
             ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
             ctx.fillStyle = skin === 'knight' ? '#8c969e' : (skin === 'ninja' ? '#1c1c28' : color);
             ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
+            ctx.fillStyle = 'rgba(255,255,255,0.22)';
+            ctx.fillRect(-3*P, -4*P, 3*P, 8*P);
 
+            // Dłonie
             ctx.fillStyle = '#000';
             ctx.fillRect(2*P, -5*P, 3*P, 3*P);
             ctx.fillRect(3*P, 2*P, 3*P, 3*P);
@@ -1279,16 +1433,20 @@
             ctx.fillRect(2*P, -4*P, 2*P, 2*P);
             ctx.fillRect(3*P, 3*P, 2*P, 2*P);
 
+            // Broń z detalami
             let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
             ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
-            ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#4a4a5a'));
+            ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
             ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
 
             if(muzzle > 0) {
                 ctx.fillStyle = '#ffde00';
-                ctx.fillRect((3+gunLen)*P, 0, 3*P, 5*P);
+                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 5, 0, Math.PI*2); ctx.fill();
             }
 
+            // Głowa i Nakrycie głowy
             ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
 
             if(skin === 'cap') {
@@ -1307,6 +1465,7 @@
             } else if(skin === 'astro') {
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
                 ctx.fillStyle = '#ffaa00'; ctx.fillRect(0, -2*P, 2*P, 4*P);
+                ctx.fillStyle = '#fff'; ctx.fillRect(P, -2*P, P, P);
             } else if(skin === 'cyborg') {
                 ctx.fillStyle = '#5c6bc0'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(P, -2*P, 2*P, 4*P);
@@ -1325,9 +1484,9 @@
                     ctx.fillStyle = '#05d5fa'; ctx.fillRect(Math.floor(x - 17), Math.floor(y - 33), Math.floor(34 * Math.min(1, shield/50)), 4);
                 }
             }
-            ctx.fillStyle = isBomb ? '#ffde00' : '#fff';
             ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-            ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x), Math.floor(y - 38));
+            ctx.fillStyle = '#000'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x)+1, Math.floor(y - 37));
+            ctx.fillStyle = isBomb ? '#ffde00' : '#fff'; ctx.fillText(isBomb ? `💣 ${name}` : name, Math.floor(x), Math.floor(y - 38));
 
             if(emote) {
                 ctx.font = '16px sans-serif';
@@ -1339,8 +1498,8 @@
             const P = z.t === 2 ? 4 : 3;
             ctx.save();
             ctx.translate(Math.floor(z.x), Math.floor(z.y));
+            ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6, 14, 7, 0, 0, Math.PI*2); ctx.fill();
             ctx.rotate(z.a || 0);
-            ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
             ctx.fillStyle = '#000'; ctx.fillRect(2*P, -4*P, 4*P, 2*P); ctx.fillRect(2*P, 2*P, 4*P, 2*P);
             ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
             ctx.fillStyle = z.t === 2 ? '#7862ad' : (z.t === 1 ? '#f05454' : '#43b84d');
@@ -1383,7 +1542,6 @@
                 if(this.speedTime > 0) this.speedTime -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
-                // W trybie Deszczu Meteorytów dostajesz +2 pkt za każdą sekundę przeżycia
                 if(gm === 'meteors' && !this.isDead) {
                     this.survTick = (this.survTick || 0) + dt;
                     if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
@@ -1699,7 +1857,6 @@
 
                 if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 1.2);
 
-                // Tryb: Deszcz Meteorytów
                 if(gm === 'meteors') {
                     if(Math.random() < 0.35 && this.hostMeteors.length < 10) {
                         this.hostMeteors.push({
@@ -1720,7 +1877,6 @@
                     db.ref(`rooms/${currentRoom}`).update({ meteors: JSON.stringify(this.hostMeteors) });
                 }
 
-                // Spawning skrzynek i monet
                 if(gm === 'coins') {
                     if(Math.random() < 0.18 && Object.keys(netItems).length < 18) {
                         let iid = 'c_' + Math.random().toString(36).substr(2, 5);
@@ -1827,7 +1983,6 @@
 
                     if(b.bType === 'rocket' && Math.random() < 0.6) FX.burst(b.x, b.y, '#888888', 1, 30, 5);
 
-                    // Trafienie w Złoty Sejf Kasyna (Tryb Heist)
                     if(gm === 'heist' && Math.hypot(b.x - 800, b.y - 800) < 55) {
                         FX.burst(b.x, b.y, '#ffde00', 6, 140, 5);
                         if(b.isMine) {
@@ -1938,52 +2093,18 @@
                 ).join('');
             },
 
-            draw() {
+            draw(dt) {
                 const gm = RoomState.activeMinigame;
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
                 ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, W, H);
 
                 Cam.apply();
 
-                ctx.fillStyle = mapObj.bg; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
-                ctx.fillStyle = mapObj.tileAlt;
-                for(let gx=0; gx<WORLD_SIZE; gx+=80) {
-                    for(let gy=0; gy<WORLD_SIZE; gy+=80) {
-                        if(((gx+gy)/80) % 2 === 0) ctx.fillRect(gx, gy, 80, 80);
-                    }
-                }
-
-                propDecorations.forEach(d => {
-                    ctx.fillStyle = RoomState.map === 'ice' ? '#ffffff' : (RoomState.map === 'cyber' ? '#05d5fa' : (RoomState.map === 'lava' ? '#362b2e' : '#2c5227'));
-                    ctx.fillRect(d.x, d.y, 4, 8);
-                });
+                // Tekstura podłoża z pamięci podręcznej Offscreen
+                const cachedBg = GroundCache.canvases[RoomState.map] || GroundCache.canvases.forest;
+                ctx.drawImage(cachedBg, 0, 0);
 
                 FX.drawDecals();
-
-                // Cienie nadlatujących Meteorytów
-                if(gm === 'meteors') {
-                    netMeteors.forEach(m => {
-                        ctx.fillStyle = 'rgba(255, 42, 109, 0.28)';
-                        ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill();
-                        ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.stroke();
-                        // Spadająca kometa z góry
-                        let dropOffset = Math.max(0, m.t * 260);
-                        ctx.fillStyle = '#ff9100';
-                        ctx.fillRect(m.x - 16, m.y - dropOffset - 16, 32, 32);
-                    });
-                }
-
-                // Złoty Sejf Kasyna na środku (Tryb Heist)
-                if(gm === 'heist') {
-                    ctx.save(); ctx.translate(800, 800);
-                    ctx.fillStyle = '#000'; ctx.fillRect(-52, -52, 104, 104);
-                    ctx.fillStyle = '#ffde00'; ctx.fillRect(-46, -46, 92, 92);
-                    ctx.fillStyle = '#b8860b'; ctx.fillRect(-34, -34, 68, 68);
-                    ctx.fillStyle = '#fff'; ctx.font = '9px "Press Start 2P"'; ctx.textAlign = 'center';
-                    ctx.fillText("🎰 SEJF", 0, -58);
-                    ctx.fillText("STRZELAJ!", 0, 5);
-                    ctx.restore();
-                }
 
                 if(gm === 'koth' && RoomState.koth) {
                     let k = RoomState.koth;
@@ -1997,12 +2118,14 @@
                     ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.stroke();
                 }
 
-                mapObj.obstacles.forEach(o => drawPixelObstacle(ctx, o));
+                // Lawa rysowana na poziomie ziemi
+                mapObj.obstacles.filter(o => o.t === 'lava').forEach(o => drawPixelObstacle25D(ctx, o));
 
-                ctx.strokeStyle = '#fff'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
-
+                // Przedmioty leżące na ziemi (z unoszeniem i poświatą)
+                let floatOff = Math.sin(performance.now()*0.006)*4;
                 Object.values(netItems).forEach(item => {
-                    ctx.save(); ctx.translate(Math.floor(item.x), Math.floor(item.y));
+                    ctx.save(); ctx.translate(Math.floor(item.x), Math.floor(item.y + floatOff));
+                    ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.ellipse(0, 14 - floatOff, 10, 5, 0, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = '#000'; ctx.fillRect(-13, -13, 26, 26);
                     let col = '#05d5fa', label = 'W';
                     if(item.t === 'coin') { col = '#ffde00'; label = '$'; }
@@ -2012,34 +2135,92 @@
                     else if(item.t === 'quad') { col = '#d500f9'; label = '2X'; }
                     else if(item.t === 'nitro') { col = '#ff9100'; label = '⚡'; }
                     ctx.fillStyle = col; ctx.fillRect(-10, -10, 20, 20);
+                    ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(-10, -10, 20, 4);
                     ctx.fillStyle = '#000'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
                     ctx.fillText(label, 0, 4);
                     ctx.restore();
                 });
 
-                if(gm === 'zombies') {
-                    Object.values(netZombies).forEach(z => drawPixelZombie(ctx, z));
-                }
-
-                this.bullets.forEach(b => {
-                    ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(b.x-5), Math.floor(b.y-5), 10, 10);
-                    ctx.fillStyle = b.bType === 'bounce' ? '#05d5fa' : (b.bType === 'rocket' ? '#ff5252' : '#ffde00');
-                    ctx.fillRect(Math.floor(b.x-3), Math.floor(b.y-3), 6, 6);
+                // Sortowanie głębi 2.5D (Y-Sorting dla przeszkód, graczy i zombiaków)
+                const renderQueue = [];
+                mapObj.obstacles.filter(o => o.t !== 'lava').forEach(o => {
+                    renderQueue.push({ y: o.y + o.h, draw: () => drawPixelObstacle25D(ctx, o) });
                 });
 
+                if(gm === 'heist') {
+                    renderQueue.push({
+                        y: 850,
+                        draw: () => {
+                            ctx.save(); ctx.translate(800, 800);
+                            ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(-48, -38, 104, 100);
+                            ctx.fillStyle = '#000'; ctx.fillRect(-52, -62, 104, 114);
+                            ctx.fillStyle = '#b8860b'; ctx.fillRect(-46, 30, 92, 18);
+                            ctx.fillStyle = '#ffde00'; ctx.fillRect(-46, -56, 92, 86);
+                            ctx.fillStyle = '#fff8dc'; ctx.fillRect(-42, -52, 84, 8);
+                            ctx.fillStyle = '#000'; ctx.font = '9px "Press Start 2P"'; ctx.textAlign = 'center';
+                            ctx.fillText("🎰 SEJF", 0, -18); ctx.fillText("STRZELAJ!", 0, 4);
+                            ctx.restore();
+                        }
+                    });
+                }
+
+                if(gm === 'zombies') {
+                    Object.values(netZombies).forEach(z => {
+                        renderQueue.push({ y: z.y, draw: () => drawPixelZombie(ctx, z) });
+                    });
+                }
+
                 Object.entries(netPlayers).forEach(([pid, p]) => {
-                    drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote);
+                    renderQueue.push({
+                        y: p.y,
+                        draw: () => drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote)
+                    });
                 });
 
                 if(this.me) {
-                    drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote);
+                    renderQueue.push({
+                        y: this.me.y,
+                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote)
+                    });
                 }
+
+                renderQueue.sort((a, b) => a.y - b.y);
+                renderQueue.forEach(item => item.draw());
+
+                // Cienie i komety w Deszczu Meteorytów
+                if(gm === 'meteors') {
+                    netMeteors.forEach(m => {
+                        ctx.fillStyle = 'rgba(255, 42, 109, 0.28)';
+                        ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill();
+                        ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.stroke();
+                        let dropOffset = Math.max(0, m.t * 260);
+                        ctx.fillStyle = '#ff9100';
+                        ctx.fillRect(m.x - 16, m.y - dropOffset - 16, 32, 32);
+                    });
+                }
+
+                // Pociski z poświatą
+                this.bullets.forEach(b => {
+                    let bCol = b.bType === 'bounce' ? '#05d5fa' : (b.bType === 'rocket' ? '#ff5252' : '#ffde00');
+                    ctx.fillStyle = bCol;
+                    ctx.globalAlpha = 0.3;
+                    ctx.beginPath(); ctx.arc(b.x, b.y, 11, 0, Math.PI*2); ctx.fill();
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = '#000'; ctx.fillRect(Math.floor(b.x-5), Math.floor(b.y-5), 10, 10);
+                    ctx.fillStyle = bCol; ctx.fillRect(Math.floor(b.x-3), Math.floor(b.y-3), 6, 6);
+                });
+
+                // Cząsteczki pogodowe biomu
+                Weather.updateAndDraw(ctx, dt || 0.016, RoomState.map);
+
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
 
                 FX.drawTop();
                 Cam.restore();
 
+                // Minimapa
                 const mSize = 110, mx = W - mSize - 14, my = H - mSize - 14, scale = mSize / WORLD_SIZE;
-                ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(mx, my, mSize, mSize);
+                ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(mx, my, mSize, mSize);
                 ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(mx, my, mSize, mSize);
 
                 Object.values(netPlayers).forEach(p => {
@@ -2055,7 +2236,7 @@
 
             loop(time) {
                 let dt = Math.min((time - this.lastTime)/1000, 0.1); this.lastTime = time;
-                if(RoomState.status === 'playing') { this.update(dt); this.draw(); }
+                if(RoomState.status === 'playing') { this.update(dt); this.draw(dt); }
                 else if(RoomState.status === 'board') { Board.drawBoard(ctx); }
                 this.loopId = requestAnimationFrame(t => this.loop(t));
             },
