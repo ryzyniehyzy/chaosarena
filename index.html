@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAWEŁ PYKA: SUPER PIXEL PARTY 50-TILES EDITION</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' rx='3' fill='%23151526'/><path fill='%23ffde00' d='M2 5h2v2h2V5h4v2h2V5h2v7H2z'/><rect x='4' y='8' width='2' height='2' fill='%23ff2a6d'/><rect x='10' y='8' width='2' height='2' fill='%2305d5fa'/><rect x='2' y='12' width='12' height='2' fill='%23ff9100'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -25,8 +25,8 @@
         .screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-grad); width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(8px); transition: background 0.4s; }
         .screen.active { display: flex; }
         
-        .panel { background: var(--panel-grad); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.2rem; max-width: 1160px; width: 96%; text-align: center; position: relative; max-height: 95vh; overflow-y: auto; }
-        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.65rem 0.9rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 9px; outline: none; text-shadow: 2px 2px 0 #000; }
+        .panel { background: var(--panel-grad); border: 4px solid #fff; box-shadow: 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.85), inset 0 4px 0 rgba(255,255,255,0.15); padding: 1.15rem; max-width: 1180px; width: 96%; text-align: center; position: relative; max-height: 95vh; overflow-y: auto; }
+        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.6rem 0.85rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 9px; outline: none; text-shadow: 2px 2px 0 #000; }
         .btn:hover { filter: brightness(1.15); }
         .btn:active { transform: translateY(3px); box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.45), 0 1px 0 #000; }
         .btn:disabled { background: #444; color: #888; border-color: #777; cursor: not-allowed; filter: none; }
@@ -49,7 +49,7 @@
         .mini-reel { width: 44px; height: 48px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
         /* HUD MINIGIER */
-        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.8); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 20, 0.82); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
         
         /* HUD PLANSZÓWKI */
@@ -60,23 +60,19 @@
         #diceOverlay { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 58; display: none; flex-direction: column; align-items: center; pointer-events: none; }
         .dice-cube { width: 100px; height: 100px; background: linear-gradient(135deg, #ffffff 0%, #dcdcdc 100%); border: 6px solid #000; box-shadow: inset -8px -8px 0 #aaa, 0 0 30px #ffde00, 12px 12px 0 rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #111; }
 
-        /* MODALE PLANSZOWE (KASYNO I SKLEP) */
+        /* MODALE PLANSZOWE */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 62; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
         .slot-machine { background: linear-gradient(180deg, #3a154d 0%, #1c0926 100%); border: 6px solid #ffde00; box-shadow: 0 0 45px #ff2a6d, 12px 12px 0 #000; padding: 24px; text-align: center; max-width: 540px; width: 92%; }
         .slot-reel { width: 90px; height: 96px; background: linear-gradient(180deg, #e0e0e0 0%, #ffffff 50%, #cccccc 100%); border: 5px solid #000; box-shadow: inset 0 8px 10px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 40px; }
 
         /* RULETKA */
-        #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+        #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.92); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
 
-        /* CZAT */
-        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 310px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
-        #chatMessages { height: 95px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
-        .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 5px; cursor: pointer; font-size: 12px; }
-        .emote-btn:hover { background: #323254; border-color: #05d5fa; transform: scale(1.15); }
-
-        /* WIRTUALNE GAŁKI NA TELEFON */
-        #mobileControls { position: absolute; bottom: 20px; right: 20px; z-index: 55; display: none; gap: 15px; pointer-events: auto; }
-        .touch-pad { width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 9px; }
+        /* CZAT + SOUNDBOARD */
+        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 330px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
+        #chatMessages { height: 90px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+        .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 4px; cursor: pointer; font-size: 11px; }
+        .emote-btn:hover { background: #323254; border-color: #05d5fa; transform: scale(1.12); }
 
         #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
         #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 20px; text-shadow: 0 0 15px #ff2a6d, 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
@@ -121,7 +117,7 @@
     <div id="shopModal" class="modal-overlay">
         <div class="slot-machine !border-[#05d5fa]">
             <div class="text-base text-[#05d5fa] mb-1">🛒 SKLEP SZEMRANEGO HANDLARZA 🛒</div>
-            <div class="text-[8px] text-gray-300 mb-4">Wydaj swoje żetony (🪙) na potężne ulepszenia planszowe!</div>
+            <div class="text-[8px] text-gray-300 mb-4">Wydaj swoje żetony (🪙) na ulepszenia planszowe!</div>
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
                 <div class="bg-black/60 border-2 border-yellow-400 p-2">
                     <div class="text-xl mb-1">🚀</div>
@@ -146,7 +142,7 @@
         </div>
     </div>
 
-    <!-- HUD PLANSZÓWKI (50 PÓL) -->
+    <!-- HUD PLANSZÓWKI -->
     <div id="boardHud">
         <div class="board-box flex flex-col md:flex-row justify-between items-center gap-2">
             <div class="text-left">
@@ -161,25 +157,28 @@
         </div>
     </div>
 
-    <!-- RULETKA MINIGIER -->
+    <!-- RULETKA MINIGIER + LOSOWANIE ŚMIESZNEJ MUTACJI -->
     <div id="rouletteOverlay">
-        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY (12 MINIGIER) 🎡</div>
-        <div class="text-[8px] text-yellow-300 mb-4">Talia bez powtórek – za każdym razem inna rozgrywka!</div>
-        <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_40px_#05d5fa] mb-4">
+        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY (13 MINIGIER) 🎡</div>
+        <div class="text-[8px] text-yellow-300 mb-4">Talia bez powtórek + Losowa Śmieszna Klątwa!</div>
+        <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_40px_#05d5fa] mb-3">
             🔫 ARENA PvP
         </div>
+        <div id="rouletteMutatorText" class="text-xs text-[#ff2a6d] bg-black/80 border-2 border-[#ff2a6d] px-4 py-2 mb-2">
+            🤡 ŚMIESZNY EFEKT: BRAK
+        </div>
         <div id="rouletteMapText" class="text-xs text-[#00e676] mb-2">BIOM: Leśny Bunkier</div>
-        <div class="text-[9px] text-gray-400">Zwycięzca minigry wybierze 1 z 3 Kart Wspomagających!</div>
     </div>
 
     <!-- LEWY HUD MINIGRY -->
     <div id="hud">
         <div id="hudModeTitle" class="text-xs text-[#05d5fa] mb-1">TRYB</div>
+        <div id="hudMutatorBadge" class="text-[8px] text-yellow-300 bg-purple-950 border border-yellow-400 px-2 py-0.5 mb-1 inline-block"></div>
         <div id="hudTimer" class="text-xl text-yellow-400 mb-1">01:00</div>
-        <div id="squidLightBanner" class="text-[9px] font-bold mb-1 hidden">🟢 ZIELONE ŚWIATŁO!</div>
+        <div id="squidLightBanner" class="text-[10px] font-bold mb-1 hidden">🟢 ZIELONE ŚWIATŁO!</div>
         <div class="text-[7px] text-gray-300">ZDROWIE + TARCZA</div>
         <div class="bar-wrap"><div id="hpBar"></div><div id="shieldBar"></div></div>
-        <div class="text-[7px] text-gray-300 mt-2">ZRYW [SPACJA]</div>
+        <div class="text-[7px] text-gray-300 mt-2">ZRYW / NITRO [SPACJA]</div>
         <div class="bar-wrap !h-2.5"><div id="dashBar"></div></div>
         <div id="hudWeapon" class="text-[8px] text-yellow-300 mt-2">BROŃ: Pistolet</div>
         <div id="hudBuffs" class="text-[8px] text-[#e040fb] mt-1"></div>
@@ -193,10 +192,10 @@
         </div>
     </div>
 
-    <!-- CZAT -->
+    <!-- CZAT + MEME SOUNDBOARD -->
     <div id="chatWidget">
         <div class="bg-[#1b1b2f] px-2 py-1 flex justify-between items-center border-b-2 border-gray-600">
-            <span class="text-[8px] text-[#05d5fa]">💬 CZAT I EMOTKI</span>
+            <span class="text-[8px] text-[#05d5fa]">💬 CZAT, EMOTKI & DŹWIĘKI</span>
             <button class="text-[8px] text-gray-300 cursor-pointer" onclick="Chat.toggleMinimize()">[_]</button>
         </div>
         <div id="chatBody">
@@ -206,11 +205,10 @@
                 <button class="emote-btn" onclick="Chat.sendEmote('💀')">💀</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('😂')">😂</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('👑')">👑</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('🎰')">🎰</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('💎')">💎</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('🤬')">🤬</button>
                 <button class="emote-btn" onclick="Chat.sendEmote('🤡')">🤡</button>
-                <button class="emote-btn" onclick="Chat.sendEmote('🎉')">🎉</button>
+                <button class="emote-btn !bg-amber-900" title="Pierdnięcie" onclick="Chat.sendSoundMeme('fart', '💨 PRRRRT!')">💨</button>
+                <button class="emote-btn !bg-red-900" title="Airhorn" onclick="Chat.sendSoundMeme('horn', '📢 AIRHORN!')">📢</button>
+                <button class="emote-btn !bg-purple-900" title="Trąbka Klauna" onclick="Chat.sendSoundMeme('honk', '🤡 HONK HONK!')">🎪</button>
             </div>
             <div id="chatMessages"></div>
             <form id="chatForm" class="flex border-t-2 border-gray-600">
@@ -222,11 +220,11 @@
 
     <div id="uiContainer" class="ui-layer">
         
-        <!-- 1. MENU GŁÓWNE Z WYBOREM GRADIENTU I CELOWNIKA -->
+        <!-- 1. MENU GŁÓWNE -->
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-2xl">
                 <h1 class="text-3xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (50 PÓL & 12 GIER) ✨</h2>
+                <h2 class="text-xs text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (SQUID GAME + WYŚCIGI + MEMY) ✨</h2>
                 
                 <div class="flex flex-col md:flex-row gap-4 items-center mb-4">
                     <div class="bg-black/80 border-4 border-[#05d5fa] p-2 flex flex-col items-center shadow-[6px_6px_0_#000]">
@@ -293,10 +291,10 @@
         <!-- 2. LOBBY -->
         <div id="screen-lobby" class="screen">
             <div class="panel">
-                <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-3 gap-2">
+                <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-2.5 gap-2">
                     <div class="text-left">
                         <h2 class="text-base md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL</h2>
-                        <span class="text-[7px] text-yellow-300">Plansza 50 Pól | 12 Minigier | Kasyno & Ruletka | Customowe Celowniki</span>
+                        <span class="text-[7px] text-yellow-300">Plansza 50 Pól | Wyścigi Gokartów | Prawdziwe Squid Game | Śmieszne Klątwy!</span>
                     </div>
                     <div class="flex items-center gap-2 bg-black/60 border-2 border-[#ff2a6d] px-3 py-1">
                         <div class="text-right">
@@ -332,13 +330,13 @@
                                 <span class="text-[8px] text-[#ffde00]">🎰 KASYNO LOBBY</span>
                                 <span class="text-[8px] text-[#00e676]">ŻETONY: <b id="lobbyChipsText">100</b> 🪙</span>
                             </div>
-                            <div class="flex justify-center gap-2 my-1.5">
+                            <div class="flex justify-center gap-2 my-1">
                                 <div id="lReel1" class="mini-reel">🍒</div>
                                 <div id="lReel2" class="mini-reel">7️⃣</div>
                                 <div id="lReel3" class="mini-reel">💎</div>
                             </div>
-                            <div id="lobbySlotMsg" class="text-[7px] text-pink-300 mb-1.5 h-3">Kręć bębnami lub obstaw kolor ruletki!</div>
-                            <div class="flex gap-1 mb-1.5">
+                            <div id="lobbySlotMsg" class="text-[7px] text-pink-300 mb-1 h-3">Kręć bębnami lub obstaw kolor ruletki!</div>
+                            <div class="flex gap-1 mb-1">
                                 <button id="btnLobbySpin" class="btn !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !py-1 !px-2 !text-[8px] w-full font-bold" onclick="LobbyCasino.spin()">🕹️ AUTOMAT (10🪙)</button>
                                 <button class="btn !bg-gray-700 !py-1 !px-2 !text-[7px]" onclick="LobbyCasino.freeChips()">+50🪙</button>
                             </div>
@@ -361,7 +359,7 @@
                                     <option value="x">❌ X-Snajper</option>
                                 </select>
                             </div>
-                            <div class="grid grid-cols-2 gap-1 text-[7px] mb-2">
+                            <div class="grid grid-cols-2 gap-1 text-[7px] mb-1.5">
                                 <label class="flex items-center gap-1 cursor-pointer">
                                     <input type="checkbox" id="chkMusic" checked onchange="Settings.update()" class="accent-[#05d5fa]"> 🎵 Muzyka
                                 </label>
@@ -382,7 +380,6 @@
                                 <button class="px-1.5 py-0.5 text-[6px] bg-emerald-900 border border-white" onclick="Settings.setTheme('emerald')">Las</button>
                                 <button class="px-1.5 py-0.5 text-[6px] bg-red-950 border border-white" onclick="Settings.setTheme('crimson')">Mrok</button>
                             </div>
-                            <!-- Tajne pole kodu (nikt inny nie widzi wpisania) -->
                             <div class="flex gap-1">
                                 <input type="password" id="secretCodeInput" placeholder="Wpisz tajny kod..." class="bg-black border border-gray-600 text-[7px] text-white px-2 py-1 flex-grow outline-none">
                                 <button class="bg-gray-800 border border-gray-500 text-[7px] px-2 py-1 text-yellow-400 cursor-pointer" onclick="Settings.redeemCode()">OK</button>
@@ -390,24 +387,32 @@
                         </div>
                     </div>
 
-                    <!-- Prawa kolumna: 12 Trybów -->
+                    <!-- Prawa kolumna: 13 Trybów -->
                     <div class="lg:col-span-8 flex flex-col justify-between bg-black/40 border-2 border-gray-700 p-3">
                         <div>
                             <div class="text-[9px] text-yellow-400 mb-1.5">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2.5 interactive">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
                                     <div class="text-[9px] text-[#ffde00] mb-0.5">🎲 SUPER MARIO PARTY XL (WYSPA 50 PÓL!)</div>
-                                    <div class="text-[6px] text-gray-300 leading-relaxed">Powiększona wyspa 50 pól! Sklep Handlarza, Pojedynki 1v1, Kasyno i 12 minigier losowanych bez powtórek!</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Powiększona wyspa 50 pól! Sklep Handlarza, Pojedynki 1v1, Kasyno i 13 minigier losowanych bez powtórek!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
-                                    <div class="text-[9px] text-[#00e676] mb-0.5">🎡 RULETKA 12 MINIGIER (BEZ POWTÓREK)</div>
-                                    <div class="text-[6px] text-gray-300 leading-relaxed">Koło fortuny losuje za każdym razem inną z 12 minigier (system tasowania talii!).</div>
+                                    <div class="text-[9px] text-[#00e676] mb-0.5">🎡 RULETKA 13 MINIGIER + ŚMIESZNE KLĄTWY</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Koło fortuny losuje unikalną minigrę oraz śmieszną mutację (np. Wielkie Głowy lub Skórki Banana)!</div>
                                 </div>
                             </div>
 
-                            <div class="text-[7px] text-gray-400 mb-1">LUB WYBIERZ KONKRETNĄ MINIGRĘ Z 12 DOSTĘPNYCH:</div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5 mb-2.5 interactive">
+                            <div class="text-[7px] text-gray-400 mb-1">LUB WYBIERZ KONKRETNĄ MINIGRĘ Z 13 DOSTĘPNYCH:</div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5 mb-2 interactive">
+                                <div class="mode-card" onclick="Lobby.selectMode('race')" id="m-race">
+                                    <div class="text-[7px] text-[#ffde00]">🏎️ WYŚCIG GOKARTÓW</div>
+                                    <div class="text-[6px] text-gray-400">Tor, Drifty, Nitro i Plamy Oleju!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('squid')" id="m-squid">
+                                    <div class="text-[7px] text-green-400">🚦 SQUID GAME (LALKA)</div>
+                                    <div class="text-[6px] text-gray-400">Biegnij do mety! Laser zabija!</div>
+                                </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('arena')" id="m-arena">
                                     <div class="text-[7px] text-[#ff2a6d]">🔫 ARENA PvP</div>
                                     <div class="text-[6px] text-gray-400">Bazooki & Plazma</div>
@@ -415,10 +420,6 @@
                                 <div class="mode-card" onclick="Lobby.selectMode('spleef')" id="m-spleef">
                                     <div class="text-[7px] text-cyan-300">🧊 KRUSZĄCY LÓD</div>
                                     <div class="text-[6px] text-gray-400">Znikające kafelki!</div>
-                                </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('squid')" id="m-squid">
-                                    <div class="text-[7px] text-green-400">🚦 CZERWONE/ZIEL</div>
-                                    <div class="text-[6px] text-gray-400">Stój na czerwonym!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('crown')" id="m-crown">
                                     <div class="text-[7px] text-yellow-400">👑 KRADZIEŻ KORONY</div>
@@ -452,15 +453,11 @@
                                     <div class="text-[7px] text-indigo-300">🎯 SNAJPERZY</div>
                                     <div class="text-[6px] text-gray-400">1 celny strzał = Zgon</div>
                                 </div>
-                                <div class="mode-card" onclick="Lobby.selectMode('coins')" id="m-coins">
-                                    <div class="text-[7px] text-[#e040fb]">💎 ZŁOTA GORĄCZKA</div>
-                                    <div class="text-[6px] text-gray-400">Zbieraj diamenty</div>
-                                </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-3 mb-2">
+                            <div class="grid grid-cols-3 gap-2 mb-2">
                                 <div>
-                                    <label class="text-[7px] text-gray-400 block mb-1">BIOM ARENY 2.5D:</label>
+                                    <label class="text-[7px] text-gray-400 block mb-1">BIOM ARENY:</label>
                                     <select id="mapSelect" class="input-pixel interactive" onchange="Lobby.changeMap(this.value)">
                                         <option value="forest">🌲 Leśny Bunkier</option>
                                         <option value="cyber">🟣 Cyber-Vegas</option>
@@ -469,11 +466,22 @@
                                     </select>
                                 </div>
                                 <div>
+                                    <label class="text-[7px] text-gray-400 block mb-1">ŚMIESZNA KLĄTWA:</label>
+                                    <select id="mutatorSelect" class="input-pixel interactive" onchange="Lobby.changeMutator(this.value)">
+                                        <option value="random">🎲 Losuj Klątwę!</option>
+                                        <option value="none">Brak (Normalnie)</option>
+                                        <option value="bighead">🎈 Wielkie Głowy</option>
+                                        <option value="tiny">🐜 Mikro-Ludziki (Hel)</option>
+                                        <option value="bananas">🍌 Skórki Banana!</option>
+                                        <option value="drunk">🦀 Chód Kraba (Na opak)</option>
+                                    </select>
+                                </div>
+                                <div>
                                     <label class="text-[7px] text-gray-400 block mb-1">CZAS MINIGRY:</label>
                                     <select id="timeSelect" class="input-pixel interactive" onchange="Lobby.changeTime(this.value)">
-                                        <option value="45">⏱️ 45 Sekund (Szybka)</option>
-                                        <option value="60" selected>⏱️ 60 Sekund (Standard)</option>
-                                        <option value="90">⏱️ 90 Sekund (Długa)</option>
+                                        <option value="45">⏱️ 45 Sekund</option>
+                                        <option value="60" selected>⏱️ 60 Sekund</option>
+                                        <option value="90">⏱️ 90 Sekund</option>
                                     </select>
                                 </div>
                             </div>
@@ -546,11 +554,11 @@
     </div>
 
     <script>
-        // === USTAWIENIA, MOTYWY GRADIENTU, CELOWNIKI & TAJNY KOD "SIGMA" ===
+        // === USTAWIENIA, MOTYWY, CELOWNIKI & TAJNY KOD "SIGMA" ===
         const Settings = {
             music: true, sfx: true, shake: true, crt: true,
             crosshair: 'cross',
-            sigmaAim: false, // Ukryty lokalny aimbot po wpisaniu "sigma"
+            sigmaAim: false,
 
             update() {
                 this.music = document.getElementById('chkMusic').checked;
@@ -590,7 +598,6 @@
                 inp.blur();
                 if(val === 'sigma') {
                     this.sigmaAim = !this.sigmaAim;
-                    // Cichy lokalny sygnał tylko dla wpisującego
                     inp.placeholder = this.sigmaAim ? "✓ TRYB SIGMA AKTYWNY" : "Wpisz tajny kod...";
                     Sound.play('coin');
                 } else {
@@ -599,7 +606,6 @@
             }
         };
 
-        // Rysowanie Customowego Celownika na Płótnie
         function drawCustomCrosshair(ctx, x, y, type) {
             ctx.save();
             ctx.translate(Math.floor(x), Math.floor(y));
@@ -692,7 +698,7 @@
             setTimeout(() => item.remove(), 3500);
         }
 
-        // === SYNTEZATOR DŹWIĘKÓW I MUZYKI ===
+        // === SYNTEZATOR DŹWIĘKÓW, MUZYKI & MEME SOUNDBOARD ===
         const Sound = {
             ctx: null, musicTimer: null, step: 0,
             init() {
@@ -709,14 +715,15 @@
                 this.musicTimer = setInterval(() => {
                     if(!Settings.music || !this.ctx || (RoomState.status !== 'playing' && RoomState.status !== 'board')) return;
                     const t = this.ctx.currentTime;
-                    let bFreq = bassNotes[this.step % bassNotes.length];
+                    let pitchMult = RoomState.mutator === 'tiny' ? 1.35 : 1.0;
+                    let bFreq = bassNotes[this.step % bassNotes.length] * pitchMult;
                     const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
                     osc.type = 'triangle'; osc.frequency.setValueAtTime(bFreq, t);
                     g.gain.setValueAtTime(0.02, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
                     osc.connect(g); g.connect(this.ctx.destination);
                     osc.start(t); osc.stop(t + 0.19);
 
-                    let lFreq = leadNotes[this.step % leadNotes.length];
+                    let lFreq = leadNotes[this.step % leadNotes.length] * pitchMult;
                     if(lFreq > 0 && this.step % 2 === 0) {
                         const lOsc = this.ctx.createOscillator(), lg = this.ctx.createGain();
                         lOsc.type = 'sine'; lOsc.frequency.setValueAtTime(lFreq, t);
@@ -743,6 +750,11 @@
                 else if(type === 'jackpot') { o.type='square'; o.frequency.setValueAtTime(523, t); o.frequency.setValueAtTime(659, t+0.1); o.frequency.setValueAtTime(784, t+0.2); o.frequency.setValueAtTime(1046, t+0.3); g.gain.setValueAtTime(0.08, t); g.gain.linearRampToValueAtTime(0.01, t+0.5); o.start(t); o.stop(t+0.5); }
                 else if(type === 'tick') { o.type='sine'; o.frequency.setValueAtTime(750, t); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.005, t+0.04); o.start(t); o.stop(t+0.04); }
                 else if(type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(100, t); o.frequency.exponentialRampToValueAtTime(15, t+0.45); g.gain.setValueAtTime(0.16, t); g.gain.linearRampToValueAtTime(0.01, t+0.45); o.start(t); o.stop(t+0.45); }
+                // Śmieszne dźwięki Meme Soundboard
+                else if(type === 'fart') { o.type='sawtooth'; o.frequency.setValueAtTime(110, t); o.frequency.linearRampToValueAtTime(42, t+0.38); g.gain.setValueAtTime(0.14, t); g.gain.linearRampToValueAtTime(0.01, t+0.38); o.start(t); o.stop(t+0.38); }
+                else if(type === 'horn') { o.type='sawtooth'; o.frequency.setValueAtTime(466, t); g.gain.setValueAtTime(0.14, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.42); o.start(t); o.stop(t+0.42); }
+                else if(type === 'honk') { o.type='triangle'; o.frequency.setValueAtTime(520, t); o.frequency.setValueAtTime(380, t+0.1); o.frequency.setValueAtTime(580, t+0.2); g.gain.setValueAtTime(0.12, t); g.gain.linearRampToValueAtTime(0.01, t+0.32); o.start(t); o.stop(t+0.32); }
+                else if(type === 'slip') { o.type='sine'; o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(950, t+0.25); g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0.01, t+0.25); o.start(t); o.stop(t+0.25); }
             }
         };
 
@@ -861,7 +873,7 @@
         let myId = null, currentRoom = null, isHost = false;
         let netPlayers = {}, netZombies = {}, netItems = {}, netMeteors = [];
 
-        const ALL_MINIGAMES = ['arena', 'spleef', 'squid', 'crown', 'meteors', 'heist', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
+        const ALL_MINIGAMES = ['race', 'squid', 'arena', 'spleef', 'crown', 'meteors', 'heist', 'royale', 'zombies', 'bomb', 'koth', 'sniper', 'coins'];
         let minigameDeck = [];
         let lastPlayedMap = '';
 
@@ -882,15 +894,24 @@
             return lastPlayedMap;
         }
 
+        const MUTATOR_NAMES = {
+            none: 'BRAK (Normalna Rozgrywka)',
+            bighead: '🎈 WIELKIE GŁOWY (Big Head Mode!)',
+            tiny: '🐜 MIKRO-LUDZIKI (Szybkość + Hel!)',
+            bananas: '🍌 SKÓRKI OD BANANA (Ślizgawka!)',
+            drunk: '🦀 CHÓD KRABA (Odwrócone Klawisze!)'
+        };
+
         const RoomState = {
             status: 'lobby', isPartyCampaign: true, mode: 'party', activeMinigame: 'arena',
-            map: 'forest', matchDuration: 60, timer: 60, bombHolder: null, bombTimer: 10,
-            crownHolder: null, squidRed: false, brokenIce: {},
+            map: 'forest', mutatorSetting: 'random', mutator: 'none',
+            matchDuration: 60, timer: 60, bombHolder: null, bombTimer: 10,
+            crownHolder: null, squidState: 'green', brokenIce: {},
             koth: {x:800, y:800, r:110}, stormR: 1100, vaultHp: 500,
             turnOrder: [], turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna XL (50 Pól)!', minigameWinner: null
         };
 
-        // === CZAT ===
+        // === CZAT & MEME SOUNDBOARD ===
         const Chat = {
             minimized: false,
             init() {
@@ -922,14 +943,70 @@
                         msg: `pokazuje emotkę: ${em}`
                     });
                 }
+            },
+            sendSoundMeme(sndKey, label) {
+                Sound.init();
+                if(Game.me) Game.me.sendEmote(label.split(' ')[0]);
+                if(currentRoom) {
+                    db.ref(`chat/${currentRoom}`).push({
+                        name: document.getElementById('playerName').value.trim() || 'Paweł',
+                        color: document.getElementById('playerColor').value,
+                        msg: `puszcza dźwięk: ${label}`,
+                        snd: sndKey
+                    });
+                }
             }
         };
 
-        // === MODELE 6 KLAS BOHATERÓW ===
+        // === RYSOWANIE GOKARTA WYŚCIGOWEGO PIXEL-ART ===
+        function drawPixelKart(ctx, x, y, angle, color, skin, name, lap) {
+            ctx.save();
+            ctx.translate(Math.floor(x), Math.floor(y));
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath(); ctx.ellipse(0, 6, 24, 14, 0, 0, Math.PI*2); ctx.fill();
+
+            ctx.rotate(angle);
+            // Opony gokarta
+            ctx.fillStyle = '#111';
+            ctx.fillRect(-18, -16, 12, 6); ctx.fillRect(8, -16, 12, 6);
+            ctx.fillRect(-18, 10, 12, 6);  ctx.fillRect(8, 10, 12, 6);
+            // Spojler i zderzak
+            ctx.fillStyle = '#222';
+            ctx.fillRect(-24, -12, 6, 24);
+            ctx.fillStyle = '#ffde00';
+            ctx.fillRect(20, -10, 5, 20);
+            // Karoseria wyścigowa
+            ctx.fillStyle = '#000'; ctx.fillRect(-18, -12, 40, 24);
+            ctx.fillStyle = color;  ctx.fillRect(-16, -10, 36, 20);
+            // Białe pasy wyścigowe
+            ctx.fillStyle = '#fff'; ctx.fillRect(-16, -3, 36, 6);
+            // Fotel i głowa kierowcy w kasku
+            ctx.fillStyle = '#111'; ctx.fillRect(-8, -7, 14, 14);
+            ctx.fillStyle = '#ffcca3'; ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(-2, 0, 7, Math.PI/2, -Math.PI/2); ctx.fill();
+            ctx.restore();
+
+            if(name) {
+                ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
+                ctx.fillStyle = '#000'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x)+1, Math.floor(y - 26));
+                ctx.fillStyle = '#ffde00'; ctx.fillText(`🏎️ ${name} (Okr.${lap||1}/3)`, Math.floor(x), Math.floor(y - 27));
+            }
+        }
+
+        // === MODELE 6 KLAS BOHATERÓW (Z OBSŁUGĄ MUTATORÓW: WIELKIE GŁOWY / MIKRO) ===
         function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote, hasCrown=false) {
+            if(RoomState.status === 'playing' && RoomState.activeMinigame === 'race') {
+                drawPixelKart(ctx, x, y, angle, color, skin, name, hp);
+                return;
+            }
+
             const P = 3;
             ctx.save();
             ctx.translate(Math.floor(x), Math.floor(y));
+
+            if(RoomState.status === 'playing' && RoomState.mutator === 'tiny') {
+                ctx.scale(0.68, 0.68);
+            }
 
             if(isDead) {
                 ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6, 16, 8, 0, 0, Math.PI*2); ctx.fill();
@@ -960,6 +1037,7 @@
                 ctx.beginPath(); ctx.arc(0, 0, 27, 0, Math.PI*2); ctx.stroke();
             }
 
+            ctx.save();
             ctx.rotate(angle);
 
             let step = Math.round(Math.sin(anim) * 2.5) * P;
@@ -969,10 +1047,36 @@
             ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
             ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
 
+            // Korpus + Broń
+            ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
+            ctx.fillStyle = skin === 'knight' ? '#9aa5b1' : (skin === 'ninja' ? '#191926' : color);
+            ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(2*P, -6*P, 3*P, 3*P);
+            ctx.fillRect(3*P, 3*P, 3*P, 3*P);
+            ctx.fillStyle = skin === 'cyborg' ? '#90a4ae' : (skin === 'knight' ? '#cbd2d9' : '#ffcca3');
+            ctx.fillRect(2*P, -5*P, 2*P, 2*P);
+            ctx.fillRect(3*P, 4*P, 2*P, 2*P);
+
+            if(RoomState.activeMinigame !== 'squid') {
+                let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
+                ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
+                ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
+                ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
+
+                if(muzzle > 0) {
+                    ctx.fillStyle = '#ffde00';
+                    ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 10, 0, Math.PI*2); ctx.fill();
+                }
+            }
+
+            // Głowa (powiększona 2.2x jeśli aktywna klątwa WIELKIE GŁOWY!)
+            if(RoomState.status === 'playing' && RoomState.mutator === 'bighead') {
+                ctx.scale(2.15, 2.15);
+            }
+
             if(skin === 'cap') {
-                ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
-                ctx.fillStyle = color; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
-                ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(-5*P, -3*P, 3*P, 6*P);
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
                 ctx.fillStyle = '#111'; ctx.fillRect(2*P, -3*P, 4*P, 6*P);
                 ctx.fillStyle = color; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
@@ -984,60 +1088,29 @@
                 ctx.fillStyle = color;
                 ctx.fillRect(-9*P, -2*P + wave, 5*P, 2*P);
                 ctx.fillRect(-12*P, -3*P - wave, 4*P, 2*P);
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-6*P, -6*P, 3*P, 2*P); ctx.fillRect(-6*P, 4*P, 3*P, 2*P);
-                ctx.fillStyle = '#ffde00';
-                ctx.fillRect(-5*P, -6*P, P, 2*P); ctx.fillRect(-5*P, 4*P, P, 2*P);
-                ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
-                ctx.fillStyle = '#191926'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
                 ctx.fillStyle = '#11111a'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
                 ctx.fillStyle = color; ctx.fillRect(-2*P, -3.5*P, 2*P, 7*P);
                 ctx.fillStyle = '#00e676'; ctx.fillRect(2*P, -2*P, P, 4*P);
             }
             else if(skin === 'knight') {
-                ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -8*P, 9*P, 16*P);
-                ctx.fillStyle = '#9aa5b1'; ctx.fillRect(-4*P, -7*P, 7*P, 14*P);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(-2*P, -9*P, 2*P, 2*P); ctx.fillRect(-2*P, 7*P, 2*P, 2*P);
-                ctx.fillStyle = '#000'; ctx.fillRect(-3*P, -8*P, 6*P, 2*P);
-                ctx.fillStyle = color; ctx.fillRect(-2*P, -8*P, 4*P, P);
                 ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 8*P, 8*P);
                 ctx.fillStyle = '#cbd2d9'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
                 ctx.fillStyle = '#ffde00'; ctx.fillRect(2*P, -3*P, P, 6*P);
                 ctx.fillStyle = '#111'; ctx.fillRect(3*P, -2*P, P, 4*P);
-                ctx.fillStyle = color;
-                ctx.fillRect(-8*P, -2*P + wave*0.5, 5*P, 4*P);
+                ctx.fillStyle = color; ctx.fillRect(-8*P, -2*P + wave*0.5, 5*P, 4*P);
             }
             else if(skin === 'astro') {
-                ctx.fillStyle = '#000'; ctx.fillRect(-8*P, -5*P, 4*P, 10*P);
-                ctx.fillStyle = '#cfd8dc'; ctx.fillRect(-7*P, -4*P, 3*P, 8*P);
-                ctx.fillStyle = '#ff9100';
-                let flame = Math.random()*3*P;
-                ctx.fillRect(-10*P - flame, -3*P, 2*P + flame, 2*P);
-                ctx.fillRect(-10*P - flame, P, 2*P + flame, 2*P);
-                ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -6*P, 9*P, 12*P);
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(-4*P, -5*P, 7*P, 10*P);
-                ctx.fillStyle = color; ctx.fillRect(-3*P, -5*P, 2*P, 10*P);
                 ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 5*P, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#eceff1'; ctx.beginPath(); ctx.arc(0, 0, 4.2*P, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#00b0ff'; ctx.beginPath(); ctx.arc(1.2*P, 0, 3.2*P, -Math.PI/2, Math.PI/2); ctx.fill();
                 ctx.fillStyle = '#fff'; ctx.fillRect(P, -2*P, P, P);
             }
             else if(skin === 'cyborg') {
-                ctx.fillStyle = '#000'; ctx.fillRect(-6*P, -7*P, 11*P, 14*P);
-                ctx.fillStyle = '#37474f'; ctx.fillRect(-5*P, -6*P, 9*P, 12*P);
-                ctx.fillStyle = color; ctx.fillRect(-4*P, -6*P, 3*P, 12*P);
-                ctx.fillStyle = '#00e5ff'; ctx.fillRect(-2*P, -2*P, 4*P, 4*P);
                 ctx.fillStyle = '#263238'; ctx.fillRect(-3*P, -3*P, 7*P, 6*P);
                 ctx.fillStyle = '#ff1744'; ctx.fillRect(2*P, -2.5*P, 2*P, 5*P);
                 ctx.fillStyle = '#ffde00'; ctx.fillRect(-2*P, -P, P, 2*P);
             }
             else if(skin === 'king') {
-                ctx.fillStyle = '#000'; ctx.fillRect(-9*P, -7*P, 12*P, 14*P);
-                ctx.fillStyle = '#b71c1c'; ctx.fillRect(-8*P, -6*P, 10*P, 12*P);
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(-5*P, -7*P, 6*P, 14*P);
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-4*P, -6*P, P, P); ctx.fillRect(-4*P, 5*P, P, P); ctx.fillRect(-2*P, -6*P, P, P); ctx.fillRect(-2*P, 5*P, P, P);
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
                 ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -4*P, 6*P, 8*P);
                 ctx.fillStyle = '#ffde00'; ctx.fillRect(-4*P, -3.5*P, 4*P, 7*P);
@@ -1045,25 +1118,7 @@
                 ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-2*P, P, P, P);
             }
 
-            ctx.fillStyle = '#000';
-            ctx.fillRect(2*P, -6*P, 3*P, 3*P);
-            ctx.fillRect(3*P, 3*P, 3*P, 3*P);
-            ctx.fillStyle = skin === 'cyborg' ? '#90a4ae' : (skin === 'knight' ? '#cbd2d9' : '#ffcca3');
-            ctx.fillRect(2*P, -5*P, 2*P, 2*P);
-            ctx.fillRect(3*P, 4*P, 2*P, 2*P);
-
-            let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
-            ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
-            ctx.fillStyle = wep === 'bazooka' ? '#4a6b3b' : (wep === 'plasma' ? '#05d5fa' : (wep === 'shotgun' ? '#7a4b24' : '#555568'));
-            ctx.fillRect(4*P, 1.5*P, (gunLen-1)*P, 2*P);
-
-            if(muzzle > 0) {
-                ctx.fillStyle = '#ffde00';
-                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#fff';
-                ctx.beginPath(); ctx.arc((4+gunLen)*P, 2.5*P, 5, 0, Math.PI*2); ctx.fill();
-            }
-
+            ctx.restore();
             ctx.restore();
 
             if(hp < maxHp || shield > 0) {
@@ -1118,7 +1173,7 @@
         };
         Preview.init();
 
-        // === POWIĘKSZONA WYSPA PLANSZOWA XL (51 PÓL: 0..50!) ===
+        // === WYSPA PLANSZOWA XL (51 PÓL: 0..50!) ===
         const BOARD_TILES = (() => {
             const arr = [];
             const rowsY = [615, 505, 395, 285, 175];
@@ -1324,7 +1379,6 @@
                 let tile = BOARD_TILES[this.myPos];
                 let msg = `🎲 ${myName} wyrzucił [${roll}] i stanął na polu ${this.myPos} (${tile.n})!`;
 
-                // Sprawdzenie Pojedynku 1v1 (czy ktoś inny stoi na tym samym polu > 0)
                 let rivalEntry = Object.entries(netPlayers).find(([pid, p]) => p.boardPos === this.myPos && this.myPos > 0 && this.myPos < 50);
                 if(rivalEntry) {
                     let [rId, rPlayer] = rivalEntry;
@@ -1504,8 +1558,10 @@
                 if(nextIdx >= RoomState.turnOrder.length) {
                     const pickedGame = drawNextUniqueMinigame();
                     const pickedMap = drawNextUniqueMap();
+                    const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
+                    const pickedMut = RoomState.mutatorSetting === 'random' ? muts[Math.floor(Math.random()*muts.length)] : RoomState.mutatorSetting;
                     db.ref(`rooms/${currentRoom}`).update({
-                        status: 'roulette', activeMinigame: pickedGame, map: pickedMap, turnIdx: 0
+                        status: 'roulette', activeMinigame: pickedGame, map: pickedMap, mutator: pickedMut, turnIdx: 0
                     });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({ turnIdx: nextIdx });
@@ -1564,14 +1620,12 @@
                 ctx.fillStyle = '#1a4f1e'; ctx.fillRect(78, 96, 1124, 540);
                 ctx.fillStyle = '#25692b'; ctx.fillRect(84, 102, 1112, 528);
 
-                // Strefa Las Vegas i Wulkanu na wielkiej wyspie 50 pól
                 ctx.fillStyle = '#1e0b2e'; ctx.fillRect(92, 245, 1096, 195);
                 ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.strokeRect(92, 245, 1096, 195);
 
                 ctx.fillStyle = '#261417'; ctx.fillRect(92, 110, 1096, 115);
                 ctx.strokeStyle = '#ff4d00'; ctx.lineWidth = 3; ctx.strokeRect(92, 110, 1096, 115);
 
-                // Kamienny trakt łączący wszystkie 51 pól
                 ctx.strokeStyle = '#3b2818'; ctx.lineWidth = 26; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
                 ctx.beginPath();
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y+5); else ctx.lineTo(t.x, t.y+5); });
@@ -1585,7 +1639,6 @@
                 ISLAND_TREES.forEach(tr => drawPalmTree(ctx, tr.x, tr.y));
                 drawIslandCastle(ctx, 1165, 155);
 
-                // Rysowanie 51 kafelków 3D (0..50)
                 BOARD_TILES.forEach((t, i) => {
                     ctx.save();
                     ctx.translate(t.x, t.y);
@@ -1825,12 +1878,15 @@
         };
 
         const FX = {
-            parts: [], texts: [], decals: [], rings: [],
+            parts: [], texts: [], decals: [], rings: [], lasers: [],
             burst(x, y, color, count=8, spd=180, size=6) {
                 for(let i=0; i<count; i++) {
                     let a = Math.random()*Math.PI*2, v = Math.random()*spd + 30;
                     this.parts.push({ x, y, vx: Math.cos(a)*v, vy: Math.sin(a)*v, l: 0.35, m: 0.35, s: size, c: color });
                 }
+            },
+            laserBeam(x1, y1, x2, y2) {
+                this.lasers.push({ x1, y1, x2, y2, l: 0.35, m: 0.35 });
             },
             explosion(x, y) {
                 Sound.play('boom'); Cam.shake(14, 0.25);
@@ -1845,9 +1901,9 @@
                 for(let i=this.parts.length-1; i>=0; i--) {
                     let p = this.parts[i]; p.x += p.vx*dt; p.y += p.vy*dt; p.vx *= 0.9; p.vy *= 0.9; p.l -= dt;
                     if(p.l <= 0) {
-                        if(p.c === '#d91643' || p.c === '#28b835') {
-                            this.decals.push({x: Math.floor(p.x/4)*4, y: Math.floor(p.y/4)*4, s: p.s+2, c: p.c === '#d91643' ? '#63081e' : '#134d18'});
-                            if(this.decals.length > 250) this.decals.shift();
+                        if(p.c === '#d91643' || p.c === '#28b835' || p.c === '#222222') {
+                            this.decals.push({x: Math.floor(p.x/4)*4, y: Math.floor(p.y/4)*4, s: p.s+2, c: p.c === '#d91643' ? '#63081e' : (p.c === '#222222' ? '#111' : '#134d18')});
+                            if(this.decals.length > 280) this.decals.shift();
                         }
                         this.parts.splice(i,1);
                     }
@@ -1857,6 +1913,10 @@
                     rg.r = rg.maxR * (1 - rg.l/rg.m);
                     if(rg.l <= 0) this.rings.splice(i,1);
                 }
+                for(let i=this.lasers.length-1; i>=0; i--) {
+                    this.lasers[i].l -= dt;
+                    if(this.lasers[i].l <= 0) this.lasers.splice(i,1);
+                }
                 for(let i=this.texts.length-1; i>=0; i--) {
                     let t = this.texts[i]; t.y -= 42*dt; t.l -= dt;
                     if(t.l <= 0) this.texts.splice(i,1);
@@ -1864,6 +1924,12 @@
             },
             drawDecals() { this.decals.forEach(d => { ctx.fillStyle = d.c; ctx.fillRect(d.x, d.y, d.s, d.s); }); },
             drawTop() {
+                this.lasers.forEach(ls => {
+                    ctx.strokeStyle = '#ff0044'; ctx.lineWidth = 6;
+                    ctx.globalAlpha = ls.l / ls.m;
+                    ctx.beginPath(); ctx.moveTo(ls.x1, ls.y1); ctx.lineTo(ls.x2, ls.y2); ctx.stroke();
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+                });
                 this.rings.forEach(rg => {
                     ctx.strokeStyle = '#ff9100'; ctx.lineWidth = 6;
                     ctx.globalAlpha = Math.max(0, rg.l/rg.m);
@@ -1934,17 +2000,63 @@
             ctx.restore();
         }
 
-        // === KLASA LOKALNEGO GRACZA ===
+        // === RYSOWANIE WIELKIEJ LALKI SQUID GAME NA GÓRZE ARENY ===
+        function drawSquidDoll(ctx, state) {
+            ctx.save();
+            ctx.translate(800, 145);
+            // Cień pod lalką
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.beginPath(); ctx.ellipse(0, 35, 48, 18, 0, 0, Math.PI*2); ctx.fill();
+
+            // Sukienka pomarańczowo-żółta
+            ctx.fillStyle = '#000'; ctx.fillRect(-32, -10, 64, 46);
+            ctx.fillStyle = '#ff9100'; ctx.fillRect(-28, -6, 56, 38);
+            ctx.fillStyle = '#ffde00'; ctx.fillRect(-28, -6, 56, 12);
+
+            // Głowa Lalki (Odwrócona tyłem na Zielonym, Przodem z laserowymi oczami na Czerwonym!)
+            ctx.fillStyle = '#000'; ctx.fillRect(-36, -64, 72, 56);
+            if(state === 'green') {
+                // Tył głowy (Czarne włosy z dwoma kucykami)
+                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 48);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-42, -40, 10, 10); ctx.fillRect(32, -40, 10, 10);
+            } else {
+                // Twarz Lalki
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-32, -60, 64, 48);
+                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 14); // grzywka
+                // Oczy (Żółte ostrzegawcze lub Czerwone zabójcze lasery!)
+                ctx.fillStyle = state === 'red' ? '#ff0033' : '#ffde00';
+                ctx.fillRect(-20, -40, 12, 12);
+                ctx.fillRect(8, -40, 12, 12);
+                if(state === 'red') {
+                    ctx.fillStyle = 'rgba(255, 0, 50, 0.35)';
+                    ctx.beginPath(); ctx.arc(-14, -34, 18, 0, Math.PI*2); ctx.arc(14, -34, 18, 0, Math.PI*2); ctx.fill();
+                }
+                // Usta
+                ctx.fillStyle = '#d91656'; ctx.fillRect(-8, -22, 16, 6);
+            }
+            ctx.restore();
+        }
+
+        // === KLASA LOKALNEGO GRACZA (OBSŁUGUJE RUCH PIESZY, SQUID GAME ORAZ FIZYKĘ GOKARTÓW!) ===
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
-                this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
+                const gm = RoomState.activeMinigame;
+                if(gm === 'squid') {
+                    this.x = 300 + Math.random()*1000; this.y = 1460;
+                } else if(gm === 'race') {
+                    this.x = 760 + (Math.random()*80 - 40); this.y = 1320 + (Math.random()*60 - 30);
+                } else {
+                    this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
+                }
                 this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                this.angle = 0; this.anim = 0; this.muzzle = 0;
-                this.hp = 100; this.maxHp = 100; this.shield = 0;
-                this.wep = RoomState.activeMinigame === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(RoomState.activeMinigame) ? 'shotgun' : 'pistol');
+                this.angle = gm === 'squid' ? -Math.PI/2 : 0;
+                this.kartSpeed = 0; this.lap = 1; this.checkpoint = 0;
+                this.anim = 0; this.muzzle = 0;
+                this.hp = gm === 'race' ? 1 : 100; this.maxHp = 100; this.shield = 0;
+                this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(gm) ? 'shotgun' : 'pistol');
                 this.fireCd = 0; this.dashCd = 0; this.dashTime = 0;
-                this.quadTime = 0; this.speedTime = 0;
+                this.quadTime = 0; this.speedTime = 0; this.slipTimer = 0;
                 this.emote = ''; this.emoteTimer = 0;
                 this.score = 0; this.streak = 0; this.isDead = false; this.respawnTimer = 0;
                 this.passImmunity = 0;
@@ -1955,7 +2067,7 @@
             }
             tryDash() {
                 if(this.dashCd <= 0 && !this.isDead && RoomState.status === 'playing') {
-                    this.dashCd = 1.6; this.dashTime = 0.16;
+                    this.dashCd = 1.6; this.dashTime = 0.22;
                     Sound.play('dash');
                     FX.burst(this.x, this.y, '#05d5fa', 10, 130, 5);
                 }
@@ -1966,10 +2078,87 @@
                 if(this.muzzle > 0) this.muzzle -= dt;
                 if(this.quadTime > 0) this.quadTime -= dt;
                 if(this.speedTime > 0) this.speedTime -= dt;
+                if(this.fireCd > 0) this.fireCd -= dt;
+                if(this.dashCd > 0) this.dashCd -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
-                // Punkty za przetrwanie lub trzymanie Korony
-                if((gm === 'meteors' || gm === 'spleef' || gm === 'squid') && !this.isDead) {
+                // Poślizg na skórce od banana lub plamie oleju!
+                if(this.slipTimer > 0) {
+                    this.slipTimer -= dt;
+                    this.angle += 18 * dt;
+                    this.x = Math.max(60, Math.min(WORLD_SIZE-60, this.x + Math.cos(this.angle)*180*dt));
+                    this.y = Math.max(60, Math.min(WORLD_SIZE-60, this.y + Math.sin(this.angle)*180*dt));
+                    return;
+                }
+
+                // === 1. LOGIKA WYŚCIGU GOKARTÓW (TRYB RACE) ===
+                if(gm === 'race') {
+                    let acc = 0, turn = 0;
+                    if(Input.isUp())   acc += 560;
+                    if(Input.isDown()) acc -= 420;
+                    if(Input.isLeft())  turn -= 2.9;
+                    if(Input.isRight()) turn += 2.9;
+                    if(RoomState.mutator === 'drunk') turn *= -1;
+
+                    if(this.dashTime > 0) { this.kartSpeed = 720; this.dashTime -= dt; FX.burst(this.x, this.y, '#ff9100', 2, 60, 5); }
+                    else { this.kartSpeed += acc * dt; }
+
+                    // Sprawdzenie czy gokart zjechał z asfaltu na trawę (Środek toru lub pobocze)
+                    let dxC = Math.abs(this.x - 800), dyC = Math.abs(this.y - 800);
+                    let onGrass = (dxC < 340 && dyC < 340) || dxC > 680 || dyC > 680;
+                    this.kartSpeed *= onGrass ? 0.92 : 0.982;
+                    let maxSpd = onGrass ? 290 : (this.speedTime > 0 ? 720 : 560);
+                    this.kartSpeed = Math.max(-220, Math.min(maxSpd, this.kartSpeed));
+
+                    if(Math.abs(this.kartSpeed) > 15) {
+                        this.angle += turn * (this.kartSpeed > 0 ? 1 : -1) * dt;
+                        if(Math.abs(turn) > 0 && !onGrass && Math.random() < 0.4) {
+                            FX.burst(this.x, this.y, '#222222', 1, 10, 4); // Ślady opon
+                        }
+                    }
+
+                    this.x = Math.max(70, Math.min(WORLD_SIZE-70, this.x + Math.cos(this.angle)*this.kartSpeed*dt));
+                    this.y = Math.max(70, Math.min(WORLD_SIZE-70, this.y + Math.sin(this.angle)*this.kartSpeed*dt));
+
+                    // Punkty kontrolne okrążenia (0: Dół, 1: Prawo, 2: Góra, 3: Lewo)
+                    let cp = -1;
+                    if(this.y > 1140 && this.x > 650 && this.x < 950) cp = 0;
+                    else if(this.x > 1140 && this.y > 650 && this.y < 950) cp = 1;
+                    else if(this.y < 460 && this.x > 650 && this.x < 950) cp = 2;
+                    else if(this.x < 460 && this.y > 650 && this.y < 950) cp = 3;
+
+                    if(cp !== -1 && cp === (this.checkpoint + 1) % 4) {
+                        this.checkpoint = cp;
+                        this.score += 5;
+                        if(cp === 0) {
+                            this.lap++;
+                            this.hp = this.lap; // Wykorzystujemy hp do synchronizacji numeru okrążenia nad autem
+                            this.score += 25;
+                            Sound.play('jackpot');
+                            FX.text(this.x, this.y, `OKRĄŻENIE ${this.lap}!`, "#ffde00", 13);
+                        }
+                    }
+
+                    // Zbieranie bananów / plam oleju / dopalaczy Nitro na torze
+                    Object.entries(netItems).forEach(([id, item]) => {
+                        if(Math.hypot(this.x - item.x, this.y - item.y) < 36) {
+                            if(item.t === 'banana') {
+                                this.slipTimer = 1.3;
+                                Sound.play('slip');
+                                FX.text(this.x, this.y, "🍌 POŚLIZG!", "#ffde00", 12);
+                            } else {
+                                this.speedTime = 4.0;
+                                Sound.play('dash');
+                                FX.text(this.x, this.y, "⚡ TURBO NITRO!", "#05d5fa", 12);
+                            }
+                            db.ref(`room_items/${currentRoom}/${id}`).remove();
+                        }
+                    });
+                    return;
+                }
+
+                // === 2. LOGIKA POZOSTAŁYCH MINIGIER PIESZYCH ===
+                if((gm === 'meteors' || gm === 'spleef') && !this.isDead) {
                     this.survTick = (this.survTick || 0) + dt;
                     if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
                 }
@@ -1986,7 +2175,11 @@
                         this.respawnTimer -= dt;
                         if(this.respawnTimer <= 0) {
                             this.isDead = false; this.hp = 100; this.shield = 0;
-                            this.x = 500 + Math.random()*600; this.y = 500 + Math.random()*600;
+                            if(gm === 'squid') {
+                                this.x = 300 + Math.random()*1000; this.y = 1460;
+                            } else {
+                                this.x = 500 + Math.random()*600; this.y = 500 + Math.random()*600;
+                            }
                             this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
                             this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(gm) ? 'shotgun' : 'pistol');
                             FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
@@ -2000,16 +2193,37 @@
                 if(Input.isDown())  iy += 1;
                 if(Input.isLeft())  ix -= 1;
                 if(Input.isRight()) ix += 1;
+                if(RoomState.mutator === 'drunk') { ix *= -1; iy *= -1; }
                 if(ix !== 0 && iy !== 0) { let l = Math.hypot(ix, iy); ix /= l; iy /= l; }
 
-                // Tryb Czerwone, Zielone (Squid Game) - kara za ruch na czerwonym świetle!
-                if(gm === 'squid' && RoomState.squidRed && (Math.hypot(ix, iy) > 0.1 || Input.down)) {
-                    this.takeDamage(45 * dt, null);
-                    if(Math.random() < 0.2) FX.text(this.x, this.y, "🛑 STÓJ!", "#ff2a6d", 11);
+                // === PRAWDZIWE SQUID GAME (CZERWONE, ZIELONE) ===
+                if(gm === 'squid') {
+                    // Jeśli poruszysz się podczas Czerwonego Światła -> Lalka strzela laserem i wracasz na start!
+                    if(RoomState.squidState === 'red' && (Math.hypot(ix, iy) > 0.05 || this.dashTime > 0)) {
+                        Sound.play('sniper');
+                        FX.laserBeam(800, 120, this.x, this.y);
+                        FX.explosion(this.x, this.y);
+                        FX.text(this.x, this.y, "👁️ WYELIMINOWANY!", "#ff0044", 13);
+                        this.x = 300 + Math.random()*1000;
+                        this.y = 1460;
+                        this.vx = 0; this.vy = 0;
+                        return;
+                    }
+                    // Przekroczenie linii Mety na górze (Y < 250)
+                    if(this.y < 250) {
+                        this.score += 25;
+                        Sound.play('jackpot');
+                        announce("🎉 DOTARŁEŚ DO METY! +25 PKT!", 1400);
+                        FX.burst(this.x, this.y, '#ffde00', 18, 220, 6);
+                        this.x = 300 + Math.random()*1000;
+                        this.y = 1460;
+                        return;
+                    }
                 }
 
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
                 let baseSpd = RoomState.bombHolder === myId ? 345 : 285;
+                if(RoomState.mutator === 'tiny') baseSpd *= 1.3;
                 if(this.speedTime > 0) baseSpd *= 1.35;
                 if(this.dashTime > 0) {
                     baseSpd = 760; this.dashTime -= dt;
@@ -2028,9 +2242,9 @@
                 this.kx *= Math.pow(0.05, dt);
                 this.ky *= Math.pow(0.05, dt);
 
-                this.moveSmoothCircle((this.vx + this.kx) * dt, (this.vy + this.ky) * dt, mapObj.obstacles, dt);
+                let activeObs = gm === 'squid' ? [] : mapObj.obstacles;
+                this.moveSmoothCircle((this.vx + this.kx) * dt, (this.vy + this.ky) * dt, activeObs, dt);
 
-                // Kruszący się Lód (Spleef)
                 if(gm === 'spleef') {
                     let tx = Math.floor(this.x / 80), ty = Math.floor(this.y / 80);
                     let key = `${tx}_${ty}`;
@@ -2049,7 +2263,6 @@
 
                 if(Math.hypot(ix, iy) > 0.1) this.anim += dt * 13;
 
-                // Ciche działanie kodu "sigma" (Lokalny Aimbot na wrogów i zombie)
                 this.angle = Math.atan2(Input.wy - this.y, Input.wx - this.x);
                 if(Settings.sigmaAim) {
                     let bestDist = 850, bestTarget = null;
@@ -2071,12 +2284,9 @@
                     }
                 }
 
-                if(this.fireCd > 0) this.fireCd -= dt;
-                if(this.dashCd > 0) this.dashCd -= dt;
-
                 if(gm === 'sniper') this.wep = 'sniper';
 
-                if(Input.down && this.fireCd <= 0 && gm !== 'bomb') {
+                if(Input.down && this.fireCd <= 0 && gm !== 'bomb' && gm !== 'squid') {
                     let w = WEAPONS[this.wep];
                     this.fireCd = w.rate; this.muzzle = 0.06;
                     Sound.play(w.snd); Cam.shake(5, 0.09);
@@ -2118,24 +2328,33 @@
 
                 Object.entries(netItems).forEach(([id, item]) => {
                     if(Math.hypot(this.x - item.x, this.y - item.y) < 32) {
-                        Sound.play('coin');
-                        if(item.t === 'coin' || item.t === 'gem') {
+                        if(item.t === 'banana') {
+                            this.slipTimer = 1.4;
+                            Sound.play('slip');
+                            FX.text(this.x, this.y, "🍌 ŁOOO! POŚLIZG!", "#ffde00", 12);
+                        } else if(item.t === 'coin' || item.t === 'gem') {
+                            Sound.play('coin');
                             let val = item.t === 'gem' ? 5 : 1;
                             this.score += val;
                             FX.text(this.x, this.y, `+${val} 💎`, "#ffde00", 11);
                         } else if(item.t === 'medkit') {
+                            Sound.play('coin');
                             this.hp = Math.min(this.maxHp, this.hp + 50);
                             FX.text(this.x, this.y, "+50 HP", "#00e676", 11);
                         } else if(item.t === 'shield') {
+                            Sound.play('coin');
                             this.shield = 50;
                             FX.text(this.x, this.y, "+TARCZA!", "#05d5fa", 11);
                         } else if(item.t === 'quad') {
+                            Sound.play('coin');
                             this.quadTime = 10.0;
                             FX.text(this.x, this.y, "2X OBRAŻENIA!", "#e040fb", 11);
                         } else if(item.t === 'nitro') {
+                            Sound.play('coin');
                             this.speedTime = 8.0;
                             FX.text(this.x, this.y, "NITRO SPEED!", "#ffde00", 11);
                         } else if(WEAPONS[item.t] && gm !== 'sniper') {
+                            Sound.play('coin');
                             this.wep = item.t;
                             FX.text(this.x, this.y, WEAPONS[this.wep].name.toUpperCase(), "#05d5fa", 11);
                             document.getElementById('hudWeapon').innerText = `BROŃ: ${WEAPONS[this.wep].name}`;
@@ -2183,7 +2402,6 @@
                 Sound.play('hit'); Cam.shake(6, 0.12);
                 FX.burst(this.x, this.y, '#d91643', 8, 160, 5);
 
-                // W trybie Kradzieży Korony trafienie przekazuje Koronę atakującemu!
                 if(RoomState.activeMinigame === 'crown' && RoomState.crownHolder === myId && attackerId) {
                     db.ref(`rooms/${currentRoom}`).update({ crownHolder: attackerId });
                     FX.text(this.x, this.y, "STRACONO KORONĘ!", "#ff2a6d", 12);
@@ -2212,17 +2430,19 @@
             me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
             hostZombies: [], hostMeteors: [], squidTimer: 0,
 
-            runRouletteAnimation(targetGame, targetMap) {
+            runRouletteAnimation(targetGame, targetMap, targetMutator) {
                 switchScreen(null);
                 document.getElementById('boardHud').style.display = 'none';
                 document.getElementById('hud').style.display = 'none';
                 const ov = document.getElementById('rouletteOverlay');
                 const box = document.getElementById('rouletteBox');
                 const mapTxt = document.getElementById('rouletteMapText');
+                const mutTxt = document.getElementById('rouletteMutatorText');
                 ov.style.display = 'flex';
 
                 const labels = {
-                    arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD', squid: '🚦 CZERWONE, ZIELONE',
+                    race: '🏎️ WYŚCIG GOKARTÓW', squid: '🚦 SQUID GAME (LALKA)',
+                    arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD',
                     crown: '👑 KRADZIEŻ KORONY', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
                     royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA', sniper: '🎯 SNAJPERZY', coins: '💎 ZŁOTA GORĄCZKA'
@@ -2238,6 +2458,7 @@
                     if(count > 18) {
                         clearInterval(spin);
                         box.innerText = labels[targetGame] || '🔫 ARENA PvP';
+                        mutTxt.innerText = `🤡 KLĄTWA RUNDY: ${MUTATOR_NAMES[targetMutator] || 'BRAK'}`;
                         mapTxt.innerText = `ARENA: ${mapNames[targetMap] || 'Leśny Bunkier'}`;
                         Sound.play('jackpot');
                         setTimeout(() => {
@@ -2246,12 +2467,12 @@
                                 db.ref(`room_items/${currentRoom}`).remove();
                                 db.ref(`rooms/${currentRoom}`).update({
                                     status: 'playing', timer: RoomState.matchDuration, stormR: 1100, vaultHp: 500,
-                                    bombHolder: null, crownHolder: myId, squidRed: false, brokenIce: {}, zombies: "[]", meteors: "[]"
+                                    bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                                 });
                             }
-                        }, 1500);
+                        }, 1600);
                     }
-                }, 100);
+                }, 95);
             },
 
             startMatch() {
@@ -2264,7 +2485,7 @@
                     document.getElementById('playerColor').value,
                     chosenSkin
                 );
-                this.bullets = []; this.hostZombies = []; this.hostMeteors = []; FX.parts = []; FX.texts = []; FX.decals = []; FX.rings = [];
+                this.bullets = []; this.hostZombies = []; this.hostMeteors = []; FX.parts = []; FX.texts = []; FX.decals = []; FX.rings = []; FX.lasers = [];
 
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'block';
@@ -2272,10 +2493,12 @@
 
                 const gm = RoomState.activeMinigame;
                 document.getElementById('squidLightBanner').style.display = gm === 'squid' ? 'block' : 'none';
-                document.getElementById('hudWeapon').innerText = gm === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : (gm === 'sniper' ? 'BROŃ: Snajperka (1 HIT)' : 'BROŃ: Pistolet');
+                document.getElementById('hudMutatorBadge').innerText = `🤡 ${MUTATOR_NAMES[RoomState.mutator] || 'Normalnie'}`;
+                document.getElementById('hudWeapon').innerText = gm === 'race' ? 'POJAZD: Gokart Turbo' : (gm === 'squid' ? 'CEL: Dobiegnij do Lalki!' : (gm === 'bomb' ? 'TRYB: OMIJAJ BOMBĘ!' : 'BROŃ: Pistolet'));
 
                 const modeTitles = {
-                    arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD', squid: '🚦 CZERWONE, ZIELONE',
+                    race: '🏎️ WYŚCIG GOKARTÓW', squid: '🚦 SQUID GAME (LALKA)',
+                    arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD',
                     crown: '👑 KRADZIEŻ KORONY', meteors: '☄️ DESZCZ METEORYTÓW', heist: '🎰 NAPAD NA KASYNO',
                     royale: '🌪️ STREFA BURZY', zombies: '🧟 HORDA ZOMBIE',
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA',
@@ -2346,14 +2569,31 @@
 
                 if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 1.2);
 
-                // Tryb Squid Game (Zmiana światła co kilka sekund)
+                // Sekwencja Lalki Squid Game: Zielone (3.5s) -> Żółte ostrzeżenie (1.1s) -> Czerwone (2.6s)
                 if(gm === 'squid') {
                     this.squidTimer = (this.squidTimer || 0) + 0.1;
-                    if(this.squidTimer >= (RoomState.squidRed ? 2.8 : 4.5)) {
+                    if(RoomState.squidState === 'green' && this.squidTimer >= 3.4) {
                         this.squidTimer = 0;
-                        RoomState.squidRed = !RoomState.squidRed;
-                        db.ref(`rooms/${currentRoom}`).update({ squidRed: RoomState.squidRed });
+                        RoomState.squidState = 'yellow';
+                        db.ref(`rooms/${currentRoom}`).update({ squidState: 'yellow' });
+                    } else if(RoomState.squidState === 'yellow' && this.squidTimer >= 1.1) {
+                        this.squidTimer = 0;
+                        RoomState.squidState = 'red';
+                        db.ref(`rooms/${currentRoom}`).update({ squidState: 'red' });
+                    } else if(RoomState.squidState === 'red' && this.squidTimer >= 2.6) {
+                        this.squidTimer = 0;
+                        RoomState.squidState = 'green';
+                        db.ref(`rooms/${currentRoom}`).update({ squidState: 'green' });
                     }
+                }
+
+                // Spawning skórek od banana i Nitro w Wyścigu lub podczas klątwy Bananów
+                if((gm === 'race' || RoomState.mutator === 'bananas') && Math.random() < 0.12 && Object.keys(netItems).length < 14) {
+                    let iid = 'b_' + Math.random().toString(36).substr(2, 5);
+                    db.ref(`room_items/${currentRoom}/${iid}`).set({
+                        x: 200 + Math.round(Math.random()*1200), y: 200 + Math.round(Math.random()*1200),
+                        t: Math.random() < 0.65 ? 'banana' : 'nitro'
+                    });
                 }
 
                 if(gm === 'meteors') {
@@ -2384,7 +2624,7 @@
                             t: Math.random() < 0.25 ? 'gem' : 'coin'
                         });
                     }
-                } else if(gm !== 'bomb' && gm !== 'sniper') {
+                } else if(!['bomb', 'sniper', 'race', 'squid'].includes(gm)) {
                     if(Math.random() < 0.05 && Object.keys(netItems).length < 8) {
                         let pool = ['medkit', 'shield', 'quad', 'nitro', 'shotgun', 'minigun', 'sniper', 'plasma', 'bazooka'];
                         let iid = 'i_' + Math.random().toString(36).substr(2, 5);
@@ -2473,7 +2713,7 @@
                 this.me.update(dt);
                 Cam.update(dt, this.me);
 
-                let obstacles = (MAPS[RoomState.map] || MAPS.forest).obstacles;
+                let obstacles = (gm === 'race' || gm === 'squid') ? [] : (MAPS[RoomState.map] || MAPS.forest).obstacles;
 
                 for(let i=this.bullets.length-1; i>=0; i--) {
                     let b = this.bullets[i];
@@ -2514,7 +2754,7 @@
 
                     if(!b.isMine) continue;
 
-                    if(['arena', 'spleef', 'squid', 'crown', 'meteors', 'heist', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
+                    if(['arena', 'spleef', 'crown', 'meteors', 'heist', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
                         for(let [pid, p] of Object.entries(netPlayers)) {
                             if(!p.isDead && Math.hypot(b.x - p.x, b.y - p.y) < 22) {
                                 if(b.bType === 'rocket') {
@@ -2563,7 +2803,7 @@
                 }
 
                 Object.values(netPlayers).forEach(p => {
-                    if(p.shooting && !p.isDead && Math.random() < 0.25 && gm !== 'bomb') {
+                    if(p.shooting && !p.isDead && Math.random() < 0.25 && !['bomb', 'race', 'squid'].includes(gm)) {
                         let wObj = WEAPONS[p.wep] || WEAPONS.pistol;
                         this.spawnBullet(p.x, p.y, p.angle, wObj.spd, 0, 0, wObj.bType, false);
                     }
@@ -2599,10 +2839,46 @@
 
                 Cam.apply();
 
-                const cachedBg = GroundCache.canvases[gm === 'spleef' ? 'ice' : RoomState.map] || GroundCache.canvases.forest;
-                ctx.drawImage(cachedBg, 0, 0);
+                // 1. TŁO SPECJALNE DLA WYŚCIGU GOKARTÓW (TOR ASFALTOWY Z TARKAMI)
+                if(gm === 'race') {
+                    ctx.fillStyle = '#1e4620'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    // Krawężniki biało-czerwone i asfaltowy owal
+                    ctx.fillStyle = '#ff2a6d'; ctx.fillRect(100, 100, 1400, 1400);
+                    ctx.fillStyle = '#2b2b36'; ctx.fillRect(120, 120, 1360, 1360);
+                    // Wyspa środkowa
+                    ctx.fillStyle = '#ffde00'; ctx.fillRect(440, 440, 720, 720);
+                    ctx.fillStyle = '#1e4620'; ctx.fillRect(460, 460, 680, 680);
+                    // Przerywana linia na środku toru
+                    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 6; ctx.setLineDash([30, 30]);
+                    ctx.strokeRect(290, 290, 1020, 1020); ctx.setLineDash([]);
+                    // Szachownica Start/Meta na dole
+                    for(let r=0; r<8; r++) {
+                        ctx.fillStyle = r%2===0 ? '#fff' : '#000';
+                        ctx.fillRect(780, 1140 + r*40, 20, 40);
+                        ctx.fillStyle = r%2===0 ? '#000' : '#fff';
+                        ctx.fillRect(800, 1140 + r*40, 20, 40);
+                    }
+                }
+                // 2. TŁO SPECJALNE DLA SQUID GAME (PIASZCZYSTA ARENA + CZERWONA META + LALKA)
+                else if(gm === 'squid') {
+                    ctx.fillStyle = '#d4b475'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    ctx.fillStyle = '#c4a262';
+                    for(let y=0; y<WORLD_SIZE; y+=80) ctx.fillRect(0, y, WORLD_SIZE, 40);
+                    // Linia Startu na dole
+                    ctx.fillStyle = '#05d5fa'; ctx.fillRect(0, 1380, WORLD_SIZE, 10);
+                    ctx.fillStyle = '#fff'; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText("LINIA STARTU - BIEGNIJ DO GÓRY NA ZIELONYM!", 800, 1420);
+                    // Czerwona Linia Mety na górze
+                    ctx.fillStyle = '#ff0044'; ctx.fillRect(0, 250, WORLD_SIZE, 14);
+                    ctx.fillStyle = '#ffde00'; ctx.fillText("🏁 LINIA METY (+25 PKT) 🏁", 800, 235);
+                    drawSquidDoll(ctx, RoomState.squidState);
+                }
+                // 3. STANDARDOWE TŁA AREN 2.5D
+                else {
+                    const cachedBg = GroundCache.canvases[gm === 'spleef' ? 'ice' : RoomState.map] || GroundCache.canvases.forest;
+                    ctx.drawImage(cachedBg, 0, 0);
+                }
 
-                // Rysowanie pękających i dziurawych kafelków w trybie Kruszący się Lód (Spleef)
                 if(gm === 'spleef') {
                     Object.entries(RoomState.brokenIce).forEach(([key, state]) => {
                         let [tx, ty] = key.split('_').map(Number);
@@ -2632,7 +2908,9 @@
                     ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.stroke();
                 }
 
-                mapObj.obstacles.filter(o => o.t === 'lava').forEach(o => drawPixelObstacle25D(ctx, o));
+                if(gm !== 'race' && gm !== 'squid') {
+                    mapObj.obstacles.filter(o => o.t === 'lava').forEach(o => drawPixelObstacle25D(ctx, o));
+                }
 
                 let floatOff = Math.sin(performance.now()*0.006)*4;
                 Object.values(netItems).forEach(item => {
@@ -2640,7 +2918,8 @@
                     ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.ellipse(0, 14 - floatOff, 10, 5, 0, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = '#000'; ctx.fillRect(-13, -13, 26, 26);
                     let col = '#05d5fa', label = 'W';
-                    if(item.t === 'coin') { col = '#ffde00'; label = '$'; }
+                    if(item.t === 'banana') { col = '#ffde00'; label = '🍌'; }
+                    else if(item.t === 'coin') { col = '#ffde00'; label = '$'; }
                     else if(item.t === 'gem') { col = '#e040fb'; label = '💎'; }
                     else if(item.t === 'medkit') { col = '#00e676'; label = '+'; }
                     else if(item.t === 'shield') { col = '#00b0ff'; label = '🛡️'; }
@@ -2654,9 +2933,11 @@
                 });
 
                 const renderQueue = [];
-                mapObj.obstacles.filter(o => o.t !== 'lava').forEach(o => {
-                    renderQueue.push({ y: o.y + o.h, draw: () => drawPixelObstacle25D(ctx, o) });
-                });
+                if(gm !== 'race' && gm !== 'squid') {
+                    mapObj.obstacles.filter(o => o.t !== 'lava').forEach(o => {
+                        renderQueue.push({ y: o.y + o.h, draw: () => drawPixelObstacle25D(ctx, o) });
+                    });
+                }
 
                 if(gm === 'heist') {
                     renderQueue.push({
@@ -2741,7 +3022,6 @@
                     ctx.fillRect(mx + this.me.x*scale - 3, my + this.me.y*scale - 3, 6, 6);
                 }
 
-                // Rysowanie wybranego Celownika (Crosshair) na wierzchu ekranu
                 drawCustomCrosshair(ctx, Input.mx, Input.my, Settings.crosshair);
             },
 
@@ -2810,7 +3090,7 @@
                     currentRoom = Math.random().toString(36).substr(2, 5).toUpperCase();
                     isHost = true;
                     await db.ref(`rooms/${currentRoom}`).set({
-                        status: 'lobby', mode: 'party', activeMinigame: 'arena', map: 'forest',
+                        status: 'lobby', mode: 'party', activeMinigame: 'arena', map: 'forest', mutatorSetting: 'random', mutator: 'none',
                         matchDuration: 60, timer: 60, stormR: 1100, turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna XL (50 Pól)!'
                     });
                     db.ref(`rooms/${currentRoom}`).onDisconnect().remove();
@@ -2843,6 +3123,7 @@
                     document.getElementById('btnStartMatch').style.display = isHost ? 'block' : 'none';
                     document.getElementById('clientWaitMsg').style.display = isHost ? 'none' : 'block';
                     document.getElementById('mapSelect').disabled = !isHost;
+                    document.getElementById('mutatorSelect').disabled = !isHost;
                     document.getElementById('timeSelect').disabled = !isHost;
                 } catch(e) { showErr("Błąd dołączania: " + e.message); }
             },
@@ -2859,6 +3140,10 @@
             changeMap(mp) {
                 if(!isHost) return;
                 db.ref(`rooms/${currentRoom}`).update({ map: mp });
+            },
+            changeMutator(mut) {
+                if(!isHost) return;
+                db.ref(`rooms/${currentRoom}`).update({ mutatorSetting: mut });
             },
             changeTime(tm) {
                 if(!isHost) return;
@@ -2878,12 +3163,14 @@
                     RoomState.isPartyCampaign = (RoomState.mode === 'party');
                     RoomState.activeMinigame = d.activeMinigame || 'arena';
                     RoomState.map = d.map || 'forest';
+                    RoomState.mutatorSetting = d.mutatorSetting || 'random';
+                    RoomState.mutator = d.mutator || 'none';
                     RoomState.matchDuration = d.matchDuration || 60;
                     RoomState.timer = d.timer ?? 60;
                     RoomState.bombHolder = d.bombHolder || null;
                     RoomState.bombTimer = d.bombTimer ?? 10;
                     RoomState.crownHolder = d.crownHolder || myId;
-                    RoomState.squidRed = !!d.squidRed;
+                    RoomState.squidState = d.squidState || 'green';
                     RoomState.brokenIce = d.brokenIce || {};
                     RoomState.stormR = d.stormR ?? 1100;
                     RoomState.turnOrder = d.turnOrder || [myId];
@@ -2894,13 +3181,22 @@
 
                     const sqBanner = document.getElementById('squidLightBanner');
                     if(sqBanner) {
-                        sqBanner.innerText = RoomState.squidRed ? "🛑 CZERWONE ŚWIATŁO! (STÓJ!)" : "🟢 ZIELONE ŚWIATŁO! (BIEGNIJ!)";
-                        sqBanner.className = `text-[9px] font-bold mb-1 ${RoomState.squidRed ? 'text-red-500 animate-pulse' : 'text-green-400'}`;
+                        if(RoomState.squidState === 'green') {
+                            sqBanner.innerText = "🟢 ZIELONE ŚWIATŁO! (BIEGNIJ DO GÓRY!)";
+                            sqBanner.className = "text-[10px] font-bold mb-1 text-green-400";
+                        } else if(RoomState.squidState === 'yellow') {
+                            sqBanner.innerText = "🟡 UWAGA! LALKA SIĘ ODWRACA! ZATRZYMAJ SIĘ!";
+                            sqBanner.className = "text-[10px] font-bold mb-1 text-yellow-300 animate-pulse";
+                        } else {
+                            sqBanner.innerText = "🛑 CZERWONE ŚWIATŁO! ANI DRGNIJ! LASER STRZELA!";
+                            sqBanner.className = "text-[10px] font-bold mb-1 text-red-500 animate-pulse";
+                        }
                     }
 
                     document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
                     document.getElementById('m-' + RoomState.mode)?.classList.add('selected');
                     document.getElementById('mapSelect').value = RoomState.map;
+                    document.getElementById('mutatorSelect').value = RoomState.mutatorSetting;
                     document.getElementById('timeSelect').value = RoomState.matchDuration;
 
                     if(d.zombies) {
@@ -2916,7 +3212,7 @@
                     if(RoomState.status !== d.status) {
                         RoomState.status = d.status;
                         if(d.status === 'board') Board.initBoardView();
-                        else if(d.status === 'roulette') Game.runRouletteAnimation(RoomState.activeMinigame, RoomState.map);
+                        else if(d.status === 'roulette') Game.runRouletteAnimation(RoomState.activeMinigame, RoomState.map, RoomState.mutator);
                         else if(d.status === 'playing') Game.startMatch();
                         else if(d.status === 'card_reward') Game.showCardRewardScreen();
                         else if(d.status === 'podium') Game.showPodium();
@@ -2954,6 +3250,7 @@
                 db.ref(`chat/${currentRoom}`).limitToLast(25).on('child_added', snap => {
                     let c = snap.val();
                     if(!c) return;
+                    if(c.snd) Sound.play(c.snd);
                     const box = document.getElementById('chatMessages');
                     const d = document.createElement('div');
                     d.innerHTML = `<span style="color:${c.color};font-weight:bold;">${c.name}:</span> <span class="text-gray-200">${c.msg}</span>`;
@@ -3018,6 +3315,8 @@
                 if(!isHost) return;
                 db.ref(`room_items/${currentRoom}`).remove();
                 let order = [myId, ...Object.keys(netPlayers)];
+                const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
+                const chosenMut = RoomState.mutatorSetting === 'random' ? muts[Math.floor(Math.random()*muts.length)] : RoomState.mutatorSetting;
 
                 if(RoomState.mode === 'party') {
                     Board.myPos = 0; Board.visualPos = 0; Board.myPrison = 0; Board.myCards = [];
@@ -3031,11 +3330,11 @@
                 } else if(RoomState.mode === 'roulette') {
                     const pickedGame = drawNextUniqueMinigame();
                     const pickedMap = drawNextUniqueMap();
-                    db.ref(`rooms/${currentRoom}`).update({ status: 'roulette', activeMinigame: pickedGame, map: pickedMap });
+                    db.ref(`rooms/${currentRoom}`).update({ status: 'roulette', activeMinigame: pickedGame, map: pickedMap, mutator: chosenMut });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
-                        status: 'playing', activeMinigame: RoomState.mode,
-                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, crownHolder: myId, squidRed: false, brokenIce: {}, zombies: "[]", meteors: "[]"
+                        status: 'playing', activeMinigame: RoomState.mode, mutator: chosenMut,
+                        timer: RoomState.matchDuration, stormR: 1100, bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                     });
                 }
             }
