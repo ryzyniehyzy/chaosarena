@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL - MEGA ULTI EDITION</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' rx='3' fill='%23151526'/><path fill='%23ffde00' d='M2 5h2v2h2V5h4v2h2V5h2v7H2z'/><rect x='4' y='8' width='2' height='2' fill='%23ff2a6d'/><rect x='10' y='8' width='2' height='2' fill='%2305d5fa'/><rect x='2' y='12' width='12' height='2' fill='%23ff9100'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -104,6 +104,123 @@
 
         .crt-effect::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 100; background-size: 100% 3px, 4px 100%; pointer-events: none; opacity: 0.35; }
     </style>
+
+    <!-- SUPER PIXEL PARTY XL / VISUAL PASS 01
+         Non-invasive visual layer: keeps existing game IDs and mechanics intact. -->
+    <style id="ppxl-visual-upgrade">
+      :root {
+        color-scheme: dark;
+        --pp-bg: #080b16;
+        --pp-panel: rgba(15, 20, 39, .96);
+        --pp-line: #354568;
+        --pp-cyan: #52f5ff;
+        --pp-pink: #ff4f9a;
+        --pp-yellow: #ffe66d;
+        --pp-green: #7dffb3;
+        --pp-shadow: 0 8px 0 #03040a, 0 18px 44px rgba(0,0,0,.45);
+        --pp-pixel-border: 3px solid #e9f6ff;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { background: #070914; }
+      body {
+        background-image: radial-gradient(ellipse at 50% 0%, rgba(39,74,137,.24), transparent 55%),
+          linear-gradient(180deg,#090d1c 0%,#070812 100%);
+        -webkit-font-smoothing: none;
+        text-rendering: geometricPrecision;
+      }
+      body::after {
+        content:""; position:fixed; inset:0; z-index:90; pointer-events:none;
+        background: linear-gradient(90deg, transparent 49.8%, rgba(82,245,255,.018) 50%, transparent 50.2%);
+        opacity:.5;
+      }
+      .screen {
+        padding: clamp(12px, 2.4vw, 32px);
+        background-image: linear-gradient(rgba(150,190,255,.035) 1px,transparent 1px),
+          linear-gradient(90deg,rgba(150,190,255,.035) 1px,transparent 1px),
+          radial-gradient(ellipse at 50% 8%,rgba(33,54,105,.72),rgba(7,9,20,.98) 70%);
+        background-size: 24px 24px,24px 24px,100% 100%;
+        backdrop-filter: blur(10px);
+      }
+      .panel {
+        width:min(1180px,100%); max-height:min(94dvh,1000px);
+        padding:clamp(16px,2.4vw,32px);
+        border:var(--pp-pixel-border);
+        border-image: none;
+        background:linear-gradient(145deg,rgba(20,29,57,.98),rgba(9,12,26,.99));
+        box-shadow:0 0 0 4px #05060d,0 0 0 6px rgba(82,245,255,.24),var(--pp-shadow),inset 0 1px 0 rgba(255,255,255,.14);
+        text-align:left;
+        scrollbar-color:#496b9c #0a0d19;
+      }
+      .panel::before {
+        content:"PLAYER ONE  /  PARTY SYSTEM"; display:block; width:fit-content;
+        margin:0 0 16px; padding:6px 9px; color:var(--pp-cyan);
+        background:#080c19; border:1px solid #334968;
+        font:8px/1.4 'Press Start 2P',monospace; letter-spacing:.04em;
+      }
+      h1,h2,h3 { line-height:1.5; }
+      h1 { filter:drop-shadow(3px 3px 0 #080b16); }
+      .btn {
+        min-height:38px; padding:10px 14px; border:2px solid #fff;
+        background:linear-gradient(180deg,#ff639f 0%,#e52c73 100%);
+        box-shadow:inset 0 -4px 0 rgba(80,0,30,.35),0 4px 0 #03040a,0 0 0 1px rgba(255,255,255,.12);
+        letter-spacing:.02em; line-height:1.6;
+        transition:transform .12s ease,filter .12s ease,box-shadow .12s ease;
+      }
+      .btn:hover:not(:disabled) { filter:brightness(1.16); transform:translateY(-2px); box-shadow:inset 0 -4px 0 rgba(80,0,30,.35),0 6px 0 #03040a,0 0 18px rgba(255,79,154,.2); }
+      .btn:active:not(:disabled) { transform:translateY(2px); box-shadow:inset 0 -2px 0 rgba(80,0,30,.35),0 1px 0 #03040a; }
+      .btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+        outline:3px solid var(--pp-cyan); outline-offset:3px;
+      }
+      .input-pixel {
+        min-height:38px; border:2px solid #465779; background:#080c19;
+        box-shadow:inset 0 3px 0 rgba(0,0,0,.35); text-align:left; padding:9px 10px;
+      }
+      .input-pixel:focus { border-color:var(--pp-cyan); box-shadow:0 0 0 2px rgba(82,245,255,.14); }
+      .mode-card,.skin-card,.reward-card,.vote-card {
+        border-width:2px; border-color:#354362;
+        box-shadow:0 4px 0 #03040a, inset 0 1px 0 rgba(255,255,255,.06);
+        transition:transform .14s ease,border-color .14s ease,filter .14s ease,box-shadow .14s ease;
+      }
+      .mode-card:hover,.skin-card:hover { transform:translateY(-3px); border-color:var(--pp-cyan); filter:brightness(1.12); }
+      .mode-card.selected { border-color:var(--pp-cyan); box-shadow:inset 0 0 0 1px var(--pp-cyan),0 4px 0 #03040a,0 0 18px rgba(82,245,255,.12); }
+      .skin-card.selected { border-color:var(--pp-yellow); box-shadow:inset 0 0 0 1px var(--pp-yellow),0 4px 0 #03040a,0 0 18px rgba(255,230,109,.12); }
+      .lobby-slot-box { border-color:var(--pp-yellow); box-shadow:inset 0 0 0 1px rgba(255,230,109,.24),0 4px 0 #03040a; }
+      #hud,#hudRight,#boardHud .board-box,#chatWidget {
+        border:2px solid #dceeff; background:linear-gradient(145deg,rgba(13,19,38,.96),rgba(5,8,19,.94));
+        box-shadow:0 5px 0 #03040a,0 10px 28px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.1);
+        backdrop-filter:blur(8px);
+      }
+      #hud { border-left:4px solid var(--pp-cyan); }
+      #boardHud .board-box { border-color:var(--pp-yellow); }
+      #chatWidget { border-color:#53698e; }
+      #chatMessages { font-size:clamp(8px,.65vw,10px); line-height:1.8; }
+      #centerAnnouncement { animation:ppxl-pop .32s cubic-bezier(.2,.9,.2,1) both; }
+      .dice-cube { border-color:#fff; box-shadow:inset -8px -8px 0 #aaa,0 0 0 4px #05060d,0 0 34px rgba(255,230,109,.6),8px 8px 0 #03040a; }
+      .modal-overlay,#rouletteOverlay { padding:16px; backdrop-filter:blur(8px); }
+      .slot-machine { border-width:3px; box-shadow:0 0 0 4px #05060d,0 0 36px rgba(255,79,154,.32),8px 8px 0 #03040a; }
+      #killFeed > * { filter:drop-shadow(2px 2px 0 #000); }
+      ::selection { background:var(--pp-cyan); color:#08101b; }
+      @keyframes ppxl-pop { from { opacity:0; transform:translate(-50%,-42%) scale(.86); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+      @keyframes ppxl-glow { 0%,100% { box-shadow:0 0 8px rgba(82,245,255,.08); } 50% { box-shadow:0 0 18px rgba(82,245,255,.2); } }
+      @media (max-width:760px) {
+        .screen { padding:8px; }
+        .panel { width:100%; max-height:96dvh; padding:12px; border-width:2px; }
+        .panel::before { font-size:7px; margin-bottom:10px; }
+        .btn { min-height:42px; padding:9px 10px; font-size:8px; }
+        #hud { top:6px; left:6px; min-width:0; max-width:calc(100vw - 12px); padding:7px 9px; }
+        #hudRight { top:auto; bottom:8px; right:8px; max-width:48vw; }
+        #boardHud { top:5px; width:calc(100% - 10px); }
+        #boardHud .board-box { padding:7px; border-width:2px; }
+        #chatWidget { left:6px; bottom:6px; width:min(290px,76vw); max-height:28vh; }
+        #chatMessages { height:60px; }
+        #centerAnnouncement { width:90%; font-size:clamp(12px,4vw,20px); }
+        .reward-card,.vote-card { width:100%; max-width:420px; }
+      }
+      @media (prefers-reduced-motion:reduce) {
+        *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; }
+      }
+    </style>
+
 </head>
 <body id="mainBody" class="crt-effect">
 
@@ -4916,7 +5033,16 @@
                     if(c.snd) Sound.play(c.snd);
                     const box = document.getElementById('chatMessages');
                     const d = document.createElement('div');
-                    d.innerHTML = `<span style="color:${c.color};font-weight:bold;">${c.name}:</span> <span class="text-gray-200">${c.msg}</span>`;
+                    const author = document.createElement('span');
+                    // Never inject Firebase/user-controlled text as HTML.
+                    const safeColor = /^#[0-9a-f]{6}$/i.test(String(c.color || '')) ? c.color : '#52f5ff';
+                    author.style.color = safeColor;
+                    author.style.fontWeight = 'bold';
+                    author.textContent = String(c.name || 'Gracz').slice(0, 24) + ': ';
+                    const message = document.createElement('span');
+                    message.className = 'text-gray-200';
+                    message.textContent = String(c.msg || '').slice(0, 300);
+                    d.append(author, message);
                     box.appendChild(d);
                     box.scrollTop = box.scrollHeight;
                 });
