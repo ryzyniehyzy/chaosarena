@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL - ULTIMATE</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL - WOW EDITION</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' rx='3' fill='%23151526'/><path fill='%23ffde00' d='M2 5h2v2h2V5h4v2h2V5h2v7H2z'/><rect x='4' y='8' width='2' height='2' fill='%23ff2a6d'/><rect x='10' y='8' width='2' height='2' fill='%2305d5fa'/><rect x='2' y='12' width='12' height='2' fill='%23ff9100'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -15,9 +15,8 @@
 
     <style>
         :root {
-            --bg-grad: radial-gradient(circle at center, rgba(34,16,72,0.92) 0%, rgba(6,6,15,0.98) 100%);
-            --panel-grad: linear-gradient(160deg, #1d1838 0%, #0d0b1a 100%);
-            --accent-glow: #05d5fa;
+            --bg-grad: radial-gradient(circle at center, rgba(38,18,82,0.92) 0%, rgba(6,6,15,0.98) 100%);
+            --panel-grad: linear-gradient(160deg, #1d1838 0%, #0c0a18 100%);
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #05050a; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: none; image-rendering: pixelated; }
@@ -25,34 +24,34 @@
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: flex; align-items: center; justify-content: center; pointer-events: none; }
         .screen {
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px), var(--bg-grad);
-            background-size: 36px 36px, 36px 36px, 100% 100%;
-            width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(8px); transition: all 0.4s;
+            background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px), var(--bg-grad);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
+            width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(8px); transition: all 0.35s;
         }
         .screen.active { display: flex; }
         
         .panel {
             background: var(--panel-grad); border: 4px solid #fff;
-            box-shadow: 0 0 25px rgba(5,213,250,0.22), 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.88), inset 0 4px 0 rgba(255,255,255,0.18);
-            padding: 1rem 1.25rem; max-width: 1240px; width: 97%; text-align: center; position: relative; max-height: 96vh; overflow-y: auto;
+            box-shadow: 0 0 35px rgba(5,213,250,0.28), 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.9), inset 0 4px 0 rgba(255,255,255,0.2);
+            padding: 0.95rem 1.2rem; max-width: 1260px; width: 97%; text-align: center; position: relative; max-height: 96vh; overflow-y: auto;
         }
-        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.55rem 0.8rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 9px; outline: none; text-shadow: 2px 2px 0 #000; }
-        .btn:hover { filter: brightness(1.18); }
+        .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.5rem 0.75rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 8px; outline: none; text-shadow: 2px 2px 0 #000; }
+        .btn:hover { filter: brightness(1.2); }
         .btn:active { transform: translateY(3px); box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.45), 0 1px 0 #000; }
         .btn:disabled { background: #444; color: #888; border-color: #777; cursor: not-allowed; filter: none; }
         
-        .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.45rem; width: 100%; text-align: center; font-size: 8px; }
+        .input-pixel { background-color: #080811; border: 3px solid #fff; box-shadow: inset 0 4px 6px rgba(0,0,0,0.7); color: #fff; outline: none; font-family: inherit; padding: 0.42rem; width: 100%; text-align: center; font-size: 8px; }
         .input-pixel:focus { border-color: #05d5fa; }
 
-        .mode-card { position: relative; border: 3px solid #2d2d48; background: linear-gradient(180deg, #161629 0%, #0b0b15 100%); padding: 6px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 3px 0 #000; }
-        .mode-card:hover { border-color: #666699; transform: translateY(-2px); }
-        .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1e2548 0%, #10142a 100%); box-shadow: inset 0 0 14px rgba(5,213,250,0.4), 0 3px 0 #000; }
-        .mode-card.excluded { opacity: 0.42; border-color: #4a1525; background: #12080c; }
+        .mode-card { position: relative; border: 2px solid #2d2d48; background: linear-gradient(180deg, #17172b 0%, #0b0b16 100%); padding: 5px 6px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 3px 0 #000; }
+        .mode-card:hover { border-color: #7777aa; transform: translateY(-2px); }
+        .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1f274d 0%, #10152e 100%); box-shadow: inset 0 0 14px rgba(5,213,250,0.45), 0 3px 0 #000; }
+        .mode-card.excluded { opacity: 0.38; border-color: #4a1525; background: #12080c; }
 
-        .pool-badge { position: absolute; top: 3px; right: 3px; font-size: 9px; padding: 1px 3px; border-radius: 2px; background: rgba(0,0,0,0.7); border: 1px solid #555; z-index: 5; }
+        .pool-badge { position: absolute; top: 2px; right: 2px; font-size: 8px; padding: 1px 3px; border-radius: 2px; background: rgba(0,0,0,0.75); border: 1px solid #555; z-index: 5; }
         .pool-badge:hover { transform: scale(1.2); border-color: #ffde00; }
 
-        .skin-card { border: 3px solid #2d2d48; background: linear-gradient(180deg, #141424 0%, #0a0a12 100%); padding: 5px 3px; cursor: pointer; font-size: 7px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
+        .skin-card { border: 2px solid #2d2d48; background: linear-gradient(180deg, #141424 0%, #0a0a12 100%); padding: 5px 3px; cursor: pointer; font-size: 7px; color: #aaa; transition: all 0.1s; box-shadow: 0 3px 0 #000; }
         .skin-card:hover { border-color: #888; color: #fff; }
         .skin-card.selected { border-color: #ffde00; color: #fff; background: linear-gradient(180deg, #332b10 0%, #1c1707 100%); transform: translateY(-2px); box-shadow: 0 0 12px rgba(255,222,0,0.45); }
 
@@ -60,19 +59,19 @@
         .reward-card:hover { transform: translateY(-6px); border-color: #05d5fa; }
 
         .lobby-slot-box { background: linear-gradient(180deg, #321042 0%, #160620 100%); border: 3px solid #ffde00; box-shadow: inset 0 0 18px rgba(255, 42, 109, 0.45), 0 4px 0 #000; padding: 8px; }
-        .mini-reel { width: 44px; height: 46px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .mini-reel { width: 42px; height: 44px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 19px; }
 
         /* HUD MINIGIER */
-        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 22, 0.86); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 22, 0.88); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; min-width: 230px; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: auto; }
         
         /* HUD PLANSZÓWKI */
-        #boardHud { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 45; width: 95%; max-width: 980px; display: none; pointer-events: none; }
-        .board-box { background: linear-gradient(180deg, rgba(22,22,42,0.95) 0%, rgba(12,12,24,0.95) 100%); border: 4px solid #ffde00; box-shadow: 0 0 20px rgba(255,222,0,0.25), 8px 8px 0 #000; padding: 10px 16px; pointer-events: auto; }
+        #boardHud { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 45; width: 96%; max-width: 1040px; display: none; pointer-events: none; }
+        .board-box { background: linear-gradient(180deg, rgba(20,20,40,0.96) 0%, rgba(10,10,22,0.96) 100%); border: 4px solid #ffde00; box-shadow: 0 0 25px rgba(255,222,0,0.3), 8px 8px 0 #000; padding: 10px 16px; pointer-events: auto; }
 
         /* KOSTKA 3D */
         #diceOverlay { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 58; display: none; flex-direction: column; align-items: center; pointer-events: none; }
-        .dice-cube { width: 100px; height: 100px; background: linear-gradient(135deg, #ffffff 0%, #dcdcdc 100%); border: 6px solid #000; box-shadow: inset -8px -8px 0 #aaa, 0 0 30px #ffde00, 12px 12px 0 rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #111; }
+        .dice-cube { width: 104px; height: 104px; background: linear-gradient(135deg, #ffffff 0%, #dcdcdc 100%); border: 6px solid #000; box-shadow: inset -8px -8px 0 #aaa, 0 0 35px #ffde00, 12px 12px 0 rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; font-size: 42px; color: #111; }
 
         /* MODALE PLANSZOWE */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 62; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
@@ -84,12 +83,12 @@
 
         /* CZAT + SOUNDBOARD */
         #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 330px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
-        #chatMessages { height: 90px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+        #chatMessages { height: 85px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
         .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 4px; cursor: pointer; font-size: 11px; }
         .emote-btn:hover { background: #323254; border-color: #05d5fa; transform: scale(1.12); }
 
         #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
-        #centerAnnouncement { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 20px; text-shadow: 0 0 15px #ff2a6d, 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
+        #centerAnnouncement { position: absolute; top: 22%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 20px; text-shadow: 0 0 18px #ff2a6d, 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
 
         .bar-wrap { width: 195px; height: 14px; border: 3px solid #fff; background: #090910; margin-top: 4px; position: relative; box-shadow: 2px 2px 0 #000; }
         #hpBar { height: 100%; background: linear-gradient(90deg, #ff1744 0%, #ff616f 100%); width: 100%; transition: width 0.1s; }
@@ -165,19 +164,20 @@
             <div class="text-left">
                 <div class="text-xs text-[#ffde00] mb-1" style="text-shadow: 2px 2px 0 #000;">🏝️ WYSPA CASINO PARTY XL (META: POLE 50)</div>
                 <div id="boardTurnText" class="text-[10px] text-[#05d5fa]">Tura gracza: ---</div>
-                <div id="boardStatusMsg" class="text-[8px] text-gray-300 mt-1">Rzucajcie po kolei kostką!</div>
+                <div id="boardStatusMsg" class="text-[8px] text-gray-300 mt-1">Po rzutach wszystkich graczy automatycznie włącza się minigra!</div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <div id="myCardsContainer" class="flex gap-1"></div>
                 <button id="btnRollDice" class="btn !bg-[#00c853] !text-xs !py-3 !px-5 hidden" onclick="Board.rollDice()">🎲 RZUĆ KOSTKĄ!</button>
+                <button id="btnForceMinigame" class="btn !bg-amber-600 hover:!bg-amber-500 !text-[7px] !py-2 !px-3 hidden" onclick="Board.forceStartMinigame()">🎡 MINIGRA TERAZ (HOST)</button>
             </div>
         </div>
     </div>
 
     <!-- RULETKA MINIGIER + LOSOWANIE ŚMIESZNEJ MUTACJI -->
     <div id="rouletteOverlay">
-        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY (WYBRANA PULA MINIGIER) 🎡</div>
-        <div class="text-[8px] text-yellow-300 mb-4">Losowanie z Twojej aktywnej listy + Śmieszna Klątwa!</div>
+        <div class="text-lg text-[#05d5fa] mb-2" style="text-shadow: 3px 3px 0 #000;">🎡 KOŁO FORTUNY (LOSOWANIE MINIGRY) 🎡</div>
+        <div class="text-[8px] text-yellow-300 mb-4">Losowanie z Twojej aktywnej puli + Śmieszna Klątwa!</div>
         <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-10 py-8 text-2xl text-white shadow-[0_0_40px_#05d5fa] mb-3">
             ⚽ PIŁKA NOŻNA
         </div>
@@ -204,7 +204,7 @@
 
     <!-- PRAWY HUD + PRZYCISK POMINIĘCIA MINIGRY DLA HOSTA -->
     <div id="hudRight">
-        <div class="bg-black/85 border-3 border-white p-3 min-w-[225px] shadow-[6px_6px_0_#000]">
+        <div class="bg-black/85 border-3 border-white p-3 min-w-[230px] shadow-[6px_6px_0_#000]">
             <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING GRACZY</div>
             <ul id="liveScoreboard" class="text-[8px] space-y-2 mb-2"></ul>
             <button id="btnSkipMinigame" class="btn !bg-amber-600 hover:!bg-amber-500 !py-1.5 !px-2 !text-[7px] w-full hidden" onclick="Game.skipCurrentMinigame()">⏭️ POMIŃ MINIGRĘ (HOST)</button>
@@ -242,40 +242,50 @@
         <!-- 1. MENU GŁÓWNE -->
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-3xl">
-                <div class="inline-block bg-black/60 border-2 border-[#ffde00] px-4 py-1 text-[8px] text-[#ffde00] mb-2">👑 ULTIMATE PARTY EDITION • 16 MINIGIER • 9 POSTACI 👑</div>
+                <div class="inline-block bg-black/70 border-2 border-[#ffde00] px-4 py-1 text-[8px] text-[#ffde00] mb-2">🌟 WOW ULTIMATE EDITION • 19 MINIGIER • PIXEL PETS • 60 FPS 🌟</div>
                 <h1 class="text-3xl md:text-4xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-[10px] text-yellow-400 mb-4 tracking-wider">✨ SUPER PIXEL PARTY XL (PIŁKA + SPLATOON + GOKARTY HD + BOTY) ✨</h2>
+                <h2 class="text-[9px] text-yellow-400 mb-3 tracking-wider">✨ SUPER PIXEL PARTY XL (BOSS RAID + SZKLANY MOST + SUMO + GOKARTY HD) ✨</h2>
                 
-                <div class="flex flex-col md:flex-row gap-4 items-center mb-4">
+                <div class="flex flex-col md:flex-row gap-4 items-center mb-3">
                     <div class="bg-black/85 border-4 border-[#05d5fa] p-2.5 flex flex-col items-center shadow-[6px_6px_0_#000]">
-                        <div class="text-[7px] text-yellow-300 mb-1">PODGLĄD KLASY & CELOWNIKA:</div>
+                        <div class="text-[7px] text-yellow-300 mb-1">PODGLĄD POSTACI & ZWIERZAKA:</div>
                         <canvas id="previewCanvas" width="135" height="135" class="bg-[#121222] border-2 border-gray-700"></canvas>
                         <div id="skinDescText" class="text-[7px] text-[#00e676] mt-1.5">Bluza, Słuchawki i Czapka</div>
                     </div>
 
                     <div class="flex-grow w-full">
-                        <div class="grid grid-cols-3 gap-2 mb-2.5">
+                        <div class="grid grid-cols-4 gap-2 mb-2.5">
                             <div class="text-left">
                                 <label class="text-[7px] text-gray-400 block mb-1">TWÓJ NICK:</label>
                                 <input type="text" id="playerName" value="Paweł" class="input-pixel interactive" maxlength="12">
                             </div>
                             <div class="text-left">
-                                <label class="text-[7px] text-gray-400 block mb-1">KOLOR STROJU:</label>
-                                <input type="color" id="playerColor" value="#05d5fa" onchange="Preview.draw()" class="w-full h-[32px] border-3 border-white cursor-pointer bg-black interactive">
+                                <label class="text-[7px] text-gray-400 block mb-1">KOLOR:</label>
+                                <input type="color" id="playerColor" value="#05d5fa" onchange="Preview.draw()" class="w-full h-[30px] border-3 border-white cursor-pointer bg-black interactive">
+                            </div>
+                            <div class="text-left">
+                                <label class="text-[7px] text-gray-400 block mb-1">ZWIERZAK (PET):</label>
+                                <select id="petSelect" class="input-pixel interactive !py-1.5" onchange="Settings.changePet(this.value)">
+                                    <option value="dragon">🐉 Złoty Smok</option>
+                                    <option value="drone">🛸 Cyber-Dron</option>
+                                    <option value="ghost">👻 Duszek</option>
+                                    <option value="star">⭐ Gwiazdka</option>
+                                    <option value="none">Brak Peta</option>
+                                </select>
                             </div>
                             <div class="text-left">
                                 <label class="text-[7px] text-gray-400 block mb-1">CELOWNIK:</label>
                                 <select id="crosshairSelect" class="input-pixel interactive !py-1.5" onchange="Settings.changeCrosshair(this.value)">
-                                    <option value="cross">➕ Krzyżyk Pro</option>
-                                    <option value="circle">⭕ Kółko Taktyczne</option>
-                                    <option value="dot">🔴 Kropka Laser</option>
+                                    <option value="cross">➕ Krzyżyk</option>
+                                    <option value="circle">⭕ Kółko</option>
+                                    <option value="dot">🔴 Kropka</option>
                                     <option value="diamond">💠 Diament</option>
                                     <option value="x">❌ X-Snajper</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div class="text-[8px] text-yellow-300 text-left mb-1">WYBIERZ SWOJĄ POSTAĆ (9 UNIKALNYCH MODELI PIXEL-ART):</div>
+                        <div class="text-[8px] text-yellow-300 text-left mb-1">WYBIERZ SWOJĄ POSTAĆ (9 MODELI PIXEL-ART):</div>
                         <div class="grid grid-cols-3 gap-1.5 mb-2.5 interactive">
                             <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ<br><span class="text-[6px] text-gray-400">Słuchawki & Bluza</span></div>
                             <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA<br><span class="text-[6px] text-gray-400">Katany & Szal</span></div>
@@ -304,10 +314,10 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-2.5">
+                <div class="flex flex-col gap-2">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3.5" id="btnCreateRoom">🌐 STWÓRZ POKÓJ ONLINE</button>
-                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !text-xs !py-3.5 font-bold" id="btnCreateSoloBots">🤖 GRAJ SOLO Z 3 BOTAMI!</button>
+                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3" id="btnCreateRoom">🌐 STWÓRZ POKÓJ ONLINE</button>
+                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !text-xs !py-3 font-bold" id="btnCreateSoloBots">🤖 GRAJ SOLO Z 3 BOTAMI!</button>
                     </div>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="WPISZ KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
@@ -323,8 +333,8 @@
             <div class="panel">
                 <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-2 mb-2 gap-2">
                     <div class="text-left">
-                        <h2 class="text-sm md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL (ULTIMATE)</h2>
-                        <span class="text-[7px] text-yellow-300">Wybieraj które minigry mają się losować (☑️/⬜), zmieniaj tła i graj z Botami lub znajomymi!</span>
+                        <h2 class="text-sm md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL (19 MINIGIER)</h2>
+                        <span class="text-[7px] text-yellow-300">Kliknij ☑️ na minigrze aby zostawić lub wyrzucić ją z losowania!</span>
                     </div>
                     <div class="flex items-center gap-2 bg-black/75 border-2 border-[#ffde00] px-3 py-1 shadow-[4px_4px_0_#000]">
                         <div class="text-right">
@@ -340,19 +350,28 @@
                     <!-- Lewa kolumna -->
                     <div class="lg:col-span-4 flex flex-col gap-2">
                         <div class="bg-black/65 border-2 border-[#05d5fa] p-2 shadow-[4px_4px_0_#000]">
-                            <div class="flex justify-between items-center mb-1">
+                            <div class="flex justify-between items-center mb-1 gap-1">
                                 <span class="text-[8px] text-[#05d5fa]">👥 GRACZE (<span id="lobbyCount">1</span>):</span>
-                                <select id="lobbySkinSelect" class="bg-[#111] border border-yellow-400 text-[7px] text-yellow-300 p-1 interactive" onchange="Lobby.changeMySkinInLobby(this.value)">
-                                    <option value="cap">🧢 Paweł</option>
-                                    <option value="ninja">🥷 Ninja</option>
-                                    <option value="knight">⚔️ Rycerz</option>
-                                    <option value="astro">👨‍🚀 Kosmos</option>
-                                    <option value="cyborg">🤖 Cyborg</option>
-                                    <option value="king">👑 Król</option>
-                                    <option value="wizard">🧙‍♂️ Mag</option>
-                                    <option value="pirate">🏴‍☠️ Pirat</option>
-                                    <option value="agent">🕶️ Agent Sigma</option>
-                                </select>
+                                <div class="flex gap-1">
+                                    <select id="lobbyPetSelect" class="bg-[#111] border border-cyan-400 text-[7px] text-cyan-300 p-0.5 interactive" onchange="Settings.changePet(this.value)">
+                                        <option value="dragon">🐉 Smok</option>
+                                        <option value="drone">🛸 Dron</option>
+                                        <option value="ghost">👻 Duch</option>
+                                        <option value="star">⭐ Gwiazda</option>
+                                        <option value="none">Brak</option>
+                                    </select>
+                                    <select id="lobbySkinSelect" class="bg-[#111] border border-yellow-400 text-[7px] text-yellow-300 p-0.5 interactive" onchange="Lobby.changeMySkinInLobby(this.value)">
+                                        <option value="cap">🧢 Paweł</option>
+                                        <option value="ninja">🥷 Ninja</option>
+                                        <option value="knight">⚔️ Rycerz</option>
+                                        <option value="astro">👨‍🚀 Kosmos</option>
+                                        <option value="cyborg">🤖 Cyborg</option>
+                                        <option value="king">👑 Król</option>
+                                        <option value="wizard">🧙‍♂️ Mag</option>
+                                        <option value="pirate">🏴‍☠️ Pirat</option>
+                                        <option value="agent">🕶️ Agent</option>
+                                    </select>
+                                </div>
                             </div>
                             <ul id="lobbyPlayerList" class="h-20 overflow-y-auto space-y-1 text-[8px]"></ul>
                             <div id="hostBotControls" class="flex gap-1 mt-1.5 pt-1.5 border-t border-gray-700 hidden interactive">
@@ -427,7 +446,7 @@
                         </div>
                     </div>
 
-                    <!-- Prawa kolumna: 16 Trybów + Wybór Puli Losowania -->
+                    <!-- Prawa kolumna: 19 Trybów + Wybór Puli Losowania -->
                     <div class="lg:col-span-8 flex flex-col justify-between bg-black/50 border-2 border-gray-600 p-2.5 shadow-[4px_4px_0_#000]">
                         <div>
                             <div class="text-[8px] text-yellow-400 mb-1">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
@@ -435,7 +454,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
                                     <div class="text-[9px] text-[#ffde00] mb-0.5">🎲 SUPER MARIO PARTY XL (WYSPA 50 PÓL!)</div>
-                                    <div class="text-[6px] text-gray-300 leading-relaxed">Plansza 50 pól! Po każdej turze rzutów losuje minigrę wyłącznie z zaznaczonych poniżej (☑️)!</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Przejrzysta wyspa 50 pól! Po każdej turze rzutów kostką automatycznie włącza się minigra z zaznaczonej puli (☑️)!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
                                     <div class="text-[9px] text-[#00e676] mb-0.5">🎡 RULETKA MINIGIER + ŚMIESZNE KLĄTWY</div>
@@ -447,13 +466,27 @@
                             <div class="flex flex-wrap justify-between items-center bg-black/60 border border-gray-700 px-2 py-1 mb-1.5 gap-1">
                                 <span class="text-[7px] text-cyan-300">🎯 PULA LOSOWANIA (KLIKNIJ ☑️ ABY WŁĄCZYĆ/WYŁĄCZYĆ Z LOSOWANIA):</span>
                                 <div class="flex gap-1 interactive">
-                                    <button class="px-1.5 py-0.5 text-[6px] bg-emerald-800 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('all')">☑️ Wszystkie (16)</button>
-                                    <button class="px-1.5 py-0.5 text-[6px] bg-amber-700 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('noshers')">🏃 Tylko Bez Strzelania (8)</button>
+                                    <button class="px-1.5 py-0.5 text-[6px] bg-emerald-800 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('all')">☑️ Wszystkie (19)</button>
+                                    <button class="px-1.5 py-0.5 text-[6px] bg-amber-700 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('noshers')">🏃 Tylko Zręcznościowe Bez Strzelania (10)</button>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5 mb-2 interactive">
-                                <!-- 3 NOWE UNIKALNE MINIGRY BEZ STRZELANIA -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1 mb-2 interactive">
+                                <div class="mode-card" onclick="Lobby.selectMode('boss')" id="m-boss">
+                                    <span class="pool-badge" id="pool-boss" onclick="Lobby.togglePoolGame(event, 'boss')">☑️</span>
+                                    <div class="text-[7px] text-amber-400">🐲 RAID NA SMOKA</div>
+                                    <div class="text-[6px] text-gray-400">Pokonajcie Bossa Kasyna!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('sumo')" id="m-sumo">
+                                    <span class="pool-badge" id="pool-sumo" onclick="Lobby.togglePoolGame(event, 'sumo')">☑️</span>
+                                    <div class="text-[7px] text-orange-400">🥊 SUMO RING</div>
+                                    <div class="text-[6px] text-gray-400">Wypchnij rywali w lawę!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('glass')" id="m-glass">
+                                    <span class="pool-badge" id="pool-glass" onclick="Lobby.togglePoolGame(event, 'glass')">☑️</span>
+                                    <div class="text-[7px] text-cyan-300">🌉 SZKLANY MOST</div>
+                                    <div class="text-[6px] text-gray-400">Wybierz właściwe szkło!</div>
+                                </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('soccer')" id="m-soccer">
                                     <span class="pool-badge" id="pool-soccer" onclick="Lobby.togglePoolGame(event, 'soccer')">☑️</span>
                                     <div class="text-[7px] text-lime-400">⚽ PIŁKA NOŻNA</div>
@@ -481,17 +514,17 @@
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('spleef')" id="m-spleef">
                                     <span class="pool-badge" id="pool-spleef" onclick="Lobby.togglePoolGame(event, 'spleef')">☑️</span>
-                                    <div class="text-[7px] text-cyan-300">🧊 KRUSZĄCY LÓD</div>
+                                    <div class="text-[7px] text-sky-300">🧊 KRUSZĄCY LÓD</div>
                                     <div class="text-[6px] text-gray-400">Znikające kafelki lodu!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('bomb')" id="m-bomb">
                                     <span class="pool-badge" id="pool-bomb" onclick="Lobby.togglePoolGame(event, 'bomb')">☑️</span>
-                                    <div class="text-[7px] text-orange-400">💣 GORĄCA BOMBA</div>
+                                    <div class="text-[7px] text-rose-400">💣 GORĄCA BOMBA</div>
                                     <div class="text-[6px] text-gray-400">Oddaj tykający lont!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('meteors')" id="m-meteors">
                                     <span class="pool-badge" id="pool-meteors" onclick="Lobby.togglePoolGame(event, 'meteors')">☑️</span>
-                                    <div class="text-[7px] text-amber-400">☄️ METEORYTY</div>
+                                    <div class="text-[7px] text-amber-300">☄️ METEORYTY</div>
                                     <div class="text-[6px] text-gray-400">Uciekaj przed kometami!</div>
                                 </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('crown')" id="m-crown">
@@ -634,10 +667,11 @@
 
     </div>
     <script>
-        // === USTAWIENIA, 8 MOTYWÓW WIZUALNYCH, CELOWNIKI & TAJNY KOD "SIGMA" ===
+        // === USTAWIENIA, 8 MOTYWÓW WIZUALNYCH, ZWIERZAKI PIXEL PETS & CELOWNIKI ===
         const Settings = {
             music: true, sfx: true, shake: true, crt: true,
             crosshair: 'cross',
+            pet: 'dragon',
             sigmaAim: false,
 
             update() {
@@ -655,10 +689,21 @@
                 if(lc) lc.value = val;
                 Preview.draw();
             },
+            changePet(val) {
+                this.pet = val;
+                const ps = document.getElementById('petSelect');
+                const lps = document.getElementById('lobbyPetSelect');
+                if(ps) ps.value = val;
+                if(lps) lps.value = val;
+                if(currentRoom && myId) {
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({ pet: val });
+                }
+                Preview.draw();
+            },
             setTheme(th) {
                 const root = document.documentElement;
                 const themes = {
-                    cyber:   ['radial-gradient(circle at center, rgba(34,16,72,0.92) 0%, rgba(6,6,15,0.98) 100%)', 'linear-gradient(160deg, #1d1838 0%, #0d0b1a 100%)'],
+                    cyber:   ['radial-gradient(circle at center, rgba(38,18,82,0.92) 0%, rgba(6,6,15,0.98) 100%)', 'linear-gradient(160deg, #1d1838 0%, #0d0b1a 100%)'],
                     sunset:  ['radial-gradient(circle at center, rgba(84,18,52,0.92) 0%, rgba(18,5,20,0.98) 100%)', 'linear-gradient(160deg, #3d1233 0%, #17071a 100%)'],
                     emerald: ['radial-gradient(circle at center, rgba(12,62,42,0.92) 0%, rgba(4,14,10,0.98) 100%)', 'linear-gradient(160deg, #10382b 0%, #061711 100%)'],
                     crimson: ['radial-gradient(circle at center, rgba(75,10,18,0.92) 0%, rgba(12,3,5,0.98) 100%)',  'linear-gradient(160deg, #3b0f15 0%, #140507 100%)'],
@@ -940,7 +985,7 @@
             }
         };
 
-        // === FIREBASE & PULA 16 MINIGIER Z MOŻLIWOŚCIĄ WYKLUCZANIA ===
+        // === FIREBASE & PULA 19 MINIGIER Z MOŻLIWOŚCIĄ WYKLUCZANIA ===
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -957,25 +1002,29 @@
         let netPlayers = {}, netZombies = {}, netItems = {}, netMeteors = [];
 
         const ALL_MINIGAMES = [
-            'soccer', 'paint', 'lasers', 'race', 'squid', 'spleef', 'bomb', 'meteors',
-            'crown', 'heist', 'zombies', 'koth', 'royale', 'sniper', 'coins', 'arena'
+            'boss', 'sumo', 'glass', 'soccer', 'paint', 'lasers', 'race', 'squid',
+            'spleef', 'bomb', 'meteors', 'crown', 'heist', 'zombies', 'koth', 'royale', 'sniper', 'coins', 'arena'
         ];
-        const NO_SHOOTING_GAMES = ['soccer', 'paint', 'lasers', 'race', 'squid', 'spleef', 'bomb', 'meteors'];
+        const NO_SHOOTING_GAMES = ['sumo', 'glass', 'soccer', 'paint', 'lasers', 'race', 'squid', 'spleef', 'bomb', 'meteors'];
 
         let minigameDeck = [];
         let lastPlayedMap = '';
 
         function drawNextUniqueMinigame() {
-            const allowed = (RoomState.allowedGames && RoomState.allowedGames.length > 0) ? RoomState.allowedGames : ALL_MINIGAMES;
-            minigameDeck = minigameDeck.filter(g => allowed.includes(g));
+            const allowed = (Array.isArray(RoomState.allowedGames) && RoomState.allowedGames.length > 0)
+                ? RoomState.allowedGames.filter(g => ALL_MINIGAMES.includes(g))
+                : [...ALL_MINIGAMES];
+            const safePool = allowed.length > 0 ? allowed : [...ALL_MINIGAMES];
+
+            minigameDeck = minigameDeck.filter(g => safePool.includes(g));
             if(minigameDeck.length === 0) {
-                minigameDeck = [...allowed];
+                minigameDeck = [...safePool];
                 for(let i = minigameDeck.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [minigameDeck[i], minigameDeck[j]] = [minigameDeck[j], minigameDeck[i]];
                 }
             }
-            return minigameDeck.pop() || allowed[0];
+            return minigameDeck.pop() || safePool[0];
         }
 
         function drawNextUniqueMap() {
@@ -997,8 +1046,9 @@
             allowedGames: [...ALL_MINIGAMES],
             map: 'forest', mutatorSetting: 'random', mutator: 'none',
             matchDuration: 60, timer: 60, bombHolder: null, bombTimer: 10,
-            crownHolder: null, squidState: 'green', brokenIce: {},
+            crownHolder: null, squidState: 'green', brokenIce: {}, paintData: {},
             koth: {x:800, y:800, r:110}, stormR: 1100, vaultHp: 500,
+            boss: {x:800, y:800, hp:1200, maxHp:1200, a:0},
             ball: {x:800, y:800, vx:0, vy:0},
             turnOrder: [], turnIdx: 0, boardMsg: 'Witajcie na Wyspie Kasyna XL (50 Pól)!', minigameWinner: null
         };
@@ -1050,7 +1100,47 @@
             }
         };
 
-        // === ULEPSZONY GOKART WYŚCIGOWY PIXEL-ART 2.5D HD ===
+        // === RYSOWANIE ZWIERZAKA PIXEL-PET LATAJĄCEGO ZA GRACZEM ===
+        function drawPixelPet(ctx, x, y, petType, anim) {
+            if(!petType || petType === 'none') return;
+            const hoverY = Math.sin(performance.now() * 0.008 + x * 0.02) * 6;
+            const px = Math.floor(x - 26);
+            const py = Math.floor(y - 22 + hoverY);
+
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.beginPath(); ctx.ellipse(0, 18 - hoverY, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+
+            if(petType === 'dragon') {
+                // Złoty Smok Pixel-Art z machającymi skrzydełkami
+                let wing = Math.sin(performance.now() * 0.02) * 4;
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-8, -4 + wing, 6, 5); ctx.fillRect(4, -4 + wing, 6, 5);
+                ctx.fillStyle = '#000'; ctx.fillRect(-6, -6, 12, 12);
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(-5, -5, 10, 10);
+                ctx.fillStyle = '#ff1744'; ctx.fillRect(1, -2, 3, 3);
+            } else if(petType === 'drone') {
+                // Cyber-Dron z neonowym okiem
+                ctx.fillStyle = '#05d5fa'; ctx.fillRect(-8, -7, 16, 2);
+                ctx.fillStyle = '#263238'; ctx.fillRect(-6, -4, 12, 9);
+                ctx.fillStyle = '#00e676'; ctx.fillRect(-2, -1, 5, 4);
+            } else if(petType === 'ghost') {
+                // Lewitujący Duszek
+                ctx.fillStyle = 'rgba(255,255,255,0.88)';
+                ctx.fillRect(-6, -6, 12, 12);
+                ctx.fillStyle = '#000'; ctx.fillRect(-3, -2, 2, 3); ctx.fillRect(2, -2, 2, 3);
+            } else if(petType === 'star') {
+                // Wirująca Gwiazdka
+                ctx.rotate(performance.now() * 0.004);
+                ctx.fillStyle = '#ffde00';
+                ctx.fillRect(-6, -6, 12, 12);
+                ctx.rotate(Math.PI / 4);
+                ctx.fillRect(-6, -6, 12, 12);
+            }
+            ctx.restore();
+        }
+
+        // === GOKART WYŚCIGOWY PIXEL-ART 2.5D HD ===
         function drawPixelKart(ctx, x, y, angle, color, skin, name, lap) {
             const P = 2;
             ctx.save();
@@ -1061,7 +1151,6 @@
 
             ctx.rotate(angle);
 
-            // Podwójne płomienie Nitro z rur wydechowych
             if(Math.sin(performance.now()*0.05) > 0) {
                 ctx.fillStyle = '#ff2a6d';
                 ctx.fillRect(-17*P, -5.5*P, 5*P, 2.5*P);
@@ -1071,12 +1160,10 @@
                 ctx.fillRect(-15*P, 3.6*P, 3*P, 1.2*P);
             }
 
-            // Chromowane kolektory wydechowe
             ctx.fillStyle = '#b0bec5';
             ctx.fillRect(-12.5*P, -5*P, 3.5*P, 2.5*P);
             ctx.fillRect(-12.5*P, 2.5*P, 3.5*P, 2.5*P);
 
-            // 4 Opony typu Slick z czerwonym paskiem i złotymi felgami
             const wheels = [
                 {wx: -10.5*P, wy: -10.5*P},
                 {wx: -10.5*P, wy: 6.5*P},
@@ -1092,13 +1179,11 @@
                 ctx.fillRect(w.wx + 2*P, w.wy + P, 2.5*P, 2*P);
             });
 
-            // Podwozie i boczne wloty powietrza (Sidepods)
             ctx.fillStyle = '#000';
             ctx.fillRect(-11*P, -7.5*P, 24*P, 15*P);
             ctx.fillStyle = '#1b2028';
             ctx.fillRect(-9*P, -6.5*P, 20*P, 13*P);
 
-            // Karoseria główna z refleksami świetlnymi
             ctx.fillStyle = color;
             ctx.fillRect(-8*P, -5.5*P, 18.5*P, 11*P);
             ctx.fillRect(8*P, -4*P, 5*P, 8*P);
@@ -1108,25 +1193,21 @@
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.fillRect(-7*P, 3.5*P, 16*P, 2*P);
 
-            // Centralne pasy wyścigowe + numer startowy
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(-8*P, -1.5*P, 20.5*P, P);
             ctx.fillRect(-8*P, 0.5*P, 20.5*P, P);
             ctx.fillRect(6*P, -2.5*P, 4*P, 5*P);
 
-            // Przednie skrzydło dociskowe
             ctx.fillStyle = '#000';
             ctx.fillRect(11.5*P, -6.5*P, 3*P, 13*P);
             ctx.fillStyle = '#ffde00';
             ctx.fillRect(12*P, -5.5*P, 1.5*P, 11*P);
 
-            // Tylne skrzydło karbonowe
             ctx.fillStyle = '#000';
             ctx.fillRect(-12.5*P, -7.5*P, 4*P, 15*P);
             ctx.fillStyle = '#ff2a6d';
             ctx.fillRect(-12*P, -6.5*P, 2.5*P, 13*P);
 
-            // Kokpit i kierownica
             ctx.fillStyle = '#0e0e14';
             ctx.fillRect(-5*P, -4*P, 7.5*P, 8*P);
             ctx.fillStyle = '#000';
@@ -1136,7 +1217,6 @@
             ctx.fillRect(2*P, -3*P, 2*P, 1.5*P);
             ctx.fillRect(2*P, 1.5*P, 2*P, 1.5*P);
 
-            // Kask kierowcy z neonowym wizjerem
             ctx.fillStyle = '#000';
             ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
             ctx.fillStyle = '#ffffff';
@@ -1155,16 +1235,24 @@
             }
         }
 
-        // === MODELE 9 KLAS BOHATERÓW PIXEL-ART ===
-        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote, hasCrown=false, jumpZ=0) {
+        // === MODELE 9 KLAS BOHATERÓW PIXEL-ART (Z ANIMACJĄ SQUASH & STRETCH I PIXEL PETEM) ===
+        function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote, hasCrown=false, jumpZ=0, petType='none') {
             if(RoomState.status === 'playing' && RoomState.activeMinigame === 'race') {
                 drawPixelKart(ctx, x, y, angle, color, skin, name, hp);
                 return;
             }
 
+            if(!isDead && petType && petType !== 'none') {
+                drawPixelPet(ctx, x, y, petType, anim);
+            }
+
             const P = 3;
             ctx.save();
             ctx.translate(Math.floor(x), Math.floor(y - jumpZ));
+
+            // Subtelny efekt Squash & Stretch przy skoku i biegu
+            let stretch = 1 + (jumpZ * 0.004) + Math.sin(anim * 2) * 0.03;
+            ctx.scale(1 / Math.sqrt(stretch), stretch);
 
             if(RoomState.status === 'playing' && RoomState.mutator === 'tiny') {
                 ctx.scale(0.68, 0.68);
@@ -1179,7 +1267,6 @@
                 return;
             }
 
-            // Cień na ziemi (zostaje na dole podczas skoku!)
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.beginPath(); ctx.ellipse(0, 8 + jumpZ, Math.max(8, 17 - jumpZ*0.2), Math.max(4, 9 - jumpZ*0.1), 0, 0, Math.PI*2); ctx.fill();
 
@@ -1210,18 +1297,15 @@
             ctx.fillRect(-3*P + step, -5*P, 3*P, 2*P);
             ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
 
-            // Korpus zależny od klasy
             ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
             ctx.fillStyle = skin === 'knight' ? '#9aa5b1' : (skin === 'ninja' || skin === 'agent' ? '#171722' : (skin === 'wizard' ? '#3f1d70' : color));
             ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
 
-            // Czerwony krawat Agenta Sigma
             if(skin === 'agent') {
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(0, -1.5*P, 3*P, 3*P);
                 ctx.fillStyle = '#ff1744'; ctx.fillRect(P, -0.5*P, 3*P, P);
             }
 
-            // Dłonie (lub Złoty Hak Pirata!)
             ctx.fillStyle = '#000';
             ctx.fillRect(2*P, -6*P, 3*P, 3*P);
             ctx.fillRect(3*P, 3*P, 3*P, 3*P);
@@ -1233,9 +1317,8 @@
                 ctx.fillRect(3*P, 4*P, 2*P, 2*P);
             }
 
-            // Broń lub Różdżka (ukryta w trybach czysto zręcznościowych bez strzelania)
             const gm = RoomState.activeMinigame;
-            const noGunModes = ['squid', 'soccer', 'paint', 'lasers', 'bomb'];
+            const noGunModes = ['squid', 'soccer', 'paint', 'lasers', 'bomb', 'sumo', 'glass'];
             if(!noGunModes.includes(gm) || RoomState.status !== 'playing') {
                 if(skin === 'wizard' && wep === 'pistol') {
                     ctx.fillStyle = '#5c3818'; ctx.fillRect(3*P, P, 6*P, 2*P);
@@ -1252,16 +1335,19 @@
                     }
                 }
             } else if(gm === 'paint') {
-                // Wałek malarski w trybie Wojny Kolorów!
                 ctx.fillStyle = '#888'; ctx.fillRect(3*P, -2*P, 3*P, 4*P);
                 ctx.fillStyle = color; ctx.fillRect(5*P, -4*P, 3*P, 8*P);
+            } else if(gm === 'sumo') {
+                // Czerwone rękawice bokserskie w trybie Sumo!
+                ctx.fillStyle = '#ff1744';
+                ctx.fillRect(3*P, -6*P, 3.5*P, 3.5*P);
+                ctx.fillRect(3*P, 2.5*P, 3.5*P, 3.5*P);
             }
 
             if(RoomState.status === 'playing' && RoomState.mutator === 'bighead') {
                 ctx.scale(2.15, 2.15);
             }
 
-            // Głowa zależna od wybranego spośród 9 modeli
             if(skin === 'cap') {
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
                 ctx.fillStyle = '#111'; ctx.fillRect(2*P, -3*P, 4*P, 6*P);
@@ -1305,22 +1391,22 @@
             }
             else if(skin === 'wizard') {
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(2*P, -2*P, 3*P, 4*P); // Biała broda
-                ctx.fillStyle = '#2c1254'; ctx.beginPath(); ctx.arc(-P, 0, 5.2*P, 0, Math.PI*2); ctx.fill(); // Rondo kapelusza
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(2*P, -2*P, 3*P, 4*P);
+                ctx.fillStyle = '#2c1254'; ctx.beginPath(); ctx.arc(-P, 0, 5.2*P, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(-5*P, -2*P); ctx.lineTo(2*P, 0); ctx.lineTo(-2*P, 3*P); ctx.fill();
                 ctx.fillStyle = '#ffde00'; ctx.fillRect(-2*P, -P, P, 2*P);
             }
             else if(skin === 'pirate') {
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
-                ctx.fillStyle = '#111'; ctx.fillRect(-4*P, -5*P, 7*P, 10*P); // Trikorn piracki
-                ctx.fillStyle = '#d91656'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P); // Bandana
-                ctx.fillStyle = '#fff'; ctx.fillRect(-2*P, -P, 2*P, 2*P); // Czaszka na kapeluszu
-                ctx.fillStyle = '#000'; ctx.fillRect(2*P, 0, 2*P, 2.5*P); // Opaska na oko
+                ctx.fillStyle = '#111'; ctx.fillRect(-4*P, -5*P, 7*P, 10*P);
+                ctx.fillStyle = '#d91656'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#fff'; ctx.fillRect(-2*P, -P, 2*P, 2*P);
+                ctx.fillStyle = '#000'; ctx.fillRect(2*P, 0, 2*P, 2.5*P);
             }
             else if(skin === 'agent') {
                 ctx.fillStyle = '#ffcca3'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
-                ctx.fillStyle = '#1a1a24'; ctx.fillRect(-4*P, -3*P, 4*P, 6*P); // Elegancka fryzura
-                ctx.fillStyle = '#000'; ctx.fillRect(1.5*P, -3*P, 2*P, 6*P); // Okulary przeciwsłoneczne Sigma
+                ctx.fillStyle = '#1a1a24'; ctx.fillRect(-4*P, -3*P, 4*P, 6*P);
+                ctx.fillStyle = '#000'; ctx.fillRect(1.5*P, -3*P, 2*P, 6*P);
                 ctx.fillStyle = '#05d5fa'; ctx.fillRect(2*P, -2.5*P, P, 2*P); ctx.fillRect(2*P, 0.5*P, P, 2*P);
             }
 
@@ -1369,9 +1455,9 @@
 
                 pCtx.save();
                 pCtx.translate(67, 72);
-                pCtx.scale(1.4, 1.4);
+                pCtx.scale(1.35, 1.35);
                 const col = document.getElementById('playerColor').value || '#05d5fa';
-                drawPixelHero(pCtx, 0, 0, this.angle, col, chosenSkin, '', 100, 100, 0, 'pistol', performance.now()*0.01, false, false, 0, false, '');
+                drawPixelHero(pCtx, 0, 0, this.angle, col, chosenSkin, '', 100, 100, 0, 'pistol', performance.now()*0.01, false, false, 0, false, '', false, 0, Settings.pet);
                 pCtx.restore();
 
                 drawCustomCrosshair(pCtx, 110, 24, Settings.crosshair);
@@ -1381,11 +1467,11 @@
 
         // === SZTUCZNA INTELIGENCJA BOTÓW ===
         const BOT_PRESETS = [
-            { name: '🤖 Bot Kuba',   color: '#ff2a6d', skin: 'ninja' },
-            { name: '🤖 Bot Sigma',  color: '#00e676', skin: 'agent' },
-            { name: '🤖 Bot Mag',    color: '#e040fb', skin: 'wizard' },
-            { name: '🤖 Bot Kapitan',color: '#ffde00', skin: 'pirate' },
-            { name: '🤖 Bot Rycerz', color: '#ff9100', skin: 'knight' }
+            { name: '🤖 Bot Kuba',   color: '#ff2a6d', skin: 'ninja',  pet: 'dragon' },
+            { name: '🤖 Bot Sigma',  color: '#00e676', skin: 'agent',  pet: 'drone' },
+            { name: '🤖 Bot Mag',    color: '#e040fb', skin: 'wizard', pet: 'ghost' },
+            { name: '🤖 Bot Kapitan',color: '#ffde00', skin: 'pirate', pet: 'star' },
+            { name: '🤖 Bot Rycerz', color: '#ff9100', skin: 'knight', pet: 'dragon' }
         ];
 
         const BotAI = {
@@ -1400,7 +1486,7 @@
                 const botId = 'bot_' + Math.random().toString(36).substr(2, 5);
 
                 await db.ref(`room_players/${currentRoom}/${botId}`).set({
-                    id: botId, isBot: true, name: preset.name, color: preset.color, skin: preset.skin,
+                    id: botId, isBot: true, name: preset.name, color: preset.color, skin: preset.skin, pet: preset.pet,
                     chips: 100, x: 600 + Math.round(Math.random()*400), y: 600 + Math.round(Math.random()*400),
                     angle: 0, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false,
                     wep: 'pistol', anim: 0, shooting: false, quad: false, emote: ''
@@ -1419,7 +1505,8 @@
 
             checkBoardTurn() {
                 if(!isHost || RoomState.status !== 'board' || this.botTurnLock) return;
-                const currentTurnId = RoomState.turnOrder[RoomState.turnIdx];
+                const validOrder = Board.getValidTurnOrder();
+                const currentTurnId = validOrder[RoomState.turnIdx];
                 if(!currentTurnId || !currentTurnId.startsWith('bot_')) return;
 
                 const bot = netPlayers[currentTurnId];
@@ -1435,7 +1522,7 @@
                     if((bot.prison || 0) > 0) {
                         db.ref(`room_players/${currentRoom}/${currentTurnId}`).update({ prison: bot.prison - 1 });
                         db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🔒 ${bot.name} siedzi w więzieniu i traci kolejkę!` });
-                        setTimeout(() => { this.botTurnLock = false; Board.advanceTurn(); }, 1200);
+                        setTimeout(() => { this.botTurnLock = false; Board.advanceTurn(); }, 1000);
                         return;
                     }
 
@@ -1455,7 +1542,7 @@
                         newPrison = 1;
                         extraMsg = ' 🔒 (Trafia do Paki!)';
                     } else if(tile.t === 'casino') {
-                        if(Math.random() < 0.5) {
+                        if(Math.random() < 0.55) {
                             newPos = Math.min(50, newPos + 4);
                             extraMsg = ' 🎰 (Wygrał w Kasynie +4 pola!)';
                         } else {
@@ -1483,12 +1570,12 @@
                         } else {
                             Board.advanceTurn();
                         }
-                    }, 1300);
-                }, 1100);
+                    }, 1100);
+                }, 900);
             }
         };
 
-        // === WYSPA PLANSZOWA XL (51 PÓL: 0..50!) ===
+        // === PRZEJRZYSTA WYSPA PLANSZOWA XL (51 PÓL: 0..50!) ===
         const BOARD_TILES = (() => {
             const arr = [];
             const rowsY = [615, 505, 395, 285, 175];
@@ -1546,17 +1633,45 @@
             myPrison: 0, myCards: [], activeDoubleDice: false, rollingLock: false,
             netVisualPos: {},
 
+            // Zawsze zwraca aktualną, zweryfikowaną listę aktywnych graczy (eliminuje zawieszanie się tur!)
+            getValidTurnOrder() {
+                const activeIds = [myId, ...Object.keys(netPlayers)].filter(Boolean);
+                let order = (Array.isArray(RoomState.turnOrder) ? RoomState.turnOrder : []).filter(id => activeIds.includes(id));
+                activeIds.forEach(id => { if(!order.includes(id)) order.push(id); });
+                return order.length > 0 ? order : [myId];
+            },
+
             initBoardView() {
                 switchScreen(null);
                 document.getElementById('hud').style.display = 'none';
                 document.getElementById('hudRight').style.display = 'block';
                 document.getElementById('btnSkipMinigame').style.display = 'none';
                 document.getElementById('boardHud').style.display = 'block';
+                document.getElementById('btnForceMinigame').style.display = isHost ? 'block' : 'none';
                 this.visualPos = this.myPos;
                 this.rollingLock = false;
+                BotAI.botTurnLock = false;
                 this.renderCardsUI();
                 this.updateTurnUI();
                 if(!Game.loopId) { Game.lastTime = performance.now(); Game.loopId = requestAnimationFrame(t => Game.loop(t)); }
+            },
+
+            // Funkcja Hosta: Natychmiastowe wymuszenie losowania minigry z poziomu planszy
+            forceStartMinigame() {
+                if(!isHost || RoomState.status !== 'board') return;
+                Sound.play('jackpot');
+                const pickedGame = drawNextUniqueMinigame();
+                const pickedMap = drawNextUniqueMap();
+                const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
+                const pickedMut = RoomState.mutatorSetting === 'random' ? muts[Math.floor(Math.random()*muts.length)] : RoomState.mutatorSetting;
+                db.ref(`rooms/${currentRoom}`).update({
+                    status: 'roulette',
+                    activeMinigame: pickedGame,
+                    map: pickedMap,
+                    mutator: pickedMut,
+                    turnOrder: this.getValidTurnOrder(),
+                    turnIdx: 0
+                });
             },
 
             renderCardsUI() {
@@ -1569,7 +1684,8 @@
             },
 
             useCard(idx) {
-                const currentTurnId = RoomState.turnOrder[RoomState.turnIdx];
+                const validOrder = this.getValidTurnOrder();
+                const currentTurnId = validOrder[RoomState.turnIdx];
                 if(currentTurnId !== myId || this.rollingLock) return announce("CZEKAJ NA SWOJĄ TURĘ!", 1200);
                 const card = this.myCards[idx];
                 this.myCards.splice(idx, 1);
@@ -1600,12 +1716,21 @@
 
             updateTurnUI() {
                 if(RoomState.status !== 'board') return;
-                const turnId = RoomState.turnOrder[RoomState.turnIdx];
+                const validOrder = this.getValidTurnOrder();
+
+                // Jeśli indeks tury wyszedł poza liczbę graczy -> od razu uruchamiamy Minigrę!
+                if(isHost && RoomState.turnIdx >= validOrder.length) {
+                    this.forceStartMinigame();
+                    return;
+                }
+
+                const turnId = validOrder[RoomState.turnIdx] || myId;
                 const isMyTurn = (turnId === myId);
                 let turnName = isMyTurn ? "TWOJA KOLEJ!" : (netPlayers[turnId]?.name || "Gracz");
-                document.getElementById('boardTurnText').innerText = `TURA: ${turnName} | ŻETONY: ${LobbyCasino.chips} 🪙`;
+                document.getElementById('boardTurnText').innerText = `TURA (${RoomState.turnIdx + 1}/${validOrder.length}): ${turnName} | ŻETONY: ${LobbyCasino.chips} 🪙`;
                 document.getElementById('boardStatusMsg').innerText = RoomState.boardMsg || '';
                 document.getElementById('btnRollDice').style.display = (isMyTurn && !this.rollingLock) ? 'block' : 'none';
+                document.getElementById('btnForceMinigame').style.display = isHost ? 'block' : 'none';
 
                 if(isHost && turnId && turnId.startsWith('bot_')) {
                     BotAI.checkBoardTurn();
@@ -1627,19 +1752,19 @@
                     Sound.play('step');
 
                     const hopAnim = setInterval(() => {
-                        progress += 0.16;
+                        progress += 0.18;
                         if(progress >= 1) {
                             clearInterval(hopAnim);
                             this.myPos = nextP;
                             this.visualPos = nextP;
                             this.jumpHeight = 0;
                             db.ref(`room_players/${currentRoom}/${myId}`).update({ boardPos: this.myPos });
-                            setTimeout(stepLoop, 35);
+                            setTimeout(stepLoop, 30);
                         } else {
                             this.visualPos = startP + (nextP - startP) * progress;
                             this.jumpHeight = Math.sin(progress * Math.PI) * 26;
                         }
-                    }, 18);
+                    }, 16);
                 };
                 stepLoop();
             },
@@ -1655,10 +1780,10 @@
                 if(this.myPrison > 0) {
                     this.myPrison--;
                     Sound.play('hit');
-                    announce("🔒 SIEDZISZ W WIĘZIENIU! TRACISZ KOLEJKĘ!", 1800);
+                    announce("🔒 SIEDZISZ W WIĘZIENIU! TRACISZ KOLEJKĘ!", 1600);
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ prison: this.myPrison });
                     db.ref(`rooms/${currentRoom}`).update({ boardMsg: `🔒 ${myName} odsiaduje wyrok i traci kolejkę!` });
-                    setTimeout(() => this.advanceTurn(), 1900);
+                    setTimeout(() => this.advanceTurn(), 1600);
                     return;
                 }
 
@@ -1679,7 +1804,7 @@
                     dBox.innerText = Math.floor(Math.random() * maxRoll) + 1;
                     dBox.style.transform = `rotate(${(ticks % 2 === 0 ? 12 : -12)}deg) scale(1.1)`;
                     ticks++;
-                    if(ticks > 14) {
+                    if(ticks > 12) {
                         clearInterval(diceTimer);
                         dBox.innerText = finalRoll;
                         dBox.style.transform = 'rotate(0deg) scale(1.25)';
@@ -1690,9 +1815,9 @@
                             dOv.style.display = 'none';
                             let dest = Math.min(50, this.myPos + finalRoll);
                             this.animateStepsTo(dest, () => this.triggerTileEffect(myName, finalRoll));
-                        }, 800);
+                        }, 700);
                     }
-                }, 70);
+                }, 65);
             },
 
             triggerTileEffect(myName, roll) {
@@ -1704,11 +1829,11 @@
                     let [rId, rPlayer] = rivalEntry;
                     Sound.play('jackpot');
                     if(Math.random() < 0.55) {
-                        announce(`⚔️ POJEDYNEK Z ${rPlayer.name}! WYGRYWASZ +2 POLA!`, 1600);
+                        announce(`⚔️ POJEDYNEK Z ${rPlayer.name}! WYGRYWASZ +2 POLA!`, 1500);
                         db.ref(`room_players/${currentRoom}/${rId}`).update({ boardPos: Math.max(0, rPlayer.boardPos - 2) });
                         this.animateStepsTo(Math.min(50, this.myPos + 2), () => this.finishTurnCheck(msg + ` ⚔️ Wygrał pojedynek z ${rPlayer.name}!`));
                     } else {
-                        announce(`⚔️ POJEDYNEK Z ${rPlayer.name}! PRZEGRYWASZ -2 POLA!`, 1600);
+                        announce(`⚔️ POJEDYNEK Z ${rPlayer.name}! PRZEGRYWASZ -2 POLA!`, 1500);
                         this.animateStepsTo(Math.max(0, this.myPos - 2), () => this.finishTurnCheck(msg + ` ⚔️ Przegrał pojedynek z ${rPlayer.name}!`));
                     }
                     return;
@@ -1810,7 +1935,7 @@
                     r2.innerText = symbols[Math.floor(Math.random()*symbols.length)];
                     r3.innerText = symbols[Math.floor(Math.random()*symbols.length)];
                     ticks++;
-                    if(ticks > 18) {
+                    if(ticks > 16) {
                         clearInterval(spinInt);
                         const myName = document.getElementById('playerName').value.trim() || 'Paweł';
                         let rollOutcome = Math.random();
@@ -1824,7 +1949,7 @@
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
                                 this.animateStepsTo(Math.min(50, this.myPos + 5), () => this.finishTurnCheck(cMsg));
-                            }, 1500);
+                            }, 1300);
                         } else if(rollOutcome < 0.68) {
                             r1.innerText = '🃏'; r2.innerText = '🃏'; r3.innerText = '💎';
                             resTxt.innerText = "🃏 WYGRANA! OTRZYMUJESZ ZŁOTĄ KOSTKĘ + 40 🪙!";
@@ -1836,7 +1961,7 @@
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
                                 this.finishTurnCheck(cMsg);
-                            }, 1500);
+                            }, 1300);
                         } else if(rollOutcome < 0.86) {
                             r1.innerText = '🍒'; r2.innerText = '🍒'; r3.innerText = '🍒';
                             resTxt.innerText = "🍒 BONUS! +3 POLA DO PRZODU!";
@@ -1845,7 +1970,7 @@
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
                                 this.animateStepsTo(Math.min(50, this.myPos + 3), () => this.finishTurnCheck(cMsg));
-                            }, 1500);
+                            }, 1300);
                         } else {
                             r1.innerText = '💀'; r2.innerText = '💀'; r3.innerText = '💀';
                             resTxt.innerText = "💀 BANKRUT! COFASZ SIĘ O 2 POLA!";
@@ -1854,10 +1979,10 @@
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
                                 this.animateStepsTo(Math.max(0, this.myPos - 2), () => this.finishTurnCheck(cMsg));
-                            }, 1500);
+                            }, 1300);
                         }
                     }
-                }, 75);
+                }, 70);
             },
 
             finishTurnCheck(msg) {
@@ -1869,22 +1994,33 @@
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ score: 999 });
                     db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
                 } else {
-                    setTimeout(() => this.advanceTurn(), 1000);
+                    setTimeout(() => this.advanceTurn(), 800);
                 }
             },
 
+            // 100% NIEZAWODNE PRZECHODZENIE DO KOLEJNEJ TURY I RULETKI MINIGIER
             advanceTurn() {
+                const validOrder = this.getValidTurnOrder();
                 let nextIdx = RoomState.turnIdx + 1;
-                if(nextIdx >= RoomState.turnOrder.length) {
+
+                if(nextIdx >= validOrder.length) {
                     const pickedGame = drawNextUniqueMinigame();
                     const pickedMap = drawNextUniqueMap();
                     const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
                     const pickedMut = RoomState.mutatorSetting === 'random' ? muts[Math.floor(Math.random()*muts.length)] : RoomState.mutatorSetting;
                     db.ref(`rooms/${currentRoom}`).update({
-                        status: 'roulette', activeMinigame: pickedGame, map: pickedMap, mutator: pickedMut, turnIdx: 0
+                        status: 'roulette',
+                        activeMinigame: pickedGame,
+                        map: pickedMap,
+                        mutator: pickedMut,
+                        turnOrder: validOrder,
+                        turnIdx: 0
                     });
                 } else {
-                    db.ref(`rooms/${currentRoom}`).update({ turnIdx: nextIdx });
+                    db.ref(`rooms/${currentRoom}`).update({
+                        turnOrder: validOrder,
+                        turnIdx: nextIdx
+                    });
                 }
             },
 
@@ -1904,7 +2040,9 @@
                     db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
-                        status: 'board', turnIdx: 0,
+                        status: 'board',
+                        turnOrder: this.getValidTurnOrder(),
+                        turnIdx: 0,
                         boardMsg: `🏆 ${myName} odebrał nagrodę za minigrę (+30 🪙)! Nowa tura rzutów!`
                     });
                 }
@@ -1913,8 +2051,8 @@
             drawBoard(ctx) {
                 const now = performance.now();
                 const seaGrad = ctx.createLinearGradient(0, 0, 0, H);
-                seaGrad.addColorStop(0, '#07162c');
-                seaGrad.addColorStop(1, '#0f2c52');
+                seaGrad.addColorStop(0, '#061326');
+                seaGrad.addColorStop(1, '#0e294d');
                 ctx.fillStyle = seaGrad;
                 ctx.fillRect(0, 0, W, H);
 
@@ -1923,47 +2061,63 @@
                 ctx.translate((W - 1280*scale)/2, (H - 720*scale)/2 + 28);
                 ctx.scale(scale, scale);
 
-                ctx.fillStyle = '#1b497d';
+                // Animowane fale oceanu
+                ctx.fillStyle = '#194575';
                 let waveShift = Math.sin(now*0.003)*14;
                 for(let wx=30; wx<1250; wx+=110) {
                     for(let wy=30; wy<690; wy+=85) {
-                        ctx.fillRect(wx + waveShift, wy, 42, 6);
+                        ctx.fillRect(wx + waveShift, wy, 44, 6);
                     }
                 }
 
+                // Piana morska i złota plaża
                 let foam = Math.sin(now*0.004)*4;
-                ctx.fillStyle = '#a8e6ff';
-                ctx.fillRect(48 - foam, 72 - foam, 1184 + foam*2, 610 + foam*2);
+                ctx.fillStyle = '#9ce2ff';
+                ctx.fillRect(46 - foam, 70 - foam, 1188 + foam*2, 614 + foam*2);
 
                 ctx.fillStyle = '#593e25'; ctx.fillRect(55, 95, 1170, 582);
-                ctx.fillStyle = '#f2d388'; ctx.fillRect(55, 78, 1170, 582);
-                ctx.fillStyle = '#1a4f1e'; ctx.fillRect(78, 96, 1124, 540);
-                ctx.fillStyle = '#25692b'; ctx.fillRect(84, 102, 1112, 528);
+                ctx.fillStyle = '#f5d78e'; ctx.fillRect(55, 78, 1170, 582);
 
-                ctx.fillStyle = '#1e0b2e'; ctx.fillRect(92, 245, 1096, 195);
+                // 3 Wyraźne strefy biomów na wyspie (Szmaragdowa Dżungla, Królewskie Kasyno, Wulkan Finałowy)
+                ctx.fillStyle = '#184d1d'; ctx.fillRect(78, 96, 1124, 540);
+                ctx.fillStyle = '#236629'; ctx.fillRect(84, 102, 1112, 528);
+
+                ctx.fillStyle = '#210b33'; ctx.fillRect(92, 245, 1096, 195);
                 ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 3; ctx.strokeRect(92, 245, 1096, 195);
 
-                ctx.fillStyle = '#261417'; ctx.fillRect(92, 110, 1096, 115);
-                ctx.strokeStyle = '#ff4d00'; ctx.lineWidth = 3; ctx.strokeRect(92, 110, 1096, 115);
+                ctx.fillStyle = '#291216'; ctx.fillRect(92, 110, 1096, 115);
+                ctx.strokeStyle = '#ff6d00'; ctx.lineWidth = 3; ctx.strokeRect(92, 110, 1096, 115);
 
-                ctx.strokeStyle = '#3b2818'; ctx.lineWidth = 26; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                // Szeroka ścieżka łącząca pola + strzałki kierunkowe
+                ctx.strokeStyle = '#1a1109'; ctx.lineWidth = 30; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
                 ctx.beginPath();
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y+5); else ctx.lineTo(t.x, t.y+5); });
                 ctx.stroke();
 
-                ctx.strokeStyle = '#9c7a54'; ctx.lineWidth = 20;
+                ctx.strokeStyle = '#b59167'; ctx.lineWidth = 22;
                 ctx.beginPath();
                 BOARD_TILES.forEach((t, i) => { if(i===0) ctx.moveTo(t.x, t.y); else ctx.lineTo(t.x, t.y); });
                 ctx.stroke();
 
+                // Strzałki wskazujące kierunek ruchu pomiędzy polami
+                ctx.fillStyle = 'rgba(255,255,255,0.45)';
+                ctx.font = '8px sans-serif'; ctx.textAlign = 'center';
+                for(let i=0; i<BOARD_TILES.length-1; i++) {
+                    let t1 = BOARD_TILES[i], t2 = BOARD_TILES[i+1];
+                    let mx = (t1.x + t2.x)/2, my = (t1.y + t2.y)/2 + 3;
+                    let arrow = t2.x > t1.x ? '▶' : (t2.x < t1.x ? '◀' : '▲');
+                    ctx.fillText(arrow, mx, my);
+                }
+
                 ISLAND_TREES.forEach(tr => drawPalmTree(ctx, tr.x, tr.y));
                 drawIslandCastle(ctx, 1165, 155);
 
+                // Rysowanie 51 Pól Planszy z numeracją i czytelnymi ikonami
                 BOARD_TILES.forEach((t, i) => {
                     ctx.save();
                     ctx.translate(t.x, t.y);
 
-                    let topCol = '#e8dcc5', sideCol = '#9e8f75', borderCol = '#2b2318';
+                    let topCol = '#f0e6d2', sideCol = '#9e8f75', borderCol = '#1c160e';
                     if(t.t === 'start')       { topCol = '#00e676'; sideCol = '#00994d'; }
                     else if(t.t === 'goal')   { topCol = '#ffde00'; sideCol = '#b39b00'; }
                     else if(t.t === 'boost')  { topCol = '#05d5fa'; sideCol = '#008ba3'; }
@@ -1974,22 +2128,22 @@
                     else if(t.t === 'shop')   { topCol = '#00e5ff'; sideCol = '#00838f'; }
                     else if(t.t === 'swap')   { topCol = '#ffd740'; sideCol = '#ff8f00'; }
 
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.fillRect(-35, -18, 70, 46);
+                    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+                    ctx.fillRect(-36, -18, 72, 46);
 
-                    ctx.fillStyle = borderCol; ctx.fillRect(-35, -22, 70, 46);
-                    ctx.fillStyle = sideCol;   ctx.fillRect(-32, -14, 64, 35);
-                    ctx.fillStyle = topCol;    ctx.fillRect(-32, -20, 64, 34);
-                    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(-30, -18, 60, 3);
+                    ctx.fillStyle = borderCol; ctx.fillRect(-36, -22, 72, 46);
+                    ctx.fillStyle = sideCol;   ctx.fillRect(-33, -14, 66, 35);
+                    ctx.fillStyle = topCol;    ctx.fillRect(-33, -20, 66, 34);
+                    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(-31, -18, 62, 3);
 
                     ctx.fillStyle = '#000'; ctx.font = '6px "Press Start 2P"'; ctx.textAlign = 'center';
-                    ctx.fillText(t.n, 0, 0);
+                    ctx.fillText(t.n, 0, 1);
                     ctx.restore();
                 });
 
                 let allP = [{
                     id: myId, name: document.getElementById('playerName').value || 'Ty',
-                    color: document.getElementById('playerColor').value, skin: chosenSkin,
+                    color: document.getElementById('playerColor').value, skin: chosenSkin, pet: Settings.pet,
                     vPos: this.visualPos, jump: this.jumpHeight, pos: this.myPos, prison: this.myPrison
                 }];
 
@@ -1998,7 +2152,7 @@
                     if(this.netVisualPos[pid] === undefined) this.netVisualPos[pid] = targetP;
                     this.netVisualPos[pid] += (targetP - this.netVisualPos[pid]) * 0.18;
                     let netJump = Math.abs(targetP - this.netVisualPos[pid]) > 0.1 ? Math.abs(Math.sin(now*0.015))*20 : 0;
-                    allP.push({ id: pid, name: p.name, color: p.color, skin: p.skin || 'cap', vPos: this.netVisualPos[pid], jump: netJump, pos: targetP, prison: p.prison || 0 });
+                    allP.push({ id: pid, name: p.name, color: p.color, skin: p.skin || 'cap', pet: p.pet || 'none', vPos: this.netVisualPos[pid], jump: netJump, pos: targetP, prison: p.prison || 0 });
                 });
 
                 allP.forEach((p, idx) => {
@@ -2011,7 +2165,7 @@
 
                     let ox = (idx % 2 === 0 ? -12 : 12);
                     let oy = (idx < 2 ? -10 : 8);
-                    drawPixelHero(ctx, px + ox, py + oy - p.jump, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', now*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '');
+                    drawPixelHero(ctx, px + ox, py + oy, 0, p.color, p.skin, p.name, 100, 100, 0, 'pistol', now*0.008, false, false, 0, false, p.prison > 0 ? '🔒' : '', false, p.jump, p.pet);
                 });
 
                 ctx.restore();
@@ -2036,24 +2190,24 @@
                     g.imageSmoothingEnabled = false;
 
                     const pal = {
-                        forest: { c1: '#1b3818', c2: '#163014', spec: '#285223', fl1: '#ffde00', fl2: '#ff5286' },
-                        cyber:  { c1: '#0c071a', c2: '#130b29', spec: '#23144a', fl1: '#05d5fa', fl2: '#ff2a6d' },
+                        forest: { c1: '#1a3817', c2: '#152e13', spec: '#285423', fl1: '#ffde00', fl2: '#ff5286' },
+                        cyber:  { c1: '#0b0618', c2: '#120a26', spec: '#25144d', fl1: '#05d5fa', fl2: '#ff2a6d' },
                         ice:    { c1: '#bce3f7', c2: '#abd8f0', spec: '#d9f2ff', fl1: '#ffffff', fl2: '#7fd1fc' },
-                        lava:   { c1: '#1a1215', c2: '#22171b', spec: '#332228', fl1: '#ff4d00', fl2: '#ff9100' }
+                        lava:   { c1: '#1a1114', c2: '#22161a', spec: '#362128', fl1: '#ff4d00', fl2: '#ff9100' }
                     }[type];
 
                     for(let x=0; x<WORLD_SIZE; x+=80) {
                         for(let y=0; y<WORLD_SIZE; y+=80) {
                             g.fillStyle = ((x+y)/80)%2 === 0 ? pal.c1 : pal.c2;
                             g.fillRect(x, y, 80, 80);
-                            g.fillStyle = 'rgba(255,255,255,0.035)';
+                            g.fillStyle = 'rgba(255,255,255,0.038)';
                             g.fillRect(x, y, 80, 4);
                             g.fillStyle = 'rgba(0,0,0,0.09)';
                             g.fillRect(x, y+76, 80, 4);
                         }
                     }
 
-                    for(let i=0; i<320; i++) {
+                    for(let i=0; i<340; i++) {
                         let rx = Math.floor(Math.random()*390)*4 + 16;
                         let ry = Math.floor(Math.random()*390)*4 + 16;
                         g.fillStyle = pal.spec;
@@ -2119,12 +2273,12 @@
         };
 
         const WEAPONS = {
-            pistol:  { name: 'Pistolet',  rate: 0.23, dmg: 22, proj: 1, spread: 0.04, spd: 1300, knock: 160, snd: 'shoot', bType: 'norm' },
-            shotgun: { name: 'Strzelba',  rate: 0.68, dmg: 18, proj: 6, spread: 0.28, spd: 1150, knock: 360, snd: 'shotgun', bType: 'norm' },
-            minigun: { name: 'Minigun',   rate: 0.08, dmg: 12, proj: 1, spread: 0.14, spd: 1350, knock: 95,  snd: 'shoot', bType: 'norm' },
-            sniper:  { name: 'Snajperka', rate: 0.90, dmg: 85, proj: 1, spread: 0.00, spd: 2050, knock: 500, snd: 'sniper', bType: 'norm' },
-            plasma:  { name: 'Plazma (Odbicia)', rate: 0.18, dmg: 28, proj: 1, spread: 0.05, spd: 1100, knock: 180, snd: 'plasma', bType: 'bounce' },
-            bazooka: { name: 'Bazooka (Wybuch)', rate: 1.15, dmg: 65, proj: 1, spread: 0.02, spd: 850,  knock: 650, snd: 'boom',   bType: 'rocket' }
+            pistol:  { name: 'Pistolet',  rate: 0.22, dmg: 22, proj: 1, spread: 0.04, spd: 1320, knock: 160, snd: 'shoot', bType: 'norm' },
+            shotgun: { name: 'Strzelba',  rate: 0.65, dmg: 18, proj: 6, spread: 0.28, spd: 1180, knock: 380, snd: 'shotgun', bType: 'norm' },
+            minigun: { name: 'Minigun',   rate: 0.08, dmg: 12, proj: 1, spread: 0.14, spd: 1360, knock: 95,  snd: 'shoot', bType: 'norm' },
+            sniper:  { name: 'Snajperka', rate: 0.88, dmg: 85, proj: 1, spread: 0.00, spd: 2100, knock: 500, snd: 'sniper', bType: 'norm' },
+            plasma:  { name: 'Plazma (Odbicia)', rate: 0.17, dmg: 28, proj: 1, spread: 0.05, spd: 1120, knock: 180, snd: 'plasma', bType: 'bounce' },
+            bazooka: { name: 'Bazooka (Wybuch)', rate: 1.10, dmg: 65, proj: 1, spread: 0.02, spd: 860,  knock: 660, snd: 'boom',   bType: 'rocket' }
         };
 
         const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
@@ -2181,8 +2335,8 @@
         const Cam = {
             x: 0, y: 0, shkT: 0, shkI: 0,
             update(dt, target) {
-                this.x += ((target.x - W/2) - this.x) * 7 * dt;
-                this.y += ((target.y - H/2) - this.y) * 7 * dt;
+                this.x += ((target.x - W/2) - this.x) * 8 * dt;
+                this.y += ((target.y - H/2) - this.y) * 8 * dt;
                 Input.wx = Input.mx + this.x; Input.wy = Input.my + this.y;
                 if(this.shkT > 0) this.shkT -= dt;
             },
@@ -2319,6 +2473,46 @@
             ctx.restore();
         }
 
+        // === RYSOWANIE GIGANTYCZNEGO SMOKA KASYNA (TRYB BOSS RAID) ===
+        function drawPixelBossDragon(ctx, boss) {
+            ctx.save();
+            ctx.translate(Math.floor(boss.x), Math.floor(boss.y));
+            const flap = Math.sin(performance.now() * 0.012) * 18;
+
+            // Cień pod smokiem
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.beginPath(); ctx.ellipse(0, 26, 65, 28, 0, 0, Math.PI*2); ctx.fill();
+
+            // Skrzydła smoka
+            ctx.fillStyle = '#a30036';
+            ctx.fillRect(-95, -25 + flap, 50, 42);
+            ctx.fillRect(45, -25 + flap, 50, 42);
+            ctx.fillStyle = '#ff2a6d';
+            ctx.fillRect(-88, -18 + flap, 38, 28);
+            ctx.fillRect(50, -18 + flap, 38, 28);
+
+            // Pancerz i głowa Złotego Smoka
+            ctx.fillStyle = '#000'; ctx.fillRect(-48, -48, 96, 92);
+            ctx.fillStyle = '#ff9100'; ctx.fillRect(-42, -42, 84, 80);
+            ctx.fillStyle = '#ffde00'; ctx.fillRect(-34, -34, 68, 60);
+
+            // Świecące ślepia i rogi
+            ctx.fillStyle = '#ff0044';
+            ctx.fillRect(-24, -10, 16, 14);
+            ctx.fillRect(8, -10, 16, 14);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(-18, -6, 6, 6);
+            ctx.fillRect(14, -6, 6, 6);
+
+            // Pasek HP Bossa nad głową
+            ctx.fillStyle = '#000'; ctx.fillRect(-72, -74, 144, 16);
+            let hpRatio = Math.max(0, (boss.hp || 0) / (boss.maxHp || 1200));
+            ctx.fillStyle = '#ff1744'; ctx.fillRect(-69, -71, Math.floor(138 * hpRatio), 10);
+            ctx.fillStyle = '#fff'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText(`🐲 SMOK KASYNA (${Math.ceil(boss.hp||0)} HP)`, 0, -80);
+            ctx.restore();
+        }
+
         function drawSquidDoll(ctx, state) {
             ctx.save();
             ctx.translate(800, 145);
@@ -2348,16 +2542,15 @@
             ctx.restore();
         }
 
-        // === RYSOWANIE PIŁKI NOŻNEJ PIXEL-ART 2.5D ===
         function drawPixelSoccerBall(ctx, b) {
             ctx.save();
             ctx.translate(Math.floor(b.x), Math.floor(b.y));
             ctx.fillStyle = 'rgba(0,0,0,0.48)';
             ctx.beginPath(); ctx.ellipse(0, 10, 18, 8, 0, 0, Math.PI*2); ctx.fill();
 
+            ctx.rotate((b.x + b.y) * 0.02);
             ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI*2); ctx.fill();
-            // Klasyczne czarne łaty piłkarskie
             ctx.fillStyle = '#111';
             ctx.fillRect(-5, -5, 10, 10);
             ctx.fillRect(-14, -4, 5, 8);
@@ -2367,31 +2560,32 @@
             ctx.restore();
         }
 
-        // === KLASA LOKALNEGO GRACZA ===
+        // === KLASA LOKALNEGO GRACZA (Z PŁYNNĄ FIZYKĄ 60 FPS) ===
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
                 const gm = RoomState.activeMinigame;
-                if(gm === 'squid') {
-                    this.x = 300 + Math.random()*1000; this.y = 1460;
+                if(gm === 'squid' || gm === 'glass') {
+                    this.x = 640 + Math.random()*320; this.y = 1440;
                 } else if(gm === 'race') {
                     this.x = 760 + (Math.random()*80 - 40); this.y = 1320 + (Math.random()*60 - 30);
-                } else if(gm === 'soccer') {
-                    this.x = 450 + Math.random()*700; this.y = 550 + Math.random()*500;
+                } else if(gm === 'sumo') {
+                    let a = Math.random()*Math.PI*2;
+                    this.x = 800 + Math.cos(a)*200; this.y = 800 + Math.sin(a)*200;
                 } else {
-                    this.x = 400 + Math.random()*800; this.y = 400 + Math.random()*800;
+                    this.x = 450 + Math.random()*700; this.y = 450 + Math.random()*700;
                 }
                 this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                this.angle = gm === 'squid' ? -Math.PI/2 : 0;
+                this.angle = (gm === 'squid' || gm === 'glass') ? -Math.PI/2 : 0;
                 this.kartSpeed = 0; this.lap = 1; this.checkpoint = 0;
                 this.anim = 0; this.muzzle = 0;
                 this.hp = gm === 'race' ? 1 : 100; this.maxHp = 100; this.shield = 0;
-                this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(gm) ? 'shotgun' : 'pistol');
+                this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
                 this.fireCd = 0; this.dashCd = 0; this.dashTime = 0; this.jumpZ = 0;
                 this.quadTime = 0; this.speedTime = 0; this.slipTimer = 0;
                 this.emote = ''; this.emoteTimer = 0;
                 this.score = 0; this.streak = 0; this.isDead = false; this.respawnTimer = 0;
-                this.passImmunity = 0; this.kickCd = 0;
+                this.passImmunity = 0; this.kickCd = 0; this.pushCd = 0;
             }
             sendEmote(em) {
                 this.emote = em; this.emoteTimer = 2.5;
@@ -2399,15 +2593,16 @@
             }
             tryDash() {
                 if(this.dashCd <= 0 && !this.isDead && RoomState.status === 'playing') {
-                    this.dashCd = 1.4; this.dashTime = 0.32;
+                    this.dashCd = 1.35; this.dashTime = 0.32;
                     Sound.play('dash');
-                    FX.burst(this.x, this.y, '#05d5fa', 10, 130, 5);
+                    FX.burst(this.x, this.y, '#05d5fa', 10, 140, 5);
                 }
             }
             update(dt) {
                 const gm = RoomState.activeMinigame;
                 if(this.passImmunity > 0) this.passImmunity -= dt;
                 if(this.kickCd > 0) this.kickCd -= dt;
+                if(this.pushCd > 0) this.pushCd -= dt;
                 if(this.muzzle > 0) this.muzzle -= dt;
                 if(this.quadTime > 0) this.quadTime -= dt;
                 if(this.speedTime > 0) this.speedTime -= dt;
@@ -2415,7 +2610,6 @@
                 if(this.dashCd > 0) this.dashCd -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
-                // Skok w górę podczas Zrywu (pozwala przeskakiwać wiązki w Laserowym Labiryncie!)
                 if(this.dashTime > 0) {
                     this.jumpZ = Math.sin((this.dashTime / 0.32) * Math.PI) * 34;
                 } else {
@@ -2433,19 +2627,19 @@
                 // === 1. LOGIKA WYŚCIGU GOKARTÓW (TRYB RACE) ===
                 if(gm === 'race') {
                     let acc = 0, turn = 0;
-                    if(Input.isUp())   acc += 560;
+                    if(Input.isUp())   acc += 580;
                     if(Input.isDown()) acc -= 420;
-                    if(Input.isLeft())  turn -= 2.9;
-                    if(Input.isRight()) turn += 2.9;
+                    if(Input.isLeft())  turn -= 3.0;
+                    if(Input.isRight()) turn += 3.0;
                     if(RoomState.mutator === 'drunk') turn *= -1;
 
-                    if(this.dashTime > 0) { this.kartSpeed = 720; this.dashTime -= dt; FX.burst(this.x, this.y, '#ff9100', 2, 60, 5); }
+                    if(this.dashTime > 0) { this.kartSpeed = 740; this.dashTime -= dt; FX.burst(this.x, this.y, '#ff9100', 2, 60, 5); }
                     else { this.kartSpeed += acc * dt; }
 
                     let dxC = Math.abs(this.x - 800), dyC = Math.abs(this.y - 800);
                     let onGrass = (dxC < 340 && dyC < 340) || dxC > 680 || dyC > 680;
-                    this.kartSpeed *= onGrass ? 0.92 : 0.982;
-                    let maxSpd = onGrass ? 290 : (this.speedTime > 0 ? 720 : 560);
+                    this.kartSpeed *= onGrass ? 0.93 : 0.984;
+                    let maxSpd = onGrass ? 310 : (this.speedTime > 0 ? 740 : 580);
                     this.kartSpeed = Math.max(-220, Math.min(maxSpd, this.kartSpeed));
 
                     if(Math.abs(this.kartSpeed) > 15) {
@@ -2458,11 +2652,12 @@
                     this.x = Math.max(70, Math.min(WORLD_SIZE-70, this.x + Math.cos(this.angle)*this.kartSpeed*dt));
                     this.y = Math.max(70, Math.min(WORLD_SIZE-70, this.y + Math.sin(this.angle)*this.kartSpeed*dt));
 
+                    // Szerokie strefy zaliczania punktów kontrolnych na rogach i prostych
                     let cp = -1;
-                    if(this.y > 1140 && this.x > 650 && this.x < 950) cp = 0;
-                    else if(this.x > 1140 && this.y > 650 && this.y < 950) cp = 1;
-                    else if(this.y < 460 && this.x > 650 && this.x < 950) cp = 2;
-                    else if(this.x < 460 && this.y > 650 && this.y < 950) cp = 3;
+                    if(this.y > 1060 && this.x > 520 && this.x < 1080) cp = 0;
+                    else if(this.x > 1060 && this.y > 520 && this.y < 1080) cp = 1;
+                    else if(this.y < 540 && this.x > 520 && this.x < 1080) cp = 2;
+                    else if(this.x < 540 && this.y > 520 && this.y < 1080) cp = 3;
 
                     if(cp !== -1 && cp === (this.checkpoint + 1) % 4) {
                         this.checkpoint = cp;
@@ -2477,9 +2672,9 @@
                     }
 
                     Object.entries(netItems).forEach(([id, item]) => {
-                        if(Math.hypot(this.x - item.x, this.y - item.y) < 36) {
+                        if(Math.hypot(this.x - item.x, this.y - item.y) < 38) {
                             if(item.t === 'banana') {
-                                this.slipTimer = 1.3;
+                                this.slipTimer = 1.2;
                                 Sound.play('slip');
                                 FX.text(this.x, this.y, "🍌 POŚLIZG!", "#ffde00", 12);
                             } else {
@@ -2493,8 +2688,8 @@
                     return;
                 }
 
-                // === 2. LOGIKA POZOSTAŁYCH MINIGIER PIESZYCH ===
-                if((gm === 'meteors' || gm === 'spleef' || gm === 'lasers') && !this.isDead) {
+                // === 2. LOGIKA POZOSTAŁYCH MINIGIER ===
+                if(['meteors', 'spleef', 'lasers', 'sumo'].includes(gm) && !this.isDead) {
                     this.survTick = (this.survTick || 0) + dt;
                     if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
                 }
@@ -2511,13 +2706,15 @@
                         this.respawnTimer -= dt;
                         if(this.respawnTimer <= 0) {
                             this.isDead = false; this.hp = 100; this.shield = 0;
-                            if(gm === 'squid') {
-                                this.x = 300 + Math.random()*1000; this.y = 1460;
+                            if(gm === 'squid' || gm === 'glass') {
+                                this.x = 640 + Math.random()*320; this.y = 1440;
+                            } else if(gm === 'sumo') {
+                                this.x = 750 + Math.random()*100; this.y = 750 + Math.random()*100;
                             } else {
                                 this.x = 500 + Math.random()*600; this.y = 500 + Math.random()*600;
                             }
                             this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                            this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef'].includes(gm) ? 'shotgun' : 'pistol');
+                            this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
                             FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
                         }
                     }
@@ -2539,8 +2736,8 @@
                         FX.laserBeam(800, 120, this.x, this.y);
                         FX.explosion(this.x, this.y);
                         FX.text(this.x, this.y, "👁️ WYELIMINOWANY!", "#ff0044", 13);
-                        this.x = 300 + Math.random()*1000;
-                        this.y = 1460;
+                        this.x = 400 + Math.random()*800;
+                        this.y = 1440;
                         this.vx = 0; this.vy = 0;
                         return;
                     }
@@ -2549,67 +2746,125 @@
                         Sound.play('jackpot');
                         announce("🎉 DOTARŁEŚ DO METY! +25 PKT!", 1400);
                         FX.burst(this.x, this.y, '#ffde00', 18, 220, 6);
-                        this.x = 300 + Math.random()*1000;
-                        this.y = 1460;
+                        this.x = 400 + Math.random()*800;
+                        this.y = 1440;
                         return;
                     }
                 }
 
+                // === NOWY TRYB: SZKLANY MOST (GLASS BRIDGE) ===
+                if(gm === 'glass') {
+                    if(this.y < 260) {
+                        this.score += 30;
+                        Sound.play('jackpot');
+                        announce("🌉 PRZESZEDŁEŚ SZKLANY MOST! +30 PKT!", 1500);
+                        FX.burst(this.x, this.y, '#05d5fa', 20, 220, 6);
+                        this.x = 660 + Math.random()*280;
+                        this.y = 1440;
+                        return;
+                    }
+                    if(this.y >= 300 && this.y <= 1300 && this.jumpZ < 12) {
+                        if(this.x < 560 || this.x > 1040) {
+                            Sound.play('boom');
+                            FX.text(this.x, this.y, "💀 SPADŁEŚ W PRZEPAŚĆ!", "#ff2a6d", 12);
+                            this.x = 660 + Math.random()*280; this.y = 1440;
+                            return;
+                        }
+                        let row = Math.floor((this.y - 300) / 125);
+                        let side = this.x < 800 ? 0 : 1;
+                        let safeSide = (row * 7 + 3) % 2;
+                        if(side !== safeSide && Math.abs(this.x - (side === 0 ? 680 : 920)) < 85) {
+                            Sound.play('boom');
+                            FX.burst(this.x, this.y, '#7fd1fc', 14, 180, 5);
+                            FX.text(this.x, this.y, "💥 PĘKNIĘTE SZKŁO!", "#ff1744", 12);
+                            this.x = 660 + Math.random()*280; this.y = 1440;
+                            return;
+                        }
+                    }
+                }
+
+                // === NOWY TRYB: SUMO RING (PRZEPYCHANIE CIAŁEM I ZRYWEM) ===
+                if(gm === 'sumo') {
+                    if(Math.hypot(this.x - 800, this.y - 800) > RoomState.stormR) {
+                        Sound.play('boom');
+                        FX.explosion(this.x, this.y);
+                        FX.text(this.x, this.y, "🔥 WYPADŁEŚ ZA RING!", "#ff2a6d", 13);
+                        this.isDead = true; this.respawnTimer = 2.0;
+                        return;
+                    }
+                    if(this.pushCd <= 0) {
+                        Object.entries(netPlayers).forEach(([pid, p]) => {
+                            if(!p.isDead && Math.hypot(this.x - p.x, this.y - p.y) < 44) {
+                                this.pushCd = 0.25;
+                                let pushAng = Math.atan2(p.y - this.y, p.x - this.x);
+                                let force = (this.dashTime > 0 || Input.down) ? 880 : 520;
+                                Sound.play('hit');
+                                FX.burst((this.x+p.x)/2, (this.y+p.y)/2, '#ffde00', 8, 160, 5);
+                                this.score += 3;
+                                db.ref(`events/${currentRoom}`).push({
+                                    type: 'hitPlayer', target: pid, attacker: myId, dmg: 0,
+                                    kx: Math.cos(pushAng)*force, ky: Math.sin(pushAng)*force
+                                });
+                            }
+                        });
+                    }
+                }
+
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
-                let baseSpd = RoomState.bombHolder === myId ? 345 : 295;
-                if(gm === 'paint') baseSpd = 340;
+                let baseSpd = RoomState.bombHolder === myId ? 350 : 300;
+                if(gm === 'paint') baseSpd = 350;
                 if(RoomState.mutator === 'tiny') baseSpd *= 1.3;
                 if(this.speedTime > 0) baseSpd *= 1.35;
                 if(this.dashTime > 0) {
-                    baseSpd = 740; this.dashTime -= dt;
+                    baseSpd = 750; this.dashTime -= dt;
                     FX.burst(this.x, this.y, this.color, 1, 20, 5);
                 }
 
-                if(RoomState.map === 'ice' || gm === 'spleef') {
-                    this.vx += ix * baseSpd * 4.5 * dt;
-                    this.vy += iy * baseSpd * 4.5 * dt;
-                    this.vx *= 0.96; this.vy *= 0.96;
-                } else {
-                    this.vx = ix * baseSpd;
-                    this.vy = iy * baseSpd;
-                }
+                // Płynne przyspieszanie i hamowanie (Smooth Physics)
+                let accelFactor = (RoomState.map === 'ice' || gm === 'spleef' || gm === 'sumo') ? 4.5 : 14.0;
+                this.vx += (ix * baseSpd - this.vx) * Math.min(1, accelFactor * dt);
+                this.vy += (iy * baseSpd - this.vy) * Math.min(1, accelFactor * dt);
 
-                this.kx *= Math.pow(0.05, dt);
-                this.ky *= Math.pow(0.05, dt);
+                this.kx *= Math.pow(0.04, dt);
+                this.ky *= Math.pow(0.04, dt);
 
-                let noObstacleModes = ['squid', 'soccer', 'paint', 'lasers'];
+                let noObstacleModes = ['squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss'];
                 let activeObs = noObstacleModes.includes(gm) ? [] : mapObj.obstacles;
                 this.moveSmoothCircle((this.vx + this.kx) * dt, (this.vy + this.ky) * dt, activeObs, dt);
 
-                // === NOWY TRYB: WOJNA KOLORÓW (SPLATOON TURF WAR) ===
+                // === WOJNA KOLORÓW (SPLATOON TURF WAR - SYNCHRONIZOWANA) ===
                 if(gm === 'paint') {
                     let tx = Math.floor(this.x / 80), ty = Math.floor(this.y / 80);
                     if(tx >= 1 && tx <= 18 && ty >= 1 && ty <= 18) {
                         let key = `${tx}_${ty}`;
                         if(Game.paintGrid[key]?.owner !== myId) {
                             Game.paintGrid[key] = { owner: myId, color: this.color };
+                            this.score += 1;
                             FX.burst(tx*80+40, ty*80+40, this.color, 3, 70, 5);
+                            db.ref(`rooms/${currentRoom}/paintData/${key}`).set({ owner: myId, color: this.color });
                         }
                     }
                 }
 
-                // === NOWY TRYB: PIŁKA NOŻNA (KOPANIE PIŁKI CIAŁEM LUB WŚLIZGIEM) ===
+                // === PIŁKA NOŻNA (PŁYNNE UDERZANIE PIŁKI W 60 FPS) ===
                 if(gm === 'soccer' && RoomState.ball && this.kickCd <= 0) {
                     let dBall = Math.hypot(RoomState.ball.x - this.x, RoomState.ball.y - this.y);
-                    if(dBall < 42) {
-                        this.kickCd = 0.18;
+                    if(dBall < 44) {
+                        this.kickCd = 0.16;
                         let kAngle = Math.atan2(RoomState.ball.y - this.y, RoomState.ball.x - this.x);
-                        let power = (this.dashTime > 0 || Input.down) ? 780 : 520;
+                        let power = (this.dashTime > 0 || Input.down) ? 820 : 540;
+                        RoomState.ball.vx = Math.cos(kAngle) * power;
+                        RoomState.ball.vy = Math.sin(kAngle) * power;
                         Sound.play('hit');
                         FX.burst(RoomState.ball.x, RoomState.ball.y, '#ffde00', 8, 150, 5);
                         db.ref(`events/${currentRoom}`).push({
                             type: 'kickBall', kicker: myId,
-                            vx: Math.cos(kAngle)*power, vy: Math.sin(kAngle)*power
+                            vx: Math.round(RoomState.ball.vx), vy: Math.round(RoomState.ball.vy)
                         });
                     }
                 }
 
-                // === NOWY TRYB: LASEROWY LABIRYNT (UNIKANIE I PRZESKAKIWANIE WIĄZEK) ===
+                // === LASEROWY LABIRYNT ===
                 if(gm === 'lasers' && this.jumpZ < 14) {
                     let hitBeam = false;
                     Game.laserBeams.forEach(lb => {
@@ -2643,8 +2898,10 @@
 
                 this.angle = Math.atan2(Input.wy - this.y, Input.wx - this.x);
                 if(Settings.sigmaAim) {
-                    let bestDist = 850, bestTarget = null;
-                    if(gm === 'zombies') {
+                    let bestDist = 900, bestTarget = null;
+                    if(gm === 'boss' && RoomState.boss) {
+                        bestTarget = RoomState.boss;
+                    } else if(gm === 'zombies') {
                         Object.values(netZombies).forEach(z => {
                             let d = Math.hypot(z.x - this.x, z.y - this.y);
                             if(d < bestDist) { bestDist = d; bestTarget = z; }
@@ -2664,7 +2921,7 @@
 
                 if(gm === 'sniper') this.wep = 'sniper';
 
-                const nonShootingModes = ['bomb', 'squid', 'soccer', 'paint', 'lasers'];
+                const nonShootingModes = ['bomb', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'];
                 if(Input.down && this.fireCd <= 0 && !nonShootingModes.includes(gm)) {
                     let w = WEAPONS[this.wep];
                     this.fireCd = w.rate; this.muzzle = 0.06;
@@ -2706,9 +2963,9 @@
                 }
 
                 Object.entries(netItems).forEach(([id, item]) => {
-                    if(Math.hypot(this.x - item.x, this.y - item.y) < 32) {
+                    if(Math.hypot(this.x - item.x, this.y - item.y) < 34) {
                         if(item.t === 'banana') {
-                            this.slipTimer = 1.4;
+                            this.slipTimer = 1.3;
                             Sound.play('slip');
                             FX.text(this.x, this.y, "🍌 ŁOOO! POŚLIZG!", "#ffde00", 12);
                         } else if(item.t === 'coin' || item.t === 'gem') {
@@ -2772,14 +3029,14 @@
 
             takeDamage(dmg, attackerId, knockX=0, knockY=0) {
                 if(this.isDead) return;
-                if(this.shield > 0) {
+                if(this.shield > 0 && dmg > 0) {
                     let sDmg = Math.min(this.shield, dmg);
                     this.shield -= sDmg; dmg -= sDmg;
                 }
                 this.hp -= dmg;
                 this.kx += knockX; this.ky += knockY;
                 Sound.play('hit'); Cam.shake(6, 0.12);
-                FX.burst(this.x, this.y, '#d91643', 8, 160, 5);
+                if(dmg > 0) FX.burst(this.x, this.y, '#d91643', 8, 160, 5);
 
                 if(RoomState.activeMinigame === 'crown' && RoomState.crownHolder === myId && attackerId) {
                     db.ref(`rooms/${currentRoom}`).update({ crownHolder: attackerId });
@@ -2804,14 +3061,15 @@
             }
         }
 
-        // === GŁÓWNA PĘTLA MINIGIER ===
+        // === GŁÓWNA PĘTLA MINIGIER (Z INTERPOLACJĄ LERP I 19 MINIGRAMI) ===
         const Game = {
             me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
             hostZombies: [], hostMeteors: [], squidTimer: 0,
             matchStartTime: 0, hostLastTickTime: 0, botStates: {},
             paintGrid: {}, laserBeams: [], hostBall: {x:800, y:800, vx:0, vy:0, lastKicker: null},
+            hostBoss: {x:800, y:800, hp:1200, maxHp:1200, a:0},
+            renderPlayers: {},
 
-            // Funkcja Hosta do natychmiastowego pominięcia minigry (przycisk SKIP)
             skipCurrentMinigame() {
                 if(!isHost || RoomState.status !== 'playing') return;
                 Sound.play('jackpot');
@@ -2844,6 +3102,7 @@
                 ov.style.display = 'flex';
 
                 const labels = {
+                    boss: '🐲 RAID NA SMOKA KASYNA', sumo: '🥊 SUMO RING', glass: '🌉 SZKLANY MOST',
                     soccer: '⚽ PIŁKA NOŻNA', paint: '🎨 WOJNA KOLORÓW', lasers: '🚨 LASEROWY UNIK',
                     race: '🏎️ WYŚCIG GOKARTÓW', squid: '🚦 SQUID GAME (LALKA)',
                     arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD',
@@ -2852,14 +3111,14 @@
                     bomb: '💣 GORĄCA BOMBA', koth: '👑 KRÓL WZGÓRZA', sniper: '🎯 SNAJPERZY', coins: '💎 ZŁOTA GORĄCZKA'
                 };
                 const mapNames = { forest: '🌲 Leśny Bunkier HD', cyber: '🟣 Cyber-Vegas HD', ice: '❄️ Lodowa Twierdza HD', lava: '🌋 Wulkaniczny Krater HD' };
-                const allowedKeys = (RoomState.allowedGames && RoomState.allowedGames.length > 0) ? RoomState.allowedGames : Object.keys(labels);
+                const allowedKeys = (Array.isArray(RoomState.allowedGames) && RoomState.allowedGames.length > 0) ? RoomState.allowedGames : Object.keys(labels);
                 let count = 0;
 
                 const spin = setInterval(() => {
                     Sound.play('tick');
-                    box.innerText = labels[allowedKeys[count % allowedKeys.length]];
+                    box.innerText = labels[allowedKeys[count % allowedKeys.length]] || '⚽ PIŁKA NOŻNA';
                     count++;
-                    if(count > 18) {
+                    if(count > 16) {
                         clearInterval(spin);
                         box.innerText = labels[targetGame] || '⚽ PIŁKA NOŻNA';
                         mutTxt.innerText = `🤡 KLĄTWA RUNDY: ${MUTATOR_NAMES[targetMutator] || 'BRAK'}`;
@@ -2871,14 +3130,16 @@
                                 const dur = Number(RoomState.matchDuration) || 60;
                                 db.ref(`room_items/${currentRoom}`).remove();
                                 db.ref(`rooms/${currentRoom}`).update({
-                                    status: 'playing', timer: dur, stormR: 1100, vaultHp: 500,
+                                    status: 'playing', timer: dur, stormR: targetGame === 'sumo' ? 460 : 1100, vaultHp: 500,
                                     ball: {x:800, y:800, vx:0, vy:0},
+                                    boss: {x:800, y:800, hp:1200, maxHp:1200, a:0},
+                                    paintData: {},
                                     bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                                 });
                             }
-                        }, 1600);
+                        }, 1500);
                     }
-                }, 95);
+                }, 90);
             },
 
             startMatch() {
@@ -2892,7 +3153,9 @@
                 this.matchStartTime = Date.now();
                 this.hostLastTickTime = Date.now();
                 this.paintGrid = {};
+                this.renderPlayers = {};
                 this.hostBall = {x:800, y:800, vx:0, vy:0, lastKicker: myId};
+                this.hostBoss = {x:800, y:800, hp:1200, maxHp:1200, a:0};
 
                 this.me = new LocalPlayer(
                     document.getElementById('playerName').value.trim() || "Paweł",
@@ -2906,15 +3169,16 @@
                     let botUpdates = {};
                     Object.entries(netPlayers).forEach(([pid, p], idx) => {
                         if(pid.startsWith('bot_') || p.isBot) {
-                            let bx = 400 + Math.random()*800, by = 400 + Math.random()*800;
-                            if(gm === 'squid') { bx = 300 + Math.random()*1000; by = 1460; }
+                            let bx = 450 + Math.random()*700, by = 450 + Math.random()*700;
+                            if(gm === 'squid' || gm === 'glass') { bx = 660 + Math.random()*280; by = 1440; }
                             else if(gm === 'race') { bx = 740 + idx*35; by = 1310 + idx*18; }
+                            else if(gm === 'sumo') { bx = 700 + Math.random()*200; by = 700 + Math.random()*200; }
 
                             this.botStates[pid] = {
-                                x: bx, y: by, angle: gm === 'squid' ? -Math.PI/2 : 0,
+                                x: bx, y: by, angle: (gm === 'squid' || gm === 'glass') ? -Math.PI/2 : 0,
                                 hp: gm === 'race' ? 1 : 100, score: 0, isDead: false, respawn: 0,
                                 wpIdx: 0, lap: 1, anim: 0, wep: gm === 'sniper' ? 'sniper' : 'pistol',
-                                targetX: 400 + Math.random()*800, targetY: 400 + Math.random()*800
+                                targetX: 450 + Math.random()*700, targetY: 450 + Math.random()*700
                             };
                             botUpdates[`${pid}/x`] = Math.round(bx);
                             botUpdates[`${pid}/y`] = Math.round(by);
@@ -2937,6 +3201,9 @@
                 document.getElementById('hudMutatorBadge').innerText = `🤡 ${MUTATOR_NAMES[RoomState.mutator] || 'Normalnie'}`;
 
                 const weaponDescriptions = {
+                    boss: 'CEL: Strzelaj w Złotego Smoka i unikaj ognia!',
+                    sumo: 'CEL: Wypchnij rywali za czerwony pierścień [SPACJA]!',
+                    glass: 'CEL: Skacz po błyszczących taflach szkła do mety!',
                     race: 'POJAZD: Gokart Turbo HD',
                     squid: 'CEL: Dobiegnij do Lalki!',
                     bomb: 'TRYB: OMIJAJ BOMBĘ!',
@@ -2947,6 +3214,7 @@
                 document.getElementById('hudWeapon').innerText = weaponDescriptions[gm] || `BROŃ: ${WEAPONS[this.me.wep].name}`;
 
                 const modeTitles = {
+                    boss: '🐲 RAID NA SMOKA KASYNA', sumo: '🥊 SUMO RING', glass: '🌉 SZKLANY MOST',
                     soccer: '⚽ PIŁKA NOŻNA (PIXEL SOCCER)', paint: '🎨 WOJNA KOLORÓW (SPLATOON)', lasers: '🚨 LASEROWY LABIRYNT',
                     race: '🏎️ WYŚCIG GOKARTÓW', squid: '🚦 SQUID GAME (LALKA)',
                     arena: '🔫 ARENA PvP', spleef: '🧊 KRUSZĄCY SIĘ LÓD',
@@ -2964,7 +3232,7 @@
                     db.ref(`room_players/${currentRoom}/${myId}`).update({
                         x: Math.round(this.me.x), y: Math.round(this.me.y), angle: Number(this.me.angle.toFixed(2)),
                         hp: Math.round(this.me.hp), shield: Math.round(this.me.shield), score: this.me.score, isDead: this.me.isDead,
-                        wep: this.me.wep, skin: this.me.skin, anim: Number(this.me.anim.toFixed(1)),
+                        wep: this.me.wep, skin: this.me.skin, pet: Settings.pet, anim: Number(this.me.anim.toFixed(1)),
                         shooting: Input.down, quad: this.me.quadTime > 0, emote: this.me.emote
                     });
                 }, 50);
@@ -3027,8 +3295,8 @@
                             b.respawn -= dt;
                             if(b.respawn <= 0) {
                                 b.isDead = false; b.hp = 100;
-                                b.x = gm === 'squid' ? 300 + Math.random()*1000 : 450 + Math.random()*700;
-                                b.y = gm === 'squid' ? 1460 : 450 + Math.random()*700;
+                                b.x = (gm === 'squid' || gm === 'glass') ? 660 + Math.random()*280 : (gm === 'sumo' ? 750 + Math.random()*100 : 450 + Math.random()*700);
+                                b.y = (gm === 'squid' || gm === 'glass') ? 1440 : (gm === 'sumo' ? 750 + Math.random()*100 : 450 + Math.random()*700);
                             }
                         }
                         botDbUpdates[`${bid}/isDead`] = b.isDead;
@@ -3046,7 +3314,7 @@
                         b.x += Math.cos(b.angle) * spd * dt;
                         b.y += Math.sin(b.angle) * spd * dt;
 
-                        if(Math.hypot(wp.x - b.x, wp.y - b.y) < 110) {
+                        if(Math.hypot(wp.x - b.x, wp.y - b.y) < 120) {
                             b.wpIdx++;
                             b.score += 5;
                             if(b.wpIdx % 4 === 0) {
@@ -3056,8 +3324,47 @@
                             }
                         }
                     }
+                    else if(gm === 'glass') {
+                        let row = Math.max(0, Math.min(7, Math.floor((b.y - 300) / 125)));
+                        let safeSide = (row * 7 + 3) % 2;
+                        let targetX = safeSide === 0 ? 680 : 920;
+                        b.angle = -Math.PI/2;
+                        b.x += (targetX - b.x) * 4 * dt;
+                        b.y -= 185 * dt;
+                        if(b.y < 260) {
+                            b.score += 30;
+                            b.y = 1440;
+                        }
+                    }
+                    else if(gm === 'sumo') {
+                        let enemy = allActive.find(p => p.id !== bid) || {x:800, y:800};
+                        b.angle = Math.atan2(enemy.y - b.y, enemy.x - b.x);
+                        b.x += Math.cos(b.angle) * 240 * dt;
+                        b.y += Math.sin(b.angle) * 240 * dt;
+                        if(Math.hypot(b.x - 800, b.y - 800) > RoomState.stormR - 30) {
+                            b.x += (800 - b.x) * 3 * dt;
+                            b.y += (800 - b.y) * 3 * dt;
+                        }
+                        if(Math.random() < 0.15) b.score += 1;
+                    }
+                    else if(gm === 'boss') {
+                        let boss = this.hostBoss;
+                        let d = Math.hypot(boss.x - b.x, boss.y - b.y);
+                        b.angle = Math.atan2(boss.y - b.y, boss.x - b.x);
+                        if(d > 260) {
+                            b.x += Math.cos(b.angle) * 220 * dt;
+                            b.y += Math.sin(b.angle) * 220 * dt;
+                        } else {
+                            b.x += Math.cos(b.angle + Math.PI/2) * 200 * dt;
+                            b.y += Math.sin(b.angle + Math.PI/2) * 200 * dt;
+                        }
+                        shooting = true;
+                        if(Math.random() < 0.28) {
+                            boss.hp = Math.max(0, boss.hp - 6);
+                            b.score += 3;
+                        }
+                    }
                     else if(gm === 'soccer') {
-                        // Boty biegną za piłką i kopią ją w stronę bramek!
                         let ball = this.hostBall;
                         b.angle = Math.atan2(ball.y - b.y, ball.x - b.x);
                         b.x = Math.max(150, Math.min(1450, b.x + Math.cos(b.angle) * 265 * dt));
@@ -3069,7 +3376,6 @@
                         }
                     }
                     else if(gm === 'paint') {
-                        // Boty biegają po planszy i zamalowują kafelki swoim kolorem!
                         if(Math.hypot(b.targetX - b.x, b.targetY - b.y) < 80 || Math.random() < 0.08) {
                             b.targetX = 160 + Math.random()*1280;
                             b.targetY = 160 + Math.random()*1280;
@@ -3079,7 +3385,11 @@
                         b.y = Math.max(100, Math.min(1500, b.y + Math.sin(b.angle) * 310 * dt));
                         let tx = Math.floor(b.x / 80), ty = Math.floor(b.y / 80);
                         if(tx >= 1 && tx <= 18 && ty >= 1 && ty <= 18) {
-                            this.paintGrid[`${tx}_${ty}`] = { owner: bid, color: netPlayers[bid].color };
+                            let key = `${tx}_${ty}`;
+                            if(this.paintGrid[key]?.owner !== bid) {
+                                this.paintGrid[key] = { owner: bid, color: netPlayers[bid].color };
+                                b.score += 1;
+                            }
                         }
                     }
                     else if(gm === 'lasers') {
@@ -3099,11 +3409,11 @@
                             b.x += Math.sin(b.anim)*40*dt;
                         } else if(RoomState.squidState === 'red' && Math.random() < 0.015) {
                             FX.laserBeam(800, 120, b.x, b.y);
-                            b.y = 1460;
+                            b.y = 1440;
                         }
                         if(b.y < 250) {
                             b.score += 25;
-                            b.y = 1460;
+                            b.y = 1440;
                             b.x = 300 + Math.random()*1000;
                         }
                     }
@@ -3165,7 +3475,7 @@
                             }
                         }
 
-                        if((gm === 'meteors' || gm === 'spleef' || gm === 'coins' || gm === 'zombies') && Math.random() < 0.15) {
+                        if(['meteors', 'spleef', 'coins', 'zombies'].includes(gm) && Math.random() < 0.15) {
                             b.score += 1;
                         }
                     }
@@ -3188,19 +3498,6 @@
                     botDbUpdates[`${bid}/anim`] = netPlayers[bid].anim;
                     botDbUpdates[`${bid}/shooting`] = shooting;
                 });
-
-                // W trybie Wojny Kolorów przeliczamy zamalowane kafelki na punkty na żywo!
-                if(gm === 'paint') {
-                    let counts = {};
-                    Object.values(this.paintGrid).forEach(cell => {
-                        counts[cell.owner] = (counts[cell.owner] || 0) + 1;
-                    });
-                    if(this.me) this.me.score = counts[myId] || 0;
-                    Object.keys(this.botStates).forEach(bid => {
-                        this.botStates[bid].score = counts[bid] || 0;
-                        botDbUpdates[`${bid}/score`] = this.botStates[bid].score;
-                    });
-                }
 
                 if(Object.keys(botDbUpdates).length > 0) {
                     db.ref(`room_players/${currentRoom}`).update(botDbUpdates);
@@ -3225,17 +3522,36 @@
 
                 this.updateBotsInMinigame(dt, gm, allActive);
 
-                // Fizyka Piłki Nożnej (odbicia od band i sprawdzanie goli w bramkach!)
+                // Logika Bossa (Smoka Kasyna) w trybie BOSS RAID
+                if(gm === 'boss') {
+                    let boss = this.hostBoss;
+                    let target = allActive[Math.floor(Math.random()*allActive.length)];
+                    if(target) {
+                        let a = Math.atan2(target.y - boss.y, target.x - boss.x);
+                        boss.x = Math.round(boss.x + Math.cos(a) * 105 * dt);
+                        boss.y = Math.round(boss.y + Math.sin(a) * 105 * dt);
+                        if(Math.random() < 0.25) {
+                            db.ref(`events/${currentRoom}`).push({ type: 'meteorBoom', x: target.x + (Math.random()*120-60), y: target.y + (Math.random()*120-60), r: 85 });
+                        }
+                    }
+                    RoomState.boss = boss;
+                    db.ref(`rooms/${currentRoom}/boss`).set(boss);
+                    if(boss.hp <= 0) {
+                        this.endMinigameRound();
+                        return;
+                    }
+                }
+
+                // Fizyka Piłki Nożnej
                 if(gm === 'soccer') {
                     let b = this.hostBall;
                     b.x += b.vx * dt;
                     b.y += b.vy * dt;
-                    b.vx *= Math.pow(0.28, dt);
-                    b.vy *= Math.pow(0.28, dt);
+                    b.vx *= Math.pow(0.32, dt);
+                    b.vy *= Math.pow(0.32, dt);
 
-                    // Sprawdzenie GOLA w lewej lub prawej bramce (Y od 640 do 960)
-                    let inGoalY = (b.y > 640 && b.y < 960);
-                    if((b.x < 135 || b.x > 1465) && inGoalY) {
+                    let inGoalY = (b.y > 620 && b.y < 980);
+                    if((b.x < 145 || b.x > 1455) && inGoalY) {
                         let scorer = b.lastKicker || myId;
                         if(scorer === myId && this.me) this.me.score += 15;
                         else if(this.botStates[scorer]) this.botStates[scorer].score += 15;
@@ -3255,6 +3571,7 @@
                 }
 
                 if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 14 * dt);
+                if(gm === 'sumo')   RoomState.stormR = Math.max(180, RoomState.stormR - 4.5 * dt);
 
                 if(gm === 'squid') {
                     this.squidTimer = (this.squidTimer || 0) + dt;
@@ -3309,7 +3626,7 @@
                             t: Math.random() < 0.25 ? 'gem' : 'coin'
                         });
                     }
-                } else if(!['bomb', 'sniper', 'race', 'squid', 'soccer', 'paint', 'lasers'].includes(gm)) {
+                } else if(!['bomb', 'sniper', 'race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'].includes(gm)) {
                     if(Math.random() < 0.05 && Object.keys(netItems).length < 8) {
                         let pool = ['medkit', 'shield', 'quad', 'nitro', 'shotgun', 'minigun', 'sniper', 'plasma', 'bazooka'];
                         let iid = 'i_' + Math.random().toString(36).substr(2, 5);
@@ -3394,7 +3711,6 @@
                 if(!this.me) return;
                 const gm = RoomState.activeMinigame;
 
-                // Aktualizacja ruchomych wiązek w Laserowym Labiryncie
                 if(gm === 'lasers') {
                     const t = performance.now() * 0.0012;
                     this.laserBeams = [
@@ -3405,15 +3721,22 @@
                     ];
                 }
 
-                // W trybie Wojny Kolorów zamalowujemy też kafelki pod innymi graczami sieciowymi
-                if(gm === 'paint') {
-                    Object.entries(netPlayers).forEach(([pid, p]) => {
-                        let tx = Math.floor((p.x || 0) / 80), ty = Math.floor((p.y || 0) / 80);
-                        if(tx >= 1 && tx <= 18 && ty >= 1 && ty <= 18) {
-                            this.paintGrid[`${tx}_${ty}`] = { owner: pid, color: p.color };
-                        }
-                    });
+                // Płynna interpolacja piłki również u klientów w 60 FPS
+                if(!isHost && gm === 'soccer' && RoomState.ball) {
+                    RoomState.ball.x += (RoomState.ball.vx || 0) * dt;
+                    RoomState.ball.y += (RoomState.ball.vy || 0) * dt;
                 }
+
+                // Płynna interpolacja pozycji graczy sieciowych i botów (Lerp 60 FPS)
+                Object.entries(netPlayers).forEach(([pid, p]) => {
+                    if(!this.renderPlayers[pid]) {
+                        this.renderPlayers[pid] = { x: p.x || 800, y: p.y || 800, angle: p.angle || 0 };
+                    }
+                    let rp = this.renderPlayers[pid];
+                    rp.x += ((p.x || 800) - rp.x) * Math.min(1, 16 * dt);
+                    rp.y += ((p.y || 800) - rp.y) * Math.min(1, 16 * dt);
+                    rp.angle = p.angle || 0;
+                });
 
                 this.me.update(dt);
                 Cam.update(dt, this.me);
@@ -3422,7 +3745,7 @@
                     RoomState.timer = Math.max(0, RoomState.timer - dt);
                 }
 
-                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers'];
+                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss'];
                 let obstacles = noObstacleModes.includes(gm) ? [] : (MAPS[RoomState.map] || MAPS.forest).obstacles;
 
                 for(let i=this.bullets.length-1; i>=0; i--) {
@@ -3436,7 +3759,19 @@
                         FX.burst(b.x, b.y, '#ffde00', 6, 140, 5);
                         if(b.isMine) {
                             Sound.play('coin');
+                            this.me.score += 2;
                             db.ref(`events/${currentRoom}`).push({ type: 'hitVault', x: b.x, y: b.y });
+                        }
+                        this.bullets.splice(i,1); continue;
+                    }
+
+                    if(gm === 'boss' && RoomState.boss && Math.hypot(b.x - RoomState.boss.x, b.y - RoomState.boss.y) < 58) {
+                        FX.burst(b.x, b.y, '#ff9100', 7, 160, 5);
+                        if(b.isMine) {
+                            Sound.play('hit');
+                            this.me.score += 5;
+                            FX.text(RoomState.boss.x, RoomState.boss.y, `+5 PKT!`, '#ffde00', 11);
+                            db.ref(`events/${currentRoom}`).push({ type: 'hitBoss', dmg: b.dmg });
                         }
                         this.bullets.splice(i,1); continue;
                     }
@@ -3513,7 +3848,7 @@
                 }
 
                 Object.values(netPlayers).forEach(p => {
-                    if(p.shooting && !p.isDead && Math.random() < 0.25 && !['bomb', 'race', 'squid', 'soccer', 'paint', 'lasers'].includes(gm)) {
+                    if(p.shooting && !p.isDead && Math.random() < 0.25 && !['bomb', 'race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'].includes(gm)) {
                         let wObj = WEAPONS[p.wep] || WEAPONS.pistol;
                         this.spawnBullet(p.x, p.y, p.angle, wObj.spd, 0, 0, wObj.bType, false);
                     }
@@ -3536,7 +3871,7 @@
 
                 document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
                 document.getElementById('shieldBar').style.width = `${Math.min(100, (this.me.shield/50)*100)}%`;
-                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.4 - this.me.dashCd)/1.4)*100)}%`;
+                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.35 - this.me.dashCd)/1.35)*100)}%`;
 
                 let buffs = [];
                 if(this.me.quadTime > 0) buffs.push(`🔥 2X DMG (${Math.ceil(this.me.quadTime)}s)`);
@@ -3558,7 +3893,7 @@
 
                 Cam.apply();
 
-                // 1. TOR WYŚCIGOWY GOKARTÓW HD (Z TARKAMI, OPONAMI I STRZAŁKAMI NITRO)
+                // 1. TOR WYŚCIGOWY GOKARTÓW HD
                 if(gm === 'race') {
                     ctx.fillStyle = '#1b431d'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     for(let k=100; k<1500; k+=40) {
@@ -3588,30 +3923,65 @@
                     ctx.strokeRect(140, 220, 1320, 1160);
                     ctx.beginPath(); ctx.moveTo(800, 220); ctx.lineTo(800, 1380); ctx.stroke();
                     ctx.beginPath(); ctx.arc(800, 800, 140, 0, Math.PI*2); ctx.stroke();
-                    // Pola karne i bramki z siatką
                     ctx.strokeRect(140, 520, 200, 560);
                     ctx.strokeRect(1260, 520, 200, 560);
-                    ctx.fillStyle = 'rgba(5, 213, 250, 0.35)'; ctx.fillRect(70, 640, 70, 320);
-                    ctx.strokeStyle = '#05d5fa'; ctx.strokeRect(70, 640, 70, 320);
-                    ctx.fillStyle = 'rgba(255, 42, 109, 0.35)'; ctx.fillRect(1460, 640, 70, 320);
-                    ctx.strokeStyle = '#ff2a6d'; ctx.strokeRect(1460, 640, 70, 320);
+                    ctx.fillStyle = 'rgba(5, 213, 250, 0.35)'; ctx.fillRect(70, 620, 70, 360);
+                    ctx.strokeStyle = '#05d5fa'; ctx.strokeRect(70, 620, 70, 360);
+                    ctx.fillStyle = 'rgba(255, 42, 109, 0.35)'; ctx.fillRect(1460, 620, 70, 360);
+                    ctx.strokeStyle = '#ff2a6d'; ctx.strokeRect(1460, 620, 70, 360);
                 }
                 // 3. ARENA WOJNY KOLORÓW (SPLATOON TURF WAR)
                 else if(gm === 'paint') {
                     ctx.fillStyle = '#141421'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     for(let tx=1; tx<=18; tx++) {
                         for(let ty=1; ty<=18; ty++) {
-                            let cell = this.paintGrid[`${tx}_${ty}`];
+                            let cell = this.paintGrid[`${tx}_${ty}`] || RoomState.paintData[`${tx}_${ty}`];
                             ctx.fillStyle = cell ? cell.color : '#222236';
                             ctx.fillRect(tx*80 + 2, ty*80 + 2, 76, 76);
                             if(cell) {
-                                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                                ctx.fillStyle = 'rgba(255,255,255,0.22)';
                                 ctx.fillRect(tx*80 + 6, ty*80 + 6, 68, 8);
                             }
                         }
                     }
                 }
-                // 4. ARENA SQUID GAME
+                // 4. SZKLANY MOST (SQUID GAME 2)
+                else if(gm === 'glass') {
+                    ctx.fillStyle = '#090614'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    // Platforma startowa i końcowa
+                    ctx.fillStyle = '#2b1b42'; ctx.fillRect(500, 1310, 600, 240);
+                    ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4; ctx.strokeRect(500, 1310, 600, 240);
+                    ctx.fillStyle = '#ffde00'; ctx.fillRect(500, 120, 600, 160);
+                    ctx.fillStyle = '#000'; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText("🏆 META SZKLANEGO MOSTU (+30 PKT) 🏆", 800, 200);
+
+                    for(let r=0; r<8; r++) {
+                        let py = 300 + r * 125;
+                        let safeSide = (r * 7 + 3) % 2;
+                        for(let s=0; s<2; s++) {
+                            let px = s === 0 ? 600 : 840;
+                            let isSafe = (s === safeSide);
+                            ctx.fillStyle = isSafe ? 'rgba(5, 213, 250, 0.42)' : 'rgba(5, 213, 250, 0.28)';
+                            ctx.fillRect(px, py, 160, 95);
+                            ctx.strokeStyle = '#05d5fa'; ctx.lineWidth = 3;
+                            ctx.strokeRect(px, py, 160, 95);
+                            if(isSafe) {
+                                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                                ctx.fillRect(px + 12, py + 12, 136, 10);
+                            }
+                        }
+                    }
+                }
+                // 5. SUMO RING NAD LAWĄ
+                else if(gm === 'sumo') {
+                    ctx.fillStyle = '#290909'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    ctx.fillStyle = '#d9b382';
+                    ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.fill();
+                    ctx.strokeStyle = '#ff1744'; ctx.lineWidth = 14; ctx.stroke();
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.arc(800, 800, 120, 0, Math.PI*2); ctx.stroke();
+                }
+                // 6. ARENA SQUID GAME
                 else if(gm === 'squid') {
                     ctx.fillStyle = '#d4b475'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     ctx.fillStyle = '#c4a262';
@@ -3623,7 +3993,7 @@
                     ctx.fillStyle = '#ffde00'; ctx.fillText("🏁 LINIA METY (+25 PKT) 🏁", 800, 235);
                     drawSquidDoll(ctx, RoomState.squidState);
                 }
-                // 5. STANDARDOWE TŁA AREN 2.5D HD
+                // 7. STANDARDOWE TŁA AREN 2.5D HD
                 else {
                     const cachedBg = GroundCache.canvases[gm === 'spleef' ? 'ice' : (gm === 'lasers' ? 'cyber' : RoomState.map)] || GroundCache.canvases.forest;
                     ctx.drawImage(cachedBg, 0, 0);
@@ -3658,7 +4028,7 @@
                     ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.stroke();
                 }
 
-                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers'];
+                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss'];
                 if(!noObstacleModes.includes(gm)) {
                     mapObj.obstacles.filter(o => o.t === 'lava').forEach(o => drawPixelObstacle25D(ctx, o));
                 }
@@ -3697,6 +4067,13 @@
                     });
                 }
 
+                if(gm === 'boss' && RoomState.boss) {
+                    renderQueue.push({
+                        y: RoomState.boss.y,
+                        draw: () => drawPixelBossDragon(ctx, RoomState.boss)
+                    });
+                }
+
                 if(gm === 'heist') {
                     renderQueue.push({
                         y: 850,
@@ -3721,23 +4098,23 @@
                 }
 
                 Object.entries(netPlayers).forEach(([pid, p]) => {
+                    let rp = this.renderPlayers[pid] || p;
                     renderQueue.push({
-                        y: p.y,
-                        draw: () => drawPixelHero(ctx, p.x, p.y, p.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote, gm === 'crown' && RoomState.crownHolder === pid, 0)
+                        y: rp.y,
+                        draw: () => drawPixelHero(ctx, rp.x, rp.y, rp.angle, p.color, p.skin || 'cap', p.name, p.hp, 100, p.shield || 0, p.wep, p.anim || 0, RoomState.bombHolder === pid, p.isDead, p.shooting ? 1 : 0, p.quad, p.emote, gm === 'crown' && RoomState.crownHolder === pid, 0, p.pet || 'none')
                     });
                 });
 
                 if(this.me) {
                     renderQueue.push({
                         y: this.me.y,
-                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote, gm === 'crown' && RoomState.crownHolder === myId, this.me.jumpZ)
+                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote, gm === 'crown' && RoomState.crownHolder === myId, this.me.jumpZ, Settings.pet)
                     });
                 }
 
                 renderQueue.sort((a, b) => a.y - b.y);
                 renderQueue.forEach(item => item.draw());
 
-                // Rysowanie zabójczych wiązek w Laserowym Labiryncie
                 if(gm === 'lasers') {
                     this.laserBeams.forEach(lb => {
                         ctx.strokeStyle = 'rgba(255, 0, 68, 0.35)'; ctx.lineWidth = 22;
@@ -3820,21 +4197,23 @@
                     document.getElementById('cardChoicesContainer').classList.add('hidden');
                     document.getElementById('cardWaitMsg').classList.remove('hidden');
 
-                    if(isHost && winId && winId.startsWith('bot_')) {
+                    if(isHost && (!winId || winId.startsWith('bot_') || !netPlayers[winId])) {
                         setTimeout(() => {
                             if(RoomState.status !== 'card_reward') return;
                             let bot = netPlayers[winId];
                             let newPos = Math.min(50, (bot?.boardPos || 0) + 3);
-                            db.ref(`room_players/${currentRoom}/${winId}`).update({ boardPos: newPos });
+                            if(winId && bot) db.ref(`room_players/${currentRoom}/${winId}`).update({ boardPos: newPos });
                             if(newPos >= 50) {
                                 db.ref(`rooms/${currentRoom}`).update({ status: 'podium' });
                             } else {
                                 db.ref(`rooms/${currentRoom}`).update({
-                                    status: 'board', turnIdx: 0,
-                                    boardMsg: `🤖 ${bot ? bot.name : 'Bot'} wygrał minigrę i wybrał kartę Turbo Skoku (+3 pola)!`
+                                    status: 'board',
+                                    turnOrder: Board.getValidTurnOrder(),
+                                    turnIdx: 0,
+                                    boardMsg: `🤖 ${bot ? bot.name : 'Zwycięzca'} wybrał kartę Turbo Skoku (+3 pola)! Nowa tura rzutów!`
                                 });
                             }
-                        }, 2000);
+                        }, 1800);
                     }
                 }
             },
@@ -3907,7 +4286,7 @@
                     const pRef = db.ref(`room_players/${currentRoom}/${myId}`);
                     await pRef.set({
                         id: myId, name: document.getElementById('playerName').value.trim() || "Paweł",
-                        color: document.getElementById('playerColor').value, skin: chosenSkin, chips: LobbyCasino.chips,
+                        color: document.getElementById('playerColor').value, skin: chosenSkin, pet: Settings.pet, chips: LobbyCasino.chips,
                         x: 800, y: 800, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false, wep: 'pistol'
                     });
                     pRef.onDisconnect().remove();
@@ -3917,6 +4296,7 @@
                     switchScreen('screen-lobby');
                     document.getElementById('lobbyCode').innerText = currentRoom;
                     document.getElementById('lobbySkinSelect').value = chosenSkin;
+                    document.getElementById('lobbyPetSelect').value = Settings.pet;
                     document.getElementById('btnStartMatch').style.display = isHost ? 'block' : 'none';
                     document.getElementById('clientWaitMsg').style.display = isHost ? 'none' : 'block';
                     document.getElementById('hostBotControls').style.display = isHost ? 'flex' : 'none';
@@ -3939,7 +4319,7 @@
                 ev.stopPropagation();
                 if(!isHost) return announce("TYLKO HOST MOŻE ZMIENIAĆ PULĘ LOSOWANIA!", 1200);
                 Sound.play('tick');
-                let currentPool = [...(RoomState.allowedGames || ALL_MINIGAMES)];
+                let currentPool = Array.isArray(RoomState.allowedGames) ? [...RoomState.allowedGames] : [...ALL_MINIGAMES];
                 if(currentPool.includes(gameKey)) {
                     if(currentPool.length <= 1) return announce("MUSI ZOSTAĆ MINIMUM 1 MINIGRA W PULI!", 1300);
                     currentPool = currentPool.filter(g => g !== gameKey);
@@ -3955,7 +4335,7 @@
                 db.ref(`rooms/${currentRoom}`).update({ allowedGames: newPool });
             },
             renderPoolBadges() {
-                const allowed = RoomState.allowedGames || ALL_MINIGAMES;
+                const allowed = Array.isArray(RoomState.allowedGames) ? RoomState.allowedGames : ALL_MINIGAMES;
                 ALL_MINIGAMES.forEach(gk => {
                     const badge = document.getElementById('pool-' + gk);
                     const card = document.getElementById('m-' + gk);
@@ -3992,7 +4372,7 @@
                     RoomState.mode = d.mode || 'party';
                     RoomState.isPartyCampaign = (RoomState.mode === 'party');
                     RoomState.activeMinigame = d.activeMinigame || 'soccer';
-                    RoomState.allowedGames = d.allowedGames || ALL_MINIGAMES;
+                    RoomState.allowedGames = d.allowedGames ? Object.values(d.allowedGames) : ALL_MINIGAMES;
                     RoomState.map = d.map || 'forest';
                     RoomState.mutatorSetting = d.mutatorSetting || 'random';
                     RoomState.mutator = d.mutator || 'none';
@@ -4003,10 +4383,12 @@
                     RoomState.crownHolder = d.crownHolder || myId;
                     RoomState.squidState = d.squidState || 'green';
                     RoomState.brokenIce = d.brokenIce || {};
+                    RoomState.paintData = d.paintData || {};
                     RoomState.stormR = d.stormR ?? 1100;
                     if(d.ball) RoomState.ball = d.ball;
-                    RoomState.turnOrder = d.turnOrder || [myId];
-                    RoomState.turnIdx = d.turnIdx || 0;
+                    if(d.boss) RoomState.boss = d.boss;
+                    RoomState.turnOrder = d.turnOrder ? Object.values(d.turnOrder) : [myId];
+                    RoomState.turnIdx = Number(d.turnIdx) || 0;
                     RoomState.boardMsg = d.boardMsg || '';
                     RoomState.minigameWinner = d.minigameWinner || null;
                     if(d.koth) RoomState.koth = d.koth;
@@ -4077,6 +4459,8 @@
                     document.getElementById('lobbyPlayerList').innerHTML = arr.map(p =>
                         `<li class="flex justify-between items-center bg-black/40 p-1"><span>${skinIcons[p.skin]||'🧢'} <span style="color:${p.color}">■</span> ${p.name} ${p.id===myId?'(TY)':''}</span><span class="text-[7px] text-yellow-400">${p.chips ?? 100} 🪙</span></li>`
                     ).join('');
+
+                    if(RoomState.status === 'board') Board.updateTurnUI();
                 });
 
                 db.ref(`room_items/${currentRoom}`).on('value', snap => { netItems = snap.val() || {}; });
@@ -4101,6 +4485,9 @@
                         Game.hostBall.vy = ev.vy;
                         Game.hostBall.lastKicker = ev.kicker;
                     }
+                    else if(isHost && ev.type === 'hitBoss') {
+                        Game.hostBoss.hp = Math.max(0, Game.hostBoss.hp - (ev.dmg || 20));
+                    }
                     else if(ev.type === 'goalScored') {
                         Sound.play('jackpot');
                         Cam.shake(12, 0.3);
@@ -4113,8 +4500,8 @@
                             let bState = Game.botStates[ev.target];
                             if(!bState.isDead) {
                                 bState.hp -= ev.dmg;
-                                bState.x = Math.max(60, Math.min(WORLD_SIZE-60, bState.x + (ev.kx || 0)*0.12));
-                                bState.y = Math.max(60, Math.min(WORLD_SIZE-60, bState.y + (ev.ky || 0)*0.12));
+                                bState.x = Math.max(60, Math.min(WORLD_SIZE-60, bState.x + (ev.kx || 0)*0.15));
+                                bState.y = Math.max(60, Math.min(WORLD_SIZE-60, bState.y + (ev.ky || 0)*0.15));
                                 if(RoomState.activeMinigame === 'crown' && RoomState.crownHolder === ev.target && ev.attacker) {
                                     db.ref(`rooms/${currentRoom}`).update({ crownHolder: ev.attacker });
                                 }
@@ -4133,7 +4520,7 @@
                     else if(ev.type === 'meteorBoom') {
                         FX.explosion(ev.x, ev.y);
                         if(!Game.me.isDead && Math.hypot(Game.me.x - ev.x, Game.me.y - ev.y) < ev.r) {
-                            Game.me.takeDamage(65, null);
+                            Game.me.takeDamage(55, null);
                         }
                     }
                     else if(isHost && ev.type === 'hitVault') {
@@ -4179,7 +4566,7 @@
             launchGame() {
                 if(!isHost) return;
                 db.ref(`room_items/${currentRoom}`).remove();
-                let order = [myId, ...Object.keys(netPlayers)];
+                let order = Board.getValidTurnOrder();
                 const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
                 const chosenMut = RoomState.mutatorSetting === 'random' ? muts[Math.floor(Math.random()*muts.length)] : RoomState.mutatorSetting;
                 const dur = Number(RoomState.matchDuration) || 60;
@@ -4200,7 +4587,8 @@
                 } else {
                     db.ref(`rooms/${currentRoom}`).update({
                         status: 'playing', activeMinigame: RoomState.mode, mutator: chosenMut,
-                        timer: dur, stormR: 1100, ball: {x:800, y:800, vx:0, vy:0},
+                        timer: dur, stormR: RoomState.mode === 'sumo' ? 460 : 1100,
+                        ball: {x:800, y:800, vx:0, vy:0}, boss: {x:800, y:800, hp:1200, maxHp:1200, a:0}, paintData: {},
                         bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
                     });
                 }
