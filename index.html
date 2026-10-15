@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL - MEGA ULTI EDITION</title>
+    <title>PAWEŁ PYKA: SUPER PIXEL PARTY XL - GOD-TIER EDITION</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' rx='3' fill='%23151526'/><path fill='%23ffde00' d='M2 5h2v2h2V5h4v2h2V5h2v7H2z'/><rect x='4' y='8' width='2' height='2' fill='%23ff2a6d'/><rect x='10' y='8' width='2' height='2' fill='%2305d5fa'/><rect x='2' y='12' width='12' height='2' fill='%23ff9100'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -15,8 +15,8 @@
 
     <style>
         :root {
-            --bg-grad: radial-gradient(circle at center, rgba(38,18,82,0.92) 0%, rgba(6,6,15,0.98) 100%);
-            --panel-grad: linear-gradient(160deg, #1d1838 0%, #0c0a18 100%);
+            --bg-grad: radial-gradient(circle at center, rgba(42,16,90,0.92) 0%, rgba(5,5,14,0.98) 100%);
+            --panel-grad: linear-gradient(160deg, #1d1838 0%, #0b0917 100%);
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #05050a; overflow: hidden; font-family: 'Press Start 2P', monospace; user-select: none; image-rendering: pixelated; color: #fff; }
         #gameCanvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: none; image-rendering: pixelated; }
@@ -26,14 +26,17 @@
             display: none; flex-direction: column; align-items: center; justify-content: center;
             background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px), var(--bg-grad);
             background-size: 40px 40px, 40px 40px, 100% 100%;
-            width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(8px); transition: all 0.35s;
+            width: 100%; height: 100%; pointer-events: auto; backdrop-filter: blur(6px); transition: all 0.35s;
         }
         .screen.active { display: flex; }
+        /* W trybie Chodzonego Lobby tło jest przezroczyste, by widzieć Salon Gier 2.5D! */
+        #screen-lobby.hub-mode { background: rgba(5, 5, 14, 0.35); backdrop-filter: none; justify-content: flex-start; padding-top: 10px; pointer-events: none; }
+        #screen-lobby.hub-mode .panel { pointer-events: auto; }
         
         .panel {
             background: var(--panel-grad); border: 4px solid #fff;
-            box-shadow: 0 0 35px rgba(5,213,250,0.28), 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.9), inset 0 4px 0 rgba(255,255,255,0.2);
-            padding: 0.85rem 1.15rem; max-width: 1260px; width: 97%; text-align: center; position: relative; max-height: 96vh; overflow-y: auto;
+            box-shadow: 0 0 35px rgba(5,213,250,0.3), 0 0 0 4px #000, 12px 12px 0px 0px rgba(0,0,0,0.9), inset 0 4px 0 rgba(255,255,255,0.2);
+            padding: 0.85rem 1.15rem; max-width: 1280px; width: 97%; text-align: center; position: relative; max-height: 95vh; overflow-y: auto;
         }
         .btn { background: linear-gradient(180deg, #ff3877 0%, #d91656 100%); border: 3px solid #fff; box-shadow: inset -3px -4px 0px 0px rgba(0,0,0,0.45), 0 4px 0 #000; color: #fff; padding: 0.5rem 0.75rem; text-transform: uppercase; cursor: pointer; transition: transform 0.08s, filter 0.1s; font-family: inherit; font-size: 8px; outline: none; text-shadow: 2px 2px 0 #000; }
         .btn:hover { filter: brightness(1.2); }
@@ -46,7 +49,7 @@
         .mode-card { position: relative; border: 2px solid #2d2d48; background: linear-gradient(180deg, #17172b 0%, #0b0b16 100%); padding: 5px 6px; cursor: pointer; transition: all 0.12s; text-align: left; box-shadow: 0 3px 0 #000; }
         .mode-card:hover { border-color: #7777aa; transform: translateY(-2px); }
         .mode-card.selected { border-color: #05d5fa; background: linear-gradient(180deg, #1f274d 0%, #10152e 100%); box-shadow: inset 0 0 14px rgba(5,213,250,0.45), 0 3px 0 #000; }
-        .mode-card.excluded { opacity: 0.36; border-color: #4a1525; background: #12080c; }
+        .mode-card.excluded { opacity: 0.35; border-color: #4a1525; background: #12080c; }
 
         .pool-badge { position: absolute; top: 2px; right: 2px; font-size: 8px; padding: 1px 3px; border-radius: 2px; background: rgba(0,0,0,0.75); border: 1px solid #555; z-index: 5; }
         .pool-badge:hover { transform: scale(1.2); border-color: #ffde00; }
@@ -64,12 +67,19 @@
         .lobby-slot-box { background: linear-gradient(180deg, #321042 0%, #160620 100%); border: 3px solid #ffde00; box-shadow: inset 0 0 18px rgba(255, 42, 109, 0.45), 0 4px 0 #000; padding: 7px; }
         .mini-reel { width: 40px; height: 42px; background: linear-gradient(180deg, #ddd 0%, #fff 50%, #bbb 100%); border: 3px solid #000; box-shadow: inset 0 4px 6px rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
+        /* PASEK NAWIGACJI CHODZONEGO LOBBY 2.5D */
+        #hubTopBar { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 54; width: 96%; max-width: 1180px; display: none; pointer-events: auto; }
+
+        /* POWIADOMIENIE O OSIĄGNIĘCIU (ACHIEVEMENT TOAST) */
+        #achievementToast { position: absolute; top: 18px; right: -400px; z-index: 95; background: linear-gradient(90deg, #2b1055 0%, #12072b 100%); border: 3px solid #ffde00; box-shadow: 0 0 25px #ffde00, 6px 6px 0 #000; padding: 10px 14px; transition: right 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); pointer-events: none; }
+        #achievementToast.show { right: 18px; }
+
         /* HUD MINIGIER */
-        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 22, 0.88); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; min-width: 235px; }
+        #hud { position: absolute; top: 14px; left: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; background: rgba(10, 10, 22, 0.88); border: 3px solid #fff; padding: 10px 14px; box-shadow: 6px 6px 0 #000; min-width: 240px; }
         #hudRight { position: absolute; top: 14px; right: 14px; z-index: 40; color: white; text-shadow: 2px 2px 0 #000; display: none; pointer-events: auto; }
         
         /* HUD PLANSZÓWKI */
-        #boardHud { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 45; width: 96%; max-width: 1080px; display: none; pointer-events: none; }
+        #boardHud { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 45; width: 96%; max-width: 1100px; display: none; pointer-events: none; }
         .board-box { background: linear-gradient(180deg, rgba(20,20,40,0.96) 0%, rgba(10,10,22,0.96) 100%); border: 4px solid #ffde00; box-shadow: 0 0 25px rgba(255,222,0,0.3), 8px 8px 0 #000; padding: 10px 16px; pointer-events: auto; }
 
         /* KOSTKA 3D */
@@ -85,7 +95,7 @@
         #rouletteOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: rgba(0,0,0,0.93); display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
 
         /* CZAT + SOUNDBOARD */
-        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 330px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
+        #chatWidget { position: absolute; bottom: 14px; left: 14px; z-index: 65; width: 335px; background: rgba(10, 10, 20, 0.94); border: 3px solid #fff; box-shadow: 6px 6px 0 #000; display: none; flex-direction: column; pointer-events: auto; }
         #chatMessages { height: 80px; overflow-y: auto; padding: 8px; font-size: 8px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
         .emote-btn { background: #1c1c30; border: 1px solid #444; padding: 3px 4px; cursor: pointer; font-size: 11px; }
         .emote-btn:hover { background: #323254; border-color: #05d5fa; transform: scale(1.12); }
@@ -93,7 +103,7 @@
         #killFeed { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); z-index: 42; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: center; }
         #centerAnnouncement { position: absolute; top: 22%; left: 50%; transform: translate(-50%, -50%); z-index: 55; color: #ffde00; font-size: 20px; text-shadow: 0 0 18px #ff2a6d, 4px 4px 0 #000; display: none; pointer-events: none; text-align: center; }
 
-        .bar-wrap { width: 200px; height: 13px; border: 2px solid #fff; background: #090910; margin-top: 3px; position: relative; box-shadow: 2px 2px 0 #000; }
+        .bar-wrap { width: 205px; height: 13px; border: 2px solid #fff; background: #090910; margin-top: 3px; position: relative; box-shadow: 2px 2px 0 #000; }
         #hpBar { height: 100%; background: linear-gradient(90deg, #ff1744 0%, #ff616f 100%); width: 100%; transition: width 0.1s; }
         #shieldBar { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #00b0ff 0%, #80d8ff 100%); width: 0%; opacity: 0.85; }
         #dashBar { height: 100%; background: linear-gradient(90deg, #ffab00 0%, #ffea00 100%); width: 100%; }
@@ -108,6 +118,26 @@
 <body id="mainBody" class="crt-effect">
 
     <canvas id="gameCanvas"></canvas>
+
+    <!-- POWIADOMIENIE O ODBLOKOWANYM OSIĄGNIĘCIU -->
+    <div id="achievementToast">
+        <div class="text-[8px] text-[#ffde00] mb-1">🏆 ODBLOKOWANO OSIĄGNIĘCIE!</div>
+        <div id="achTitle" class="text-[10px] text-white">Pierwsza Krew! (+50 XP)</div>
+    </div>
+
+    <!-- PASEK STEROWANIA CHODZONYM SALONEM GIER (PLAYABLE LOBBY HUB 2.5D) -->
+    <div id="hubTopBar">
+        <div class="board-box flex flex-wrap justify-between items-center gap-2 !py-2">
+            <div class="text-left">
+                <span class="text-[10px] text-[#ffde00]">🕹️ SALON GIER LOBBY 2.5D (CHODZISZ POSTACIĄ!)</span>
+                <span class="text-[7px] text-cyan-300 block">Biegaj [WASD], strzelaj do tarcz, kop piłkę na boisku lub podejdź do Automatu 777!</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="btn !bg-indigo-600 !py-2 !px-3 !text-[8px]" onclick="Lobby.toggleLobbyPanel()">⚙️ OTWÓRZ / ZWIŃ PANEL TRYBÓW [TAB]</button>
+                <button id="btnHubQuickStart" class="btn !bg-[#00c853] !py-2 !px-4 !text-[9px] hidden" onclick="Lobby.launchGame()">🚀 START MECZU!</button>
+            </div>
+        </div>
+    </div>
 
     <div id="centerAnnouncement">START!</div>
     <div id="killFeed"></div>
@@ -184,7 +214,6 @@
         <div class="text-lg text-[#05d5fa] mb-1" style="text-shadow: 3px 3px 0 #000;">🗳️ GŁOSOWANIE NA MINIGRĘ & KOŁO FORTUNY 🎡</div>
         <div id="voteSubHeader" class="text-[8px] text-yellow-300 mb-4">Kliknij swoją ulubioną minigrę poniżej (masz 4 sekundy na oddanie głosu)!</div>
         
-        <!-- 3 Karty Głosowania -->
         <div id="voteChoicesRow" class="flex justify-center gap-3 w-full max-w-2xl px-3 mb-4"></div>
 
         <div id="rouletteBox" class="border-4 border-[#ffde00] bg-[#1a1829] px-8 py-5 text-xl text-white shadow-[0_0_40px_#05d5fa] mb-3">
@@ -196,7 +225,7 @@
         <div id="rouletteMapText" class="text-xs text-[#00e676] mb-2">BIOM: Leśny Bunkier</div>
     </div>
 
-    <!-- CEREMONIA ROZDANIA BONUSOWYCH GWIAZD (PLOT TWIST PRZED PODIUM!) -->
+    <!-- CEREMONIA ROZDANIA BONUSOWYCH GWIAZD -->
     <div id="bonusStarsModal" class="modal-overlay">
         <div class="slot-machine !max-w-xl !border-[#ffde00]">
             <div class="text-xl text-[#ffde00] mb-1" style="text-shadow: 3px 3px 0 #000;">🌟 CEREMONIA BONUSOWYCH GWIAZD! 🌟</div>
@@ -215,7 +244,7 @@
         <div id="squidLightBanner" class="text-[10px] font-bold mb-1 hidden">🟢 ZIELONE ŚWIATŁO!</div>
         <div class="text-[7px] text-gray-300">ZDROWIE + TARCZA</div>
         <div class="bar-wrap"><div id="hpBar"></div><div id="shieldBar"></div></div>
-        <div class="text-[7px] text-gray-300 mt-1.5">ZRYW / SKOK [SPACJA]</div>
+        <div class="text-[7px] text-gray-300 mt-1.5">ZRYW / SKOK / PLECAK [SPACJA]</div>
         <div class="bar-wrap !h-2"><div id="dashBar"></div></div>
         <div class="flex justify-between items-center mt-1.5">
             <span class="text-[7px] text-[#e040fb]">⚡ SUPER-MOC ULTI [KLAWISZ Q]</span>
@@ -228,7 +257,7 @@
 
     <!-- PRAWY HUD + PRZYCISK POMINIĘCIA MINIGRY DLA HOSTA -->
     <div id="hudRight">
-        <div class="bg-black/85 border-3 border-white p-3 min-w-[230px] shadow-[6px_6px_0_#000]">
+        <div class="bg-black/85 border-3 border-white p-3 min-w-[235px] shadow-[6px_6px_0_#000]">
             <div class="text-[9px] text-[#05d5fa] border-b-2 border-gray-600 pb-1 mb-2">RANKING GRACZY</div>
             <ul id="liveScoreboard" class="text-[8px] space-y-2 mb-2"></ul>
             <button id="btnSkipMinigame" class="btn !bg-amber-600 hover:!bg-amber-500 !py-1.5 !px-2 !text-[7px] w-full hidden" onclick="Game.skipCurrentMinigame()">⏭️ POMIŃ MINIGRĘ (HOST)</button>
@@ -263,26 +292,25 @@
 
     <div id="uiContainer" class="ui-layer">
         
-        <!-- 1. MENU GŁÓWNE Z PASKIEM RANGI I POZIOMU KONTA (LOCALSTORAGE) -->
+        <!-- 1. MENU GŁÓWNE Z PASKIEM RANGI, OSIĄGNIĘĆ I 12 POSTACIAMI -->
         <div id="screen-menu" class="screen active">
             <div class="panel !max-w-3xl">
-                <!-- Pasek profilu gracza (LVL, XP, Ranga, Stałe Żetony) -->
                 <div class="flex flex-wrap justify-between items-center bg-black/80 border-2 border-[#ffde00] px-3 py-1.5 mb-2 text-[8px]">
                     <div class="flex items-center gap-2">
                         <span id="profileRankBadge" class="text-yellow-400 font-bold">🥇 ZŁOTO • LVL 1</span>
                         <div class="w-28 h-2.5 bg-gray-900 border border-white"><div id="profileXpBar" class="h-full bg-[#00e676]" style="width:25%"></div></div>
                     </div>
-                    <div class="text-[#05d5fa]">WYGRANE MECZE: <b id="profileWins">0</b> | BANK ŻETONÓW: <b id="profileChips" class="text-[#00e676]">150</b> 🪙</div>
+                    <div class="text-[#05d5fa]">WYGRANE: <b id="profileWins">0</b> | PUCHARY: <b id="profileAchCount" class="text-yellow-300">0/8</b> 🏆 | BANK: <b id="profileChips" class="text-[#00e676]">150</b> 🪙</div>
                 </div>
 
                 <h1 class="text-3xl md:text-4xl text-[#05d5fa] mb-1" style="text-shadow: 4px 4px 0 #ff2a6d;">PAWEŁ PYKA</h1>
-                <h2 class="text-[8px] text-yellow-400 mb-2.5 tracking-wider">⚡ SUPER PIXEL PARTY XL (MOCE ULTI [Q] • BECZKI TNT • ZAROŚLA • PUŁAPKI • 19 GIER) ⚡</h2>
+                <h2 class="text-[8px] text-yellow-400 mb-2.5 tracking-wider">🌟 GOD-TIER EDITION (CHODZONE LOBBY 2.5D • 22 MINIGRY • 12 KLAS ULTI [Q] • BECZKI TNT) 🌟</h2>
                 
                 <div class="flex flex-col md:flex-row gap-4 items-center mb-3">
                     <div class="bg-black/85 border-4 border-[#05d5fa] p-2 flex flex-col items-center shadow-[6px_6px_0_#000]">
-                        <div class="text-[7px] text-yellow-300 mb-1">KLASA, PET & SUPER-MOC [Q]:</div>
+                        <div class="text-[7px] text-yellow-300 mb-1">BOHATER, PET & MOC [Q]:</div>
                         <canvas id="previewCanvas" width="130" height="130" class="bg-[#121222] border-2 border-gray-700"></canvas>
-                        <div id="skinDescText" class="text-[6px] text-[#00e676] mt-1 max-w-[140px]">ULTRABASS: Fala dźwiękowa odrzucająca wrogów!</div>
+                        <div id="skinDescText" class="text-[6px] text-[#00e676] mt-1 max-w-[145px]">ULTRABASS: Fala dźwiękowa odrzucająca wrogów!</div>
                     </div>
 
                     <div class="flex-grow w-full">
@@ -326,17 +354,20 @@
                             </div>
                         </div>
 
-                        <div class="text-[7px] text-yellow-300 text-left mb-1">WYBIERZ KLASĘ BOHATERA (KAŻDA MA UNIKALNE ULTI POD KLAWISZEM [Q]!):</div>
-                        <div class="grid grid-cols-3 gap-1.5 mb-2 interactive">
-                            <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ<br><span class="text-[6px] text-cyan-300">[Q] Fala Basowa</span></div>
-                            <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA<br><span class="text-[6px] text-cyan-300">[Q] Cień + Speed</span></div>
-                            <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ<br><span class="text-[6px] text-cyan-300">[Q] Złoty Pancerz</span></div>
-                            <div class="skin-card" onclick="selectSkin('astro')" id="sk-astro">👨‍🚀 KOSMOS<br><span class="text-[6px] text-cyan-300">[Q] Skok Grawitacji</span></div>
-                            <div class="skin-card" onclick="selectSkin('cyborg')" id="sk-cyborg">🤖 CYBORG<br><span class="text-[6px] text-cyan-300">[Q] Laser Overdrive</span></div>
-                            <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL<br><span class="text-[6px] text-cyan-300">[Q] Deszcz Monet</span></div>
-                            <div class="skin-card" onclick="selectSkin('wizard')" id="sk-wizard">🧙‍♂️ MAG<br><span class="text-[6px] text-cyan-300">[Q] Czarna Dziura</span></div>
-                            <div class="skin-card" onclick="selectSkin('pirate')" id="sk-pirate">🏴‍☠️ PIRAT<br><span class="text-[6px] text-cyan-300">[Q] Salwa Armatnia</span></div>
-                            <div class="skin-card" onclick="selectSkin('agent')" id="sk-agent">🕶️ AGENT SIGMA<br><span class="text-[6px] text-cyan-300">[Q] Bullet-Time</span></div>
+                        <div class="text-[7px] text-yellow-300 text-left mb-1">WYBIERZ 1 Z 12 KLAS BOHATERÓW (KAŻDA POSIADA UNIKALNE ULTI POD [Q]!):</div>
+                        <div class="grid grid-cols-4 gap-1 mb-2 interactive">
+                            <div class="skin-card selected" onclick="selectSkin('cap')" id="sk-cap">🧢 PAWEŁ<br><span class="text-[5px] text-cyan-300">[Q] Fala Basowa</span></div>
+                            <div class="skin-card" onclick="selectSkin('ninja')" id="sk-ninja">🥷 NINJA<br><span class="text-[5px] text-cyan-300">[Q] Cień + Speed</span></div>
+                            <div class="skin-card" onclick="selectSkin('knight')" id="sk-knight">⚔️ RYCERZ<br><span class="text-[5px] text-cyan-300">[Q] Złoty Pancerz</span></div>
+                            <div class="skin-card" onclick="selectSkin('astro')" id="sk-astro">👨‍🚀 KOSMOS<br><span class="text-[5px] text-cyan-300">[Q] Skok Kosmosu</span></div>
+                            <div class="skin-card" onclick="selectSkin('cyborg')" id="sk-cyborg">🤖 CYBORG<br><span class="text-[5px] text-cyan-300">[Q] Laser Overdrive</span></div>
+                            <div class="skin-card" onclick="selectSkin('king')" id="sk-king">👑 KRÓL<br><span class="text-[5px] text-cyan-300">[Q] Deszcz Monet</span></div>
+                            <div class="skin-card" onclick="selectSkin('wizard')" id="sk-wizard">🧙‍♂️ MAG<br><span class="text-[5px] text-cyan-300">[Q] Czarna Dziura</span></div>
+                            <div class="skin-card" onclick="selectSkin('pirate')" id="sk-pirate">🏴‍☠️ PIRAT<br><span class="text-[5px] text-cyan-300">[Q] Salwa Armatnia</span></div>
+                            <div class="skin-card" onclick="selectSkin('agent')" id="sk-agent">🕶️ AGENT SIGMA<br><span class="text-[5px] text-cyan-300">[Q] Bullet-Time</span></div>
+                            <div class="skin-card" onclick="selectSkin('vampire')" id="sk-vampire">🧛‍♂️ WAMPIR<br><span class="text-[5px] text-cyan-300">[Q] Krwawa Nova</span></div>
+                            <div class="skin-card" onclick="selectSkin('cowboy')" id="sk-cowboy">🤠 SZERYF<br><span class="text-[5px] text-cyan-300">[Q] High Noon</span></div>
+                            <div class="skin-card" onclick="selectSkin('thunder')" id="sk-thunder">⚡ ZEUS<br><span class="text-[5px] text-cyan-300">[Q] Grom z Nieba</span></div>
                         </div>
 
                         <div class="flex flex-wrap items-center justify-between bg-black/60 border border-gray-600 px-2 py-1 gap-1">
@@ -358,7 +389,7 @@
                 <div class="flex flex-col gap-2">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <button class="btn w-full interactive !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3" id="btnCreateRoom">🌐 STWÓRZ POKÓJ ONLINE</button>
-                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !text-xs !py-3 font-bold" id="btnCreateSoloBots">🤖 GRAJ SOLO Z 3 BOTAMI!</button>
+                        <button class="btn w-full interactive !bg-gradient-to-b !from-[#ffde00] !to-[#ff9100] !text-black !text-xs !py-3 font-bold" id="btnCreateSoloBots">🤖 GRAJ SOLO Z 3 BOTAMI (CHODZONE LOBBY)!</button>
                     </div>
                     <div class="flex gap-2">
                         <input type="text" id="joinCode" placeholder="WPISZ KOD POKOJU" class="input-pixel interactive uppercase w-1/2" maxlength="6">
@@ -368,21 +399,23 @@
                 <div id="menuError" class="bg-black/90 border-2 border-red-500 p-2 text-[8px] text-yellow-400 mt-3 hidden"></div>
             </div>
         </div>
-
-        <!-- 2. LOBBY -->
+        <!-- 2. ZWIJANY PANEL LOBBY (DZIAŁA NAD CHODZONYM SALONEM GIER 2.5D!) -->
         <div id="screen-lobby" class="screen">
-            <div class="panel">
+            <div class="panel" id="lobbyMainPanel">
                 <div class="flex flex-wrap justify-between items-center border-b-4 border-white pb-1.5 mb-2 gap-2">
                     <div class="text-left">
-                        <h2 class="text-sm md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & KASYNA XL (MEGA-JUICE)</h2>
-                        <span class="text-[7px] text-yellow-300">Super-Moce ULTI [Q] | Wybuchowe Beczki TNT | Trampoliny | Głosowanie na Minigry!</span>
+                        <h2 class="text-sm md:text-lg text-[#05d5fa]" style="text-shadow: 2px 2px 0 #000;">🎰 CENTRUM IMPREZY & SALON GIER 2.5D (22 MINIGRY)</h2>
+                        <span class="text-[7px] text-yellow-300">Możesz zwinąć ten panel przyciskiem po prawej [TAB] i biegać postacią po Salonie Gier w tle!</span>
                     </div>
-                    <div class="flex items-center gap-2 bg-black/75 border-2 border-[#ffde00] px-3 py-1 shadow-[4px_4px_0_#000]">
-                        <div class="text-right">
-                            <span class="text-[6px] text-gray-400 block">KOD POKOJU:</span>
-                            <span id="lobbyCode" class="text-base text-[#ffde00] font-bold tracking-widest">-----</span>
+                    <div class="flex items-center gap-2">
+                        <button class="btn !bg-emerald-600 !p-2 !text-[8px] interactive" onclick="Lobby.toggleLobbyPanel()">🕹️ BIEGAJ W LOBBY 2.5D [TAB]</button>
+                        <div class="flex items-center gap-2 bg-black/75 border-2 border-[#ffde00] px-3 py-1 shadow-[4px_4px_0_#000]">
+                            <div class="text-right">
+                                <span class="text-[6px] text-gray-400 block">KOD POKOJU:</span>
+                                <span id="lobbyCode" class="text-base text-[#ffde00] font-bold tracking-widest">-----</span>
+                            </div>
+                            <button class="btn !bg-indigo-600 !p-2 !text-[7px] interactive" id="btnCopyLink">🔗 LINK</button>
                         </div>
-                        <button class="btn !bg-indigo-600 !p-2 !text-[7px] interactive" id="btnCopyLink">🔗 KOPIUJ LINK</button>
                     </div>
                 </div>
                 <div id="copyAlert" class="text-[8px] text-green-400 mb-2 hidden">SKOPIOWANO LINK ZAPROSZENIA DO SCHOWKA!</div>
@@ -411,6 +444,9 @@
                                         <option value="wizard">🧙‍♂️ Mag</option>
                                         <option value="pirate">🏴‍☠️ Pirat</option>
                                         <option value="agent">🕶️ Agent</option>
+                                        <option value="vampire">🧛‍♂️ Wampir</option>
+                                        <option value="cowboy">🤠 Szeryf</option>
+                                        <option value="thunder">⚡ Zeus</option>
                                     </select>
                                 </div>
                             </div>
@@ -487,7 +523,7 @@
                         </div>
                     </div>
 
-                    <!-- Prawa kolumna: 19 Trybów + Wybór Puli Losowania -->
+                    <!-- Prawa kolumna: 22 Tryby + Wybór Puli Losowania -->
                     <div class="lg:col-span-8 flex flex-col justify-between bg-black/50 border-2 border-gray-600 p-2.5 shadow-[4px_4px_0_#000]">
                         <div>
                             <div class="text-[8px] text-yellow-400 mb-1">1. GŁÓWNY TRYB IMPREZY (WYBIERA HOST):</div>
@@ -495,24 +531,39 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2 interactive">
                                 <div class="mode-card selected !border-4" onclick="Lobby.selectMode('party')" id="m-party">
                                     <div class="text-[9px] text-[#ffde00] mb-0.5">🎲 SUPER MARIO PARTY XL (WYSPA 50 PÓL!)</div>
-                                    <div class="text-[6px] text-gray-300 leading-relaxed">Plansza 50 pól z pułapkami, głosowaniem na minigry i Ceremonią Bonusowych Gwiazd na koniec!</div>
+                                    <div class="text-[6px] text-gray-300 leading-relaxed">Plansza 50 pól z Kołem Chaosu, pułapkami, głosowaniem na minigry i Ceremonią Bonusowych Gwiazd!</div>
                                 </div>
                                 <div class="mode-card !border-4" onclick="Lobby.selectMode('roulette')" id="m-roulette">
-                                    <div class="text-[9px] text-[#00e676] mb-0.5">🗳️ GŁOSOWANIE + RULETKA MINIGIER</div>
+                                    <div class="text-[9px] text-[#00e676] mb-0.5">🗳️ GŁOSOWANIE + RULETKA 22 MINIGIER</div>
                                     <div class="text-[6px] text-gray-300 leading-relaxed">Gracze głosują na 1 z 3 wylosowanych minigier z zaznaczonej puli (☑️) oraz losują śmieszną klątwę!</div>
                                 </div>
                             </div>
 
-                            <!-- Pasek filtrowania puli minigier -->
+                            <!-- Pasek filtrowania puli 22 minigier -->
                             <div class="flex flex-wrap justify-between items-center bg-black/60 border border-gray-700 px-2 py-1 mb-1.5 gap-1">
                                 <span class="text-[7px] text-cyan-300">🎯 PULA LOSOWANIA (KLIKNIJ ☑️ ABY WŁĄCZYĆ/WYŁĄCZYĆ Z LOSOWANIA):</span>
                                 <div class="flex gap-1 interactive">
-                                    <button class="px-1.5 py-0.5 text-[6px] bg-emerald-800 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('all')">☑️ Wszystkie (19)</button>
-                                    <button class="px-1.5 py-0.5 text-[6px] bg-amber-700 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('noshers')">🏃 Tylko Zręcznościowe Bez Strzelania (10)</button>
+                                    <button class="px-1.5 py-0.5 text-[6px] bg-emerald-800 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('all')">☑️ Wszystkie (22)</button>
+                                    <button class="px-1.5 py-0.5 text-[6px] bg-amber-700 border border-white cursor-pointer" onclick="Lobby.setPoolPreset('noshers')">🏃 Tylko Zręcznościowe Bez Strzelania (12)</button>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1 mb-2 interactive">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1 mb-2 interactive max-h-56 overflow-y-auto pr-1">
+                                <div class="mode-card" onclick="Lobby.selectMode('flappy')" id="m-flappy">
+                                    <span class="pool-badge" id="pool-flappy" onclick="Lobby.togglePoolGame(event, 'flappy')">☑️</span>
+                                    <div class="text-[7px] text-yellow-300">🚀 FLAPPY JETPACK</div>
+                                    <div class="text-[6px] text-gray-400">Leć między neon-rurami!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('fallguys')" id="m-fallguys">
+                                    <span class="pool-badge" id="pool-fallguys" onclick="Lobby.togglePoolGame(event, 'fallguys')">☑️</span>
+                                    <div class="text-[7px] text-pink-300">🏔️ GÓRA KORONY</div>
+                                    <div class="text-[6px] text-gray-400">Omijaj głazy jak w Fall Guys!</div>
+                                </div>
+                                <div class="mode-card" onclick="Lobby.selectMode('duel')" id="m-duel">
+                                    <span class="pool-badge" id="pool-duel" onclick="Lobby.togglePoolGame(event, 'duel')">☑️</span>
+                                    <div class="text-[7px] text-amber-500">🤠 DZIKI ZACHÓD</div>
+                                    <div class="text-[6px] text-gray-400">Strzel na sygnał REFLEKS!</div>
+                                </div>
                                 <div class="mode-card" onclick="Lobby.selectMode('boss')" id="m-boss">
                                     <span class="pool-badge" id="pool-boss" onclick="Lobby.togglePoolGame(event, 'boss')">☑️</span>
                                     <div class="text-[7px] text-amber-400">🐲 RAID NA SMOKA</div>
@@ -644,7 +695,7 @@
 
                         <div>
                             <button id="btnStartMatch" class="btn w-full !bg-gradient-to-b !from-[#00e676] !to-[#00a854] !text-xs !py-3 interactive hidden">🚀 ROZPOCZNIJ GRĘ!</button>
-                            <div id="clientWaitMsg" class="text-[8px] text-yellow-400 py-2 text-center animate-pulse hidden">Graj w kasynie po lewej i czekaj aż Host odpali mecz!</div>
+                            <div id="clientWaitMsg" class="text-[8px] text-yellow-400 py-2 text-center animate-pulse hidden">Zwiń panel [TAB] i biegaj po Salonie Gier 2.5D czekając na Hosta!</div>
                         </div>
                     </div>
                 </div>
@@ -707,36 +758,67 @@
         </div>
 
     </div>
+
     <script>
-        // === ZAPISYWANY PROFIL GRACZA, POZIOM LVL, RANGA I BANK ŻETONÓW (LOCALSTORAGE) ===
+        // === SYSTEM PROFILU GRACZA, RANG LVL I 8 OSIĄGNIĘĆ (ACHIEVEMENTS LOCALSTORAGE) ===
+        const ACHIEVEMENTS_LIST = {
+            first_blood: { title: '💥 Pierwsza Krew! (+40 XP)', xp: 40 },
+            jackpot_king:{ title: '🎰 Król Jackpota 777! (+60 XP)', xp: 60 },
+            ulti_master: { title: '⚡ Mistrz Super-Mocy ULTI! (+50 XP)', xp: 50 },
+            soccer_star: { title: '⚽ Łowca Bramek! (+50 XP)', xp: 50 },
+            trap_setter: { title: '💣 Saper Sabotażysta! (+40 XP)', xp: 40 },
+            kart_drifter:{ title: '🏎️ Król Toru Gokartów! (+50 XP)', xp: 50 },
+            dragon_slayer:{ title: '🐲 Pogromca Smoka Kasyna! (+70 XP)', xp: 70 },
+            champion:    { title: '👑 Zwycięzca Turnieju XL! (+100 XP)', xp: 100 }
+        };
+
         const Profile = {
-            xp: 0, lvl: 1, wins: 0, savedChips: 150,
+            xp: 0, lvl: 1, wins: 0, savedChips: 150, unlockedAch: {},
             load() {
                 try {
-                    const data = JSON.parse(localStorage.getItem('pawel_pyka_profile_v2'));
+                    const data = JSON.parse(localStorage.getItem('pawel_pyka_profile_god_v3'));
                     if(data) {
                         this.xp = data.xp || 0;
                         this.wins = data.wins || 0;
                         this.savedChips = data.savedChips ?? 150;
+                        this.unlockedAch = data.unlockedAch || {};
                     }
                 } catch(e){}
                 this.recalcUI();
             },
             save() {
                 try {
-                    localStorage.setItem('pawel_pyka_profile_v2', JSON.stringify({
-                        xp: this.xp, wins: this.wins, savedChips: LobbyCasino.chips
+                    localStorage.setItem('pawel_pyka_profile_god_v3', JSON.stringify({
+                        xp: this.xp, wins: this.wins,
+                        savedChips: LobbyCasino ? LobbyCasino.chips : this.savedChips,
+                        unlockedAch: this.unlockedAch
                     }));
                 } catch(e){}
                 this.recalcUI();
             },
+            unlockAchievement(key) {
+                if(this.unlockedAch[key] || !ACHIEVEMENTS_LIST[key]) return;
+                this.unlockedAch[key] = true;
+                const ach = ACHIEVEMENTS_LIST[key];
+                this.xp += ach.xp;
+                this.save();
+                Sound.play('jackpot');
+                const toast = document.getElementById('achievementToast');
+                document.getElementById('achTitle').innerText = ach.title;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3600);
+            },
             addXp(amount, isWin = false) {
                 this.xp += amount;
-                if(isWin) this.wins++;
+                if(isWin) {
+                    this.wins++;
+                    this.unlockAchievement('champion');
+                }
                 this.save();
             },
             getRankTitle(lvl) {
-                if(lvl >= 20) return '👑 SIGMA MASTER';
+                if(lvl >= 25) return '🌌 GOD-TIER SIGMA';
+                if(lvl >= 18) return '👑 SIGMA MASTER';
                 if(lvl >= 12) return '💎 DIAMENT';
                 if(lvl >= 7)  return '🥇 ZŁOTO';
                 if(lvl >= 3)  return '🥈 SREBRO';
@@ -748,10 +830,12 @@
                 const badgeEl = document.getElementById('profileRankBadge');
                 const barEl = document.getElementById('profileXpBar');
                 const winsEl = document.getElementById('profileWins');
+                const achEl = document.getElementById('profileAchCount');
                 const chipsEl = document.getElementById('profileChips');
                 if(badgeEl) badgeEl.innerText = `${this.getRankTitle(this.lvl)} • LVL ${this.lvl}`;
                 if(barEl) barEl.style.width = `${xpInLvl}%`;
                 if(winsEl) winsEl.innerText = this.wins;
+                if(achEl) achEl.innerText = `${Object.keys(this.unlockedAch).length}/8`;
                 if(chipsEl) chipsEl.innerText = LobbyCasino ? LobbyCasino.chips : this.savedChips;
             }
         };
@@ -798,7 +882,7 @@
             setTheme(th) {
                 const root = document.documentElement;
                 const themes = {
-                    cyber:   ['radial-gradient(circle at center, rgba(38,18,82,0.92) 0%, rgba(6,6,15,0.98) 100%)', 'linear-gradient(160deg, #1d1838 0%, #0d0b1a 100%)'],
+                    cyber:   ['radial-gradient(circle at center, rgba(42,16,90,0.92) 0%, rgba(5,5,14,0.98) 100%)', 'linear-gradient(160deg, #1d1838 0%, #0d0b1a 100%)'],
                     sunset:  ['radial-gradient(circle at center, rgba(84,18,52,0.92) 0%, rgba(18,5,20,0.98) 100%)', 'linear-gradient(160deg, #3d1233 0%, #17071a 100%)'],
                     emerald: ['radial-gradient(circle at center, rgba(12,62,42,0.92) 0%, rgba(4,14,10,0.98) 100%)', 'linear-gradient(160deg, #10382b 0%, #061711 100%)'],
                     crimson: ['radial-gradient(circle at center, rgba(75,10,18,0.92) 0%, rgba(12,3,5,0.98) 100%)',  'linear-gradient(160deg, #3b0f15 0%, #140507 100%)'],
@@ -827,102 +911,7 @@
             }
         };
 
-        function drawCustomCrosshair(ctx, x, y, type) {
-            ctx.save();
-            ctx.translate(Math.floor(x), Math.floor(y));
-            ctx.strokeStyle = '#00ff88';
-            ctx.fillStyle = '#ff2a6d';
-            ctx.lineWidth = 2;
-
-            if(type === 'cross') {
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-11, -2, 7, 4); ctx.fillRect(4, -2, 7, 4);
-                ctx.fillRect(-2, -11, 4, 7); ctx.fillRect(-2, 4, 4, 7);
-                ctx.fillStyle = '#00ff88';
-                ctx.fillRect(-10, -1, 6, 2); ctx.fillRect(4, -1, 6, 2);
-                ctx.fillRect(-1, -10, 2, 6); ctx.fillRect(-1, 4, 2, 6);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-1, -1, 2, 2);
-            } else if(type === 'circle') {
-                ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.stroke();
-                ctx.fillRect(-2, -2, 4, 4);
-            } else if(type === 'dot') {
-                ctx.fillStyle = '#000'; ctx.fillRect(-4, -4, 8, 8);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-3, -3, 6, 6);
-            } else if(type === 'diamond') {
-                ctx.rotate(Math.PI/4);
-                ctx.strokeStyle = '#ffde00';
-                ctx.strokeRect(-7, -7, 14, 14);
-                ctx.fillRect(-2, -2, 4, 4);
-            } else if(type === 'x') {
-                ctx.strokeStyle = '#ff2a6d';
-                ctx.beginPath();
-                ctx.moveTo(-8, -8); ctx.lineTo(-3, -3);
-                ctx.moveTo(8, -8); ctx.lineTo(3, -3);
-                ctx.moveTo(-8, 8); ctx.lineTo(-3, 3);
-                ctx.moveTo(8, 8); ctx.lineTo(3, 3);
-                ctx.stroke();
-                ctx.fillStyle = '#05d5fa'; ctx.fillRect(-1, -1, 2, 2);
-            }
-            ctx.restore();
-        }
-
-        let chosenSkin = 'cap';
-        const SKIN_DESCRIPTIONS = {
-            cap:    'ULTI [Q]: Fala Basowa odrzucająca pobliskich wrogów!',
-            ninja:  'ULTI [Q]: Zasłona Dymna (Niewidzialność + Speed)!',
-            knight: 'ULTI [Q]: Złoty Pancerz (+100 Tarczy + Fala Uderzeniowa)!',
-            astro:  'ULTI [Q]: Skok Antygrawitacyjny przez całą mapę!',
-            cyborg: 'ULTI [Q]: Przeładowanie Rdzenia (Minigun + 2X Obrażenia)!',
-            king:   'ULTI [Q]: Królewski Dekret (+15 PKT i Deszcz Monet)!',
-            wizard: 'ULTI [Q]: Czarna Dziura przyciągająca rywali!',
-            pirate: 'ULTI [Q]: Salwa Armatnia (Wybuchy wokół postaci)!',
-            agent:  'ULTI [Q]: Tryb Matrix Sigma (Auto-Aim + Snajperka)!'
-        };
-
-        function selectSkin(sk) {
-            chosenSkin = sk;
-            document.querySelectorAll('.skin-card').forEach(el => el.classList.remove('selected'));
-            document.getElementById('sk-' + sk)?.classList.add('selected');
-            document.getElementById('skinDescText').innerText = SKIN_DESCRIPTIONS[sk] || '';
-            const lSel = document.getElementById('lobbySkinSelect');
-            if(lSel) lSel.value = sk;
-            Preview.draw();
-        }
-
-        function switchScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const ui = document.getElementById('uiContainer');
-            if(id) {
-                ui.classList.add('interactive');
-                document.getElementById(id)?.classList.add('active');
-            } else {
-                ui.classList.remove('interactive');
-                if(document.activeElement) document.activeElement.blur();
-            }
-        }
-
-        function showErr(msg, isWarn = false) {
-            const el = document.getElementById('menuError');
-            el.innerText = msg; el.classList.remove('hidden');
-            el.className = `bg-black/90 border-2 p-2 text-[8px] mt-3 ${isWarn ? 'border-yellow-400 text-yellow-300' : 'border-red-500 text-red-400'}`;
-        }
-
-        function announce(txt, dur = 1800) {
-            const el = document.getElementById('centerAnnouncement');
-            el.innerText = txt; el.style.display = 'block';
-            if(dur > 0) setTimeout(() => el.style.display = 'none', dur);
-        }
-
-        function addKillFeed(killerName, victimName, killerColor, victimColor) {
-            const box = document.getElementById('killFeed');
-            const item = document.createElement('div');
-            item.className = 'bg-black/85 border border-gray-500 px-3 py-1 text-[8px] text-white shadow-[3px_3px_0_#000]';
-            item.innerHTML = `<span style="color:${killerColor}">${killerName}</span> 💥 <span style="color:${victimColor}">${victimName}</span>`;
-            box.appendChild(item);
-            setTimeout(() => item.remove(), 3500);
-        }
-
-        // === SYNTEZATOR DŹWIĘKÓW, MUZYKI & MEME SOUNDBOARD ===
+        // === 4-POZIOMOWY SYNTEZATOR DŹWIĘKÓW I MUZYKI CHIPTUNE (OSOBNE ŚCIEŻKI DLA LOBBY, WYSPY I AKCJI) ===
         const Sound = {
             ctx: null, musicTimer: null, step: 0,
             init() {
@@ -934,20 +923,26 @@
             },
             startMusicLoop() {
                 if(this.musicTimer) return;
-                const bassNotes = [110, 110, 130.8, 146.8, 98, 98, 130.8, 164.8];
-                const leadNotes = [440, 523.2, 659.2, 587.3, 523.2, 0, 440, 392];
+                const tracks = {
+                    lobby:  { bass: [110, 110, 146.8, 130.8, 98, 98, 130.8, 146.8], lead: [440, 0, 523.2, 587.3, 440, 0, 392, 523.2] },
+                    board:  { bass: [130.8, 164.8, 196, 164.8, 146.8, 174.6, 220, 174.6], lead: [523.2, 659.2, 784, 659.2, 587.3, 698.4, 880, 0] },
+                    action: { bass: [110, 110, 130.8, 146.8, 98, 98, 130.8, 164.8], lead: [440, 523.2, 659.2, 587.3, 523.2, 0, 440, 392] }
+                };
                 this.musicTimer = setInterval(() => {
-                    if(!Settings.music || !this.ctx || (RoomState.status !== 'playing' && RoomState.status !== 'board')) return;
+                    if(!Settings.music || !this.ctx || !currentRoom) return;
                     const t = this.ctx.currentTime;
+                    const modeKey = RoomState.status === 'lobby' ? 'lobby' : (RoomState.status === 'board' ? 'board' : 'action');
+                    const tr = tracks[modeKey];
                     let pitchMult = RoomState.mutator === 'tiny' ? 1.35 : 1.0;
-                    let bFreq = bassNotes[this.step % bassNotes.length] * pitchMult;
+
+                    let bFreq = tr.bass[this.step % tr.bass.length] * pitchMult;
                     const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
                     osc.type = 'triangle'; osc.frequency.setValueAtTime(bFreq, t);
                     g.gain.setValueAtTime(0.02, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
                     osc.connect(g); g.connect(this.ctx.destination);
                     osc.start(t); osc.stop(t + 0.19);
 
-                    let lFreq = leadNotes[this.step % leadNotes.length] * pitchMult;
+                    let lFreq = tr.lead[this.step % tr.lead.length] * pitchMult;
                     if(lFreq > 0 && this.step % 2 === 0) {
                         const lOsc = this.ctx.createOscillator(), lg = this.ctx.createGain();
                         lOsc.type = 'sine'; lOsc.frequency.setValueAtTime(lFreq, t);
@@ -956,7 +951,7 @@
                         lOsc.start(t); lOsc.stop(t + 0.23);
                     }
                     this.step++;
-                }, 220);
+                }, 215);
             },
             play(type) {
                 if(!this.ctx || !Settings.sfx) return;
@@ -981,7 +976,6 @@
                 else if(type === 'slip') { o.type='sine'; o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(950, t+0.25); g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0.01, t+0.25); o.start(t); o.stop(t+0.25); }
             }
         };
-
         // === AUTOMAT I RULETKA W LOBBY ===
         const LobbyCasino = {
             chips: 150, spinning: false, spinsCount: 0,
@@ -1016,6 +1010,7 @@
                     let win = outcome === 'green' ? 150 : 30;
                     this.chips += win;
                     Sound.play('jackpot');
+                    Profile.unlockAchievement('jackpot_king');
                     msgEl.innerText = `🎡 TRAFIONO ${outcome.toUpperCase()}! +${win} 🪙!`;
                     if(outcome === 'green' && currentRoom) {
                         db.ref(`chat/${currentRoom}`).push({ name: '🎡 RULETKA', color: '#00e676', msg: `${myName} trafił ZIELONE ZERO (10x) i zgarnął +150 🪙!` });
@@ -1063,6 +1058,7 @@
                             r1.innerText = '7️⃣'; r2.innerText = '7️⃣'; r3.innerText = '7️⃣';
                             this.chips += 150;
                             Sound.play('jackpot');
+                            Profile.unlockAchievement('jackpot_king');
                             msgEl.innerText = "🔥 JACKPOT 777! WYGRYWASZ +150 🪙!";
                             if(currentRoom) db.ref(`chat/${currentRoom}`).push({ name: '🎰 KASYNO', color: '#ffde00', msg: `${myName} TRAFIŁ JACKPOT 777 (+150 🪙)!` });
                         } else if(rand < 0.36) {
@@ -1086,7 +1082,105 @@
         Profile.load();
         LobbyCasino.chips = Profile.savedChips;
 
-        // === FIREBASE & PULA 19 MINIGIER Z MOŻLIWOŚCIĄ WYKLUCZANIA ===
+        function drawCustomCrosshair(ctx, x, y, type) {
+            ctx.save();
+            ctx.translate(Math.floor(x), Math.floor(y));
+            ctx.strokeStyle = '#00ff88';
+            ctx.fillStyle = '#ff2a6d';
+            ctx.lineWidth = 2;
+
+            if(type === 'cross') {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-11, -2, 7, 4); ctx.fillRect(4, -2, 7, 4);
+                ctx.fillRect(-2, -11, 4, 7); ctx.fillRect(-2, 4, 4, 7);
+                ctx.fillStyle = '#00ff88';
+                ctx.fillRect(-10, -1, 6, 2); ctx.fillRect(4, -1, 6, 2);
+                ctx.fillRect(-1, -10, 2, 6); ctx.fillRect(-1, 4, 2, 6);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-1, -1, 2, 2);
+            } else if(type === 'circle') {
+                ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.stroke();
+                ctx.fillRect(-2, -2, 4, 4);
+            } else if(type === 'dot') {
+                ctx.fillStyle = '#000'; ctx.fillRect(-4, -4, 8, 8);
+                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-3, -3, 6, 6);
+            } else if(type === 'diamond') {
+                ctx.rotate(Math.PI/4);
+                ctx.strokeStyle = '#ffde00';
+                ctx.strokeRect(-7, -7, 14, 14);
+                ctx.fillRect(-2, -2, 4, 4);
+            } else if(type === 'x') {
+                ctx.strokeStyle = '#ff2a6d';
+                ctx.beginPath();
+                ctx.moveTo(-8, -8); ctx.lineTo(-3, -3);
+                ctx.moveTo(8, -8); ctx.lineTo(3, -3);
+                ctx.moveTo(-8, 8); ctx.lineTo(-3, 3);
+                ctx.moveTo(8, 8); ctx.lineTo(3, 3);
+                ctx.stroke();
+                ctx.fillStyle = '#05d5fa'; ctx.fillRect(-1, -1, 2, 2);
+            }
+            ctx.restore();
+        }
+
+        let chosenSkin = 'cap';
+        const SKIN_DESCRIPTIONS = {
+            cap:     'ULTI [Q]: Fala Basowa odrzucająca pobliskich wrogów!',
+            ninja:   'ULTI [Q]: Zasłona Dymna (Niewidzialność + Speed)!',
+            knight:  'ULTI [Q]: Złoty Pancerz (+100 Tarczy + Fala Uderzeniowa)!',
+            astro:   'ULTI [Q]: Skok Antygrawitacyjny przez całą mapę!',
+            cyborg:  'ULTI [Q]: Przeładowanie Rdzenia (Minigun + 2X Obrażenia)!',
+            king:    'ULTI [Q]: Królewski Dekret (+15 PKT i Deszcz Monet)!',
+            wizard:  'ULTI [Q]: Czarna Dziura przyciągająca rywali!',
+            pirate:  'ULTI [Q]: Salwa Armatnia (Wybuchy wokół postaci)!',
+            agent:   'ULTI [Q]: Tryb Matrix Sigma (Auto-Aim + Snajperka)!',
+            vampire: 'ULTI [Q]: Krwawa Nova (Wysysa HP rywali i leczy do 100%)!',
+            cowboy:  'ULTI [Q]: High Noon (Automatyczny strzał we wszystkich wrogów)!',
+            thunder: 'ULTI [Q]: Grom Zeusa (Pioruny rażące rywali na mapie)!'
+        };
+
+        function selectSkin(sk) {
+            chosenSkin = sk;
+            document.querySelectorAll('.skin-card').forEach(el => el.classList.remove('selected'));
+            document.getElementById('sk-' + sk)?.classList.add('selected');
+            document.getElementById('skinDescText').innerText = SKIN_DESCRIPTIONS[sk] || '';
+            const lSel = document.getElementById('lobbySkinSelect');
+            if(lSel) lSel.value = sk;
+            Preview.draw();
+        }
+
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const ui = document.getElementById('uiContainer');
+            if(id) {
+                ui.classList.add('interactive');
+                document.getElementById(id)?.classList.add('active');
+            } else {
+                ui.classList.remove('interactive');
+                if(document.activeElement) document.activeElement.blur();
+            }
+        }
+
+        function showErr(msg, isWarn = false) {
+            const el = document.getElementById('menuError');
+            el.innerText = msg; el.classList.remove('hidden');
+            el.className = `bg-black/90 border-2 p-2 text-[8px] mt-3 ${isWarn ? 'border-yellow-400 text-yellow-300' : 'border-red-500 text-red-400'}`;
+        }
+
+        function announce(txt, dur = 1800) {
+            const el = document.getElementById('centerAnnouncement');
+            el.innerText = txt; el.style.display = 'block';
+            if(dur > 0) setTimeout(() => el.style.display = 'none', dur);
+        }
+
+        function addKillFeed(killerName, victimName, killerColor, victimColor) {
+            const box = document.getElementById('killFeed');
+            const item = document.createElement('div');
+            item.className = 'bg-black/85 border border-gray-500 px-3 py-1 text-[8px] text-white shadow-[3px_3px_0_#000]';
+            item.innerHTML = `<span style="color:${killerColor}">${killerName}</span> 💥 <span style="color:${victimColor}">${victimName}</span>`;
+            box.appendChild(item);
+            setTimeout(() => item.remove(), 3500);
+        }
+
+        // === FIREBASE & PULA 22 MINIGIER ===
         const firebaseConfig = {
             apiKey: "AIzaSyCr-idnk4Nrol2615W0Jf62oajJJkTdpks",
             authDomain: "chaosarena-75404.firebaseapp.com",
@@ -1103,12 +1197,13 @@
         let netPlayers = {}, netZombies = {}, netItems = {}, netMeteors = [];
 
         const ALL_MINIGAMES = [
-            'boss', 'sumo', 'glass', 'soccer', 'paint', 'lasers', 'race', 'squid',
-            'spleef', 'bomb', 'meteors', 'crown', 'heist', 'zombies', 'koth', 'royale', 'sniper', 'coins', 'arena'
+            'flappy', 'fallguys', 'duel', 'boss', 'sumo', 'glass', 'soccer', 'paint', 'lasers',
+            'race', 'squid', 'spleef', 'bomb', 'meteors', 'crown', 'heist', 'zombies', 'koth', 'royale', 'sniper', 'coins', 'arena'
         ];
-        const NO_SHOOTING_GAMES = ['sumo', 'glass', 'soccer', 'paint', 'lasers', 'race', 'squid', 'spleef', 'bomb', 'meteors'];
+        const NO_SHOOTING_GAMES = ['flappy', 'fallguys', 'sumo', 'glass', 'soccer', 'paint', 'lasers', 'race', 'squid', 'spleef', 'bomb', 'meteors'];
 
         const MINIGAME_LABELS = {
+            flappy: '🚀 FLAPPY JETPACK', fallguys: '🏔️ GÓRA KORONY', duel: '🤠 DZIKI ZACHÓD',
             boss: '🐲 RAID NA SMOKA', sumo: '🥊 SUMO RING', glass: '🌉 SZKLANY MOST',
             soccer: '⚽ PIŁKA NOŻNA', paint: '🎨 WOJNA KOLORÓW', lasers: '🚨 LASEROWY UNIK',
             race: '🏎️ WYŚCIG GOKARTÓW', squid: '🚦 SQUID GAME',
@@ -1120,23 +1215,6 @@
 
         let minigameDeck = [];
         let lastPlayedMap = '';
-
-        function drawNextUniqueMinigame() {
-            const allowed = (Array.isArray(RoomState.allowedGames) && RoomState.allowedGames.length > 0)
-                ? RoomState.allowedGames.filter(g => ALL_MINIGAMES.includes(g))
-                : [...ALL_MINIGAMES];
-            const safePool = allowed.length > 0 ? allowed : [...ALL_MINIGAMES];
-
-            minigameDeck = minigameDeck.filter(g => safePool.includes(g));
-            if(minigameDeck.length === 0) {
-                minigameDeck = [...safePool];
-                for(let i = minigameDeck.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [minigameDeck[i], minigameDeck[j]] = [minigameDeck[j], minigameDeck[i]];
-                }
-            }
-            return minigameDeck.pop() || safePool[0];
-        }
 
         function drawThreeVoteChoices() {
             const allowed = (Array.isArray(RoomState.allowedGames) && RoomState.allowedGames.length > 0)
@@ -1227,7 +1305,7 @@
             }
         };
 
-        // === RYSOWANIE ZWIERZAKA PIXEL-PET LATAJĄCEGO ZA GRACZEM ===
+        // === RYSOWANIE ZWIERZAKA PIXEL-PET ===
         function drawPixelPet(ctx, x, y, petType, anim) {
             if(!petType || petType === 'none') return;
             const hoverY = Math.sin(performance.now() * 0.008 + x * 0.02) * 6;
@@ -1358,7 +1436,7 @@
             }
         }
 
-        // === MODELE 9 KLAS BOHATERÓW PIXEL-ART ===
+        // === MODELE WSZYSTKICH 12 KLAS BOHATERÓW PIXEL-ART ===
         function drawPixelHero(ctx, x, y, angle, color, skin, name, hp, maxHp, shield, wep, anim, isBomb, isDead, muzzle, quad, emote, hasCrown=false, jumpZ=0, petType='none', inBush=false) {
             if(RoomState.status === 'playing' && RoomState.activeMinigame === 'race') {
                 drawPixelKart(ctx, x, y, angle, color, skin, name, hp);
@@ -1422,18 +1500,22 @@
             ctx.fillRect(-3*P - step, 3*P, 3*P, 2*P);
 
             ctx.fillStyle = '#000'; ctx.fillRect(-5*P, -5*P, 9*P, 10*P);
-            ctx.fillStyle = skin === 'knight' ? '#9aa5b1' : (skin === 'ninja' || skin === 'agent' ? '#171722' : (skin === 'wizard' ? '#3f1d70' : color));
+            ctx.fillStyle = skin === 'knight' ? '#9aa5b1' : (skin === 'ninja' || skin === 'agent' || skin === 'vampire' ? '#171722' : (skin === 'wizard' ? '#3f1d70' : color));
             ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
 
             if(skin === 'agent') {
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(0, -1.5*P, 3*P, 3*P);
                 ctx.fillStyle = '#ff1744'; ctx.fillRect(P, -0.5*P, 3*P, P);
+            } else if(skin === 'vampire') {
+                // Czerwono-czarna peleryna Wampira
+                ctx.fillStyle = '#b71c1c';
+                ctx.fillRect(-8*P, -4*P + wave*0.4, 5*P, 8*P);
             }
 
             ctx.fillStyle = '#000';
             ctx.fillRect(2*P, -6*P, 3*P, 3*P);
             ctx.fillRect(3*P, 3*P, 3*P, 3*P);
-            ctx.fillStyle = skin === 'cyborg' ? '#90a4ae' : (skin === 'knight' ? '#cbd2d9' : '#ffcca3');
+            ctx.fillStyle = skin === 'cyborg' ? '#90a4ae' : (skin === 'knight' ? '#cbd2d9' : (skin === 'vampire' ? '#e8eaf6' : '#ffcca3'));
             ctx.fillRect(2*P, -5*P, 2*P, 2*P);
             if(skin === 'pirate') {
                 ctx.fillStyle = '#ffde00'; ctx.fillRect(3*P, 4*P, 3*P, P); ctx.fillRect(5*P, 3*P, P, 2*P);
@@ -1442,11 +1524,13 @@
             }
 
             const gm = RoomState.activeMinigame;
-            const noGunModes = ['squid', 'soccer', 'paint', 'lasers', 'bomb', 'sumo', 'glass'];
+            const noGunModes = ['squid', 'soccer', 'paint', 'lasers', 'bomb', 'sumo', 'glass', 'flappy', 'fallguys'];
             if(!noGunModes.includes(gm) || RoomState.status !== 'playing') {
                 if(skin === 'wizard' && wep === 'pistol') {
                     ctx.fillStyle = '#5c3818'; ctx.fillRect(3*P, P, 6*P, 2*P);
                     ctx.fillStyle = '#05d5fa'; ctx.fillRect(8*P, 0.5*P, 2.5*P, 3*P);
+                } else if(skin === 'thunder' && wep === 'pistol') {
+                    ctx.fillStyle = '#ffde00'; ctx.fillRect(3*P, P, 7*P, 2*P);
                 } else {
                     let gunLen = wep === 'sniper' || wep === 'bazooka' ? 9 : (wep === 'minigun' || wep === 'plasma' ? 7 : 5);
                     ctx.fillStyle = '#000'; ctx.fillRect(3*P, P, gunLen*P, 3*P);
@@ -1532,6 +1616,22 @@
                 ctx.fillStyle = '#000'; ctx.fillRect(1.5*P, -3*P, 2*P, 6*P);
                 ctx.fillStyle = '#05d5fa'; ctx.fillRect(2*P, -2.5*P, P, 2*P); ctx.fillRect(2*P, 0.5*P, P, 2*P);
             }
+            else if(skin === 'vampire') {
+                ctx.fillStyle = '#e8eaf6'; ctx.fillRect(-3*P, -3*P, 6*P, 6*P);
+                ctx.fillStyle = '#0c0c14'; ctx.fillRect(-4*P, -3.5*P, 4*P, 7*P);
+                ctx.fillStyle = '#ff1744'; ctx.fillRect(2*P, -2*P, P, P); ctx.fillRect(2*P, P, P, P);
+            }
+            else if(skin === 'cowboy') {
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#5c3818'; ctx.beginPath(); ctx.arc(0, 0, 5.2*P, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#825226'; ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#ffde00'; ctx.fillRect(-P, -P, 2*P, 2*P);
+            }
+            else if(skin === 'thunder') {
+                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-2*P, -3*P, 5*P, 6*P);
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(-4*P, -4*P, 5*P, 8*P);
+                ctx.fillStyle = '#05d5fa'; ctx.fillRect(2*P, -2*P, 2*P, 4*P);
+            }
 
             ctx.restore();
             ctx.restore();
@@ -1590,11 +1690,11 @@
 
         // === SZTUCZNA INTELIGENCJA BOTÓW ===
         const BOT_PRESETS = [
-            { name: '🤖 Bot Kuba',   color: '#ff2a6d', skin: 'ninja',  pet: 'dragon' },
-            { name: '🤖 Bot Sigma',  color: '#00e676', skin: 'agent',  pet: 'drone' },
-            { name: '🤖 Bot Mag',    color: '#e040fb', skin: 'wizard', pet: 'ghost' },
-            { name: '🤖 Bot Kapitan',color: '#ffde00', skin: 'pirate', pet: 'star' },
-            { name: '🤖 Bot Rycerz', color: '#ff9100', skin: 'knight', pet: 'dragon' }
+            { name: '🤖 Bot Kuba',   color: '#ff2a6d', skin: 'ninja',   pet: 'dragon' },
+            { name: '🤖 Bot Sigma',  color: '#00e676', skin: 'agent',   pet: 'drone' },
+            { name: '🤖 Bot Mag',    color: '#e040fb', skin: 'wizard',  pet: 'ghost' },
+            { name: '🤖 Bot Szeryf', color: '#ffde00', skin: 'cowboy',  pet: 'star' },
+            { name: '🤖 Bot Zeus',   color: '#05d5fa', skin: 'thunder', pet: 'dragon' }
         ];
 
         const BotAI = {
@@ -1656,7 +1756,6 @@
                     let extraMsg = '';
                     let newPrison = 0;
 
-                    // Sprawdzenie czy na polu jest postawiona mina-pułapka!
                     let trapOwner = RoomState.boardTraps && RoomState.boardTraps[newPos];
                     if(trapOwner && trapOwner !== currentTurnId) {
                         newPos = Math.max(0, newPos - 4);
@@ -1772,6 +1871,7 @@
 
             initBoardView() {
                 switchScreen(null);
+                document.getElementById('hubTopBar').style.display = 'none';
                 document.getElementById('hud').style.display = 'none';
                 document.getElementById('hudRight').style.display = 'block';
                 document.getElementById('btnSkipMinigame').style.display = 'none';
@@ -1785,13 +1885,13 @@
                 if(!Game.loopId) { Game.lastTime = performance.now(); Game.loopId = requestAnimationFrame(t => Game.loop(t)); }
             },
 
-            // Stawianie własnej Miny-Pułapki na polu, na którym stoi gracz
             placeTrapOnCurrentTile() {
                 if(this.myPos <= 0 || this.myPos >= 50) return announce("NIE MOŻNA STAWIAĆ MINY NA STARCIE/MECIE!", 1300);
                 if(LobbyCasino.chips < 15) return announce("POTRZEBUJESZ 15 🪙 NA MINĘ!", 1300);
                 LobbyCasino.chips -= 15;
                 LobbyCasino.syncChips();
                 Sound.play('coin');
+                Profile.unlockAchievement('trap_setter');
                 db.ref(`rooms/${currentRoom}/boardTraps/${this.myPos}`).set(myId);
                 announce(`💣 UZBROJONO MINĘ NA POLU ${this.myPos}!`, 1500);
                 this.updateTurnUI();
@@ -1968,7 +2068,6 @@
                 let tile = BOARD_TILES[this.myPos];
                 let msg = `🎲 ${myName} wyrzucił [${roll}] i stanął na polu ${this.myPos} (${tile.n})!`;
 
-                // Sprawdzenie czy na polu ktoś postawił Minę-Pułapkę!
                 let trapOwner = RoomState.boardTraps && RoomState.boardTraps[this.myPos];
                 if(trapOwner && trapOwner !== myId) {
                     Sound.play('boom');
@@ -2060,6 +2159,7 @@
                 } else if(itemType === 'sabotage') {
                     this.myCards.push('magnet');
                     this.renderCardsUI();
+                    Profile.unlockAchievement('trap_setter');
                     db.ref(`rooms/${currentRoom}/boardTraps/${this.myPos}`).set(myId);
                     this.finishTurnCheck(`🛒 ${myName} kupił Pakiet Sabotażu i uzbroił Minę na polu ${this.myPos}!`);
                 }
@@ -2104,6 +2204,7 @@
                             r1.innerText = '7️⃣'; r2.innerText = '7️⃣'; r3.innerText = '7️⃣';
                             resTxt.innerText = "🎰 JACKPOT 777! +5 PÓL DO PRZODU!";
                             Sound.play('jackpot');
+                            Profile.unlockAchievement('jackpot_king');
                             cMsg = `🎰 ${myName} rozbił BANK W KASYNIE (777) i skacze +5 pól!`;
                             setTimeout(() => {
                                 document.getElementById('casinoModal').style.display = 'none';
@@ -2281,7 +2382,6 @@
                     ctx.fillStyle = '#000'; ctx.font = '6px "Press Start 2P"'; ctx.textAlign = 'center';
                     ctx.fillText(t.n, 0, 1);
 
-                    // Rysowanie uzbrojonej Miny-Pułapki na polu!
                     if(RoomState.boardTraps && RoomState.boardTraps[i]) {
                         ctx.font = '13px sans-serif';
                         ctx.fillText('💣', 22, -10);
@@ -2327,706 +2427,6 @@
             }
         };
         // === GENERATOR TEKSTUR PODŁOŻA 2.5D HD ===
-        const WORLD_SIZE = 1600;
-        const GroundCache = {
-            canvases: {},
-            buildAll() {
-                ['forest', 'cyber', 'ice', 'lava'].forEach(type => {
-                    const c = document.createElement('canvas');
-                    c.width = WORLD_SIZE; c.height = WORLD_SIZE;
-                    const g = c.getContext('2d');
-                    g.imageSmoothingEnabled = false;
-
-                    const pal = {
-                        forest: { c1: '#1a3817', c2: '#152e13', spec: '#285423', fl1: '#ffde00', fl2: '#ff5286' },
-                        cyber:  { c1: '#0b0618', c2: '#120a26', spec: '#25144d', fl1: '#05d5fa', fl2: '#ff2a6d' },
-                        ice:    { c1: '#bce3f7', c2: '#abd8f0', spec: '#d9f2ff', fl1: '#ffffff', fl2: '#7fd1fc' },
-                        lava:   { c1: '#1a1114', c2: '#22161a', spec: '#362128', fl1: '#ff4d00', fl2: '#ff9100' }
-                    }[type];
-
-                    for(let x=0; x<WORLD_SIZE; x+=80) {
-                        for(let y=0; y<WORLD_SIZE; y+=80) {
-                            g.fillStyle = ((x+y)/80)%2 === 0 ? pal.c1 : pal.c2;
-                            g.fillRect(x, y, 80, 80);
-                            g.fillStyle = 'rgba(255,255,255,0.038)';
-                            g.fillRect(x, y, 80, 4);
-                            g.fillStyle = 'rgba(0,0,0,0.09)';
-                            g.fillRect(x, y+76, 80, 4);
-                        }
-                    }
-
-                    for(let i=0; i<340; i++) {
-                        let rx = Math.floor(Math.random()*390)*4 + 16;
-                        let ry = Math.floor(Math.random()*390)*4 + 16;
-                        g.fillStyle = pal.spec;
-                        g.fillRect(rx, ry, 8, 4); g.fillRect(rx+4, ry-4, 4, 8);
-                        if(i % 4 === 0) {
-                            g.fillStyle = i % 8 === 0 ? pal.fl1 : pal.fl2;
-                            g.fillRect(rx+4, ry, 4, 4);
-                        }
-                    }
-                    this.canvases[type] = c;
-                });
-            }
-        };
-        GroundCache.buildAll();
-
-        // === INTERAKTYWNE ELEMENTY AREN (BECZKI TNT, ZAROŚLA NIEWIDZIALNOŚCI, TRAMPOLINY JUMP-PADS) ===
-        const ARENA_BUSHES = [
-            {x:540, y:540, r:65}, {x:1060, y:540, r:65},
-            {x:540, y:1060, r:65}, {x:1060, y:1060, r:65}
-        ];
-        const ARENA_JUMPPADS = [
-            {x:220, y:800, vx:680, vy:-120}, {x:1380, y:800, vx:-680, vy:120},
-            {x:800, y:220, vx:120, vy:680},  {x:800, y:1380, vx:-120, vy:-680}
-        ];
-        const ARENA_BARRELS = [
-            {id:'b0', x:620, y:360}, {id:'b1', x:980, y:360},
-            {id:'b2', x:620, y:1240},{id:'b3', x:980, y:1240},
-            {id:'b4', x:360, y:800}, {id:'b5', x:1240, y:800}
-        ];
-
-        const Weather = {
-            dots: Array.from({length: 55}, () => ({ x: Math.random()*WORLD_SIZE, y: Math.random()*WORLD_SIZE, s: Math.random()*3+2, sp: Math.random()*25+15, p: Math.random()*6 })),
-            updateAndDraw(ctx, dt, mapType) {
-                const col = mapType === 'ice' ? '#ffffff' : (mapType === 'lava' ? '#ff6d00' : (mapType === 'cyber' ? '#05d5fa' : '#d4ff59'));
-                ctx.fillStyle = col;
-                this.dots.forEach(d => {
-                    d.p += dt * 2;
-                    d.y += (mapType === 'lava' ? -d.sp : d.sp) * dt;
-                    d.x += Math.sin(d.p) * 18 * dt;
-                    if(d.y > WORLD_SIZE) d.y = 0; if(d.y < 0) d.y = WORLD_SIZE;
-                    ctx.globalAlpha = 0.45 + Math.sin(d.p)*0.35;
-                    ctx.fillRect(Math.floor(d.x), Math.floor(d.y), d.s, d.s);
-                });
-                ctx.globalAlpha = 1;
-            }
-        };
-
-        const MAPS = {
-            forest: {
-                friction: 0.82,
-                obstacles: [
-                    {x:320, y:320, w:120, h:120, t:'crate'}, {x:1160, y:320, w:120, h:120, t:'crate'},
-                    {x:320, y:1160, w:120, h:120, t:'crate'}, {x:1160, y:1160, w:120, h:120, t:'crate'},
-                    {x:740, y:440, w:120, h:80, t:'tree'}, {x:740, y:1080, w:120, h:80, t:'tree'}
-                ]
-            },
-            cyber: {
-                friction: 0.85,
-                obstacles: [
-                    {x:340, y:340, w:130, h:90, t:'neon'}, {x:1130, y:340, w:130, h:90, t:'neon'},
-                    {x:340, y:1170, w:130, h:90, t:'neon'}, {x:1130, y:1170, w:130, h:90, t:'neon'}
-                ]
-            },
-            ice: {
-                friction: 0.96,
-                obstacles: [
-                    {x:380, y:380, w:160, h:80, t:'ice'}, {x:1060, y:380, w:160, h:80, t:'ice'},
-                    {x:380, y:1140, w:160, h:80, t:'ice'}, {x:1060, y:1140, w:160, h:80, t:'ice'}
-                ]
-            },
-            lava: {
-                friction: 0.82,
-                obstacles: [
-                    {x:300, y:300, w:140, h:140, t:'lava'}, {x:1160, y:300, w:140, h:140, t:'lava'},
-                    {x:300, y:1160, w:140, h:140, t:'lava'}, {x:1160, y:1160, w:140, h:140, t:'lava'}
-                ]
-            }
-        };
-
-        const WEAPONS = {
-            pistol:  { name: 'Pistolet',  rate: 0.22, dmg: 22, proj: 1, spread: 0.04, spd: 1320, knock: 160, snd: 'shoot', bType: 'norm' },
-            shotgun: { name: 'Strzelba',  rate: 0.65, dmg: 18, proj: 6, spread: 0.28, spd: 1180, knock: 380, snd: 'shotgun', bType: 'norm' },
-            minigun: { name: 'Minigun',   rate: 0.08, dmg: 12, proj: 1, spread: 0.14, spd: 1360, knock: 95,  snd: 'shoot', bType: 'norm' },
-            sniper:  { name: 'Snajperka', rate: 0.88, dmg: 85, proj: 1, spread: 0.00, spd: 2100, knock: 500, snd: 'sniper', bType: 'norm' },
-            plasma:  { name: 'Plazma (Odbicia)', rate: 0.17, dmg: 28, proj: 1, spread: 0.05, spd: 1120, knock: 180, snd: 'plasma', bType: 'bounce' },
-            bazooka: { name: 'Bazooka (Wybuch)', rate: 1.10, dmg: 65, proj: 1, spread: 0.02, spd: 860,  knock: 660, snd: 'boom',   bType: 'rocket' }
-        };
-
-        const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-        let W = window.innerWidth, H = window.innerHeight;
-        window.onresize = () => { W = window.innerWidth; H = window.innerHeight; canvas.width = W; canvas.height = H; ctx.imageSmoothingEnabled = false; };
-        window.onresize();
-
-        const Input = {
-            keys: {}, mx: W/2, my: H/2, wx: 0, wy: 0, down: false, initialized: false,
-            init() {
-                if(this.initialized) return;
-                this.initialized = true;
-
-                window.addEventListener('keydown', e => {
-                    Sound.init();
-                    const tag = document.activeElement ? document.activeElement.tagName : '';
-                    if(tag === 'INPUT' || tag === 'SELECT') return;
-
-                    if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
-
-                    this.keys[e.code] = true;
-                    if(e.key) this.keys[e.key.toLowerCase()] = true;
-
-                    if(e.code === 'Space' && Game.me) Game.me.tryDash();
-                    if(e.code === 'KeyQ'  && Game.me) Game.me.tryUltimate();
-                    if(e.code === 'KeyE'  && Game.me) {
-                        const emotes = ['😎', '🔥', '💀', '😂', '👑', '⚽'];
-                        Chat.sendEmote(emotes[Math.floor(Math.random()*emotes.length)]);
-                    }
-                });
-
-                window.addEventListener('keyup', e => {
-                    this.keys[e.code] = false;
-                    if(e.key) this.keys[e.key.toLowerCase()] = false;
-                });
-
-                window.addEventListener('blur', () => { this.keys = {}; this.down = false; });
-                window.addEventListener('mousemove', e => { this.mx = e.clientX; this.my = e.clientY; });
-                window.addEventListener('mousedown', e => {
-                    Sound.init();
-                    if(e.target.tagName === 'CANVAS') {
-                        if(document.activeElement) document.activeElement.blur();
-                        this.down = true;
-                    }
-                });
-                window.addEventListener('mouseup', () => { this.down = false; });
-            },
-            isLeft()  { return !!(this.keys['KeyA'] || this.keys['ArrowLeft']  || this.keys['a']); },
-            isRight() { return !!(this.keys['KeyD'] || this.keys['ArrowRight'] || this.keys['d']); },
-            isUp()    { return !!(this.keys['KeyW'] || this.keys['ArrowUp']    || this.keys['w']); },
-            isDown()  { return !!(this.keys['KeyS'] || this.keys['ArrowDown']  || this.keys['s']); }
-        };
-        Input.init();
-
-        const Cam = {
-            x: 0, y: 0, shkT: 0, shkI: 0,
-            update(dt, target) {
-                this.x += ((target.x - W/2) - this.x) * 8 * dt;
-                this.y += ((target.y - H/2) - this.y) * 8 * dt;
-                Input.wx = Input.mx + this.x; Input.wy = Input.my + this.y;
-                if(this.shkT > 0) this.shkT -= dt;
-            },
-            shake(i, d) { if(!Settings.shake) return; this.shkI = i; this.shkT = d; },
-            apply() {
-                ctx.save();
-                let ox = this.shkT > 0 ? (Math.random()-0.5)*this.shkI : 0;
-                let oy = this.shkT > 0 ? (Math.random()-0.5)*this.shkI : 0;
-                ctx.translate(Math.floor(-this.x + ox), Math.floor(-this.y + oy));
-            },
-            restore() { ctx.restore(); }
-        };
-
-        // === SILNIK EFEKTÓW „GAME JUICE” (NEON GLOW, ŁUSKI, KRATERY) ===
-        const FX = {
-            parts: [], texts: [], decals: [], rings: [], lasers: [], shells: [],
-            burst(x, y, color, count=8, spd=180, size=6) {
-                for(let i=0; i<count; i++) {
-                    let a = Math.random()*Math.PI*2, v = Math.random()*spd + 30;
-                    this.parts.push({ x, y, vx: Math.cos(a)*v, vy: Math.sin(a)*v, l: 0.35, m: 0.35, s: size, c: color });
-                }
-            },
-            spawnShell(x, y, angle) {
-                let sideA = angle + Math.PI/2 + (Math.random()-0.5)*0.5;
-                let v = 90 + Math.random()*60;
-                this.shells.push({ x, y, vx: Math.cos(sideA)*v, vy: Math.sin(sideA)*v, l: 1.5 });
-                if(this.shells.length > 70) this.shells.shift();
-            },
-            laserBeam(x1, y1, x2, y2) {
-                this.lasers.push({ x1, y1, x2, y2, l: 0.35, m: 0.35 });
-            },
-            explosion(x, y, col='#ff9100') {
-                Sound.play('boom'); Cam.shake(15, 0.26);
-                this.rings.push({ x, y, r: 10, maxR: 155, l: 0.3, m: 0.3, c: col });
-                this.burst(x, y, col, 22, 300, 8);
-                this.burst(x, y, '#ffde00', 14, 200, 6);
-                this.decals.push({ x: Math.floor(x-16), y: Math.floor(y-16), s: 32, c: 'rgba(10,10,14,0.65)' });
-            },
-            text(x, y, txt, c='#fff', s=11) {
-                this.texts.push({ x: x+(Math.random()*16-8), y: y-22, txt, c, s, l: 0.85, m: 0.85 });
-            },
-            update(dt) {
-                for(let i=this.parts.length-1; i>=0; i--) {
-                    let p = this.parts[i]; p.x += p.vx*dt; p.y += p.vy*dt; p.vx *= 0.9; p.vy *= 0.9; p.l -= dt;
-                    if(p.l <= 0) {
-                        if(p.c === '#d91643' || p.c === '#28b835' || p.c === '#222222') {
-                            this.decals.push({x: Math.floor(p.x/4)*4, y: Math.floor(p.y/4)*4, s: p.s+2, c: p.c === '#d91643' ? '#63081e' : (p.c === '#222222' ? '#111' : '#134d18')});
-                            if(this.decals.length > 260) this.decals.shift();
-                        }
-                        this.parts.splice(i,1);
-                    }
-                }
-                for(let i=this.shells.length-1; i>=0; i--) {
-                    let sh = this.shells[i]; sh.x += sh.vx*dt; sh.y += sh.vy*dt; sh.vx *= 0.85; sh.vy *= 0.85; sh.l -= dt;
-                    if(sh.l <= 0) this.shells.splice(i,1);
-                }
-                for(let i=this.rings.length-1; i>=0; i--) {
-                    let rg = this.rings[i]; rg.l -= dt;
-                    rg.r = rg.maxR * (1 - rg.l/rg.m);
-                    if(rg.l <= 0) this.rings.splice(i,1);
-                }
-                for(let i=this.lasers.length-1; i>=0; i--) {
-                    this.lasers[i].l -= dt;
-                    if(this.lasers[i].l <= 0) this.lasers.splice(i,1);
-                }
-                for(let i=this.texts.length-1; i>=0; i--) {
-                    let t = this.texts[i]; t.y -= 42*dt; t.l -= dt;
-                    if(t.l <= 0) this.texts.splice(i,1);
-                }
-            },
-            drawDecals() {
-                this.decals.forEach(d => { ctx.fillStyle = d.c; ctx.fillRect(d.x, d.y, d.s, d.s); });
-                ctx.fillStyle = '#ffde00';
-                this.shells.forEach(sh => { ctx.fillRect(Math.floor(sh.x), Math.floor(sh.y), 5, 3); });
-            },
-            drawTop() {
-                // Włączenie trybu mieszania światła Neon-Glow!
-                ctx.save();
-                ctx.globalCompositeOperation = 'lighter';
-                this.lasers.forEach(ls => {
-                    ctx.strokeStyle = '#ff0044'; ctx.lineWidth = 8;
-                    ctx.globalAlpha = ls.l / ls.m;
-                    ctx.beginPath(); ctx.moveTo(ls.x1, ls.y1); ctx.lineTo(ls.x2, ls.y2); ctx.stroke();
-                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.stroke();
-                });
-                this.rings.forEach(rg => {
-                    ctx.strokeStyle = rg.c || '#ff9100'; ctx.lineWidth = 7;
-                    ctx.globalAlpha = Math.max(0, rg.l/rg.m);
-                    ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, 0, Math.PI*2); ctx.stroke();
-                });
-                this.parts.forEach(p => { ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, p.l/p.m); ctx.fillRect(Math.floor(p.x-p.s/2), Math.floor(p.y-p.s/2), p.s, p.s); });
-                ctx.restore();
-
-                ctx.globalAlpha = 1; ctx.textAlign = 'center';
-                this.texts.forEach(t => {
-                    ctx.globalAlpha = Math.max(0, t.l/t.m);
-                    ctx.font = `${t.s}px "Press Start 2P"`;
-                    ctx.fillStyle = '#000'; ctx.fillText(t.txt, Math.floor(t.x)+2, Math.floor(t.y)+2);
-                    ctx.fillStyle = t.c; ctx.fillText(t.txt, Math.floor(t.x), Math.floor(t.y));
-                });
-                ctx.globalAlpha = 1;
-            }
-        };
-
-        function drawPixelObstacle25D(ctx, o) {
-            const P = 4, wallH = 22;
-            if(o.t === 'lava') {
-                ctx.fillStyle = '#6e1100'; ctx.fillRect(o.x-4, o.y-4, o.w+8, o.h+8);
-                ctx.fillStyle = '#cc2900'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.fillStyle = '#ff6600'; ctx.fillRect(o.x+8, o.y+8, o.w-16, o.h-16);
-                ctx.fillStyle = '#ffde00';
-                let pulse = Math.floor(Math.sin(performance.now()*0.005)*8);
-                ctx.fillRect(o.x+24+pulse, o.y+24, 24, 24);
-                return;
-            }
-
-            ctx.fillStyle = 'rgba(0,0,0,0.52)';
-            ctx.fillRect(o.x + 8, o.y + 10, o.w, o.h);
-
-            if(o.t === 'crate') {
-                ctx.fillStyle = '#1f1004'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
-                ctx.fillStyle = '#593414'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
-                ctx.fillStyle = '#99622e'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
-                ctx.fillStyle = '#784a1f';
-                for(let py = o.y-wallH+P*4; py < o.y+o.h-wallH-P*2; py += P*5) ctx.fillRect(o.x+P*2, py, o.w-P*4, P);
-            } else if(o.t === 'neon') {
-                ctx.fillStyle = '#05d5fa'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
-                ctx.fillStyle = '#120924'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
-                ctx.fillStyle = '#221242'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
-                ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 4;
-                ctx.strokeRect(o.x+12, o.y-wallH+12, o.w-24, o.h-24);
-            } else if(o.t === 'tree') {
-                ctx.fillStyle = '#472810'; ctx.fillRect(o.x + o.w/2 - 14, o.y + o.h - 24, 28, 24);
-                ctx.fillStyle = '#0b1f0a'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h);
-                ctx.fillStyle = '#1b4718'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
-                ctx.fillStyle = '#296924'; ctx.fillRect(o.x+P*3, o.y-wallH+P*2, o.w-P*6, o.h-P*6);
-            } else if(o.t === 'ice') {
-                ctx.fillStyle = '#133c52'; ctx.fillRect(o.x, o.y - wallH, o.w, o.h + wallH);
-                ctx.fillStyle = '#3993bd'; ctx.fillRect(o.x+P, o.y+o.h-wallH, o.w-P*2, wallH-P);
-                ctx.fillStyle = '#73c7eb'; ctx.fillRect(o.x+P, o.y-wallH+P, o.w-P*2, o.h-P*2);
-            }
-        }
-
-        function drawPixelBarrelTNT(ctx, b) {
-            ctx.save();
-            ctx.translate(b.x, b.y);
-            ctx.fillStyle = 'rgba(0,0,0,0.48)'; ctx.beginPath(); ctx.ellipse(0, 12, 20, 9, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#000'; ctx.fillRect(-18, -22, 36, 36);
-            ctx.fillStyle = '#d50000'; ctx.fillRect(-15, -19, 30, 30);
-            ctx.fillStyle = '#ffde00'; ctx.fillRect(-15, -8, 30, 10);
-            ctx.fillStyle = '#000'; ctx.font = '7px "Press Start 2P"'; ctx.textAlign = 'center';
-            ctx.fillText("TNT", 0, 0);
-            ctx.restore();
-        }
-
-        function drawPixelJumpPad(ctx, jp) {
-            ctx.save();
-            ctx.translate(jp.x, jp.y);
-            ctx.fillStyle = '#000'; ctx.fillRect(-24, -24, 48, 48);
-            ctx.fillStyle = '#1e2238'; ctx.fillRect(-20, -20, 40, 40);
-            let pulse = Math.sin(performance.now()*0.01) * 3;
-            ctx.strokeStyle = '#00e676'; ctx.lineWidth = 3;
-            ctx.strokeRect(-14 - pulse, -14 - pulse, 28 + pulse*2, 28 + pulse*2);
-            ctx.fillStyle = '#ffde00'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('⏫', 0, 5);
-            ctx.restore();
-        }
-
-        function drawPixelBush(ctx, b) {
-            ctx.save();
-            ctx.translate(b.x, b.y);
-            ctx.fillStyle = 'rgba(20, 82, 28, 0.78)';
-            ctx.beginPath(); ctx.arc(0, 0, b.r, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = 'rgba(46, 138, 56, 0.72)';
-            ctx.beginPath(); ctx.arc(-15, -12, b.r*0.6, 0, Math.PI*2); ctx.arc(18, 10, b.r*0.55, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-        }
-
-        function drawPixelZombie(ctx, z) {
-            const P = z.t === 2 ? 4 : 3;
-            ctx.save();
-            ctx.translate(Math.floor(z.x), Math.floor(z.y));
-            ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0, 6, 14, 7, 0, 0, Math.PI*2); ctx.fill();
-            ctx.rotate(z.a || 0);
-            ctx.fillStyle = '#000'; ctx.fillRect(2*P, -4*P, 4*P, 2*P); ctx.fillRect(2*P, 2*P, 4*P, 2*P);
-            ctx.fillStyle = '#000'; ctx.fillRect(-4*P, -4*P, 7*P, 8*P);
-            ctx.fillStyle = z.t === 2 ? '#7862ad' : (z.t === 1 ? '#f05454' : '#43b84d');
-            ctx.fillRect(-3*P, -3*P, 5*P, 6*P);
-            ctx.fillStyle = '#ffde00'; ctx.fillRect(P, -2*P, P, P); ctx.fillRect(P, P, P, P);
-            ctx.restore();
-        }
-
-        function drawPixelBossDragon(ctx, boss) {
-            ctx.save();
-            ctx.translate(Math.floor(boss.x), Math.floor(boss.y));
-            const flap = Math.sin(performance.now() * 0.012) * 18;
-
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.beginPath(); ctx.ellipse(0, 26, 65, 28, 0, 0, Math.PI*2); ctx.fill();
-
-            ctx.fillStyle = '#a30036';
-            ctx.fillRect(-95, -25 + flap, 50, 42);
-            ctx.fillRect(45, -25 + flap, 50, 42);
-            ctx.fillStyle = '#ff2a6d';
-            ctx.fillRect(-88, -18 + flap, 38, 28);
-            ctx.fillRect(50, -18 + flap, 38, 28);
-
-            ctx.fillStyle = '#000'; ctx.fillRect(-48, -48, 96, 92);
-            ctx.fillStyle = '#ff9100'; ctx.fillRect(-42, -42, 84, 80);
-            ctx.fillStyle = '#ffde00'; ctx.fillRect(-34, -34, 68, 60);
-
-            ctx.fillStyle = '#ff0044';
-            ctx.fillRect(-24, -10, 16, 14);
-            ctx.fillRect(8, -10, 16, 14);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(-18, -6, 6, 6);
-            ctx.fillRect(14, -6, 6, 6);
-
-            ctx.fillStyle = '#000'; ctx.fillRect(-72, -74, 144, 16);
-            let hpRatio = Math.max(0, (boss.hp || 0) / (boss.maxHp || 1200));
-            ctx.fillStyle = '#ff1744'; ctx.fillRect(-69, -71, Math.floor(138 * hpRatio), 10);
-            ctx.fillStyle = '#fff'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-            ctx.fillText(`🐲 SMOK KASYNA (${Math.ceil(boss.hp||0)} HP)`, 0, -80);
-            ctx.restore();
-        }
-
-        function drawSquidDoll(ctx, state) {
-            ctx.save();
-            ctx.translate(800, 145);
-            ctx.fillStyle = 'rgba(0,0,0,0.55)';
-            ctx.beginPath(); ctx.ellipse(0, 35, 48, 18, 0, 0, Math.PI*2); ctx.fill();
-
-            ctx.fillStyle = '#000'; ctx.fillRect(-32, -10, 64, 46);
-            ctx.fillStyle = '#ff9100'; ctx.fillRect(-28, -6, 56, 38);
-            ctx.fillStyle = '#ffde00'; ctx.fillRect(-28, -6, 56, 12);
-
-            ctx.fillStyle = '#000'; ctx.fillRect(-36, -64, 72, 56);
-            if(state === 'green') {
-                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 48);
-                ctx.fillStyle = '#ff2a6d'; ctx.fillRect(-42, -40, 10, 10); ctx.fillRect(32, -40, 10, 10);
-            } else {
-                ctx.fillStyle = '#ffcca3'; ctx.fillRect(-32, -60, 64, 48);
-                ctx.fillStyle = '#181820'; ctx.fillRect(-32, -60, 64, 14);
-                ctx.fillStyle = state === 'red' ? '#ff0033' : '#ffde00';
-                ctx.fillRect(-20, -40, 12, 12);
-                ctx.fillRect(8, -40, 12, 12);
-                if(state === 'red') {
-                    ctx.fillStyle = 'rgba(255, 0, 50, 0.35)';
-                    ctx.beginPath(); ctx.arc(-14, -34, 18, 0, Math.PI*2); ctx.arc(14, -34, 18, 0, Math.PI*2); ctx.fill();
-                }
-                ctx.fillStyle = '#d91656'; ctx.fillRect(-8, -22, 16, 6);
-            }
-            ctx.restore();
-        }
-
-        function drawPixelSoccerBall(ctx, b) {
-            ctx.save();
-            ctx.translate(Math.floor(b.x), Math.floor(b.y));
-            ctx.fillStyle = 'rgba(0,0,0,0.48)';
-            ctx.beginPath(); ctx.ellipse(0, 10, 18, 8, 0, 0, Math.PI*2); ctx.fill();
-
-            ctx.rotate((b.x + b.y) * 0.02);
-            ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#111';
-            ctx.fillRect(-5, -5, 10, 10);
-            ctx.fillRect(-14, -4, 5, 8);
-            ctx.fillRect(9, -4, 5, 8);
-            ctx.fillRect(-4, -14, 8, 5);
-            ctx.fillRect(-4, 9, 8, 5);
-            ctx.restore();
-        }
-
-        // === KLASA LOKALNEGO GRACZA (Z SUPER-MOCĄ ULTI POD KLAWISZEM [Q], ŚLADAMI I TRAMPOLINAMI) ===
-        class LocalPlayer {
-            constructor(name, color, skin) {
-                this.name = name; this.color = color; this.skin = skin;
-                const gm = RoomState.activeMinigame;
-                if(gm === 'squid' || gm === 'glass') {
-                    this.x = 640 + Math.random()*320; this.y = 1440;
-                } else if(gm === 'race') {
-                    this.x = 760 + (Math.random()*80 - 40); this.y = 1320 + (Math.random()*60 - 30);
-                } else if(gm === 'sumo') {
-                    let a = Math.random()*Math.PI*2;
-                    this.x = 800 + Math.cos(a)*200; this.y = 800 + Math.sin(a)*200;
-                } else {
-                    this.x = 450 + Math.random()*700; this.y = 450 + Math.random()*700;
-                }
-                this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                this.angle = (gm === 'squid' || gm === 'glass') ? -Math.PI/2 : 0;
-                this.kartSpeed = 0; this.lap = 1; this.checkpoint = 0;
-                this.anim = 0; this.muzzle = 0;
-                this.hp = gm === 'race' ? 1 : 100; this.maxHp = 100; this.shield = 0;
-                this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
-                this.fireCd = 0; this.dashCd = 0; this.dashTime = 0; this.jumpZ = 0;
-                this.ultiCharge = 40; // Startuje z 40% naładowania ULTI!
-                this.inBush = false;
-                this.quadTime = 0; this.speedTime = 0; this.slipTimer = 0;
-                this.emote = ''; this.emoteTimer = 0;
-                this.score = 0; this.streak = 0; this.isDead = false; this.respawnTimer = 0;
-                this.passImmunity = 0; this.kickCd = 0; this.pushCd = 0;
-            }
-            sendEmote(em) {
-                this.emote = em; this.emoteTimer = 2.5;
-                FX.text(this.x, this.y - 20, em, '#fff', 14);
-            }
-            tryDash() {
-                if(this.dashCd <= 0 && !this.isDead && RoomState.status === 'playing') {
-                    this.dashCd = 1.35; this.dashTime = 0.32;
-                    Sound.play('dash');
-                    FX.burst(this.x, this.y, '#05d5fa', 10, 140, 5);
-                }
-            }
-            // Aktywacja Super-Umiejętności ULTI pod klawiszem [Q]
-            tryUltimate() {
-                if(this.ultiCharge < 100 || this.isDead || RoomState.status !== 'playing') return;
-                this.ultiCharge = 0;
-                Sound.play('ulti');
-                Cam.shake(12, 0.25);
-
-                const sk = this.skin;
-                if(sk === 'cap') {
-                    // Paweł: Fala Basowa odrzucająca wszystkich wrogów wokół!
-                    FX.rings.push({ x: this.x, y: this.y, r: 10, maxR: 280, l: 0.35, m: 0.35, c: '#05d5fa' });
-                    FX.text(this.x, this.y, "🎧 ULTRABASS DROP!!", "#05d5fa", 14);
-                    Object.entries(netPlayers).forEach(([pid, p]) => {
-                        if(!p.isDead && Math.hypot(p.x - this.x, p.y - this.y) < 280) {
-                            let a = Math.atan2(p.y - this.y, p.x - this.x);
-                            db.ref(`events/${currentRoom}`).push({
-                                type: 'hitPlayer', target: pid, attacker: myId, dmg: 35,
-                                kx: Math.cos(a)*950, ky: Math.sin(a)*950
-                            });
-                        }
-                    });
-                } else if(sk === 'ninja') {
-                    this.speedTime = 6.0;
-                    this.dashTime = 0.65;
-                    FX.burst(this.x, this.y, '#00e676', 20, 220, 7);
-                    FX.text(this.x, this.y, "🥷 KROK CIENIA!", "#00e676", 14);
-                } else if(sk === 'knight') {
-                    this.shield = 100;
-                    this.hp = 100;
-                    FX.rings.push({ x: this.x, y: this.y, r: 10, maxR: 200, l: 0.35, m: 0.35, c: '#ffde00' });
-                    FX.text(this.x, this.y, "⚔️ ZŁOTY PANCERZ!", "#ffde00", 14);
-                } else if(sk === 'astro') {
-                    this.dashTime = 0.85;
-                    this.kx = Math.cos(this.angle)*900;
-                    this.ky = Math.sin(this.angle)*900;
-                    FX.text(this.x, this.y, "👨‍🚀 HIPER-SKOK!", "#05d5fa", 14);
-                } else if(sk === 'cyborg') {
-                    this.wep = 'minigun';
-                    this.quadTime = 7.0;
-                    FX.text(this.x, this.y, "🤖 RDZEŃ OVERDRIVE!", "#ff1744", 14);
-                } else if(sk === 'king') {
-                    this.score += 15;
-                    this.shield = 50;
-                    FX.burst(this.x, this.y, '#ffde00', 25, 250, 7);
-                    FX.text(this.x, this.y, "👑 KRÓLEWSKI DEKRET (+15 PKT)!", "#ffde00", 13);
-                } else if(sk === 'wizard') {
-                    FX.rings.push({ x: Input.wx, y: Input.wy, r: 190, maxR: 10, l: 0.4, m: 0.4, c: '#e040fb' });
-                    FX.text(this.x, this.y, "🧙‍♂️ CZARNA DZIURA!", "#e040fb", 14);
-                    Object.entries(netPlayers).forEach(([pid, p]) => {
-                        if(!p.isDead && Math.hypot(p.x - Input.wx, p.y - Input.wy) < 340) {
-                            let a = Math.atan2(Input.wy - p.y, Input.wx - p.x);
-                            db.ref(`events/${currentRoom}`).push({
-                                type: 'hitPlayer', target: pid, attacker: myId, dmg: 40,
-                                kx: Math.cos(a)*700, ky: Math.sin(a)*700
-                            });
-                        }
-                    });
-                } else if(sk === 'pirate') {
-                    FX.text(this.x, this.y, "🏴‍☠️ SALWA ARMATNIA!", "#ff9100", 14);
-                    for(let i=0; i<3; i++) {
-                        let a = this.angle + (i-1)*0.25;
-                        Game.spawnBullet(this.x, this.y, a, 880, 65, 650, 'rocket', true);
-                    }
-                } else if(sk === 'agent') {
-                    this.wep = 'sniper';
-                    this.quadTime = 8.0;
-                    this.speedTime = 6.0;
-                    FX.text(this.x, this.y, "🕶️ TRYB MATRIX SIGMA!", "#00e676", 14);
-                }
-            }
-            spawnFootstepTrail() {
-                if(Math.random() > 0.35) return;
-                const cols = {
-                    fire: '#ff6d00',
-                    rainbow: `hsl(${(performance.now()*0.2)%360}, 100%, 60%)`,
-                    matrix: '#00e676',
-                    gold: '#ffde00'
-                };
-                FX.burst(this.x, this.y + 8, cols[Settings.trail] || '#ff6d00', 1, 25, 4);
-            }
-            update(dt) {
-                const gm = RoomState.activeMinigame;
-                if(this.passImmunity > 0) this.passImmunity -= dt;
-                if(this.kickCd > 0) this.kickCd -= dt;
-                if(this.pushCd > 0) this.pushCd -= dt;
-                if(this.muzzle > 0) this.muzzle -= dt;
-                if(this.quadTime > 0) this.quadTime -= dt;
-                if(this.speedTime > 0) this.speedTime -= dt;
-                if(this.fireCd > 0) this.fireCd -= dt;
-                if(this.dashCd > 0) this.dashCd -= dt;
-                if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
-
-                // Automatyczne ładowanie paska ULTI [Q]
-                if(!this.isDead && this.ultiCharge < 100) {
-                    this.ultiCharge = Math.min(100, this.ultiCharge + 7.5 * dt);
-                }
-
-                if(this.dashTime > 0) {
-                    this.jumpZ = Math.sin((this.dashTime / 0.32) * Math.PI) * 34;
-                } else {
-                    this.jumpZ = 0;
-                }
-
-                if(this.slipTimer > 0) {
-                    this.slipTimer -= dt;
-                    this.angle += 18 * dt;
-                    this.x = Math.max(60, Math.min(WORLD_SIZE-60, this.x + Math.cos(this.angle)*180*dt));
-                    this.y = Math.max(60, Math.min(WORLD_SIZE-60, this.y + Math.sin(this.angle)*180*dt));
-                    return;
-                }
-
-                // === 1. LOGIKA WYŚCIGU GOKARTÓW (TRYB RACE) ===
-                if(gm === 'race') {
-                    let acc = 0, turn = 0;
-                    if(Input.isUp())   acc += 580;
-                    if(Input.isDown()) acc -= 420;
-                    if(Input.isLeft())  turn -= 3.0;
-                    if(Input.isRight()) turn += 3.0;
-                    if(RoomState.mutator === 'drunk') turn *= -1;
-
-                    if(this.dashTime > 0) { this.kartSpeed = 740; this.dashTime -= dt; FX.burst(this.x, this.y, '#ff9100', 2, 60, 5); }
-                    else { this.kartSpeed += acc * dt; }
-
-                    let dxC = Math.abs(this.x - 800), dyC = Math.abs(this.y - 800);
-                    let onGrass = (dxC < 340 && dyC < 340) || dxC > 680 || dyC > 680;
-                    this.kartSpeed *= onGrass ? 0.93 : 0.984;
-                    let maxSpd = onGrass ? 310 : (this.speedTime > 0 ? 740 : 580);
-                    this.kartSpeed = Math.max(-220, Math.min(maxSpd, this.kartSpeed));
-
-                    if(Math.abs(this.kartSpeed) > 15) {
-                        this.angle += turn * (this.kartSpeed > 0 ? 1 : -1) * dt;
-                        this.spawnFootstepTrail();
-                    }
-
-                    this.x = Math.max(70, Math.min(WORLD_SIZE-70, this.x + Math.cos(this.angle)*this.kartSpeed*dt));
-                    this.y = Math.max(70, Math.min(WORLD_SIZE-70, this.y + Math.sin(this.angle)*this.kartSpeed*dt));
-
-                    let cp = -1;
-                    if(this.y > 1060 && this.x > 520 && this.x < 1080) cp = 0;
-                    else if(this.x > 1060 && this.y > 520 && this.y < 1080) cp = 1;
-                    else if(this.y < 540 && this.x > 520 && this.x < 1080) cp = 2;
-                    else if(this.x < 540 && this.y > 520 && this.y < 1080) cp = 3;
-
-                    if(cp !== -1 && cp === (this.checkpoint + 1) % 4) {
-                        this.checkpoint = cp;
-                        this.score += 5;
-                        if(cp === 0) {
-                            this.lap++;
-                            this.hp = this.lap;
-                            this.score += 25;
-                            Sound.play('jackpot');
-                            FX.text(this.x, this.y, `OKRĄŻENIE ${this.lap}!`, "#ffde00", 13);
-                        }
-                    }
-
-                    Object.entries(netItems).forEach(([id, item]) => {
-                        if(Math.hypot(this.x - item.x, this.y - item.y) < 38) {
-                            if(item.t === 'banana') {
-                                this.slipTimer = 1.2;
-                                Sound.play('slip');
-                                FX.text(this.x, this.y, "🍌 POŚLIZG!", "#ffde00", 12);
-                            } else {
-                                this.speedTime = 4.0;
-                                Sound.play('dash');
-                                FX.text(this.x, this.y, "⚡ TURBO NITRO!", "#05d5fa", 12);
-                            }
-                            db.ref(`room_items/${currentRoom}/${id}`).remove();
-                        }
-                    });
-                    return;
-                }
-
-                // === 2. LOGIKA POZOSTAŁYCH MINIGIER ===
-                if(['meteors', 'spleef', 'lasers', 'sumo'].includes(gm) && !this.isDead) {
-                    this.survTick = (this.survTick || 0) + dt;
-                    if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
-                }
-                if(gm === 'crown' && RoomState.crownHolder === myId && !this.isDead) {
-                    this.crownTick = (this.crownTick || 0) + dt;
-                    if(this.crownTick >= 0.4) {
-                        this.crownTick = 0; this.score += 2;
-                        FX.text(this.x, this.y, "+2 👑", "#ffde00", 9);
-                    }
-                }
-
-                if(this.isDead) {
-                    if(gm !== 'bomb') {
-                        this.respawnTimer -= dt;
-                        if(this.respawnTimer <= 0) {
-                            this.isDead = false; this.hp = 100; this.shield = 0;
-                            if(gm === 'squid' || gm === 'glass') {
-                                this.x = 640 + Math.random()*320; this.y = 1440;
-                            } else if(gm === 'sumo') {
-                                this.x = 750 + Math.random()*100; this.y = 750 + Math.random()*100;
-                            } else {
-                                this.x = 500 + Math.random()*600; this.y = 500 + Math.random()*600;
-                            }
-                            this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                            this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
-                            FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
-                        }
-                    }
-                    return;
-                }
-
-                let ix = 0, iy = 0;
-                if(Input.isUp())    iy -= 1;
-                if(Input.isDown())  iy += 1;
-                if(Input.isLeft())  ix -= 1;
-                if(Input.isRight()) ix += 1;
-                if(RoomState.mutator === 'drunk') { ix *= -1; iy *= -1; }
-                if(ix !== 0 && iy !== 0) { let l = Math.hypot(ix, iy); ix /= l; iy /= l; }
-// === GENERATOR TEKSTUR PODŁOŻA 2.5D HD ===
         const WORLD_SIZE = 1600;
         const GroundCache = {
             canvases: {},
@@ -3163,11 +2563,14 @@
                     const tag = document.activeElement ? document.activeElement.tagName : '';
                     if(tag === 'INPUT' || tag === 'SELECT') return;
 
-                    if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+                    if(['Space', 'Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
 
                     this.keys[e.code] = true;
                     if(e.key) this.keys[e.key.toLowerCase()] = true;
 
+                    if(e.code === 'Tab' && RoomState.status === 'lobby' && currentRoom) {
+                        Lobby.toggleLobbyPanel();
+                    }
                     if(e.code === 'Space' && Game.me) Game.me.tryDash();
                     if(e.code === 'KeyQ' && Game.me) Game.me.tryUlti();
                     if(e.code === 'KeyE' && Game.me) {
@@ -3217,7 +2620,7 @@
             restore() { ctx.restore(); }
         };
 
-        // === SILNIK EFEKTÓW SPECJALNYCH "GAME JUICE" (NEON GLOW, ŁUSKI, KRATERY, ŚLADY) ===
+        // === SILNIK EFEKTÓW SPECJALNYCH "GAME JUICE" ===
         const FX = {
             parts: [], texts: [], decals: [], rings: [], lasers: [], shells: [],
             burst(x, y, color, count=8, spd=180, size=6) {
@@ -3297,7 +2700,6 @@
                 });
             },
             drawTop() {
-                // Prawdziwy Neon Glow poprzez tryb mieszania 'lighter'
                 ctx.save();
                 ctx.globalCompositeOperation = 'lighter';
                 this.lasers.forEach(ls => {
@@ -3369,9 +2771,8 @@
         }
 
         function drawInteractiveArenaProps(ctx, gm) {
-            if(['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'].includes(gm)) return;
+            if(['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'flappy', 'fallguys', 'duel'].includes(gm)) return;
 
-            // 1. Trampoliny (Jump Pads) w narożnikach areny
             ARENA_JUMPPADS.forEach(jp => {
                 ctx.save();
                 ctx.translate(jp.x, jp.y);
@@ -3385,7 +2786,6 @@
                 ctx.restore();
             });
 
-            // 2. Wybuchowe Beczki TNT
             ARENA_BARRELS.forEach(b => {
                 if(RoomState.barrelDestroyed && RoomState.barrelDestroyed[b.id]) return;
                 ctx.save();
@@ -3401,7 +2801,7 @@
         }
 
         function drawStealthBushesTop(ctx, gm) {
-            if(['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'].includes(gm)) return;
+            if(['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'flappy', 'fallguys', 'duel'].includes(gm)) return;
             ARENA_BUSHES.forEach(bu => {
                 ctx.save();
                 ctx.translate(bu.x, bu.y);
@@ -3509,13 +2909,17 @@
             ctx.restore();
         }
 
-        // === KLASA LOKALNEGO GRACZA (Z SYSTEMEM SUPER-MOCY ULTI POD KLAWISZEM [Q]!) ===
+        // === KLASA LOKALNEGO GRACZA (Z 12 MOCAMI ULTI [Q] I 22 MINIGRAMI!) ===
         class LocalPlayer {
             constructor(name, color, skin) {
                 this.name = name; this.color = color; this.skin = skin;
                 const gm = RoomState.activeMinigame;
-                if(gm === 'squid' || gm === 'glass') {
+                if(RoomState.status === 'lobby') {
+                    this.x = 700 + Math.random()*200; this.y = 850 + Math.random()*150;
+                } else if(gm === 'squid' || gm === 'glass' || gm === 'fallguys') {
                     this.x = 640 + Math.random()*320; this.y = 1440;
+                } else if(gm === 'flappy') {
+                    this.x = 320; this.y = 800;
                 } else if(gm === 'race') {
                     this.x = 760 + (Math.random()*80 - 40); this.y = 1320 + (Math.random()*60 - 30);
                 } else if(gm === 'sumo') {
@@ -3525,13 +2929,13 @@
                     this.x = 450 + Math.random()*700; this.y = 450 + Math.random()*700;
                 }
                 this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                this.angle = (gm === 'squid' || gm === 'glass') ? -Math.PI/2 : 0;
+                this.angle = (gm === 'squid' || gm === 'glass' || gm === 'fallguys') ? -Math.PI/2 : 0;
                 this.kartSpeed = 0; this.lap = 1; this.checkpoint = 0;
                 this.anim = 0; this.muzzle = 0;
                 this.hp = gm === 'race' ? 1 : 100; this.maxHp = 100; this.shield = 0;
-                this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
+                this.wep = (gm === 'sniper' || gm === 'duel') ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
                 this.fireCd = 0; this.dashCd = 0; this.dashTime = 0; this.jumpZ = 0;
-                this.ultiCharge = 40; // Pasek Super-Mocy ULTI (0..100%)
+                this.ultiCharge = 45;
                 this.quadTime = 0; this.speedTime = 0; this.slipTimer = 0; this.stealthTime = 0;
                 this.emote = ''; this.emoteTimer = 0;
                 this.score = 0; this.streak = 0; this.isDead = false; this.respawnTimer = 0;
@@ -3542,21 +2946,27 @@
                 FX.text(this.x, this.y - 20, em, '#fff', 14);
             }
             tryDash() {
-                if(this.dashCd <= 0 && !this.isDead && RoomState.status === 'playing') {
+                if(RoomState.activeMinigame === 'flappy' && RoomState.status === 'playing') {
+                    this.vy = -420;
+                    Sound.play('dash');
+                    FX.burst(this.x - 10, this.y + 10, '#ff9100', 6, 120, 5);
+                    return;
+                }
+                if(this.dashCd <= 0 && !this.isDead && (RoomState.status === 'playing' || RoomState.status === 'lobby')) {
                     this.dashCd = 1.35; this.dashTime = 0.32;
                     Sound.play('dash');
                     FX.burst(this.x, this.y, '#05d5fa', 10, 140, 5);
                 }
             }
-            // === UNIKALNE SUPER-MOCE ULTI DLA KAŻDEJ Z 9 KLAS POD KLAWISZEM [Q]! ===
+            // === WSZYSTKIE 12 UNIKALNYCH SUPER-MOCY ULTI POD KLAWISZEM [Q]! ===
             tryUlti() {
                 if(this.ultiCharge < 100 || this.isDead || RoomState.status !== 'playing') return;
                 this.ultiCharge = 0;
                 Sound.play('ulti');
                 Cam.shake(12, 0.25);
+                Profile.unlockAchievement('ulti_master');
 
                 if(this.skin === 'cap') {
-                    // Paweł: Fala Basowa odrzucająca wszystkich rywali
                     FX.explosion(this.x, this.y, '#05d5fa');
                     FX.text(this.x, this.y, "🔊 ULTRABASS DROP!", "#05d5fa", 14);
                     Object.entries(netPlayers).forEach(([pid, p]) => {
@@ -3588,7 +2998,6 @@
                     FX.explosion(this.x, this.y, '#ffde00');
                     FX.text(this.x, this.y, "👑 KRÓLEWSKI SKARB +12 PKT!", "#ffde00", 13);
                 } else if(this.skin === 'wizard') {
-                    // Mag: Czarna Dziura przyciągająca wrogów do środka
                     FX.explosion(this.x, this.y, '#aa00ff');
                     FX.text(this.x, this.y, "🧙‍♂️ CZARNA DZIURA!", "#e040fb", 13);
                     Object.entries(netPlayers).forEach(([pid, p]) => {
@@ -3607,6 +3016,35 @@
                 } else if(this.skin === 'agent') {
                     this.wep = 'sniper'; this.quadTime = 8.0; this.speedTime = 6.0;
                     FX.text(this.x, this.y, "🕶️ TRYB MATRIX SIGMA!", "#00e676", 13);
+                } else if(this.skin === 'vampire') {
+                    // Wampir: Krwawa Nova wysysająca HP wrogów i lecząca do 100%
+                    this.hp = 100; this.shield = 50;
+                    FX.explosion(this.x, this.y, '#ff1744');
+                    FX.text(this.x, this.y, "🧛‍♂️ KRWAWA NOVA (+100 HP)!", "#ff1744", 13);
+                    Object.entries(netPlayers).forEach(([pid, p]) => {
+                        if(!p.isDead && Math.hypot(p.x - this.x, p.y - this.y) < 380) {
+                            db.ref(`events/${currentRoom}`).push({ type: 'hitPlayer', target: pid, attacker: myId, dmg: 45, kx: 0, ky: 0 });
+                        }
+                    });
+                } else if(this.skin === 'cowboy') {
+                    // Szeryf: High Noon (Samoistny ostrzał snajperski we wszystkich żywych wrogów!)
+                    FX.text(this.x, this.y, "🤠 HIGH NOON!", "#ffde00", 14);
+                    Object.entries(netPlayers).forEach(([pid, p]) => {
+                        if(!p.isDead) {
+                            let a = Math.atan2(p.y - this.y, p.x - this.x);
+                            Game.spawnBullet(this.x, this.y, a, 2100, 65, 400, 'norm', true);
+                        }
+                    });
+                } else if(this.skin === 'thunder') {
+                    // Zeus: Uderzenie Pioruna z nieba w losowych rywali!
+                    FX.text(this.x, this.y, "⚡ GROM ZEUSA!", "#05d5fa", 14);
+                    Object.entries(netPlayers).forEach(([pid, p]) => {
+                        if(!p.isDead) {
+                            FX.laserBeam(p.x, p.y - 400, p.x, p.y);
+                            FX.explosion(p.x, p.y, '#05d5fa');
+                            db.ref(`events/${currentRoom}`).push({ type: 'hitPlayer', target: pid, attacker: myId, dmg: 50, kx: 0, ky: 0 });
+                        }
+                    });
                 }
             }
 
@@ -3624,9 +3062,8 @@
                 if(this.dashCd > 0) this.dashCd -= dt;
                 if(this.emoteTimer > 0) { this.emoteTimer -= dt; if(this.emoteTimer <= 0) this.emote = ''; }
 
-                // Ładowanie paska ULTI w czasie gry
-                if(!this.isDead && this.ultiCharge < 100) {
-                    this.ultiCharge = Math.min(100, this.ultiCharge + 9.5 * dt);
+                if(!this.isDead && this.ultiCharge < 100 && RoomState.status === 'playing') {
+                    this.ultiCharge = Math.min(100, this.ultiCharge + 10.5 * dt);
                 }
 
                 if(this.dashTime > 0) {
@@ -3643,8 +3080,38 @@
                     return;
                 }
 
+                // === NOWY TRYB: FLAPPY PAWEŁ (JETPACK RUN) ===
+                if(RoomState.status === 'playing' && gm === 'flappy') {
+                    this.vy += 880 * dt; // Grawitacja
+                    if(Input.isUp()) this.vy = -360;
+                    this.y += this.vy * dt;
+                    this.x = 360;
+                    this.angle = Math.max(-0.5, Math.min(0.5, this.vy * 0.001));
+                    if(Math.random() < 0.5) FX.spawnTrail(this.x - 14, this.y, 'fire');
+
+                    // Sprawdzenie kolizji z neonowymi rurami
+                    let hitPipe = false;
+                    Game.flappyPipes.forEach(p => {
+                        if(Math.abs(this.x - p.x) < 42) {
+                            if(this.y < p.gapY - 115 || this.y > p.gapY + 115) hitPipe = true;
+                        }
+                        if(!p.passed && p.x < this.x) {
+                            p.passed = true;
+                            this.score += 5;
+                            Sound.play('coin');
+                            FX.text(this.x, this.y - 30, "+5 PKT!", "#00e676", 11);
+                        }
+                    });
+                    if(hitPipe || this.y < 120 || this.y > 1480) {
+                        Sound.play('hit');
+                        FX.burst(this.x, this.y, '#ff1744', 10, 160, 5);
+                        this.y = 800; this.vy = -200;
+                    }
+                    return;
+                }
+
                 // === 1. LOGIKA WYŚCIGU GOKARTÓW (TRYB RACE) ===
-                if(gm === 'race') {
+                if(RoomState.status === 'playing' && gm === 'race') {
                     let acc = 0, turn = 0;
                     if(Input.isUp())   acc += 580;
                     if(Input.isDown()) acc -= 420;
@@ -3683,6 +3150,7 @@
                             this.hp = this.lap;
                             this.score += 25;
                             Sound.play('jackpot');
+                            Profile.unlockAchievement('kart_drifter');
                             FX.text(this.x, this.y, `OKRĄŻENIE ${this.lap}!`, "#ffde00", 13);
                         }
                     }
@@ -3704,12 +3172,12 @@
                     return;
                 }
 
-                // === 2. LOGIKA POZOSTAŁYCH MINIGIER ===
-                if(['meteors', 'spleef', 'lasers', 'sumo'].includes(gm) && !this.isDead) {
+                // === 2. LOGIKA POZOSTAŁYCH MINIGIER & CHODZONEGO LOBBY 2.5D ===
+                if(RoomState.status === 'playing' && ['meteors', 'spleef', 'lasers', 'sumo'].includes(gm) && !this.isDead) {
                     this.survTick = (this.survTick || 0) + dt;
                     if(this.survTick >= 1.0) { this.survTick = 0; this.score += 2; }
                 }
-                if(gm === 'crown' && RoomState.crownHolder === myId && !this.isDead) {
+                if(RoomState.status === 'playing' && gm === 'crown' && RoomState.crownHolder === myId && !this.isDead) {
                     this.crownTick = (this.crownTick || 0) + dt;
                     if(this.crownTick >= 0.4) {
                         this.crownTick = 0; this.score += 2;
@@ -3722,7 +3190,7 @@
                         this.respawnTimer -= dt;
                         if(this.respawnTimer <= 0) {
                             this.isDead = false; this.hp = 100; this.shield = 0;
-                            if(gm === 'squid' || gm === 'glass') {
+                            if(gm === 'squid' || gm === 'glass' || gm === 'fallguys') {
                                 this.x = 640 + Math.random()*320; this.y = 1440;
                             } else if(gm === 'sumo') {
                                 this.x = 750 + Math.random()*100; this.y = 750 + Math.random()*100;
@@ -3730,7 +3198,7 @@
                                 this.x = 500 + Math.random()*600; this.y = 500 + Math.random()*600;
                             }
                             this.vx = 0; this.vy = 0; this.kx = 0; this.ky = 0;
-                            this.wep = gm === 'sniper' ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
+                            this.wep = (gm === 'sniper' || gm === 'duel') ? 'sniper' : (['meteors', 'spleef', 'boss'].includes(gm) ? 'shotgun' : 'pistol');
                             FX.burst(this.x, this.y, '#05d5fa', 12, 200, 6);
                         }
                     }
@@ -3742,11 +3210,26 @@
                 if(Input.isDown())  iy += 1;
                 if(Input.isLeft())  ix -= 1;
                 if(Input.isRight()) ix += 1;
-                if(RoomState.mutator === 'drunk') { ix *= -1; iy *= -1; }
+                if(RoomState.status === 'playing' && RoomState.mutator === 'drunk') { ix *= -1; iy *= -1; }
                 if(ix !== 0 && iy !== 0) { let l = Math.hypot(ix, iy); ix /= l; iy /= l; }
 
+                // === NOWY TRYB: GÓRA KORONY (FALL GUYS MOUNTAIN) ===
+                if(RoomState.status === 'playing' && gm === 'fallguys') {
+                    // Spływający w dół wiatr / taśmociąg na górze
+                    this.y += 65 * dt;
+                    if(this.y < 230) {
+                        this.score += 30;
+                        Sound.play('jackpot');
+                        announce("👑 ZDOBYŁEŚ SZCZYT GÓRY KORONY! +30 PKT!", 1500);
+                        FX.burst(this.x, this.y, '#ffde00', 22, 240, 6);
+                        this.x = 450 + Math.random()*700;
+                        this.y = 1440;
+                        return;
+                    }
+                }
+
                 // === SQUID GAME ===
-                if(gm === 'squid') {
+                if(RoomState.status === 'playing' && gm === 'squid') {
                     if(RoomState.squidState === 'red' && (Math.hypot(ix, iy) > 0.05 || this.dashTime > 0)) {
                         Sound.play('sniper');
                         FX.laserBeam(800, 120, this.x, this.y);
@@ -3767,9 +3250,8 @@
                         return;
                     }
                 }
-
-                // === SZKLANY MOST ===
-                if(gm === 'glass') {
+// === SZKLANY MOST ===
+                if(RoomState.status === 'playing' && gm === 'glass') {
                     if(this.y < 260) {
                         this.score += 30;
                         Sound.play('jackpot');
@@ -3800,7 +3282,7 @@
                 }
 
                 // === SUMO RING ===
-                if(gm === 'sumo') {
+                if(RoomState.status === 'playing' && gm === 'sumo') {
                     if(Math.hypot(this.x - 800, this.y - 800) > RoomState.stormR) {
                         Sound.play('boom');
                         FX.explosion(this.x, this.y);
@@ -3829,7 +3311,7 @@
                 let mapObj = MAPS[RoomState.map] || MAPS.forest;
                 let baseSpd = RoomState.bombHolder === myId ? 350 : 300;
                 if(gm === 'paint') baseSpd = 350;
-                if(RoomState.mutator === 'tiny') baseSpd *= 1.3;
+                if(RoomState.status === 'playing' && RoomState.mutator === 'tiny') baseSpd *= 1.3;
                 if(this.speedTime > 0) baseSpd *= 1.35;
                 if(this.dashTime > 0) {
                     baseSpd = 750; this.dashTime -= dt;
@@ -3843,11 +3325,11 @@
                 this.kx *= Math.pow(0.04, dt);
                 this.ky *= Math.pow(0.04, dt);
 
-                let noObstacleModes = ['squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss'];
-                let activeObs = noObstacleModes.includes(gm) ? [] : mapObj.obstacles;
+                let noObstacleModes = ['squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss', 'flappy', 'fallguys', 'duel'];
+                let activeObs = (RoomState.status === 'lobby' || noObstacleModes.includes(gm)) ? [] : mapObj.obstacles;
                 this.moveSmoothCircle((this.vx + this.kx) * dt, (this.vy + this.ky) * dt, activeObs, dt);
 
-                // Trampoliny (Jump Pads) wystrzeliwujące gracza ponad przeszkodami!
+                // Trampoliny (Jump Pads)
                 if(!noObstacleModes.includes(gm) && this.padCd <= 0) {
                     ARENA_JUMPPADS.forEach(jp => {
                         if(Math.hypot(this.x - jp.x, this.y - jp.y) < 34) {
@@ -3861,14 +3343,14 @@
                     });
                 }
 
-                // Ślady (Trails) pod stopami
+                // Ślady pod stopami (Trails)
                 if(Math.hypot(ix, iy) > 0.1) {
                     this.anim += dt * 13;
                     if(Math.random() < 0.35) FX.spawnTrail(this.x, this.y, Settings.trail);
                 }
 
                 // === WOJNA KOLORÓW ===
-                if(gm === 'paint') {
+                if(RoomState.status === 'playing' && gm === 'paint') {
                     let tx = Math.floor(this.x / 80), ty = Math.floor(this.y / 80);
                     if(tx >= 1 && tx <= 18 && ty >= 1 && ty <= 18) {
                         let key = `${tx}_${ty}`;
@@ -3881,8 +3363,8 @@
                     }
                 }
 
-                // === PIŁKA NOŻNA ===
-                if(gm === 'soccer' && RoomState.ball && this.kickCd <= 0) {
+                // === PIŁKA NOŻNA (W MINIGRZE ORAZ NA MINI-BOISKU W CHODZONYM LOBBY!) ===
+                if((gm === 'soccer' || RoomState.status === 'lobby') && RoomState.ball && this.kickCd <= 0) {
                     let dBall = Math.hypot(RoomState.ball.x - this.x, RoomState.ball.y - this.y);
                     if(dBall < 44) {
                         this.kickCd = 0.16;
@@ -3892,15 +3374,17 @@
                         RoomState.ball.vy = Math.sin(kAngle) * power;
                         Sound.play('hit');
                         FX.burst(RoomState.ball.x, RoomState.ball.y, '#ffde00', 8, 150, 5);
-                        db.ref(`events/${currentRoom}`).push({
-                            type: 'kickBall', kicker: myId,
-                            vx: Math.round(RoomState.ball.vx), vy: Math.round(RoomState.ball.vy)
-                        });
+                        if(currentRoom) {
+                            db.ref(`events/${currentRoom}`).push({
+                                type: 'kickBall', kicker: myId,
+                                vx: Math.round(RoomState.ball.vx), vy: Math.round(RoomState.ball.vy)
+                            });
+                        }
                     }
                 }
 
                 // === LASEROWY LABIRYNT ===
-                if(gm === 'lasers' && this.jumpZ < 14) {
+                if(RoomState.status === 'playing' && gm === 'lasers' && this.jumpZ < 14) {
                     let hitBeam = false;
                     Game.laserBeams.forEach(lb => {
                         if(lb.type === 'h' && Math.abs(this.y - lb.pos) < 16) hitBeam = true;
@@ -3913,7 +3397,7 @@
                     }
                 }
 
-                if(gm === 'spleef') {
+                if(RoomState.status === 'playing' && gm === 'spleef') {
                     let tx = Math.floor(this.x / 80), ty = Math.floor(this.y / 80);
                     let key = `${tx}_${ty}`;
                     if(RoomState.brokenIce[key] === 2) {
@@ -3952,30 +3436,32 @@
                     }
                 }
 
-                if(gm === 'sniper') this.wep = 'sniper';
+                if(gm === 'sniper' || gm === 'duel') this.wep = 'sniper';
 
-                const nonShootingModes = ['bomb', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'];
-                if(Input.down && this.fireCd <= 0 && !nonShootingModes.includes(gm)) {
+                const canShootDuel = (gm !== 'duel' || RoomState.squidState === 'green');
+                const nonShootingModes = ['bomb', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'flappy', 'fallguys'];
+
+                if(Input.down && this.fireCd <= 0 && (!nonShootingModes.includes(gm) || RoomState.status === 'lobby') && canShootDuel) {
                     let w = WEAPONS[this.wep];
                     this.fireCd = w.rate; this.muzzle = 0.06;
-                    this.stealthTime = 0; // Strzał przerywa niewidzialność
+                    this.stealthTime = 0;
                     Sound.play(w.snd); Cam.shake(5, 0.09);
                     FX.spawnShell(this.x, this.y, this.angle);
                     this.kx -= Math.cos(this.angle) * (w.knock * 0.55);
                     this.ky -= Math.sin(this.angle) * (w.knock * 0.55);
 
-                    let dmgVal = gm === 'sniper' ? 999 : (this.quadTime > 0 ? w.dmg * 2 : w.dmg);
+                    let dmgVal = (gm === 'sniper' || gm === 'duel') ? 999 : (this.quadTime > 0 ? w.dmg * 2 : w.dmg);
                     for(let i=0; i<w.proj; i++) {
                         let a = this.angle + (Settings.sigmaAim ? 0 : (Math.random()-0.5)*w.spread);
                         Game.spawnBullet(this.x, this.y, a, w.spd, dmgVal, w.knock, w.bType, true);
                     }
                 }
 
-                if(gm === 'royale' && Math.hypot(this.x - 800, this.y - 800) > RoomState.stormR) {
+                if(RoomState.status === 'playing' && gm === 'royale' && Math.hypot(this.x - 800, this.y - 800) > RoomState.stormR) {
                     this.takeDamage(18 * dt, null);
                 }
 
-                if(gm === 'bomb' && RoomState.bombHolder === myId && this.passImmunity <= 0) {
+                if(RoomState.status === 'playing' && gm === 'bomb' && RoomState.bombHolder === myId && this.passImmunity <= 0) {
                     Object.entries(netPlayers).forEach(([pid, p]) => {
                         if(!p.isDead && Math.hypot(this.x - p.x, this.y - p.y) < 42) {
                             this.passImmunity = 1.0;
@@ -3986,7 +3472,7 @@
                     });
                 }
 
-                if(gm === 'koth') {
+                if(RoomState.status === 'playing' && gm === 'koth') {
                     let k = RoomState.koth;
                     if(Math.hypot(this.x - k.x, this.y - k.y) < k.r) {
                         this.kothTick = (this.kothTick || 0) + dt;
@@ -4025,7 +3511,7 @@
                             Sound.play('coin');
                             this.speedTime = 8.0;
                             FX.text(this.x, this.y, "NITRO SPEED!", "#ffde00", 11);
-                        } else if(WEAPONS[item.t] && gm !== 'sniper') {
+                        } else if(WEAPONS[item.t] && gm !== 'sniper' && gm !== 'duel') {
                             Sound.play('coin');
                             this.wep = item.t;
                             FX.text(this.x, this.y, WEAPONS[this.wep].name.toUpperCase(), "#05d5fa", 11);
@@ -4039,7 +3525,7 @@
             isInBush() {
                 if(this.stealthTime > 0) return true;
                 const gm = RoomState.activeMinigame;
-                if(['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'].includes(gm)) return false;
+                if(['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'flappy', 'fallguys', 'duel'].includes(gm)) return false;
                 return ARENA_BUSHES.some(bu => Math.hypot(this.x - bu.x, this.y - bu.y) < bu.r - 8);
             }
 
@@ -4048,7 +3534,7 @@
                 this.x = Math.max(40, Math.min(WORLD_SIZE - 40, this.x + dx));
                 this.y = Math.max(40, Math.min(WORLD_SIZE - 40, this.y + dy));
 
-                if(this.jumpZ > 18) return; // Podczas wysokiego skoku na trampolinie przelatujesz nad niskimi skrzyniami!
+                if(this.jumpZ > 18) return;
 
                 for(let o of obstacles) {
                     let cx = Math.max(o.x, Math.min(this.x, o.x + o.w));
@@ -4073,7 +3559,7 @@
             }
 
             takeDamage(dmg, attackerId, knockX=0, knockY=0) {
-                if(this.isDead) return;
+                if(this.isDead || RoomState.status === 'lobby') return;
                 if(this.shield > 0 && dmg > 0) {
                     let sDmg = Math.min(this.shield, dmg);
                     this.shield -= sDmg; dmg -= sDmg;
@@ -4105,15 +3591,43 @@
                 }
             }
         }
-
-        // === GŁÓWNA PĘTLA MINIGIER, GŁOSOWANIE I CEREMONIA BONUSOWYCH GWIAZD ===
+        // === GŁÓWNA PĘTLA MINIGIER, CHODZONY SALON GIER 2.5D, GŁOSOWANIE I BONUSOWE GWIAZDY ===
         const Game = {
             me: null, bullets: [], loopId: null, syncId: null, hostId: null, lastTime: 0,
             hostZombies: [], hostMeteors: [], squidTimer: 0,
             matchStartTime: 0, hostLastTickTime: 0, botStates: {},
-            paintGrid: {}, laserBeams: [], hostBall: {x:800, y:800, vx:0, vy:0, lastKicker: null},
+            paintGrid: {}, laserBeams: [], flappyPipes: [], boulders: [],
+            hostBall: {x:800, y:800, vx:0, vy:0, lastKicker: null},
             hostBoss: {x:800, y:800, hp:1200, maxHp:1200, a:0},
             renderPlayers: {}, myVote: null,
+
+            // Inicjalizacja Chodzonego Salonu Gier 2.5D w Lobby!
+            initLobbyHub() {
+                this.me = new LocalPlayer(
+                    document.getElementById('playerName').value.trim() || "Paweł",
+                    document.getElementById('playerColor').value,
+                    chosenSkin
+                );
+                this.me.x = 800 + (Math.random()*160 - 80);
+                this.me.y = 860 + (Math.random()*120 - 60);
+                RoomState.ball = {x: 800, y: 1180, vx: 0, vy: 0};
+                this.hostBall = {x: 800, y: 1180, vx: 0, vy: 0, lastKicker: myId};
+
+                if(this.syncId) clearInterval(this.syncId);
+                this.syncId = setInterval(() => {
+                    if(!currentRoom || !this.me || (RoomState.status !== 'playing' && RoomState.status !== 'lobby')) return;
+                    db.ref(`room_players/${currentRoom}/${myId}`).update({
+                        x: Math.round(this.me.x), y: Math.round(this.me.y), angle: Number(this.me.angle.toFixed(2)),
+                        hp: Math.round(this.me.hp), shield: Math.round(this.me.shield), score: this.me.score, isDead: this.me.isDead,
+                        wep: this.me.wep, skin: chosenSkin, pet: Settings.pet, inBush: this.me.isInBush(),
+                        anim: Number(this.me.anim.toFixed(1)),
+                        shooting: Input.down, quad: this.me.quadTime > 0, emote: this.me.emote
+                    });
+                }, 50);
+
+                this.lastTime = performance.now();
+                if(!this.loopId) this.loopId = requestAnimationFrame(t => this.loop(t));
+            },
 
             skipCurrentMinigame() {
                 if(!isHost || RoomState.status !== 'playing') return;
@@ -4165,6 +3679,7 @@
 
             runRouletteAnimation(targetGame, targetMap, targetMutator) {
                 switchScreen(null);
+                document.getElementById('hubTopBar').style.display = 'none';
                 document.getElementById('boardHud').style.display = 'none';
                 document.getElementById('hud').style.display = 'none';
                 const ov = document.getElementById('rouletteOverlay');
@@ -4176,7 +3691,6 @@
                 this.myVote = null;
                 this.renderVoteCardsUI();
 
-                // Boty oddają swoje losowe głosy na karty
                 if(isHost) {
                     const opts = RoomState.voteOptions || ['soccer', 'paint', 'race'];
                     Object.keys(netPlayers).forEach(pid => {
@@ -4196,9 +3710,8 @@
                     this.renderVoteCardsUI();
                     box.innerText = MINIGAME_LABELS[opts[count % opts.length]] || '⚽ PIŁKA NOŻNA';
                     count++;
-                    if(count > 28) {
+                    if(count > 26) {
                         clearInterval(spin);
-                        // Wyłonienie zwycięskiej gry z głosowania
                         let chosen = targetGame;
                         const votesObj = RoomState.votes || {};
                         const tallies = {};
@@ -4224,16 +3737,18 @@
                                     ball: {x:800, y:800, vx:0, vy:0},
                                     boss: {x:800, y:800, hp:1200, maxHp:1200, a:0},
                                     paintData: {}, barrelDestroyed: {},
-                                    bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
+                                    bombHolder: null, crownHolder: myId, squidState: chosen === 'duel' ? 'red' : 'green',
+                                    brokenIce: {}, zombies: "[]", meteors: "[]"
                                 });
                             }
-                        }, 1400);
+                        }, 1350);
                     }
-                }, 115);
+                }, 110);
             },
 
             startMatch() {
                 Input.init();
+                document.getElementById('hubTopBar').style.display = 'none';
                 document.getElementById('rouletteOverlay').style.display = 'none';
                 document.getElementById('boardHud').style.display = 'none';
 
@@ -4244,6 +3759,16 @@
                 this.hostLastTickTime = Date.now();
                 this.paintGrid = {};
                 this.renderPlayers = {};
+                this.flappyPipes = [
+                    {x: 900, gapY: 650, passed: false},
+                    {x: 1350, gapY: 900, passed: false},
+                    {x: 1800, gapY: 550, passed: false}
+                ];
+                this.boulders = [
+                    {x: 550, y: 350, vy: 340, r: 36},
+                    {x: 800, y: 650, vy: 390, r: 42},
+                    {x: 1050, y: 950, vy: 360, r: 38}
+                ];
                 this.hostBall = {x:800, y:800, vx:0, vy:0, lastKicker: myId};
                 this.hostBoss = {x:800, y:800, hp:1200, maxHp:1200, a:0};
 
@@ -4260,14 +3785,15 @@
                     Object.entries(netPlayers).forEach(([pid, p], idx) => {
                         if(pid.startsWith('bot_') || p.isBot) {
                             let bx = 450 + Math.random()*700, by = 450 + Math.random()*700;
-                            if(gm === 'squid' || gm === 'glass') { bx = 660 + Math.random()*280; by = 1440; }
+                            if(gm === 'squid' || gm === 'glass' || gm === 'fallguys') { bx = 660 + Math.random()*280; by = 1440; }
+                            else if(gm === 'flappy') { bx = 360; by = 700 + idx*60; }
                             else if(gm === 'race') { bx = 740 + idx*35; by = 1310 + idx*18; }
                             else if(gm === 'sumo') { bx = 700 + Math.random()*200; by = 700 + Math.random()*200; }
 
                             this.botStates[pid] = {
-                                x: bx, y: by, angle: (gm === 'squid' || gm === 'glass') ? -Math.PI/2 : 0,
+                                x: bx, y: by, angle: (gm === 'squid' || gm === 'glass' || gm === 'fallguys') ? -Math.PI/2 : 0,
                                 hp: gm === 'race' ? 1 : 100, score: 0, isDead: false, respawn: 0,
-                                wpIdx: 0, lap: 1, anim: 0, wep: gm === 'sniper' ? 'sniper' : 'pistol',
+                                wpIdx: 0, lap: 1, anim: 0, wep: (gm === 'sniper' || gm === 'duel') ? 'sniper' : 'pistol',
                                 targetX: 450 + Math.random()*700, targetY: 450 + Math.random()*700
                             };
                             botUpdates[`${pid}/x`] = Math.round(bx);
@@ -4287,10 +3813,13 @@
                 document.getElementById('hudRight').style.display = 'block';
                 document.getElementById('btnSkipMinigame').style.display = isHost ? 'block' : 'none';
 
-                document.getElementById('squidLightBanner').style.display = gm === 'squid' ? 'block' : 'none';
+                document.getElementById('squidLightBanner').style.display = (gm === 'squid' || gm === 'duel') ? 'block' : 'none';
                 document.getElementById('hudMutatorBadge').innerText = `🤡 ${MUTATOR_NAMES[RoomState.mutator] || 'Normalnie'}`;
 
                 const weaponDescriptions = {
+                    flappy: 'CEL: Skacz [SPACJA / W] i omijaj neonowe rury!',
+                    fallguys: 'CEL: Biegnij na szczyt góry i omijaj toczące się głazy!',
+                    duel: 'CEL: Czekaj na sygnał STRZELAJ! i traf rywala!',
                     boss: 'CEL: Strzelaj w Złotego Smoka! [Q = ULTI]',
                     sumo: 'CEL: Wypchnij rywali za czerwony pierścień!',
                     glass: 'CEL: Skacz po błyszczących taflach szkła!',
@@ -4308,7 +3837,7 @@
 
                 if(this.syncId) clearInterval(this.syncId);
                 this.syncId = setInterval(() => {
-                    if(!currentRoom || !this.me || RoomState.status !== 'playing') return;
+                    if(!currentRoom || !this.me || (RoomState.status !== 'playing' && RoomState.status !== 'lobby')) return;
                     db.ref(`room_players/${currentRoom}/${myId}`).update({
                         x: Math.round(this.me.x), y: Math.round(this.me.y), angle: Number(this.me.angle.toFixed(2)),
                         hp: Math.round(this.me.hp), shield: Math.round(this.me.shield), score: this.me.score, isDead: this.me.isDead,
@@ -4376,8 +3905,8 @@
                             b.respawn -= dt;
                             if(b.respawn <= 0) {
                                 b.isDead = false; b.hp = 100;
-                                b.x = (gm === 'squid' || gm === 'glass') ? 660 + Math.random()*280 : (gm === 'sumo' ? 750 + Math.random()*100 : 450 + Math.random()*700);
-                                b.y = (gm === 'squid' || gm === 'glass') ? 1440 : (gm === 'sumo' ? 750 + Math.random()*100 : 450 + Math.random()*700);
+                                b.x = (gm === 'squid' || gm === 'glass' || gm === 'fallguys') ? 660 + Math.random()*280 : (gm === 'sumo' ? 750 + Math.random()*100 : 450 + Math.random()*700);
+                                b.y = (gm === 'squid' || gm === 'glass' || gm === 'fallguys') ? 1440 : (gm === 'sumo' ? 750 + Math.random()*100 : 450 + Math.random()*700);
                             }
                         }
                         botDbUpdates[`${bid}/isDead`] = b.isDead;
@@ -4388,7 +3917,36 @@
                     b.anim += dt * 11;
                     let shooting = false;
 
-                    if(gm === 'race') {
+                    if(gm === 'flappy') {
+                        let nextPipe = this.flappyPipes.find(p => p.x > 320) || {gapY: 800};
+                        b.x = 360;
+                        b.y += (nextPipe.gapY - b.y) * 3.5 * dt;
+                        b.angle = 0;
+                        if(Math.random() < 0.14) b.score += 1;
+                    }
+                    else if(gm === 'fallguys') {
+                        b.angle = -Math.PI/2;
+                        b.y -= 175 * dt;
+                        b.x += Math.sin(b.anim * 0.5) * 90 * dt;
+                        if(b.y < 230) {
+                            b.score += 30;
+                            b.y = 1440;
+                        }
+                    }
+                    else if(gm === 'duel') {
+                        if(RoomState.squidState === 'green') {
+                            let enemy = allActive.find(p => p.id !== bid);
+                            if(enemy) {
+                                b.angle = Math.atan2(enemy.y - b.y, enemy.x - b.x);
+                                shooting = Math.random() < 0.35;
+                                if(shooting && Math.random() < 0.18) b.score += 5;
+                            }
+                        } else {
+                            b.x += Math.cos(b.anim*0.3)*80*dt;
+                            b.y += Math.sin(b.anim*0.3)*80*dt;
+                        }
+                    }
+                    else if(gm === 'race') {
                         let wp = waypoints[b.wpIdx % 4];
                         b.angle = Math.atan2(wp.y - b.y, wp.x - b.x);
                         let spd = 435 + (bid.charCodeAt(4) % 70);
@@ -4617,6 +4175,7 @@
                     RoomState.boss = boss;
                     db.ref(`rooms/${currentRoom}/boss`).set(boss);
                     if(boss.hp <= 0) {
+                        Profile.unlockAchievement('dragon_slayer');
                         this.endMinigameRound();
                         return;
                     }
@@ -4632,7 +4191,10 @@
                     let inGoalY = (b.y > 620 && b.y < 980);
                     if((b.x < 145 || b.x > 1455) && inGoalY) {
                         let scorer = b.lastKicker || myId;
-                        if(scorer === myId && this.me) this.me.score += 15;
+                        if(scorer === myId && this.me) {
+                            this.me.score += 15;
+                            Profile.unlockAchievement('soccer_star');
+                        }
                         else if(this.botStates[scorer]) this.botStates[scorer].score += 15;
                         else db.ref(`events/${currentRoom}`).push({ type: 'kill', killer: scorer, pts: 15 });
 
@@ -4652,9 +4214,9 @@
                 if(gm === 'royale') RoomState.stormR = Math.max(160, RoomState.stormR - 14 * dt);
                 if(gm === 'sumo')   RoomState.stormR = Math.max(180, RoomState.stormR - 4.5 * dt);
 
-                if(gm === 'squid') {
+                if(gm === 'squid' || gm === 'duel') {
                     this.squidTimer = (this.squidTimer || 0) + dt;
-                    if(RoomState.squidState === 'green' && this.squidTimer >= 3.4) {
+                    if(RoomState.squidState === 'green' && this.squidTimer >= 3.2) {
                         this.squidTimer = 0;
                         RoomState.squidState = 'yellow';
                         db.ref(`rooms/${currentRoom}`).update({ squidState: 'yellow' });
@@ -4705,7 +4267,7 @@
                             t: Math.random() < 0.25 ? 'gem' : 'coin'
                         });
                     }
-                } else if(!['bomb', 'sniper', 'race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'].includes(gm)) {
+                } else if(!['bomb', 'sniper', 'race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'flappy', 'fallguys', 'duel'].includes(gm)) {
                     if(Math.random() < 0.05 && Object.keys(netItems).length < 8) {
                         let pool = ['medkit', 'shield', 'quad', 'nitro', 'shotgun', 'minigun', 'sniper', 'plasma', 'bazooka'];
                         let iid = 'i_' + Math.random().toString(36).substr(2, 5);
@@ -4790,6 +4352,32 @@
                 if(!this.me) return;
                 const gm = RoomState.activeMinigame;
 
+                if(gm === 'flappy' && RoomState.status === 'playing') {
+                    this.flappyPipes.forEach(p => {
+                        p.x -= 310 * dt;
+                        if(p.x < -80) {
+                            p.x = 1350;
+                            p.gapY = 450 + Math.random()*700;
+                            p.passed = false;
+                        }
+                    });
+                }
+
+                if(gm === 'fallguys' && RoomState.status === 'playing') {
+                    this.boulders.forEach(bo => {
+                        bo.y += bo.vy * dt;
+                        if(bo.y > 1420) {
+                            bo.y = 260;
+                            bo.x = 420 + Math.random()*760;
+                        }
+                        if(!this.me.isDead && Math.hypot(this.me.x - bo.x, this.me.y - bo.y) < bo.r + 16) {
+                            Sound.play('boom');
+                            FX.burst(this.me.x, this.me.y, '#ff9100', 10, 180, 5);
+                            this.me.ky = 650;
+                        }
+                    });
+                }
+
                 if(gm === 'lasers') {
                     const t = performance.now() * 0.0012;
                     this.laserBeams = [
@@ -4800,9 +4388,15 @@
                     ];
                 }
 
-                if(!isHost && gm === 'soccer' && RoomState.ball) {
+                if((gm === 'soccer' || RoomState.status === 'lobby') && RoomState.ball) {
                     RoomState.ball.x += (RoomState.ball.vx || 0) * dt;
                     RoomState.ball.y += (RoomState.ball.vy || 0) * dt;
+                    if(RoomState.status === 'lobby') {
+                        RoomState.ball.vx *= Math.pow(0.3, dt);
+                        RoomState.ball.vy *= Math.pow(0.3, dt);
+                        if(RoomState.ball.x < 400 || RoomState.ball.x > 1200) RoomState.ball.vx *= -0.8;
+                        if(RoomState.ball.y < 600 || RoomState.ball.y > 1350) RoomState.ball.vy *= -0.8;
+                    }
                 }
 
                 Object.entries(netPlayers).forEach(([pid, p]) => {
@@ -4818,12 +4412,12 @@
                 this.me.update(dt);
                 Cam.update(dt, this.me);
 
-                if(!isHost && RoomState.timer > 0) {
+                if(!isHost && RoomState.status === 'playing' && RoomState.timer > 0) {
                     RoomState.timer = Math.max(0, RoomState.timer - dt);
                 }
 
-                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss'];
-                let obstacles = noObstacleModes.includes(gm) ? [] : (MAPS[RoomState.map] || MAPS.forest).obstacles;
+                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss', 'flappy', 'fallguys', 'duel'];
+                let obstacles = (RoomState.status === 'lobby' || noObstacleModes.includes(gm)) ? [] : (MAPS[RoomState.map] || MAPS.forest).obstacles;
 
                 for(let i=this.bullets.length-1; i>=0; i--) {
                     let b = this.bullets[i];
@@ -4832,8 +4426,7 @@
 
                     if(b.bType === 'rocket' && Math.random() < 0.6) FX.burst(b.x, b.y, '#888888', 1, 30, 5);
 
-                    // Trafienie w Wybuchową Beczkę TNT!
-                    if(!noObstacleModes.includes(gm) && b.isMine) {
+                    if(RoomState.status === 'playing' && !noObstacleModes.includes(gm) && b.isMine) {
                         let hitBarrel = ARENA_BARRELS.find(bar => !(RoomState.barrelDestroyed && RoomState.barrelDestroyed[bar.id]) && Math.hypot(b.x - bar.x, b.y - bar.y) < 28);
                         if(hitBarrel) {
                             db.ref(`rooms/${currentRoom}/barrelDestroyed/${hitBarrel.id}`).set(true);
@@ -4843,7 +4436,7 @@
                         }
                     }
 
-                    if(gm === 'heist' && Math.hypot(b.x - 800, b.y - 800) < 55) {
+                    if(RoomState.status === 'playing' && gm === 'heist' && Math.hypot(b.x - 800, b.y - 800) < 55) {
                         FX.burst(b.x, b.y, '#ffde00', 6, 140, 5);
                         if(b.isMine) {
                             Sound.play('coin');
@@ -4854,7 +4447,7 @@
                         this.bullets.splice(i,1); continue;
                     }
 
-                    if(gm === 'boss' && RoomState.boss && Math.hypot(b.x - RoomState.boss.x, b.y - RoomState.boss.y) < 58) {
+                    if(RoomState.status === 'playing' && gm === 'boss' && RoomState.boss && Math.hypot(b.x - RoomState.boss.x, b.y - RoomState.boss.y) < 58) {
                         FX.burst(b.x, b.y, '#ff9100', 7, 160, 5);
                         if(b.isMine) {
                             Sound.play('hit');
@@ -4887,9 +4480,9 @@
                         this.bullets.splice(i,1); continue;
                     }
 
-                    if(!b.isMine) continue;
+                    if(!b.isMine || RoomState.status !== 'playing') continue;
 
-                    if(['arena', 'spleef', 'crown', 'meteors', 'heist', 'royale', 'koth', 'sniper', 'coins'].includes(gm)) {
+                    if(['arena', 'spleef', 'crown', 'meteors', 'heist', 'royale', 'koth', 'sniper', 'coins', 'duel'].includes(gm)) {
                         for(let [pid, p] of Object.entries(netPlayers)) {
                             if(!p.isDead && Math.hypot(b.x - p.x, b.y - p.y) < 22) {
                                 if(b.bType === 'rocket') {
@@ -4931,7 +4524,7 @@
                     }
                 }
 
-                if(gm === 'zombies' && !this.me.isDead) {
+                if(RoomState.status === 'playing' && gm === 'zombies' && !this.me.isDead) {
                     Object.values(netZombies).forEach(z => {
                         if(Math.hypot(this.me.x - z.x, this.me.y - z.y) < 30) {
                             this.me.takeDamage(25 * dt, null);
@@ -4940,7 +4533,7 @@
                 }
 
                 Object.values(netPlayers).forEach(p => {
-                    if(p.shooting && !p.isDead && Math.random() < 0.25 && !['bomb', 'race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass'].includes(gm)) {
+                    if(p.shooting && !p.isDead && Math.random() < 0.25 && !['bomb', 'race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'flappy', 'fallguys'].includes(gm)) {
                         let wObj = WEAPONS[p.wep] || WEAPONS.pistol;
                         this.spawnBullet(p.x, p.y, p.angle, wObj.spd, 0, 0, wObj.bType, false);
                     }
@@ -4948,41 +4541,43 @@
 
                 FX.update(dt);
 
-                let secs = Math.max(0, Math.ceil(RoomState.timer));
-                let mins = Math.floor(secs / 60);
-                let remSecs = secs % 60;
-                document.getElementById('hudTimer').innerText = `${mins.toString().padStart(2,'0')}:${remSecs.toString().padStart(2,'0')}`;
+                if(RoomState.status === 'playing') {
+                    let secs = Math.max(0, Math.ceil(RoomState.timer));
+                    let mins = Math.floor(secs / 60);
+                    let remSecs = secs % 60;
+                    document.getElementById('hudTimer').innerText = `${mins.toString().padStart(2,'0')}:${remSecs.toString().padStart(2,'0')}`;
 
-                const subTimerEl = document.getElementById('hudSubTimer');
-                if(gm === 'bomb' && RoomState.bombTimer !== undefined) {
-                    subTimerEl.classList.remove('hidden');
-                    subTimerEl.innerText = `💣 WYBUCH ZA: ${Math.max(0, RoomState.bombTimer).toFixed(1)}s`;
-                } else {
-                    subTimerEl.classList.add('hidden');
+                    const subTimerEl = document.getElementById('hudSubTimer');
+                    if(gm === 'bomb' && RoomState.bombTimer !== undefined) {
+                        subTimerEl.classList.remove('hidden');
+                        subTimerEl.innerText = `💣 WYBUCH ZA: ${Math.max(0, RoomState.bombTimer).toFixed(1)}s`;
+                    } else {
+                        subTimerEl.classList.add('hidden');
+                    }
+
+                    document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
+                    document.getElementById('shieldBar').style.width = `${Math.min(100, (this.me.shield/50)*100)}%`;
+                    document.getElementById('dashBar').style.width = `${Math.max(0, ((1.35 - this.me.dashCd)/1.35)*100)}%`;
+                    document.getElementById('ultiBar').style.width = `${Math.floor(this.me.ultiCharge)}%`;
+                    const uTxt = document.getElementById('ultiReadyTxt');
+                    if(uTxt) {
+                        if(this.me.ultiCharge >= 100) uTxt.classList.remove('hidden');
+                        else uTxt.classList.add('hidden');
+                    }
+
+                    let buffs = [];
+                    if(this.me.quadTime > 0) buffs.push(`🔥 2X DMG (${Math.ceil(this.me.quadTime)}s)`);
+                    if(this.me.speedTime > 0) buffs.push(`⚡ NITRO (${Math.ceil(this.me.speedTime)}s)`);
+                    if(this.me.isInBush()) buffs.push(`🌿 UKRYTY W KRZAKACH!`);
+                    document.getElementById('hudBuffs').innerText = buffs.join(' | ');
+
+                    let scores = [{ name: this.me.name, color: this.me.color, score: this.me.score }];
+                    Object.values(netPlayers).forEach(p => scores.push({ name: p.name, color: p.color, score: p.score || 0 }));
+                    scores.sort((a,b) => b.score - a.score);
+                    document.getElementById('liveScoreboard').innerHTML = scores.map((s, idx) =>
+                        `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score} pkt</span></li>`
+                    ).join('');
                 }
-
-                document.getElementById('hpBar').style.width = `${Math.max(0, (this.me.hp/this.me.maxHp)*100)}%`;
-                document.getElementById('shieldBar').style.width = `${Math.min(100, (this.me.shield/50)*100)}%`;
-                document.getElementById('dashBar').style.width = `${Math.max(0, ((1.35 - this.me.dashCd)/1.35)*100)}%`;
-                document.getElementById('ultiBar').style.width = `${Math.floor(this.me.ultiCharge)}%`;
-                const uTxt = document.getElementById('ultiReadyTxt');
-                if(uTxt) {
-                    if(this.me.ultiCharge >= 100) uTxt.classList.remove('hidden');
-                    else uTxt.classList.add('hidden');
-                }
-
-                let buffs = [];
-                if(this.me.quadTime > 0) buffs.push(`🔥 2X DMG (${Math.ceil(this.me.quadTime)}s)`);
-                if(this.me.speedTime > 0) buffs.push(`⚡ NITRO (${Math.ceil(this.me.speedTime)}s)`);
-                if(this.me.isInBush()) buffs.push(`🌿 UKRYTY W KRZAKACH!`);
-                document.getElementById('hudBuffs').innerText = buffs.join(' | ');
-
-                let scores = [{ name: this.me.name, color: this.me.color, score: this.me.score }];
-                Object.values(netPlayers).forEach(p => scores.push({ name: p.name, color: p.color, score: p.score || 0 }));
-                scores.sort((a,b) => b.score - a.score);
-                document.getElementById('liveScoreboard').innerHTML = scores.map((s, idx) =>
-                    `<li class="flex justify-between"><span>#${idx+1} <span style="color:${s.color}">■</span> ${s.name}</span><span class="text-yellow-400">${s.score} pkt</span></li>`
-                ).join('');
             },
 
             draw(dt) {
@@ -4992,7 +4587,50 @@
 
                 Cam.apply();
 
-                if(gm === 'race') {
+                // === 0. CHODZONY SALON GIER 2.5D W LOBBY ===
+                if(RoomState.status === 'lobby') {
+                    ctx.drawImage(GroundCache.canvases.cyber, 0, 0);
+                    // Czerwony dywan Kasyna VIP na środku
+                    ctx.fillStyle = '#3b091e'; ctx.fillRect(520, 620, 560, 420);
+                    ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 6; ctx.strokeRect(520, 620, 560, 420);
+                    ctx.fillStyle = '#ffde00'; ctx.font = '14px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText("🎰 SALON GIER VIP - ROZGRZEWKA 🎰", 800, 665);
+                    ctx.font = '8px "Press Start 2P"'; ctx.fillStyle = '#05d5fa';
+                    ctx.fillText("Naciśnij [TAB] aby otworzyć / zamknąć wybór 22 Minigier!", 800, 695);
+
+                    // Mini-boisko piłkarskie na dole Salonu Gier
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 4;
+                    ctx.strokeRect(500, 1080, 600, 260);
+                    ctx.fillStyle = '#00e676'; ctx.fillText("⚽ STREFA PIŁKI NOŻNEJ", 800, 1110);
+                }
+                // 1. FLAPPY JETPACK RUN
+                else if(gm === 'flappy') {
+                    ctx.fillStyle = '#0b071a'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    this.flappyPipes.forEach(p => {
+                        ctx.fillStyle = '#00e676';
+                        ctx.fillRect(p.x - 35, 0, 70, p.gapY - 125);
+                        ctx.fillRect(p.x - 35, p.gapY + 125, 70, WORLD_SIZE);
+                        ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 4;
+                        ctx.strokeRect(p.x - 35, 0, 70, p.gapY - 125);
+                        ctx.strokeRect(p.x - 35, p.gapY + 125, 70, WORLD_SIZE);
+                    });
+                }
+                // 2. GÓRA KORONY (FALL GUYS MOUNTAIN)
+                else if(gm === 'fallguys') {
+                    ctx.fillStyle = '#1b1136'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+                    ctx.fillStyle = '#ff2a6d'; ctx.fillRect(380, 180, 840, 1320);
+                    ctx.fillStyle = '#26184a'; ctx.fillRect(400, 200, 800, 1280);
+                    ctx.fillStyle = '#ffde00'; ctx.fillRect(400, 180, 800, 60);
+                    ctx.fillStyle = '#000'; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
+                    ctx.fillText("👑 SZCZYT GÓRY KORONY (+30 PKT) 👑", 800, 218);
+                    this.boulders.forEach(bo => {
+                        ctx.fillStyle = '#ff9100';
+                        ctx.beginPath(); ctx.arc(bo.x, bo.y, bo.r, 0, Math.PI*2); ctx.fill();
+                        ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 4; ctx.stroke();
+                    });
+                }
+                // 3. TOR WYŚCIGOWY GOKARTÓW HD
+                else if(gm === 'race') {
                     ctx.fillStyle = '#1b431d'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     for(let k=100; k<1500; k+=40) {
                         ctx.fillStyle = (k/40)%2===0 ? '#ff1744' : '#ffffff';
@@ -5011,6 +4649,7 @@
                         ctx.fillRect(800, 1140 + r*40, 20, 40);
                     }
                 }
+                // 4. STADION PIŁKARSKI PIXEL SOCCER HD
                 else if(gm === 'soccer') {
                     for(let x=0; x<WORLD_SIZE; x+=100) {
                         ctx.fillStyle = (x/100)%2===0 ? '#1e5c23' : '#256e2b';
@@ -5027,6 +4666,7 @@
                     ctx.fillStyle = 'rgba(255, 42, 109, 0.35)'; ctx.fillRect(1460, 620, 70, 360);
                     ctx.strokeStyle = '#ff2a6d'; ctx.strokeRect(1460, 620, 70, 360);
                 }
+                // 5. ARENA WOJNY KOLORÓW
                 else if(gm === 'paint') {
                     ctx.fillStyle = '#141421'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     for(let tx=1; tx<=18; tx++) {
@@ -5041,6 +4681,7 @@
                         }
                     }
                 }
+                // 6. SZKLANY MOST
                 else if(gm === 'glass') {
                     ctx.fillStyle = '#090614'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     ctx.fillStyle = '#2b1b42'; ctx.fillRect(500, 1310, 600, 240);
@@ -5066,6 +4707,7 @@
                         }
                     }
                 }
+                // 7. SUMO RING
                 else if(gm === 'sumo') {
                     ctx.fillStyle = '#290909'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     ctx.fillStyle = '#d9b382';
@@ -5074,6 +4716,7 @@
                     ctx.strokeStyle = '#fff'; ctx.lineWidth = 4;
                     ctx.beginPath(); ctx.arc(800, 800, 120, 0, Math.PI*2); ctx.stroke();
                 }
+                // 8. SQUID GAME
                 else if(gm === 'squid') {
                     ctx.fillStyle = '#d4b475'; ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
                     ctx.fillStyle = '#c4a262';
@@ -5090,7 +4733,7 @@
                     ctx.drawImage(cachedBg, 0, 0);
                 }
 
-                if(gm === 'spleef') {
+                if(RoomState.status === 'playing' && gm === 'spleef') {
                     Object.entries(RoomState.brokenIce).forEach(([key, state]) => {
                         let [tx, ty] = key.split('_').map(Number);
                         if(state === 1) {
@@ -5107,24 +4750,24 @@
 
                 FX.drawDecals();
 
-                if(gm === 'koth' && RoomState.koth) {
+                if(RoomState.status === 'playing' && gm === 'koth' && RoomState.koth) {
                     let k = RoomState.koth;
                     ctx.fillStyle = 'rgba(255, 222, 0, 0.22)';
                     ctx.beginPath(); ctx.arc(k.x, k.y, k.r, 0, Math.PI*2); ctx.fill();
                     ctx.strokeStyle = '#ffde00'; ctx.lineWidth = 4; ctx.stroke();
                 }
 
-                if(gm === 'royale') {
+                if(RoomState.status === 'playing' && gm === 'royale') {
                     ctx.strokeStyle = '#ff2a6d'; ctx.lineWidth = 10;
                     ctx.beginPath(); ctx.arc(800, 800, RoomState.stormR, 0, Math.PI*2); ctx.stroke();
                 }
 
-                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss'];
-                if(!noObstacleModes.includes(gm)) {
+                let noObstacleModes = ['race', 'squid', 'soccer', 'paint', 'lasers', 'sumo', 'glass', 'boss', 'flappy', 'fallguys', 'duel'];
+                if(RoomState.status === 'playing' && !noObstacleModes.includes(gm)) {
                     mapObj.obstacles.filter(o => o.t === 'lava').forEach(o => drawPixelObstacle25D(ctx, o));
                 }
 
-                drawInteractiveArenaProps(ctx, gm);
+                if(RoomState.status === 'playing') drawInteractiveArenaProps(ctx, gm);
 
                 let floatOff = Math.sin(performance.now()*0.006)*4;
                 Object.values(netItems).forEach(item => {
@@ -5147,27 +4790,27 @@
                 });
 
                 const renderQueue = [];
-                if(!noObstacleModes.includes(gm)) {
+                if(RoomState.status === 'playing' && !noObstacleModes.includes(gm)) {
                     mapObj.obstacles.filter(o => o.t !== 'lava').forEach(o => {
                         renderQueue.push({ y: o.y + o.h, draw: () => drawPixelObstacle25D(ctx, o) });
                     });
                 }
 
-                if(gm === 'soccer' && RoomState.ball) {
+                if((gm === 'soccer' || RoomState.status === 'lobby') && RoomState.ball) {
                     renderQueue.push({
                         y: RoomState.ball.y,
                         draw: () => drawPixelSoccerBall(ctx, RoomState.ball)
                     });
                 }
 
-                if(gm === 'boss' && RoomState.boss) {
+                if(RoomState.status === 'playing' && gm === 'boss' && RoomState.boss) {
                     renderQueue.push({
                         y: RoomState.boss.y,
                         draw: () => drawPixelBossDragon(ctx, RoomState.boss)
                     });
                 }
 
-                if(gm === 'heist') {
+                if(RoomState.status === 'playing' && gm === 'heist') {
                     renderQueue.push({
                         y: 850,
                         draw: () => {
@@ -5184,7 +4827,7 @@
                     });
                 }
 
-                if(gm === 'zombies') {
+                if(RoomState.status === 'playing' && gm === 'zombies') {
                     Object.values(netZombies).forEach(z => {
                         renderQueue.push({ y: z.y, draw: () => drawPixelZombie(ctx, z) });
                     });
@@ -5192,9 +4835,8 @@
 
                 Object.entries(netPlayers).forEach(([pid, p]) => {
                     let rp = this.renderPlayers[pid] || p;
-                    // Jeśli przeciwnik stoi w zaroślach (inBush) i jest daleko od nas -> jest całkowicie niewidzialny!
                     let distToMe = this.me ? Math.hypot(rp.x - this.me.x, rp.y - this.me.y) : 999;
-                    if(p.inBush && distToMe > 140) return;
+                    if(RoomState.status === 'playing' && p.inBush && distToMe > 140) return;
 
                     renderQueue.push({
                         y: rp.y,
@@ -5205,16 +4847,16 @@
                 if(this.me) {
                     renderQueue.push({
                         y: this.me.y,
-                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, this.me.skin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote, gm === 'crown' && RoomState.crownHolder === myId, this.me.jumpZ, Settings.pet, this.me.isInBush())
+                        draw: () => drawPixelHero(ctx, this.me.x, this.me.y, this.me.angle, this.me.color, chosenSkin, this.me.name, this.me.hp, this.me.maxHp, this.me.shield, this.me.wep, this.me.anim, RoomState.bombHolder === myId, this.me.isDead, this.me.muzzle, this.me.quadTime > 0, this.me.emote, gm === 'crown' && RoomState.crownHolder === myId, this.me.jumpZ, Settings.pet, this.me.isInBush())
                     });
                 }
 
                 renderQueue.sort((a, b) => a.y - b.y);
                 renderQueue.forEach(item => item.draw());
 
-                drawStealthBushesTop(ctx, gm);
+                if(RoomState.status === 'playing') drawStealthBushesTop(ctx, gm);
 
-                if(gm === 'lasers') {
+                if(RoomState.status === 'playing' && gm === 'lasers') {
                     this.laserBeams.forEach(lb => {
                         ctx.strokeStyle = 'rgba(255, 0, 68, 0.35)'; ctx.lineWidth = 22;
                         ctx.beginPath();
@@ -5227,7 +4869,7 @@
                     });
                 }
 
-                if(gm === 'meteors') {
+                if(RoomState.status === 'playing' && gm === 'meteors') {
                     netMeteors.forEach(m => {
                         ctx.fillStyle = 'rgba(255, 42, 109, 0.28)';
                         ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill();
@@ -5276,8 +4918,12 @@
 
             loop(time) {
                 let dt = Math.min((time - this.lastTime)/1000, 0.1); this.lastTime = time;
-                if(RoomState.status === 'playing') { this.update(dt); this.draw(dt); }
-                else if(RoomState.status === 'board') { Board.drawBoard(ctx); }
+                if(RoomState.status === 'playing' || (RoomState.status === 'lobby' && currentRoom)) {
+                    this.update(dt);
+                    this.draw(dt);
+                } else if(RoomState.status === 'board') {
+                    Board.drawBoard(ctx);
+                }
                 this.loopId = requestAnimationFrame(t => this.loop(t));
             },
 
@@ -5319,7 +4965,6 @@
                 }
             },
 
-            // Ceremonia Bonusowych Gwiazd przed wyświetleniem ostatecznego Podium!
             showPodium() {
                 document.getElementById('hud').style.display = 'none';
                 document.getElementById('hudRight').style.display = 'none';
@@ -5340,7 +4985,6 @@
                     });
                 });
 
-                // Wyliczenie 3 Bonusowych Gwiazd
                 const bonusUnit = RoomState.isPartyCampaign ? '+3 POLA' : '+20 PKT';
                 const bonusAdd = RoomState.isPartyCampaign ? 3 : 20;
 
@@ -5383,8 +5027,27 @@
             }
         };
 
-        // === LOBBY, FILTROWANIE PULI LOSOWANIA & SYNCHRONIZACJA FIREBASE ===
+        // === LOBBY, CHODZONY SALON GIER 2.5D & SYNCHRONIZACJA FIREBASE ===
         const Lobby = {
+            panelMinimized: false,
+
+            toggleLobbyPanel() {
+                this.panelMinimized = !this.panelMinimized;
+                const scr = document.getElementById('screen-lobby');
+                const pan = document.getElementById('lobbyMainPanel');
+                const hubBar = document.getElementById('hubTopBar');
+                if(this.panelMinimized) {
+                    pan.style.display = 'none';
+                    scr.classList.add('hub-mode');
+                    hubBar.style.display = 'block';
+                    document.getElementById('btnHubQuickStart').style.display = isHost ? 'block' : 'none';
+                } else {
+                    pan.style.display = 'block';
+                    scr.classList.remove('hub-mode');
+                    hubBar.style.display = 'none';
+                }
+            },
+
             async auth() {
                 if(myId) return;
                 try { const c = await auth.signInAnonymously(); myId = c.user.uid; }
@@ -5427,13 +5090,14 @@
                     await pRef.set({
                         id: myId, name: document.getElementById('playerName').value.trim() || "Paweł",
                         color: document.getElementById('playerColor').value, skin: chosenSkin, pet: Settings.pet, chips: LobbyCasino.chips,
-                        x: 800, y: 800, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false, wep: 'pistol'
+                        x: 800, y: 860, hp: 100, shield: 0, score: 0, boardPos: 0, prison: 0, isDead: false, wep: 'pistol'
                     });
                     pRef.onDisconnect().remove();
 
                     Chat.init();
                     this.listen();
                     switchScreen('screen-lobby');
+                    Game.initLobbyHub();
                     document.getElementById('lobbyCode').innerText = currentRoom;
                     document.getElementById('lobbySkinSelect').value = chosenSkin;
                     document.getElementById('lobbyPetSelect').value = Settings.pet;
@@ -5447,6 +5111,7 @@
             },
             changeMySkinInLobby(sk) {
                 selectSkin(sk);
+                if(Game.me) Game.me.skin = sk;
                 if(currentRoom && myId) {
                     db.ref(`room_players/${currentRoom}/${myId}`).update({ skin: sk });
                 }
@@ -5542,7 +5207,10 @@
 
                     const sqBanner = document.getElementById('squidLightBanner');
                     if(sqBanner) {
-                        if(RoomState.squidState === 'green') {
+                        if(RoomState.activeMinigame === 'duel') {
+                            sqBanner.innerText = RoomState.squidState === 'green' ? "🤠 STRZELAJ TERAZ!! OGIEŃ!!" : "⏳ CZEKAJ NA SYGNAŁ... NIE STRZELAJ!";
+                            sqBanner.className = RoomState.squidState === 'green' ? "text-[10px] font-bold mb-1 text-green-400 animate-pulse" : "text-[10px] font-bold mb-1 text-amber-400";
+                        } else if(RoomState.squidState === 'green') {
                             sqBanner.innerText = "🟢 ZIELONE ŚWIATŁO! (BIEGNIJ DO GÓRY!)";
                             sqBanner.className = "text-[10px] font-bold mb-1 text-green-400";
                         } else if(RoomState.squidState === 'yellow') {
@@ -5578,7 +5246,12 @@
                         else if(d.status === 'card_reward') Game.showCardRewardScreen();
                         else if(d.status === 'podium') Game.showPodium();
                         else if(d.status === 'lobby') {
+                            this.panelMinimized = false;
+                            document.getElementById('lobbyMainPanel').style.display = 'block';
+                            document.getElementById('screen-lobby').classList.remove('hub-mode');
+                            document.getElementById('hubTopBar').style.display = 'none';
                             switchScreen('screen-lobby');
+                            Game.initLobbyHub();
                             document.getElementById('hud').style.display = 'none';
                             document.getElementById('hudRight').style.display = 'none';
                             document.getElementById('boardHud').style.display = 'none';
@@ -5589,7 +5262,7 @@
                     }
                 });
 
-                const skinIcons = { cap:'🧢', ninja:'🥷', knight:'⚔️', astro:'👨‍🚀', cyborg:'🤖', king:'👑', wizard:'🧙‍♂️', pirate:'🏴‍☠️', agent:'🕶️' };
+                const skinIcons = { cap:'🧢', ninja:'🥷', knight:'⚔️', astro:'👨‍🚀', cyborg:'🤖', king:'👑', wizard:'🧙‍♂️', pirate:'🏴‍☠️', agent:'🕶️', vampire:'🧛‍♂️', cowboy:'🤠', thunder:'⚡' };
                 db.ref(`room_players/${currentRoom}`).on('value', snap => {
                     let all = snap.val() || {}; netPlayers = {}; let arr = [];
                     Object.entries(all).forEach(([pid, p]) => {
@@ -5686,6 +5359,7 @@
                             addKillFeed(kPlayer.name, ev.victimName, kPlayer.color, ev.victimColor || '#fff');
                         }
                         if(ev.killer === myId) {
+                            Profile.unlockAchievement('first_blood');
                             Game.me.score += (ev.pts || 10);
                             Game.me.streak += 1;
                             Game.me.ultiCharge = Math.min(100, Game.me.ultiCharge + 30);
@@ -5711,6 +5385,7 @@
             },
             launchGame() {
                 if(!isHost) return;
+                document.getElementById('hubTopBar').style.display = 'none';
                 db.ref(`room_items/${currentRoom}`).remove();
                 let order = Board.getValidTurnOrder();
                 const muts = ['none', 'bighead', 'tiny', 'bananas', 'drunk'];
@@ -5739,7 +5414,8 @@
                         timer: dur, stormR: RoomState.mode === 'sumo' ? 460 : 1100,
                         ball: {x:800, y:800, vx:0, vy:0}, boss: {x:800, y:800, hp:1200, maxHp:1200, a:0},
                         paintData: {}, barrelDestroyed: {},
-                        bombHolder: null, crownHolder: myId, squidState: 'green', brokenIce: {}, zombies: "[]", meteors: "[]"
+                        bombHolder: null, crownHolder: myId, squidState: RoomState.mode === 'duel' ? 'red' : 'green',
+                        brokenIce: {}, zombies: "[]", meteors: "[]"
                     });
                 }
             }
