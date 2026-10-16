@@ -7,26 +7,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Firebase SDK do synchronizacji przez Internet -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
     :root {
-      --bg-abyss: #0a0812;
-      --bg-coal: #120f1e;
-      --bg-panel: #1b162b;
-      --bg-panel-elevated: #241e38;
-      --bg-tile: #26203a;
-      --bg-tile-hover: #322a4d;
-      --bg-corner: #2e2747;
-      --border-glass: rgba(255, 255, 255, 0.08);
-      --border-ember: rgba(255, 138, 0, 0.45);
-      --text-bright: #f5f3ff;
-      --text-dim: #9b92b8;
+      --bg-abyss: #08070f;
+      --bg-coal: #110e1c;
+      --bg-panel: rgba(25, 20, 40, 0.92);
+      --bg-panel-elevated: rgba(38, 31, 61, 0.95);
+      --bg-tile: #221c35;
+      --bg-tile-hover: #2f2749;
+      --bg-corner: #2b2342;
+      --border-glass: rgba(255, 255, 255, 0.09);
+      --border-ember: rgba(255, 152, 0, 0.45);
+      --text-bright: #f8f6ff;
+      --text-dim: #a39ac2;
       --purple-rich: #7c4dff;
       --ember-gold: #ff9800;
       --emerald-win: #2ecc71;
       --crimson-danger: #ff5252;
-      --board-dim: min(90vh, 90vw, 850px);
+      --cyan-glow: #00e5ff;
+      --board-dim: min(91vh, 91vw, 860px);
     }
 
     * {
@@ -39,17 +41,21 @@
 
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at 50% 25%, #1d1632 0%, #0d0a17 65%, #07050c 100%);
+      background:
+        radial-gradient(circle at 50% 15%, rgba(124, 77, 255, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(255, 152, 0, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #130f22 0%, #090711 100%);
       color: var(--text-bright);
       min-height: 100vh;
       overflow-x: hidden;
       user-select: none;
     }
 
+    /* ==================== UKŁAD 3 KOLUMN ==================== */
     .richup-shell {
       display: grid;
-      grid-template-columns: 315px 1fr 335px;
-      gap: 14px;
+      grid-template-columns: 320px 1fr 345px;
+      gap: 16px;
       height: 100vh;
       max-width: 1920px;
       margin: 0 auto;
@@ -66,13 +72,15 @@
     }
 
     .glass-card {
-      background: linear-gradient(180deg, rgba(31, 26, 48, 0.95) 0%, rgba(22, 18, 35, 0.95) 100%);
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border-glass);
       border-radius: 16px;
-      padding: 12px 14px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      padding: 13px 15px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
     }
 
+    /* ==================== LEWA KOLUMNA ==================== */
     .brand-header-bar {
       display: flex;
       align-items: center;
@@ -81,23 +89,25 @@
     }
 
     .logo-compact {
-      font-size: 1.75rem;
+      font-size: 1.8rem;
       font-weight: 900;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: baseline;
     }
 
     .logo-light { color: #ffffff; }
     .logo-accent { color: var(--ember-gold); margin-left: 4px; }
-    .logo-io { color: var(--purple-rich); font-size: 1.2rem; }
+    .logo-io { color: var(--purple-rich); font-size: 1.2rem; margin-left: 2px; }
 
     .header-icons-row {
       display: flex;
-      gap: 6px;
+      gap: 7px;
     }
 
     .top-icon-btn {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 10px;
       border: 1px solid var(--border-glass);
       background: var(--bg-panel-elevated);
@@ -106,22 +116,24 @@
       display: grid;
       place-items: center;
       font-size: 0.95rem;
-      transition: all 0.16s ease;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s;
     }
 
     .top-icon-btn:hover {
       background: var(--purple-rich);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
 
     .card-caption-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.78rem;
+      font-weight: 700;
       color: var(--text-dim);
       margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .sync-dot {
@@ -130,6 +142,11 @@
       border-radius: 50%;
       background: var(--emerald-win);
       box-shadow: 0 0 10px var(--emerald-win);
+    }
+
+    .sync-dot.cloud {
+      background: var(--cyan-glow);
+      box-shadow: 0 0 12px var(--cyan-glow);
     }
 
     .share-controls-row {
@@ -144,7 +161,7 @@
       border: 1px solid var(--border-glass);
       border-radius: 9px;
       color: var(--text-dim);
-      padding: 7px 9px;
+      padding: 7px 10px;
       font-size: 0.75rem;
       font-family: 'JetBrains Mono', monospace;
     }
@@ -154,18 +171,20 @@
       color: var(--text-bright);
       border: 1px solid var(--border-glass);
       border-radius: 9px;
-      padding: 7px 10px;
+      padding: 7px 11px;
       font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
-      transition: background 0.15s;
+      transition: all 0.15s ease;
     }
 
     .btn-chip:hover {
-      background: #352c52;
+      background: #372d56;
+      transform: translateY(-1px);
     }
 
+    /* Inspektor Dzielnicy */
     .district-spotlight {
       padding: 0;
       overflow: hidden;
@@ -173,26 +192,28 @@
     }
 
     .spotlight-banner {
-      padding: 11px 14px;
+      padding: 12px 15px;
       background: linear-gradient(135deg, #342952, #1d1730);
       border-bottom: 1px solid var(--border-glass);
+      transition: background 0.25s ease;
     }
 
     .spotlight-tag {
-      font-size: 0.66rem;
+      font-size: 0.65rem;
       font-weight: 800;
-      letter-spacing: 0.9px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      opacity: 0.85;
+      opacity: 0.9;
     }
 
     .spotlight-banner h3 {
-      font-size: 0.95rem;
+      font-size: 0.98rem;
+      font-weight: 800;
       margin-top: 2px;
     }
 
     .spotlight-content {
-      padding: 11px 14px;
+      padding: 12px 15px;
       font-size: 0.8rem;
     }
 
@@ -204,24 +225,26 @@
     .spot-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 8px;
+      gap: 7px;
+      margin-bottom: 9px;
     }
 
     .spot-stat {
       background: var(--bg-abyss);
-      padding: 6px 8px;
-      border-radius: 8px;
+      padding: 7px 9px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.04);
     }
 
     .spot-stat span {
       display: block;
-      font-size: 0.67rem;
+      font-size: 0.66rem;
       color: var(--text-dim);
     }
 
     .spot-stat strong {
-      font-size: 0.85rem;
+      font-size: 0.86rem;
+      font-weight: 800;
     }
 
     .spot-btn-row {
@@ -230,6 +253,7 @@
       margin-top: 8px;
     }
 
+    /* Czat */
     .chat-box {
       flex: 1;
       display: flex;
@@ -241,7 +265,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--text-dim);
       padding-bottom: 8px;
@@ -249,10 +273,12 @@
     }
 
     .chat-room-tag {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       background: var(--bg-panel-elevated);
-      padding: 2px 7px;
+      padding: 3px 8px;
       border-radius: 6px;
+      color: var(--ember-gold);
+      font-weight: 800;
     }
 
     .chat-stream {
@@ -268,6 +294,7 @@
       display: flex;
       align-items: flex-start;
       gap: 8px;
+      animation: fadeSlideUp 0.22s ease;
     }
 
     .chat-msg-bubble {
@@ -281,7 +308,7 @@
     }
 
     .chat-msg-author {
-      font-size: 0.68rem;
+      font-size: 0.67rem;
       font-weight: 800;
       color: var(--text-dim);
       display: block;
@@ -298,14 +325,16 @@
     .emoji-chip {
       background: transparent;
       border: none;
-      font-size: 1rem;
+      font-size: 1.05rem;
       cursor: pointer;
       padding: 3px 6px;
       border-radius: 6px;
+      transition: transform 0.15s;
     }
 
     .emoji-chip:hover {
       background: var(--bg-panel-elevated);
+      transform: scale(1.2);
     }
 
     .chat-input-bar {
@@ -332,8 +361,14 @@
       background: var(--purple-rich);
       color: #fff;
       cursor: pointer;
+      transition: transform 0.15s;
     }
 
+    .btn-chat-send:hover {
+      transform: scale(1.08);
+    }
+
+    /* ==================== PLANSZA 11x11 (CZYTELNA I PRZEJRZYSTA) ==================== */
     .board-viewport {
       display: flex;
       align-items: center;
@@ -344,7 +379,7 @@
     .board-outer-frame {
       width: var(--board-dim);
       height: var(--board-dim);
-      padding: 20px;
+      padding: 22px;
       position: relative;
     }
 
@@ -352,63 +387,93 @@
       width: 100%;
       height: 100%;
       display: grid;
-      grid-template-columns: 1.38fr repeat(9, 1fr) 1.38fr;
-      grid-template-rows: 1.38fr repeat(9, 1fr) 1.38fr;
-      gap: 3px;
-      background: #0d0a16;
-      padding: 4px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      grid-template-columns: 1.36fr repeat(9, 1fr) 1.36fr;
+      grid-template-rows: 1.36fr repeat(9, 1fr) 1.36fr;
+      gap: 4px;
+      background: #0c0915;
+      padding: 5px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow:
-        0 22px 60px rgba(0, 0, 0, 0.85),
-        0 0 40px rgba(124, 77, 255, 0.12);
+        0 25px 70px rgba(0, 0, 0, 0.85),
+        0 0 50px rgba(124, 77, 255, 0.14);
       position: relative;
     }
 
     .board-tile {
-      background: linear-gradient(165deg, #2b2442 0%, #201a33 100%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 7px;
+      background: linear-gradient(165deg, #27203d 0%, #1c172d 100%);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 3px;
+      padding: 5px 3px 4px;
       cursor: pointer;
-      transition: transform 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s, box-shadow 0.18s;
       overflow: visible;
     }
 
+    /* Wewnętrzny pasek kolorystyczny dzielnicy dla maksymalnej przejrzystości */
+    .tile-color-bar {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+      border-radius: 7px 7px 0 0;
+      opacity: 0.95;
+    }
+
     .board-tile:hover {
-      background: linear-gradient(165deg, #393057 0%, #2a2242 100%);
-      z-index: 9;
-      box-shadow: 0 0 0 2px var(--ember-gold);
+      background: linear-gradient(165deg, #372d56 0%, #27203e 100%);
+      z-index: 15;
+      transform: scale(1.06);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65), 0 0 0 2px var(--ember-gold);
     }
 
     .board-tile.selected-tile {
-      box-shadow: 0 0 0 2px #00e5ff;
-      z-index: 10;
+      box-shadow: 0 0 0 2px var(--cyan-glow), 0 0 16px rgba(0, 229, 255, 0.35);
+      z-index: 12;
+    }
+
+    .board-tile.active-landed-tile {
+      animation: tilePulseGlow 1.1s ease-out;
+    }
+
+    .board-tile.upgraded-flash {
+      animation: buildFlashAnim 0.85s ease-out;
+    }
+
+    @keyframes tilePulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.9); transform: scale(1.1); }
+      100% { box-shadow: 0 0 0 14px rgba(255, 152, 0, 0); transform: scale(1); }
+    }
+
+    @keyframes buildFlashAnim {
+      0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.95); transform: scale(1.12); }
+      100% { box-shadow: 0 0 0 18px rgba(46, 204, 113, 0); transform: scale(1); }
     }
 
     .board-tile.mortgaged-tile {
-      opacity: 0.5;
-      filter: grayscale(0.6);
+      opacity: 0.45;
+      filter: grayscale(0.75);
     }
 
+    /* Narożniki */
     .board-tile.corner-tile {
-      background: linear-gradient(145deg, #352c52 0%, #211b36 100%);
+      background: linear-gradient(145deg, #342b52 0%, #1e1831 100%);
       justify-content: center;
-      gap: 3px;
-      padding: 5px;
+      gap: 4px;
+      padding: 6px;
       text-align: center;
     }
 
     .corner-label {
       font-size: 0.72rem;
       font-weight: 900;
-      letter-spacing: 0.7px;
+      letter-spacing: 0.6px;
       text-transform: uppercase;
+      color: #fff;
     }
 
     .corner-svg-wrap {
@@ -420,47 +485,50 @@
 
     .corner-sub {
       font-size: 0.58rem;
-      color: var(--text-dim);
-      font-weight: 600;
+      color: var(--ember-gold);
+      font-weight: 700;
     }
 
+    /* Czytelne nazwy i ceny na kafelkach */
     .tile-title {
-      font-size: 0.61rem;
-      font-weight: 700;
+      font-size: 0.62rem;
+      font-weight: 800;
       text-align: center;
-      line-height: 1.1;
-      color: #f2efff;
-      max-width: 100%;
+      line-height: 1.12;
+      color: #ffffff;
+      max-width: 96%;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     }
 
     .tile-price-tag {
-      font-size: 0.55rem;
+      font-size: 0.56rem;
       font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
-      color: #cbc3e6;
-      background: rgba(8, 6, 15, 0.55);
-      padding: 1px 5px;
+      color: #ded8f5;
+      background: rgba(7, 5, 14, 0.65);
+      padding: 1px 6px;
       border-radius: 5px;
+      margin-top: 2px;
     }
 
     .tile-badge-circle {
-      width: 24px;
-      height: 24px;
+      width: 23px;
+      height: 23px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.6rem;
+      font-size: 0.56rem;
       font-weight: 900;
       color: #fff;
       border: 2px solid rgba(255, 255, 255, 0.92);
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 3px 7px rgba(0, 0, 0, 0.6);
       flex-shrink: 0;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     }
 
     .tile-special-svg {
@@ -470,6 +538,7 @@
       place-items: center;
     }
 
+    /* Zewnętrzne kapsułki właścicieli i poziomów domów (Richup style) */
     .owner-outer-cap {
       position: absolute;
       display: flex;
@@ -478,46 +547,48 @@
       gap: 2px;
       font-size: 0.58rem;
       font-weight: 900;
-      color: #0e0b16;
+      color: #0b0813;
       pointer-events: none;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 3px 9px rgba(0, 0, 0, 0.65);
       z-index: 5;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .edge-top .owner-outer-cap {
-      top: -17px;
+      top: -18px;
       left: 2px;
       right: 2px;
-      height: 14px;
+      height: 15px;
       border-radius: 7px 7px 2px 2px;
     }
 
     .edge-bottom .owner-outer-cap {
-      bottom: -17px;
+      bottom: -18px;
       left: 2px;
       right: 2px;
-      height: 14px;
+      height: 15px;
       border-radius: 2px 2px 7px 7px;
     }
 
     .edge-left .owner-outer-cap {
-      left: -18px;
+      left: -19px;
       top: 2px;
       bottom: 2px;
-      width: 15px;
+      width: 16px;
       writing-mode: vertical-rl;
       border-radius: 7px 2px 2px 7px;
     }
 
     .edge-right .owner-outer-cap {
-      right: -18px;
+      right: -19px;
       top: 2px;
       bottom: 2px;
-      width: 15px;
+      width: 16px;
       writing-mode: vertical-rl;
       border-radius: 2px 7px 7px 2px;
     }
 
+    /* Pionki z oczkami i animacją skoku */
     .tile-tokens-box {
       position: absolute;
       inset: 2px;
@@ -527,20 +598,26 @@
       justify-content: center;
       gap: 2px;
       pointer-events: none;
-      z-index: 12;
+      z-index: 14;
     }
 
     .eye-token {
-      width: 23px;
-      height: 23px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      border: 2px solid #ffffff;
+      border: 2.2px solid #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 2px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.75);
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.85);
+      animation: tokenHopIn 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes tokenHopIn {
+      0% { transform: translateY(-12px) scale(0.75); opacity: 0.4; }
+      70% { transform: translateY(2px) scale(1.12); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     .eye-token::before,
@@ -553,27 +630,31 @@
       border: 1.5px solid #0e0b16;
     }
 
+    /* ==================== ŚRODEK PLANSZY ==================== */
     .board-center-well {
       grid-column: 2 / 11;
       grid-row: 2 / 11;
-      background: radial-gradient(circle at center, #1c162e 0%, #120e1f 75%, #0d0a18 100%);
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background:
+        radial-gradient(circle at 50% 35%, rgba(56, 43, 94, 0.42) 0%, rgba(18, 14, 31, 0.96) 70%),
+        #110d1d;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      padding: 18px 22px;
       position: relative;
       overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.65);
     }
 
     .mine-watermark {
       position: absolute;
-      font-size: 15rem;
-      color: rgba(255, 255, 255, 0.018);
+      font-size: 14rem;
+      color: rgba(255, 255, 255, 0.016);
       pointer-events: none;
-      top: 50%;
+      top: 48%;
       left: 50%;
       transform: translate(-50%, -50%);
     }
@@ -582,91 +663,108 @@
       display: flex;
       gap: 10px;
       z-index: 2;
+      align-items: center;
     }
 
     .timer-pill,
-    .round-badge {
-      background: rgba(34, 28, 54, 0.9);
+    .round-badge,
+    .build-quota-pill {
+      background: rgba(34, 28, 54, 0.92);
       border: 1px solid var(--border-glass);
       padding: 5px 13px;
       border-radius: 20px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
+    }
+
+    .build-quota-pill.ready {
+      border-color: rgba(46, 204, 113, 0.5);
+      color: var(--emerald-win);
+    }
+
+    .build-quota-pill.used {
+      border-color: rgba(255, 152, 0, 0.4);
+      color: var(--ember-gold);
     }
 
     .timer-spinner {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       border-radius: 50%;
       border: 2.5px solid var(--ember-gold);
     }
 
     .center-card-alert {
-      background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(124, 77, 255, 0.25));
+      background: linear-gradient(135deg, rgba(255, 152, 0, 0.24), rgba(124, 77, 255, 0.28));
       border: 1px solid var(--ember-gold);
       border-radius: 12px;
-      padding: 8px 14px;
-      font-size: 0.8rem;
-      font-weight: 600;
+      padding: 9px 16px;
+      font-size: 0.81rem;
+      font-weight: 700;
       text-align: center;
       max-width: 88%;
       z-index: 3;
+      animation: fadeSlideUp 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
+    /* Kostki 3D z ulepszoną animacją */
     .dice-stage {
       display: flex;
-      gap: 24px;
+      gap: 26px;
       margin: 6px 0;
       cursor: pointer;
       z-index: 3;
+      perspective: 600px;
     }
 
     .die-3d {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(145deg, #ffffff 0%, #e4e0f0 65%, #cbc4de 100%);
-      border-radius: 18px;
+      width: 76px;
+      height: 76px;
+      background: linear-gradient(145deg, #ffffff 0%, #eae6f7 60%, #cdc6e3 100%);
+      border-radius: 20px;
       box-shadow:
-        0 14px 28px rgba(0, 0, 0, 0.65),
-        inset 0 -5px 8px rgba(0, 0, 0, 0.22),
-        inset 0 2px 4px rgba(255, 255, 255, 0.9);
+        0 16px 32px rgba(0, 0, 0, 0.7),
+        inset 0 -5px 9px rgba(0, 0, 0, 0.22),
+        inset 0 2px 4px rgba(255, 255, 255, 0.95);
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      padding: 11px;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      padding: 12px;
+      transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
     }
 
     .die-3d:hover {
-      transform: scale(1.05) rotate(-3deg);
+      transform: translateY(-4px) rotate(-4deg) scale(1.05);
+      box-shadow: 0 22px 38px rgba(124, 77, 255, 0.35), inset 0 -5px 9px rgba(0, 0, 0, 0.22);
     }
 
     .die-3d.rolling {
-      animation: smoothRoll3D 0.42s infinite ease-in-out;
+      animation: richupDiceRoll 0.48s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
     }
 
-    @keyframes smoothRoll3D {
-      0% { transform: rotate(0deg) scale(1); }
-      25% { transform: rotate(16deg) scale(1.08) translateY(-4px); }
-      50% { transform: rotate(-16deg) scale(0.96); }
-      75% { transform: rotate(10deg) scale(1.05) translateY(3px); }
-      100% { transform: rotate(0deg) scale(1); }
+    @keyframes richupDiceRoll {
+      0%   { transform: rotateX(0deg) rotateZ(0deg) translateY(0) scale(1); }
+      25%  { transform: rotateX(28deg) rotateZ(22deg) translateY(-10px) scale(1.1); }
+      50%  { transform: rotateX(-24deg) rotateZ(-22deg) translateY(2px) scale(0.95); }
+      75%  { transform: rotateX(18deg) rotateZ(15deg) translateY(-6px) scale(1.06); }
+      100% { transform: rotateX(0deg) rotateZ(0deg) translateY(0) scale(1); }
     }
 
     .dot {
-      width: 11.5px;
-      height: 11.5px;
+      width: 12px;
+      height: 12px;
       background: #171324;
       border-radius: 50%;
       place-self: center;
       opacity: 0;
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
+      transition: opacity 0.12s;
     }
 
-    .die-3d[data-val="1"] .d5 { opacity: 1; width: 15px; height: 15px; background: #e53935; }
+    .die-3d[data-val="1"] .d5 { opacity: 1; width: 16px; height: 16px; background: #e53935; }
     .die-3d[data-val="2"] .d1, .die-3d[data-val="2"] .d9 { opacity: 1; }
     .die-3d[data-val="3"] .d1, .die-3d[data-val="3"] .d5, .die-3d[data-val="3"] .d9 { opacity: 1; }
     .die-3d[data-val="4"] .d1, .die-3d[data-val="4"] .d3, .die-3d[data-val="4"] .d7, .die-3d[data-val="4"] .d9 { opacity: 1; }
@@ -677,16 +775,21 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       z-index: 3;
+      width: 100%;
     }
 
     .playing-now-line {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.92rem;
+      font-size: 0.94rem;
       font-weight: 800;
+      background: rgba(0, 0, 0, 0.28);
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
     }
 
     .mini-eyes-token {
@@ -706,36 +809,49 @@
 
     .btn-game {
       border: none;
-      border-radius: 11px;
-      padding: 9px 16px;
-      font-size: 0.82rem;
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 0.83rem;
       font-weight: 800;
       color: #fff;
       cursor: pointer;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
-      transition: transform 0.14s, filter 0.14s;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.16s;
     }
 
     .btn-game:hover:not(:disabled) {
-      transform: translateY(-2px);
+      transform: translateY(-2px) scale(1.02);
       filter: brightness(1.12);
     }
 
     .btn-game:disabled {
-      opacity: 0.42;
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
-    .btn-roll-main { background: linear-gradient(135deg, #7c4dff, #536dfe); }
+    .btn-roll-main {
+      background: linear-gradient(135deg, #7c4dff, #536dfe);
+      box-shadow: 0 6px 20px rgba(124, 77, 255, 0.45);
+    }
     .btn-buy-main { background: linear-gradient(135deg, #00c853, #2ecc71); }
     .btn-auction-main { background: linear-gradient(135deg, #ff8f00, #ffb300); color: #120e1e; }
     .btn-build-main { background: linear-gradient(135deg, #00b0ff, #00e5ff); color: #120e1e; }
     .btn-jail-main { background: linear-gradient(135deg, #ec407a, #d81b60); }
-    .btn-end-main { background: linear-gradient(135deg, #4a3f6b, #322a4a); }
+    .btn-end-main { background: linear-gradient(135deg, #4f4373, #352c4f); border: 1px solid rgba(255,255,255,0.12); }
 
+    .wait-turn-pill {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border-glass);
+    }
+
+    /* Strumień zdarzeń na środku planszy */
     .center-feed-log {
-      width: 92%;
-      height: 145px;
+      width: 94%;
+      height: 140px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -747,15 +863,22 @@
 
     .feed-line {
       font-size: 0.78rem;
-      color: #d7d1ed;
+      color: #dad4f0;
       text-align: center;
-      line-height: 1.35;
+      line-height: 1.36;
+      animation: fadeSlideUp 0.24s ease;
     }
 
     .feed-line strong {
       color: #ffffff;
     }
 
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==================== PRAWA KOLUMNA (GRACZE + ANIMACJA GOTÓWKI) ==================== */
     .players-roster {
       display: flex;
       flex-direction: column;
@@ -767,14 +890,16 @@
       align-items: center;
       justify-content: space-between;
       background: var(--bg-panel-elevated);
-      padding: 8px 10px;
-      border-radius: 11px;
+      padding: 9px 11px;
+      border-radius: 12px;
       border-left: 4px solid transparent;
+      position: relative;
+      transition: background 0.2s, transform 0.2s;
     }
 
     .roster-player-row.is-active {
-      background: #322a4f;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+      background: linear-gradient(90deg, rgba(124, 77, 255, 0.22) 0%, rgba(50, 42, 79, 0.95) 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
     }
 
     .roster-player-row.is-bankrupt {
@@ -789,14 +914,15 @@
     }
 
     .roster-avatar {
-      width: 32px;
-      height: 32px;
+      width: 33px;
+      height: 33px;
       border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.92);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 3px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.45);
     }
 
     .roster-avatar::before,
@@ -819,10 +945,34 @@
       color: var(--text-dim);
     }
 
+    .roster-money-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      position: relative;
+    }
+
     .roster-money {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.92rem;
+      font-size: 0.94rem;
       font-weight: 800;
+    }
+
+    /* Animowana delta gotówki (jak -100 pod pieniędzmi w Richup.io) */
+    .cash-delta-float {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      font-weight: 800;
+      animation: floatDelta 1.8s ease-out forwards;
+    }
+
+    .cash-delta-float.plus { color: var(--emerald-win); }
+    .cash-delta-float.minus { color: var(--crimson-danger); }
+
+    @keyframes floatDelta {
+      0%   { opacity: 1; transform: translateY(0); }
+      75%  { opacity: 1; transform: translateY(-2px); }
+      100% { opacity: 0; transform: translateY(-8px); }
     }
 
     .perspective-bar {
@@ -860,6 +1010,11 @@
       font-size: 0.76rem;
       font-weight: 800;
       cursor: pointer;
+      transition: filter 0.15s;
+    }
+
+    .btn-bankrupt-pill:hover {
+      filter: brightness(1.1);
     }
 
     .section-row-head {
@@ -880,6 +1035,11 @@
       font-size: 0.76rem;
       font-weight: 800;
       cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .btn-create-trade:hover {
+      transform: translateY(-1px);
     }
 
     .trades-list-box {
@@ -909,6 +1069,7 @@
       margin-top: 6px;
     }
 
+    /* Moje Nieruchomości */
     .properties-card {
       flex: 1;
       display: flex;
@@ -934,14 +1095,16 @@
       align-items: center;
       justify-content: space-between;
       background: var(--bg-panel-elevated);
-      padding: 7px 10px;
-      border-radius: 9px;
+      padding: 8px 10px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background 0.14s;
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s, transform 0.15s;
     }
 
     .owned-prop-item:hover {
-      background: #332b4f;
+      background: #352c53;
+      transform: translateX(2px);
     }
 
     .owned-prop-left {
@@ -977,8 +1140,8 @@
     .lvl-tag {
       font-size: 0.7rem;
       font-weight: 800;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 2px 6px;
+      background: rgba(0, 0, 0, 0.42);
+      padding: 2px 7px;
       border-radius: 5px;
     }
 
@@ -987,24 +1150,30 @@
       color: #0e0b16;
       border: none;
       border-radius: 6px;
-      padding: 3px 8px;
+      padding: 4px 8px;
       font-size: 0.7rem;
       font-weight: 900;
       cursor: pointer;
+      transition: transform 0.14s;
+    }
+
+    .btn-quick-up:hover:not(:disabled) {
+      transform: scale(1.06);
     }
 
     .btn-quick-up:disabled {
-      background: #423c54;
-      color: #827b99;
+      background: #3d3750;
+      color: #8b84a3;
       cursor: not-allowed;
     }
 
+    /* ==================== LOBBY I MODALE ==================== */
     .lobby-overlay,
     .modal-mask {
       position: fixed;
       inset: 0;
-      background: rgba(7, 5, 13, 0.86);
-      backdrop-filter: blur(8px);
+      background: rgba(7, 5, 13, 0.85);
+      backdrop-filter: blur(9px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1018,15 +1187,21 @@
 
     .lobby-card,
     .modal-dialog {
-      background: linear-gradient(180deg, #1f1932 0%, #151124 100%);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 20px;
+      background: linear-gradient(180deg, #211a36 0%, #141022 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 22px;
       width: 100%;
       max-width: 690px;
       max-height: 92vh;
       overflow-y: auto;
       padding: 24px;
       box-shadow: 0 28px 75px rgba(0, 0, 0, 0.85);
+      animation: modalPopIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modalPopIn {
+      from { opacity: 0; transform: scale(0.94) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .brand-logo-xl {
@@ -1121,11 +1296,12 @@
       border-radius: 50%;
       border: 3px solid transparent;
       cursor: pointer;
+      transition: transform 0.15s;
     }
 
     .color-dot-pick.active {
       border-color: #ffffff;
-      transform: scale(1.12);
+      transform: scale(1.14);
     }
 
     .label-row {
@@ -1175,7 +1351,7 @@
       border-radius: 12px;
       padding: 11px 14px;
       font-size: 0.8rem;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .coal-icon-wrap {
@@ -1192,6 +1368,18 @@
       font-weight: 900;
       cursor: pointer;
       box-shadow: 0 8px 20px rgba(255, 152, 0, 0.35);
+      transition: transform 0.15s;
+    }
+
+    .btn-ember-xl:hover,
+    .btn-ember-lg:hover,
+    .btn-ember-md:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .btn-ember-md:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .btn-ember-xl { padding: 14px; font-size: 1rem; }
@@ -1249,6 +1437,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .code-pill {
@@ -1325,7 +1515,7 @@
     }
 
     .dark-rent-table tr.current-lvl-row {
-      background: rgba(46, 204, 113, 0.2);
+      background: rgba(46, 204, 113, 0.22);
       font-weight: 800;
     }
 
@@ -1349,6 +1539,7 @@
       font-size: 0.78rem;
       color: var(--ember-gold);
       margin-bottom: 10px;
+      font-weight: 700;
     }
 
     .pm-buttons-row {
@@ -1437,11 +1628,12 @@
       </div>
 
       <div class="lobby-tabs">
-        <button type="button" class="lobby-tab active" data-tab="local">⚒️ Szybka Gra / Boty AI</button>
+        <button type="button" class="lobby-tab active" data-tab="local">⚒️ Gra Lokalna / Boty AI</button>
         <button type="button" class="lobby-tab" data-tab="online">🌐 Pokój Online ze Znajomymi</button>
         <button type="button" class="lobby-tab" data-tab="firebase">⚙️ Serwer Firebase</button>
       </div>
 
+      <!-- ZAKŁADKA 1: LOKALNA / BOTY -->
       <div id="tab-local" class="lobby-tab-pane active">
         <div class="form-grid-2">
           <div class="field-box">
@@ -1468,16 +1660,16 @@
             <label>Uczestnicy przy szybie (2 – 6 graczy)</label>
             <div class="mini-btn-group">
               <button type="button" id="btn-add-bot" class="btn-ghost-sm">+ Dodaj Bota AI</button>
-              <button type="button" id="btn-add-human" class="btn-ghost-sm">+ Dodaj Gracza</button>
+              <button type="button" id="btn-add-human" class="btn-ghost-sm">+ Dodaj Gracza (Hot-Seat)</button>
             </div>
           </div>
           <div id="local-opponents-list" class="opponents-list"></div>
         </div>
 
         <div class="coal-rule-banner">
-          <div class="coal-icon-wrap">⛏️</div>
+          <div class="coal-icon-wrap">🏠</div>
           <div>
-            <strong>Zasada Wolnej Zabudowy Szybów:</strong> Nie musisz zbierać całego koloru! Kupujesz dowolną dzielnicę (np. <em>Wirek</em> albo <em>Halembę</em>) i od razu możesz stawiać na niej domy oraz szyby kopalniane.
+            <strong>Zasady Rozbudowy Szybów:</strong> Możesz budować domy na <strong>każdej kupionej dzielnicy bez wymogu posiadania całego koloru</strong>, ale obowiązuje limit <strong>maksymalnie 1 wybudowanego domu na turę!</strong>
           </div>
         </div>
 
@@ -1486,14 +1678,22 @@
         </button>
       </div>
 
+      <!-- ZAKŁADKA 2: POKÓJ ONLINE -->
       <div id="tab-online" class="lobby-tab-pane">
+        <div id="online-mode-banner" class="coal-rule-banner" style="background:rgba(124,77,255,0.12);border-color:rgba(124,77,255,0.4);">
+          <div class="coal-icon-wrap">🌐</div>
+          <div id="online-mode-desc">
+            <strong>Status sieci:</strong> Synchronizacja kart przeglądarki aktywna. Aby grać ze znajomymi z innych domów/telefonów, podłącz bazę w zakładce <em>⚙️ Serwer Firebase</em> — link zaproszenia automatycznie przekaże połączenie znajomym!
+          </div>
+        </div>
+
         <div class="form-grid-2">
           <div class="field-box">
             <label>Twój Nick w Pokoju</label>
             <input type="text" id="online-name-input" value="Gracz_Ruda" maxlength="16" />
           </div>
           <div class="field-box">
-            <label>Twój Kolor</label>
+            <label>Twój Kolor Pionka</label>
             <div id="online-color-picker" class="color-picker-bar"></div>
           </div>
         </div>
@@ -1501,13 +1701,13 @@
         <div class="online-cards-grid">
           <div class="online-action-card">
             <h4>Utwórz Prywatny Pokój</h4>
-            <p>Wygeneruj kod pokoju i wyślij link znajomym. Działa między kartami przeglądarki od razu oraz przez Internet z Firebase.</p>
+            <p>Stwórz pokój jako Host i skopiuj link dla znajomych.</p>
             <button type="button" id="btn-create-room" class="btn-purple-glow">Stwórz Nowy Pokój</button>
           </div>
 
           <div class="online-action-card">
             <h4>Dołącz po Kodzie</h4>
-            <input type="text" id="join-code-input" placeholder="Wpisz kod np. RUDA123" maxlength="12" />
+            <input type="text" id="join-code-input" placeholder="Kod pokoju np. RUDA123" maxlength="12" style="text-transform:uppercase;" />
             <button type="button" id="btn-join-room" class="btn-steel">Dołącz do Pokoju</button>
           </div>
         </div>
@@ -1518,24 +1718,29 @@
               <span class="muted-label">AKTYWNY POKÓJ:</span>
               <span id="lobby-room-code-display" class="code-pill">------</span>
             </div>
-            <button type="button" id="btn-copy-invite-lobby" class="btn-ghost-sm">📋 Kopiuj Link Zaproszenia</button>
+            <button type="button" id="btn-copy-invite-lobby" class="btn-ghost-sm">📋 Kopiuj Link Zaproszenia dla Znajomych</button>
           </div>
           <div id="lobby-room-players" class="waiting-players-grid"></div>
           <div class="waiting-bottom-bar">
             <button type="button" id="btn-room-add-bot" class="btn-steel">+ Dodaj Bota AI do Pokoju</button>
-            <button type="button" id="btn-launch-room-game" class="btn-ember-lg">Rozpocznij Mecz dla Wszystkich</button>
+            <button type="button" id="btn-launch-room-game" class="btn-ember-lg">Rozpocznij Mecz / Wejdź na Planszę</button>
           </div>
         </div>
       </div>
 
+      <!-- ZAKŁADKA 3: SERWER FIREBASE -->
       <div id="tab-firebase" class="lobby-tab-pane">
-        <p style="font-size:0.8rem;color:#9b92b8;line-height:1.45;">
-          Domyślnie pokoje synchronizują się przez <strong>BroadcastChannel + LocalStorage</strong>. Aby grać między różnymi urządzeniami przez Internet, wklej JSON konfiguracji swojego projektu <strong>Firebase Realtime Database</strong>:
+        <p style="font-size:0.8rem;color:#9b92b8;line-height:1.5;">
+          Aby grać ze znajomymi na różnych komputerach/telefonach przez Internet:
+          <br/>1. Wejdź na <strong>console.firebase.google.com</strong>, utwórz darmowy projekt i włącz <strong>Realtime Database</strong> (w trybie testowym).
+          <br/>2. Wklej poniżej sam adres URL bazy (np. <code>https://twoja-baza-default-rtdb.europe-west1.firebasedatabase.app</code>) LUB obiekt JSON.
+          <br/>3. <strong>Twoi znajomi nie muszą nic wklejać!</strong> Gdy wyślesz im skopiowany Link Zaproszenia, baza połączy się u nich automatycznie.
         </p>
-        <textarea id="firebase-json-input" rows="5" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"https://twoja-baza.firebaseio.com","projectId":"..."}'></textarea>
+        <textarea id="firebase-json-input" rows="4" placeholder='Wklej sam adres https://twoja-baza.firebasedatabase.app LUB obiekt JSON {"databaseURL": "https://..."}'></textarea>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <button type="button" id="btn-save-firebase" class="btn-purple-glow">Zapisz i Połącz Firebase</button>
-          <span id="firebase-conn-badge" style="font-size:0.78rem;color:#2ecc71;">Tryb: Multi-Tab Realtime</span>
+          <button type="button" id="btn-save-firebase" class="btn-purple-glow">Zapisz i Połącz z Chmurą Firebase</button>
+          <button type="button" id="btn-clear-firebase" class="btn-steel">Odłącz</button>
+          <span id="firebase-conn-badge" style="font-size:0.78rem;color:#ffca28;font-weight:700;">Tryb: Lokalny / Multi-Tab</span>
         </div>
       </div>
     </div>
@@ -1558,8 +1763,8 @@
 
       <div class="glass-card share-box">
         <div class="card-caption-row">
-          <span>Udostępnij ten pokój</span>
-          <span id="sync-status-dot" class="sync-dot"></span>
+          <span id="share-caption-text">Share this game</span>
+          <span id="sync-status-dot" class="sync-dot" title="Status połączenia"></span>
         </div>
         <div class="share-controls-row">
           <input type="text" id="share-link-field" readonly value="https://ruda.io/room/SZYB-1" />
@@ -1575,14 +1780,14 @@
         </div>
         <div class="spotlight-content" id="spotlight-content">
           <p class="spotlight-hint">
-            Kliknij dowolną dzielnicę Rudy Śląskiej na planszy lub po prawej stronie, aby zbudować domy/szyby lub sprawdzić czynsze.
+            Kliknij dowolną dzielnicę Rudy Śląskiej na planszy lub po prawej stronie, aby zbudować dom (limit 1 na turę) lub sprawdzić czynsze.
           </p>
         </div>
       </div>
 
       <div class="glass-card chat-box">
         <div class="chat-top-bar">
-          <span>💬 Czat Górniczy</span>
+          <span>💬 Chat</span>
           <span class="chat-room-tag" id="chat-room-tag">Pokój Lokalny</span>
         </div>
         <div id="chat-stream" class="chat-stream"></div>
@@ -1595,7 +1800,7 @@
           <button type="button" class="emoji-chip" data-emoji="💀">💀</button>
         </div>
         <form id="chat-form" class="chat-input-bar">
-          <input type="text" id="chat-text-input" placeholder="Napisz coś na czacie..." maxlength="140" autocomplete="off" />
+          <input type="text" id="chat-text-input" placeholder="Say something..." maxlength="140" autocomplete="off" />
           <button type="submit" class="btn-chat-send">➤</button>
         </form>
       </div>
@@ -1613,6 +1818,7 @@
                 <span id="hud-timer">02:00</span>
               </div>
               <div class="round-badge" id="hud-round">Runda 1</div>
+              <div class="build-quota-pill ready" id="hud-build-quota">🏠 Budowa: 1/1 w tej turze</div>
             </div>
 
             <div id="center-card-alert" class="center-card-alert hidden"></div>
@@ -1636,11 +1842,15 @@
                 <span id="playing-now-label">Trwa uruchamianie szybu...</span>
               </div>
 
-              <div class="action-buttons-wrap">
+              <div id="wait-turn-notice" class="wait-turn-pill hidden">
+                ⏳ Czekasz na ruch aktualnego gracza...
+              </div>
+
+              <div id="action-buttons-wrap" class="action-buttons-wrap">
                 <button type="button" id="btn-roll" class="btn-game btn-roll-main">🎲 Rzuć kostką</button>
                 <button type="button" id="btn-buy" class="btn-game btn-buy-main hidden">💰 Kup pole</button>
                 <button type="button" id="btn-auction" class="btn-game btn-auction-main hidden">🔨 Licytacja</button>
-                <button type="button" id="btn-build-quick" class="btn-game btn-build-main hidden">🏠 Zbuduj dom</button>
+                <button type="button" id="btn-build-quick" class="btn-game btn-build-main hidden">🏠 Zbuduj dom (1/turę)</button>
                 <button type="button" id="btn-jail-pay" class="btn-game btn-jail-main hidden">🔓 Wykup ($100)</button>
                 <button type="button" id="btn-jail-card" class="btn-game btn-jail-main hidden">🕊️ Karta Wolności</button>
                 <button type="button" id="btn-end-turn" class="btn-game btn-end-main hidden">⏭️ Zakończ turę</button>
@@ -1658,18 +1868,18 @@
         <div id="players-roster" class="players-roster"></div>
 
         <div id="perspective-bar" class="perspective-bar">
-          <span>Widok portfela:</span>
+          <span id="perspective-label">Twój gracz:</span>
           <select id="perspective-select"></select>
         </div>
 
         <div class="bankrupt-bar">
-          <button type="button" id="btn-bankrupt" class="btn-bankrupt-pill">▶ Bankrupt (Ogłoś upadłość)</button>
+          <button type="button" id="btn-bankrupt" class="btn-bankrupt-pill">▶ Bankrupt</button>
         </div>
       </div>
 
       <div class="glass-card trades-card">
         <div class="section-row-head">
-          <span>Trades (Wymiany)</span>
+          <span>Trades</span>
           <button type="button" id="btn-new-trade" class="btn-create-trade">⊕ Create</button>
         </div>
         <div id="trades-list-box" class="trades-list-box">
@@ -1736,7 +1946,7 @@
           </div>
           <div id="pm-status-note" class="pm-status-note"></div>
           <div class="pm-buttons-row">
-            <button type="button" id="btn-pm-build" class="btn-ember-md">🏠 Zbuduj dom (+1 poziom)</button>
+            <button type="button" id="btn-pm-build" class="btn-ember-md">🏠 Zbuduj dom (Limit 1/turę)</button>
             <button type="button" id="btn-pm-sell" class="btn-steel">🔨 Sprzedaj poziom (+50%)</button>
             <button type="button" id="btn-pm-mortgage" class="btn-steel">🏦 Hipoteka</button>
           </div>
@@ -1826,6 +2036,10 @@
     (function () {
       'use strict';
 
+      const DEFAULT_FIREBASE_CONFIG = {
+        databaseURL: ""
+      };
+
       const PLAYER_COLORS = [
         { id: 'ember', name: 'Żar Węglowy', hex: '#ff7849' },
         { id: 'pink',  name: 'Neon Róż',   hex: '#f06292' },
@@ -1848,47 +2062,48 @@
         UTILITY:     { name: 'Huty i Elektrownie',      color: '#ffa000', code: 'PRZ' }
       };
 
+      // Skrócone nazwy kafelków (`shortName`) zapewniające idealną czytelność na planszy jak w Richup.io
       const BOARD_TILES = [
-        { index: 0,  type: 'START',      name: 'START', subtitle: '+$250 za zjazd' },
-        { index: 1,  type: 'PROPERTY',   name: 'Orzegów — Burloch Arena', district: 'Orzegów', group: 'ORZEGOW', price: 60, buildCost: 50, rents: [6, 25, 70, 200, 340, 480] },
-        { index: 2,  type: 'TREASURE',   name: 'Skarb Skarbnika', district: 'Kasa Kopalni' },
-        { index: 3,  type: 'PROPERTY',   name: 'Chebzie — Kolonia Kaufhaus', district: 'Chebzie', group: 'ORZEGOW', price: 70, buildCost: 50, rents: [8, 35, 100, 280, 420, 560] },
-        { index: 4,  type: 'TAX',        name: 'Podatek Górniczy', district: 'Urząd Miasta', taxAmount: 150 },
-        { index: 5,  type: 'TRANSPORT',  name: 'Stacja PKP Chebzie', district: 'Węzeł Kolejowy', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
-        { index: 6,  type: 'PROPERTY',   name: 'Godula — Szyb Godula', district: 'Godula', group: 'GODULA', price: 100, buildCost: 60, rents: [10, 45, 120, 320, 460, 620] },
-        { index: 7,  type: 'SURPRISE',   name: 'Szansa na Szychcie', district: 'Losowanie' },
-        { index: 8,  type: 'PROPERTY',   name: 'Godula — Park Młodzieży', district: 'Godula', group: 'GODULA', price: 100, buildCost: 60, rents: [10, 45, 120, 320, 460, 620] },
-        { index: 9,  type: 'PROPERTY',   name: 'Ruda — KWK Pokój (Szyb)', district: 'Ruda', group: 'GODULA', price: 120, buildCost: 60, rents: [12, 55, 160, 460, 640, 780] },
-        { index: 10, type: 'JAIL',       name: 'Izba / Karcer', subtitle: 'Kontrola OUG' },
-        { index: 11, type: 'PROPERTY',   name: 'Czarny Las — Osiedle', district: 'Czarny Las', group: 'KOCHLOWICE', price: 140, buildCost: 90, rents: [14, 65, 190, 510, 710, 910] },
-        { index: 12, type: 'UTILITY',    name: 'Elektrociepłownia Mikołaj', district: 'Energetyka', group: 'UTILITY', price: 150 },
-        { index: 13, type: 'PROPERTY',   name: 'Kochłowice — Rynek', district: 'Kochłowice', group: 'KOCHLOWICE', price: 140, buildCost: 90, rents: [14, 65, 190, 510, 710, 910] },
-        { index: 14, type: 'PROPERTY',   name: 'Kochłowice — Szyb Radoszowy', district: 'Kochłowice', group: 'KOCHLOWICE', price: 160, buildCost: 90, rents: [16, 75, 210, 560, 760, 970] },
-        { index: 15, type: 'TRANSPORT',  name: 'Dworzec PKP Ruda Śląska', district: 'Koleje Śląskie', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
-        { index: 16, type: 'PROPERTY',   name: 'Bykowina — Gwarek', district: 'Bykowina', group: 'BYKOWINA', price: 180, buildCost: 110, rents: [18, 85, 230, 620, 820, 1020] },
-        { index: 17, type: 'TREASURE',   name: 'Skarb Skarbnika', district: 'Kasa Kopalni' },
-        { index: 18, type: 'PROPERTY',   name: 'Bykowina — ul. Górnośląska', district: 'Bykowina', group: 'BYKOWINA', price: 180, buildCost: 110, rents: [18, 85, 230, 620, 820, 1020] },
-        { index: 19, type: 'PROPERTY',   name: 'Bykowina — Planetarium Skałka', district: 'Bykowina', group: 'BYKOWINA', price: 200, buildCost: 110, rents: [20, 95, 260, 720, 890, 1080] },
-        { index: 20, type: 'VACATION',   name: 'Hałda Widokowa', subtitle: 'Pula Miasta' },
-        { index: 21, type: 'PROPERTY',   name: 'Bielszowice — Dom Kultury', district: 'Bielszowice', group: 'BIELSZOWICE', price: 220, buildCost: 130, rents: [22, 105, 310, 760, 940, 1120] },
-        { index: 22, type: 'SURPRISE',   name: 'Szansa na Szychcie', district: 'Losowanie' },
-        { index: 23, type: 'PROPERTY',   name: 'Bielszowice — ul. Kokota', district: 'Bielszowice', group: 'BIELSZOWICE', price: 220, buildCost: 130, rents: [22, 105, 310, 760, 940, 1120] },
-        { index: 24, type: 'PROPERTY',   name: 'Bielszowice — KWK Ruda Ruch', district: 'Bielszowice', group: 'BIELSZOWICE', price: 240, buildCost: 130, rents: [24, 115, 340, 810, 990, 1180] },
-        { index: 25, type: 'TRANSPORT',  name: 'Węzeł DTŚ Ruda Śląska', district: 'Trasa Średnicowa', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
-        { index: 26, type: 'PROPERTY',   name: 'Halemba — Aquadrom', district: 'Halemba', group: 'HALEMBA', price: 260, buildCost: 150, rents: [26, 125, 370, 860, 1040, 1220] },
-        { index: 27, type: 'PROPERTY',   name: 'Halemba — Elektrownia Halemba', district: 'Halemba', group: 'HALEMBA', price: 260, buildCost: 150, rents: [26, 125, 370, 860, 1040, 1220] },
-        { index: 28, type: 'UTILITY',    name: 'Wodociągi Rudzkie PWiK', district: 'Infrastruktura', group: 'UTILITY', price: 150 },
-        { index: 29, type: 'PROPERTY',   name: 'Halemba — KWK Halemba', district: 'Halemba', group: 'HALEMBA', price: 280, buildCost: 150, rents: [28, 135, 400, 920, 1120, 1300] },
-        { index: 30, type: 'GO_TO_JAIL', name: 'Alarm Metanowy!', subtitle: 'Idź na Izbę' },
-        { index: 31, type: 'PROPERTY',   name: 'Wirek — Kolonia Ficinus', district: 'Wirek', group: 'WIREK', price: 300, buildCost: 175, rents: [30, 150, 450, 1000, 1200, 1400] },
-        { index: 32, type: 'PROPERTY',   name: 'Wirek — Szyb Andrzej', district: 'Wirek', group: 'WIREK', price: 300, buildCost: 175, rents: [30, 150, 450, 1000, 1200, 1400] },
-        { index: 33, type: 'TREASURE',   name: 'Skarb Skarbnika', district: 'Kasa Kopalni' },
-        { index: 34, type: 'PROPERTY',   name: 'Wirek — CH Plaza Ruda Śląska', district: 'Wirek', group: 'WIREK', price: 320, buildCost: 175, rents: [34, 165, 490, 1060, 1260, 1480] },
-        { index: 35, type: 'TRANSPORT',  name: 'Węzeł Autostrady A4 Wirek', district: 'Autostrada A4', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
-        { index: 36, type: 'SURPRISE',   name: 'Szansa na Szychcie', district: 'Losowanie' },
-        { index: 37, type: 'PROPERTY',   name: 'Nowy Bytom — Wielki Piec Huty Pokój', district: 'Nowy Bytom', group: 'NOWY_BYTOM', price: 350, buildCost: 200, rents: [40, 180, 520, 1120, 1320, 1550] },
-        { index: 38, type: 'TAX',        name: 'Podatek Węglowy', district: 'Opłata Specjalna', taxAmount: 100 },
-        { index: 39, type: 'PROPERTY',   name: 'Nowy Bytom — Plac Jana Pawła II (Ratusz)', district: 'Nowy Bytom', group: 'NOWY_BYTOM', price: 400, buildCost: 200, rents: [55, 220, 620, 1400, 1700, 2000] }
+        { index: 0,  type: 'START',      name: 'START', shortName: 'START', subtitle: '+$250 za zjazd' },
+        { index: 1,  type: 'PROPERTY',   name: 'Orzegów — Burloch Arena', shortName: 'Burloch Arena', district: 'Orzegów', group: 'ORZEGOW', price: 60, buildCost: 50, rents: [6, 25, 70, 200, 340, 480] },
+        { index: 2,  type: 'TREASURE',   name: 'Skarb Skarbnika', shortName: 'Skarb', district: 'Kasa Kopalni' },
+        { index: 3,  type: 'PROPERTY',   name: 'Chebzie — Kolonia Kaufhaus', shortName: 'Kaufhaus', district: 'Chebzie', group: 'ORZEGOW', price: 70, buildCost: 50, rents: [8, 35, 100, 280, 420, 560] },
+        { index: 4,  type: 'TAX',        name: 'Podatek Górniczy', shortName: 'Podatek', district: 'Urząd Miasta', taxAmount: 150 },
+        { index: 5,  type: 'TRANSPORT',  name: 'Stacja PKP Chebzie', shortName: 'PKP Chebzie', district: 'Węzeł Kolejowy', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
+        { index: 6,  type: 'PROPERTY',   name: 'Godula — Szyb Godula', shortName: 'Szyb Godula', district: 'Godula', group: 'GODULA', price: 100, buildCost: 60, rents: [10, 45, 120, 320, 460, 620] },
+        { index: 7,  type: 'SURPRISE',   name: 'Szansa na Szychcie', shortName: 'Szansa', district: 'Losowanie' },
+        { index: 8,  type: 'PROPERTY',   name: 'Godula — Park Młodzieży', shortName: 'Godula Park', district: 'Godula', group: 'GODULA', price: 100, buildCost: 60, rents: [10, 45, 120, 320, 460, 620] },
+        { index: 9,  type: 'PROPERTY',   name: 'Ruda — KWK Pokój (Szyb)', shortName: 'KWK Pokój', district: 'Ruda', group: 'GODULA', price: 120, buildCost: 60, rents: [12, 55, 160, 460, 640, 780] },
+        { index: 10, type: 'JAIL',       name: 'Izba / Karcer', shortName: 'Izba', subtitle: 'Kontrola OUG' },
+        { index: 11, type: 'PROPERTY',   name: 'Czarny Las — Osiedle', shortName: 'Czarny Las', district: 'Czarny Las', group: 'KOCHLOWICE', price: 140, buildCost: 90, rents: [14, 65, 190, 510, 710, 910] },
+        { index: 12, type: 'UTILITY',    name: 'Elektrociepłownia Mikołaj', shortName: 'EC Mikołaj', district: 'Energetyka', group: 'UTILITY', price: 150 },
+        { index: 13, type: 'PROPERTY',   name: 'Kochłowice — Rynek', shortName: 'Kochłowice', district: 'Kochłowice', group: 'KOCHLOWICE', price: 140, buildCost: 90, rents: [14, 65, 190, 510, 710, 910] },
+        { index: 14, type: 'PROPERTY',   name: 'Kochłowice — Szyb Radoszowy', shortName: 'Radoszowy', district: 'Kochłowice', group: 'KOCHLOWICE', price: 160, buildCost: 90, rents: [16, 75, 210, 560, 760, 970] },
+        { index: 15, type: 'TRANSPORT',  name: 'Dworzec PKP Ruda Śląska', shortName: 'PKP Ruda Śl.', district: 'Koleje Śląskie', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
+        { index: 16, type: 'PROPERTY',   name: 'Bykowina — Gwarek', shortName: 'Bykowina', district: 'Bykowina', group: 'BYKOWINA', price: 180, buildCost: 110, rents: [18, 85, 230, 620, 820, 1020] },
+        { index: 17, type: 'TREASURE',   name: 'Skarb Skarbnika', shortName: 'Skarb', district: 'Kasa Kopalni' },
+        { index: 18, type: 'PROPERTY',   name: 'Bykowina — ul. Górnośląska', shortName: 'Górnośląska', district: 'Bykowina', group: 'BYKOWINA', price: 180, buildCost: 110, rents: [18, 85, 230, 620, 820, 1020] },
+        { index: 19, type: 'PROPERTY',   name: 'Bykowina — Planetarium Skałka', shortName: 'Skałka', district: 'Bykowina', group: 'BYKOWINA', price: 200, buildCost: 110, rents: [20, 95, 260, 720, 890, 1080] },
+        { index: 20, type: 'VACATION',   name: 'Hałda Widokowa', shortName: 'Hałda', subtitle: 'Pula Miasta' },
+        { index: 21, type: 'PROPERTY',   name: 'Bielszowice — Dom Kultury', shortName: 'Bielszowice', district: 'Bielszowice', group: 'BIELSZOWICE', price: 220, buildCost: 130, rents: [22, 105, 310, 760, 940, 1120] },
+        { index: 22, type: 'SURPRISE',   name: 'Szansa na Szychcie', shortName: 'Szansa', district: 'Losowanie' },
+        { index: 23, type: 'PROPERTY',   name: 'Bielszowice — ul. Kokota', shortName: 'ul. Kokota', district: 'Bielszowice', group: 'BIELSZOWICE', price: 220, buildCost: 130, rents: [22, 105, 310, 760, 940, 1120] },
+        { index: 24, type: 'PROPERTY',   name: 'Bielszowice — KWK Ruda Ruch', shortName: 'KWK Ruda', district: 'Bielszowice', group: 'BIELSZOWICE', price: 240, buildCost: 130, rents: [24, 115, 340, 810, 990, 1180] },
+        { index: 25, type: 'TRANSPORT',  name: 'Węzeł DTŚ Ruda Śląska', shortName: 'Węzeł DTŚ', district: 'Trasa Średnicowa', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
+        { index: 26, type: 'PROPERTY',   name: 'Halemba — Aquadrom', shortName: 'Aquadrom', district: 'Halemba', group: 'HALEMBA', price: 260, buildCost: 150, rents: [26, 125, 370, 860, 1040, 1220] },
+        { index: 27, type: 'PROPERTY',   name: 'Halemba — Elektrownia Halemba', shortName: 'El. Halemba', district: 'Halemba', group: 'HALEMBA', price: 260, buildCost: 150, rents: [26, 125, 370, 860, 1040, 1220] },
+        { index: 28, type: 'UTILITY',    name: 'Wodociągi Rudzkie PWiK', shortName: 'Wodociągi', district: 'Infrastruktura', group: 'UTILITY', price: 150 },
+        { index: 29, type: 'PROPERTY',   name: 'Halemba — KWK Halemba', shortName: 'KWK Halemba', district: 'Halemba', group: 'HALEMBA', price: 280, buildCost: 150, rents: [28, 135, 400, 920, 1120, 1300] },
+        { index: 30, type: 'GO_TO_JAIL', name: 'Alarm Metanowy!', shortName: 'Na Izbę!', subtitle: 'Idź na Izbę' },
+        { index: 31, type: 'PROPERTY',   name: 'Wirek — Kolonia Ficinus', shortName: 'Ficinus', district: 'Wirek', group: 'WIREK', price: 300, buildCost: 175, rents: [30, 150, 450, 1000, 1200, 1400] },
+        { index: 32, type: 'PROPERTY',   name: 'Wirek — Szyb Andrzej', shortName: 'Szyb Andrzej', district: 'Wirek', group: 'WIREK', price: 300, buildCost: 175, rents: [30, 150, 450, 1000, 1200, 1400] },
+        { index: 33, type: 'TREASURE',   name: 'Skarb Skarbnika', shortName: 'Skarb', district: 'Kasa Kopalni' },
+        { index: 34, type: 'PROPERTY',   name: 'Wirek — CH Plaza Ruda Śląska', shortName: 'CH Plaza', district: 'Wirek', group: 'WIREK', price: 320, buildCost: 175, rents: [34, 165, 490, 1060, 1260, 1480] },
+        { index: 35, type: 'TRANSPORT',  name: 'Węzeł Autostrady A4 Wirek', shortName: 'Węzeł A4', district: 'Autostrada A4', group: 'TRANSPORT', price: 200, rents: [40, 80, 160, 320] },
+        { index: 36, type: 'SURPRISE',   name: 'Szansa na Szychcie', shortName: 'Szansa', district: 'Losowanie' },
+        { index: 37, type: 'PROPERTY',   name: 'Nowy Bytom — Wielki Piec Huty Pokój', shortName: 'Huta Pokój', district: 'Nowy Bytom', group: 'NOWY_BYTOM', price: 350, buildCost: 200, rents: [40, 180, 520, 1120, 1320, 1550] },
+        { index: 38, type: 'TAX',        name: 'Podatek Węglowy', shortName: 'Podatek', district: 'Opłata Specjalna', taxAmount: 100 },
+        { index: 39, type: 'PROPERTY',   name: 'Nowy Bytom — Plac Jana Pawła II (Ratusz)', shortName: 'Nowy Bytom', district: 'Nowy Bytom', group: 'NOWY_BYTOM', price: 400, buildCost: 200, rents: [55, 220, 620, 1400, 1700, 2000] }
       ];
 
       const SURPRISE_CARDS = [
@@ -1927,7 +2142,7 @@
             if (AudioCtx) this.ctx = new AudioCtx();
           }
         }
-        beep(freq = 440, dur = 0.09, type = 'sine', vol = 0.08) {
+        beep(freq = 440, dur = 0.08, type = 'sine', vol = 0.07) {
           if (!this.enabled) return;
           try {
             this.init();
@@ -1944,23 +2159,37 @@
             osc.stop(this.ctx.currentTime + dur);
           } catch (e) {}
         }
-        dice() { this.beep(260, 0.06, 'triangle'); setTimeout(() => this.beep(360, 0.07, 'triangle'), 70); }
+        step() { this.beep(320, 0.035, 'triangle', 0.045); }
+        dice() { this.beep(240, 0.06, 'triangle'); setTimeout(() => this.beep(350, 0.07, 'triangle'), 70); }
         buy()  { this.beep(520, 0.08, 'sine'); setTimeout(() => this.beep(780, 0.14, 'sine'), 80); }
-        build(){ this.beep(440, 0.07, 'square', 0.05); setTimeout(() => this.beep(660, 0.12, 'square', 0.05), 80); }
-        rent() { this.beep(310, 0.12, 'sawtooth', 0.05); }
+        build(){ this.beep(440, 0.07, 'square', 0.05); setTimeout(() => this.beep(680, 0.14, 'square', 0.05), 80); }
+        rent() { this.beep(300, 0.12, 'sawtooth', 0.05); }
       }
 
       const sfx = new SoundEngine();
 
+      let myClientToken = localStorage.getItem('ruda_client_token');
+      if (!myClientToken) {
+        myClientToken = 'cl_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
+        localStorage.setItem('ruda_client_token', myClientToken);
+      }
+
       let gameState = null;
       let selectedTileIndex = 1;
       let activePerspectiveId = 'p1';
+      let myOnlinePlayerId = null;
+      let isOnlineRoomMode = false;
       let currentRoomCode = null;
       let broadcastChannel = null;
       let firebaseDb = null;
+      let activeFirebaseUrl = '';
       let firebaseRoomRef = null;
       let isRollingLock = false;
       let turnTimerInterval = null;
+
+      // Śledzenie ostatnich kwot graczy do wyświetlania latających animacji +$ / -$
+      let previousCashMap = {};
+      let activeCashDeltas = {};
 
       let localPickedColor = PLAYER_COLORS[0].hex;
       let onlinePickedColor = PLAYER_COLORS[2].hex;
@@ -1974,7 +2203,97 @@
         return new Date().toTimeString().slice(0, 5);
       }
 
-      function createFreshGameState(playersList, startingCash, roomCode = 'LOKALNY') {
+      function recordCashChanges(players) {
+        if (!players) return;
+        players.forEach(p => {
+          if (typeof previousCashMap[p.id] === 'number' && previousCashMap[p.id] !== p.cash) {
+            const diff = p.cash - previousCashMap[p.id];
+            activeCashDeltas[p.id] = { diff, ts: Date.now() };
+          }
+          previousCashMap[p.id] = p.cash;
+        });
+      }
+
+      function connectFirebaseConfig(rawInput) {
+        if (!rawInput) return false;
+        let cfg = null;
+        const trimmed = typeof rawInput === 'string' ? rawInput.trim() : JSON.stringify(rawInput);
+        if (!trimmed) return false;
+
+        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+          cfg = { databaseURL: trimmed.replace(/\/$/, '') };
+        } else {
+          try { cfg = JSON.parse(trimmed); } catch (e) { return false; }
+        }
+
+        if (!cfg || !cfg.databaseURL || !window.firebase) return false;
+
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(cfg);
+          }
+          firebaseDb = firebase.database();
+          activeFirebaseUrl = cfg.databaseURL;
+          localStorage.setItem('ruda_firebase_cfg', JSON.stringify(cfg));
+
+          const badge = document.getElementById('firebase-conn-badge');
+          if (badge) {
+            badge.textContent = '✅ Połączono z Chmurą Firebase (Gra przez Internet aktywna)';
+            badge.style.color = '#2ecc71';
+          }
+          const dot = document.getElementById('sync-status-dot');
+          if (dot) dot.classList.add('cloud');
+          const desc = document.getElementById('online-mode-desc');
+          if (desc) {
+            desc.innerHTML = '<strong>Status sieci: Chmura Firebase Aktywna!</strong> Możesz stworzyć pokój i wysłać Link Zaproszenia znajomym na dowolnym komputerze lub telefonie.';
+          }
+          return true;
+        } catch (err) {
+          console.error('Firebase init error:', err);
+          return false;
+        }
+      }
+
+      function buildInviteUrl(roomCode) {
+        const url = new URL(window.location.origin + window.location.pathname);
+        url.searchParams.set('room', roomCode);
+        if (activeFirebaseUrl) {
+          url.searchParams.set('db', btoa(activeFirebaseUrl));
+        }
+        return url.toString();
+      }
+
+      function normalizeFirebaseState(state) {
+        if (!state) return null;
+        state.players = Array.isArray(state.players) ? state.players : Object.values(state.players || {});
+        state.trades = Array.isArray(state.trades) ? state.trades : Object.values(state.trades || {});
+        state.feed = Array.isArray(state.feed) ? state.feed : Object.values(state.feed || {});
+        state.chat = Array.isArray(state.chat) ? state.chat : Object.values(state.chat || {});
+        state.builtThisTurn = !!state.builtThisTurn;
+
+        if (!state.properties) state.properties = {};
+        BOARD_TILES.forEach(tile => {
+          if (tile.type === 'PROPERTY' || tile.type === 'TRANSPORT' || tile.type === 'UTILITY') {
+            if (!state.properties[tile.index]) {
+              state.properties[tile.index] = {
+                ownerId: null,
+                level: 0,
+                mortgaged: false,
+                history: ['Dostępne w zasobach Miasta Ruda Śląska']
+              };
+            } else {
+              const pr = state.properties[tile.index];
+              if (!pr.ownerId) pr.ownerId = null;
+              if (typeof pr.level !== 'number') pr.level = 0;
+              pr.mortgaged = !!pr.mortgaged;
+              pr.history = Array.isArray(pr.history) ? pr.history : Object.values(pr.history || ['Dostępne']);
+            }
+          }
+        });
+        return state;
+      }
+
+      function createFreshGameState(playersList, startingCash, roomCode = 'LOKALNY', isOnline = false) {
         const propertiesState = {};
         BOARD_TILES.forEach(tile => {
           if (tile.type === 'PROPERTY' || tile.type === 'TRANSPORT' || tile.type === 'UTILITY') {
@@ -1987,18 +2306,24 @@
           }
         });
 
+        previousCashMap = {};
+        activeCashDeltas = {};
+
         return {
           roomCode: roomCode,
+          isOnline: isOnline,
           status: 'PLAYING',
           round: 1,
           turnIndex: 0,
           turnPhase: 'ROLL',
+          builtThisTurn: false, // LIMIT: TYLKO 1 DOMEK NA TURĘ
           lastDice: [6, 5],
           doublesStreak: 0,
           vacationPool: 100,
           turnSecondsLeft: 120,
           players: playersList.map((p, idx) => ({
             id: p.id || ('p' + (idx + 1)),
+            clientToken: p.clientToken || '',
             name: p.name,
             color: p.color,
             isBot: !!p.isBot,
@@ -2012,18 +2337,20 @@
           properties: propertiesState,
           trades: [],
           feed: [
-            { text: '⚒️ Rozpoczęto szychcie w Rudzie Śląskiej! Niezależna budowa domów na każdym polu jest aktywna.', time: nowTime() }
+            { text: '⚒️ Rozpoczęto szychcie w Rudzie Śląskiej! Limit budowy: 1 domek na turę (bez wymogu monopolu).', time: nowTime() }
           ],
           chat: [
-            { author: 'Skarbnik', color: '#ffca28', text: 'Szczęść Boże! Kupujcie dzielnice i stawiajcie szyby bez wymogu monopolu.', time: nowTime() }
+            { author: 'Skarbnik', color: '#ffca28', text: 'Szczęść Boże! W każdej swojej turze możecie wybudować maksymalnie 1 domek.', time: nowTime() }
           ]
         };
       }
 
-      function setupRoomSync(roomCode) {
+      function setupRoomSync(roomCode, isOnline = false) {
         currentRoomCode = roomCode;
+        isOnlineRoomMode = isOnline;
+
         const shareField = document.getElementById('share-link-field');
-        if (shareField) shareField.value = window.location.origin + window.location.pathname + '?room=' + roomCode;
+        if (shareField) shareField.value = buildInviteUrl(roomCode);
         const chatTag = document.getElementById('chat-room-tag');
         if (chatTag) chatTag.textContent = 'Pokój: ' + roomCode;
 
@@ -2032,20 +2359,22 @@
           broadcastChannel = new BroadcastChannel('ruda_monopoly_' + roomCode);
           broadcastChannel.onmessage = (ev) => {
             if (ev.data && ev.data.type === 'STATE_SYNC') {
-              gameState = ev.data.state;
+              gameState = normalizeFirebaseState(ev.data.state);
+              syncMyOnlineIdentity();
               renderAll();
               updateLobbyWaitingRoom();
             }
           };
         }
 
-        if (firebaseDb) {
+        if (firebaseDb && roomCode !== 'SZYB-RUDA') {
           if (firebaseRoomRef) firebaseRoomRef.off();
           firebaseRoomRef = firebaseDb.ref('rooms/' + roomCode);
           firebaseRoomRef.on('value', (snap) => {
             const val = snap.val();
             if (val) {
-              gameState = val;
+              gameState = normalizeFirebaseState(val);
+              syncMyOnlineIdentity();
               renderAll();
               updateLobbyWaitingRoom();
             }
@@ -2053,11 +2382,26 @@
         }
       }
 
+      function syncMyOnlineIdentity() {
+        if (!gameState || !gameState.isOnline) return;
+        const matched = gameState.players.find(p => p.clientToken === myClientToken);
+        if (matched) {
+          myOnlinePlayerId = matched.id;
+          activePerspectiveId = matched.id;
+        }
+      }
+
       function pushStateSync() {
         if (!gameState) return;
-        try { localStorage.setItem('ruda_room_' + gameState.roomCode, JSON.stringify(gameState)); } catch (e) {}
-        if (broadcastChannel) broadcastChannel.postMessage({ type: 'STATE_SYNC', state: gameState });
-        if (firebaseDb && gameState.roomCode !== 'LOKALNY') {
+        try {
+          localStorage.setItem('ruda_room_' + gameState.roomCode, JSON.stringify(gameState));
+          localStorage.setItem('ruda_last_active_room', gameState.roomCode);
+        } catch (e) {}
+
+        if (broadcastChannel) {
+          broadcastChannel.postMessage({ type: 'STATE_SYNC', state: gameState });
+        }
+        if (firebaseDb && gameState.roomCode !== 'SZYB-RUDA') {
           firebaseDb.ref('rooms/' + gameState.roomCode).set(gameState);
         }
         renderAll();
@@ -2085,16 +2429,21 @@
           cell.style.gridRow = pos.row;
           cell.style.gridColumn = pos.col;
           cell.dataset.index = tile.index;
+          cell.title = tile.name;
 
           if (pos.edge === 'corner') {
             cell.innerHTML = `
-              <div class="corner-label">${tile.name}</div>
+              <div class="corner-label">${tile.shortName || tile.name}</div>
               <div class="corner-svg-wrap">${SVG_ICONS[tile.type] || ''}</div>
               <div class="corner-sub" id="corner-sub-${tile.index}">${tile.subtitle || ''}</div>
               <div class="tile-tokens-box" id="tokens-${tile.index}"></div>
             `;
           } else {
             const groupObj = tile.group ? GROUPS[tile.group] : null;
+            const colorBarHtml = groupObj
+              ? `<div class="tile-color-bar" style="background:${groupObj.color}"></div>`
+              : '';
+
             const badgeHtml = (tile.type === 'PROPERTY')
               ? `<div class="tile-badge-circle" style="background:${groupObj.color}">${groupObj.code}</div>`
               : `<div class="tile-special-svg">${SVG_ICONS[tile.type] || ''}</div>`;
@@ -2104,9 +2453,10 @@
               : (tile.taxAmount ? `<span class="tile-price-tag">-$${tile.taxAmount}</span>` : '');
 
             cell.innerHTML = `
+              ${colorBarHtml}
               <div class="owner-outer-cap hidden" id="cap-${tile.index}"></div>
               ${priceHtml}
-              <div class="tile-title">${tile.name.replace(/^[^—]+—\s*/, '')}</div>
+              <div class="tile-title">${tile.shortName || tile.name}</div>
               ${badgeHtml}
               <div class="tile-tokens-box" id="tokens-${tile.index}"></div>
             `;
@@ -2131,6 +2481,16 @@
 
       function currentTurnPlayer() {
         return gameState.players[gameState.turnIndex];
+      }
+
+      function canControlCurrentTurn() {
+        if (!gameState || gameState.status !== 'PLAYING') return false;
+        const active = currentTurnPlayer();
+        if (!active || active.isBot) return false;
+        if (gameState.isOnline && myOnlinePlayerId) {
+          return active.id === myOnlinePlayerId;
+        }
+        return true;
       }
 
       function calculateRent(tileIndex, diceSum = 7) {
@@ -2162,19 +2522,28 @@
         return 0;
       }
 
+      /**
+       * ZASADA ROZBUDOWY:
+       * 1. Brak wymogu posiadania całego koloru (monopolu).
+       * 2. Można budować tylko w trakcie swojej tury.
+       * 3. Maksymalnie 1 domek na całą turę (`gameState.builtThisTurn`).
+       */
       function canUpgradeProperty(tileIndex, playerId) {
         const tile = BOARD_TILES[tileIndex];
         const prop = gameState.properties[tileIndex];
         const player = getPlayerById(playerId);
+        const active = currentTurnPlayer();
 
         if (!tile || tile.type !== 'PROPERTY') return { ok: false, reason: 'Tego pola nie można rozbudowywać.' };
         if (!prop || prop.ownerId !== playerId) return { ok: false, reason: 'Nie jesteś właścicielem tej dzielnicy.' };
+        if (!active || active.id !== playerId) return { ok: false, reason: 'Budować możesz tylko podczas swojej tury.' };
+        if (gameState.builtThisTurn) return { ok: false, reason: '⏳ Wykorzystano już limit budowy (1 domek na turę).' };
         if (prop.mortgaged) return { ok: false, reason: 'Nieruchomość jest obciążona hipoteką.' };
         if (prop.level >= 5) return { ok: false, reason: 'Osiągnięto maksymalny poziom (Poziom 5 — Kompleks).' };
-        if (player.cash < tile.buildCost) {
-          return { ok: false, reason: `Brakuje Ci $${tile.buildCost - player.cash} do budowy kolejnego poziomu.` };
+        if (!player || player.cash < tile.buildCost) {
+          return { ok: false, reason: `Brakuje Ci $${tile.buildCost - (player ? player.cash : 0)} do budowy.` };
         }
-        return { ok: true, reason: 'Gotowe do niezależnej rozbudowy (monopol nie jest wymagany).' };
+        return { ok: true, reason: '✅ Możesz wybudować 1 domek w tej turze (monopol nie jest wymagany).' };
       }
 
       function buildHouseOnProperty(tileIndex, playerId) {
@@ -2187,11 +2556,21 @@
 
         player.cash -= tile.buildCost;
         prop.level += 1;
+        gameState.builtThisTurn = true; // BLOKADA KOLEJNYCH DOMKÓW W TEJ TURZE
+
         const lvlName = prop.level === 5 ? 'Kompleks Górniczy / Hotel' : `Dom #${prop.level}`;
         prop.history.unshift(`${nowTime()} — ${player.name} zbudował ${lvlName} za $${tile.buildCost}`);
 
-        addFeedEvent(`<strong>${player.name}</strong> zbudował 🏠 (${lvlName}) w <strong>${tile.name}</strong>`);
+        addFeedEvent(`<strong>${player.name}</strong> zbudował 🏠 (${lvlName}) w <strong>${tile.shortName}</strong>`);
         sfx.build();
+
+        const tileEl = document.querySelector(`.board-tile[data-index="${tileIndex}"]`);
+        if (tileEl) {
+          tileEl.classList.remove('upgraded-flash');
+          void tileEl.offsetWidth;
+          tileEl.classList.add('upgraded-flash');
+        }
+
         pushStateSync();
         return true;
       }
@@ -2206,7 +2585,7 @@
         prop.level -= 1;
         player.cash += refund;
         prop.history.unshift(`${nowTime()} — ${player.name} sprzedał ulepszenie (+$${refund})`);
-        addFeedEvent(`<strong>${player.name}</strong> zmniejszył zabudowę w <strong>${tile.name}</strong> (+$${refund})`);
+        addFeedEvent(`<strong>${player.name}</strong> zmniejszył zabudowę w <strong>${tile.shortName}</strong> (+$${refund})`);
         pushStateSync();
         return true;
       }
@@ -2223,14 +2602,14 @@
           prop.mortgaged = true;
           player.cash += val;
           prop.history.unshift(`${nowTime()} — Zastawiono pod hipotekę (+$${val})`);
-          addFeedEvent(`<strong>${player.name}</strong> zastawił hipoteką <strong>${tile.name}</strong> (+$${val})`);
+          addFeedEvent(`<strong>${player.name}</strong> zastawił hipoteką <strong>${tile.shortName}</strong> (+$${val})`);
         } else {
           const payoff = Math.ceil(tile.price * 0.55);
           if (player.cash < payoff) return false;
           player.cash -= payoff;
           prop.mortgaged = false;
           prop.history.unshift(`${nowTime()} — Spłacono hipotekę (-$${payoff})`);
-          addFeedEvent(`<strong>${player.name}</strong> wykupił hipotekę <strong>${tile.name}</strong> (-$${payoff})`);
+          addFeedEvent(`<strong>${player.name}</strong> wykupił hipotekę <strong>${tile.shortName}</strong> (-$${payoff})`);
         }
         pushStateSync();
         return true;
@@ -2241,12 +2620,47 @@
         if (gameState.feed.length > 40) gameState.feed.pop();
       }
 
+      /* ==================== PŁYNNA ANIMACJA RUCHU PIONKA PO POLACH ==================== */
+      function animateStepByStepMove(player, stepsCount, onComplete) {
+        let remaining = stepsCount;
+
+        function nextStep() {
+          if (remaining <= 0) {
+            const landedCell = document.querySelector(`.board-tile[data-index="${player.position}"]`);
+            if (landedCell) {
+              landedCell.classList.remove('active-landed-tile');
+              void landedCell.offsetWidth;
+              landedCell.classList.add('active-landed-tile');
+            }
+            onComplete();
+            return;
+          }
+
+          remaining -= 1;
+          player.position = (player.position + 1) % 40;
+          if (player.position === 0) {
+            player.cash += 250;
+            addFeedEvent(`⏩ <strong>${player.name}</strong> minął START i odebrał <strong>+$250</strong> premii górniczej!`);
+            sfx.buy();
+          } else {
+            sfx.step();
+          }
+
+          selectedTileIndex = player.position;
+          renderBoardState();
+          setTimeout(nextStep, 115);
+        }
+
+        nextStep();
+      }
+
       function handleRollDice() {
         if (!gameState || gameState.status !== 'PLAYING') return;
         if (gameState.turnPhase !== 'ROLL' || isRollingLock) return;
 
         const player = currentTurnPlayer();
         if (!player || player.bankrupt) return;
+        if (!player.isBot && !canControlCurrentTurn()) return;
 
         isRollingLock = true;
         sfx.dice();
@@ -2309,23 +2723,17 @@
             gameState.doublesStreak = 0;
           }
 
-          const oldPos = player.position;
-          const newPos = (oldPos + sum) % 40;
-          if (oldPos + sum >= 40) {
-            player.cash += 250;
-            addFeedEvent(`⏩ <strong>${player.name}</strong> minął START i odebrał <strong>+$250</strong> premii górniczej!`);
-          }
-          player.position = newPos;
-          selectedTileIndex = newPos;
+          // Płynna animacja skakania pionka po polach
+          animateStepByStepMove(player, sum, () => {
+            resolveLandedTile(player, player.position, sum);
+            isRollingLock = false;
+            pushStateSync();
 
-          resolveLandedTile(player, newPos, sum);
-          isRollingLock = false;
-          pushStateSync();
-
-          if (player.isBot) {
-            setTimeout(botContinueTurn, 850);
-          }
-        }, 440);
+            if (player.isBot) {
+              setTimeout(botContinueTurn, 850);
+            }
+          });
+        }, 460);
       }
 
       function resolveLandedTile(player, tileIndex, diceSum) {
@@ -2347,7 +2755,7 @@
             player.cash -= rent;
             owner.cash += rent;
             sfx.rent();
-            addFeedEvent(`💸 <strong>${player.name}</strong> zapłacił <strong>$${rent}</strong> czynszu dla <strong>${owner.name}</strong> (${tile.name})`);
+            addFeedEvent(`💸 <strong>${player.name}</strong> zapłacił <strong>$${rent}</strong> czynszu dla <strong>${owner.name}</strong> (${tile.shortName})`);
             checkAutoBankrupt(player, owner.id);
           }
           gameState.turnPhase = 'END';
@@ -2424,6 +2832,7 @@
 
       function buyCurrentField() {
         const player = currentTurnPlayer();
+        if (!player.isBot && !canControlCurrentTurn()) return;
         const tile = BOARD_TILES[player.position];
         const prop = gameState.properties[player.position];
         if (!prop || prop.ownerId || player.cash < tile.price) return;
@@ -2443,9 +2852,11 @@
       function endCurrentTurn() {
         if (!gameState || gameState.status !== 'PLAYING') return;
         const player = currentTurnPlayer();
+        if (!player.isBot && !canControlCurrentTurn()) return;
 
         if (gameState.doublesStreak > 0 && !player.inJail && !player.bankrupt) {
           gameState.turnPhase = 'ROLL';
+          gameState.builtThisTurn = false; // Odnawia limit 1 domu przy dodatkowym rzucie z dubletu
           addFeedEvent(`🎲 <strong>${player.name}</strong> ma dodatkowy rzut za dublet!`);
           pushStateSync();
           if (player.isBot) setTimeout(handleRollDice, 750);
@@ -2465,11 +2876,14 @@
 
         gameState.turnIndex = nextIdx;
         gameState.turnPhase = 'ROLL';
+        gameState.builtThisTurn = false; // RESET LIMITU 1 DOMU NA NOWĄ TURĘ
         gameState.doublesStreak = 0;
         gameState.turnSecondsLeft = 120;
 
         const nextPlayer = currentTurnPlayer();
-        if (!nextPlayer.isBot) activePerspectiveId = nextPlayer.id;
+        if (!gameState.isOnline && !nextPlayer.isBot) {
+          activePerspectiveId = nextPlayer.id;
+        }
 
         pushStateSync();
         if (nextPlayer.isBot) setTimeout(handleRollDice, 800);
@@ -2491,13 +2905,16 @@
           }
         }
 
-        const myProps = BOARD_TILES.filter(
-          t => t.type === 'PROPERTY' && gameState.properties[t.index]?.ownerId === bot.id
-        );
-        for (const t of myProps) {
-          if (bot.cash > t.buildCost + 280 && canUpgradeProperty(t.index, bot.id).ok) {
-            buildHouseOnProperty(t.index, bot.id);
-            break;
+        // Bot buduje maksymalnie 1 domek w swojej turze
+        if (!gameState.builtThisTurn) {
+          const myProps = BOARD_TILES.filter(
+            t => t.type === 'PROPERTY' && gameState.properties[t.index]?.ownerId === bot.id
+          );
+          for (const t of myProps) {
+            if (bot.cash > t.buildCost + 280 && canUpgradeProperty(t.index, bot.id).ok) {
+              buildHouseOnProperty(t.index, bot.id);
+              break;
+            }
           }
         }
 
@@ -2556,6 +2973,7 @@
 
       function renderAll() {
         if (!gameState) return;
+        recordCashChanges(gameState.players);
         renderBoardState();
         renderCenterHUD();
         renderPlayersRoster();
@@ -2620,11 +3038,37 @@
         document.getElementById('die-box-1').dataset.val = gameState.lastDice[0];
         document.getElementById('die-box-2').dataset.val = gameState.lastDice[1];
 
+        const quotaEl = document.getElementById('hud-build-quota');
+        if (quotaEl) {
+          if (gameState.builtThisTurn) {
+            quotaEl.textContent = '⏳ Budowa: 0/1 (Wykorzystano w tej turze)';
+            quotaEl.className = 'build-quota-pill used';
+          } else {
+            quotaEl.textContent = '🏠 Budowa: 1/1 dostępna w tej turze';
+            quotaEl.className = 'build-quota-pill ready';
+          }
+        }
+
         const avatarDot = document.getElementById('playing-now-avatar');
         const labelEl = document.getElementById('playing-now-label');
         if (active) {
           avatarDot.style.background = active.color;
-          labelEl.textContent = `${active.name} rozgrywa turę...`;
+          labelEl.textContent = `${active.name} is playing...`;
+        }
+
+        const isMyTurn = canControlCurrentTurn();
+        const waitNotice = document.getElementById('wait-turn-notice');
+        const btnsWrap = document.getElementById('action-buttons-wrap');
+
+        if (!isMyTurn) {
+          waitNotice.classList.remove('hidden');
+          waitNotice.textContent = active?.isBot
+            ? `🤖 ${active.name} wykonuje ruch...`
+            : `⏳ Ruch należy teraz do gracza: ${active?.name || '...'}`;
+          btnsWrap.classList.add('hidden');
+        } else {
+          waitNotice.classList.add('hidden');
+          btnsWrap.classList.remove('hidden');
         }
 
         const btnRoll = document.getElementById('btn-roll');
@@ -2643,7 +3087,7 @@
         btnEnd.classList.toggle('hidden', gameState.turnPhase === 'ROLL');
 
         if (gameState.turnPhase === 'DECIDE' && tile) {
-          btnBuy.textContent = `💰 Kup ${tile.name.split('—').pop().trim()} ($${tile.price})`;
+          btnBuy.textContent = `💰 Kup ${tile.shortName} ($${tile.price})`;
           btnBuy.disabled = active.cash < tile.price;
         }
 
@@ -2659,29 +3103,54 @@
 
       function renderPlayersRoster() {
         const rosterEl = document.getElementById('players-roster');
+        const now = Date.now();
+
         rosterEl.innerHTML = gameState.players.map((p, idx) => {
           const isTurn = idx === gameState.turnIndex;
           const crown = idx === 0 ? '👑' : '';
+          const youTag = (gameState.isOnline && p.id === myOnlinePlayerId) ? ' (Ty)' : '';
           const jailBadge = p.inJail ? ' • 🔒 Izba' : '';
+
+          const deltaInfo = activeCashDeltas[p.id];
+          let deltaHtml = '';
+          if (deltaInfo && (now - deltaInfo.ts < 2000)) {
+            const sign = deltaInfo.diff > 0 ? '+' : '';
+            const cls = deltaInfo.diff > 0 ? 'plus' : 'minus';
+            deltaHtml = `<span class="cash-delta-float ${cls}">${sign}$${deltaInfo.diff}</span>`;
+          }
+
           return `
             <div class="roster-player-row ${isTurn ? 'is-active' : ''} ${p.bankrupt ? 'is-bankrupt' : ''}" style="border-left-color:${p.color}">
               <div class="roster-left">
                 <div class="roster-avatar" style="background:${p.color}"></div>
                 <div>
-                  <div class="roster-name-title">${p.name} ${crown} ${p.isBot ? '🤖' : ''}</div>
-                  <div class="roster-meta-sub">${BOARD_TILES[p.position].name.split('—')[0]}${jailBadge}</div>
+                  <div class="roster-name-title">${p.name}${youTag} ${crown} ${p.isBot ? '🤖' : ''}</div>
+                  <div class="roster-meta-sub">${BOARD_TILES[p.position].shortName}${jailBadge}</div>
                 </div>
               </div>
-              <div class="roster-money">$${p.cash}</div>
+              <div class="roster-money-wrap">
+                <div class="roster-money">$${p.cash}</div>
+                ${deltaHtml}
+              </div>
             </div>
           `;
         }).join('');
 
         const sel = document.getElementById('perspective-select');
-        sel.innerHTML = gameState.players
-          .filter(p => !p.bankrupt)
-          .map(p => `<option value="${p.id}" ${p.id === activePerspectiveId ? 'selected' : ''}>${p.name} ($${p.cash})</option>`)
-          .join('');
+        const label = document.getElementById('perspective-label');
+        if (gameState.isOnline && myOnlinePlayerId) {
+          const me = getPlayerById(myOnlinePlayerId);
+          label.textContent = 'Grasz w pokoju jako:';
+          sel.innerHTML = me ? `<option value="${me.id}">${me.name} ($${me.cash})</option>` : '';
+          sel.disabled = true;
+        } else {
+          label.textContent = 'Widok portfela (Hot-Seat):';
+          sel.disabled = false;
+          sel.innerHTML = gameState.players
+            .filter(p => !p.bankrupt)
+            .map(p => `<option value="${p.id}" ${p.id === activePerspectiveId ? 'selected' : ''}>${p.name} ($${p.cash})</option>`)
+            .join('');
+        }
       }
 
       function renderMyProperties() {
@@ -2690,8 +3159,9 @@
         const headEl = document.getElementById('my-props-header-text');
         const worthEl = document.getElementById('my-networth-badge');
 
+        if (!viewer) return;
         const ownedTiles = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === viewer.id);
-        headEl.textContent = `Moje nieruchomości (${ownedTiles.length})`;
+        headEl.textContent = `My properties (${ownedTiles.length})`;
 
         let totalWorth = viewer.cash;
         ownedTiles.forEach(t => {
@@ -2713,8 +3183,9 @@
             ? '🔒 Hipoteka'
             : (t.type === 'PROPERTY' ? (pr.level === 5 ? '🏨 Hotel' : `🏠 Poz. ${pr.level}/5`) : 'Aktywne');
 
+          const btnLabel = gameState.builtThisTurn ? '⏳ Limit 1/1' : `+🏠 $${t.buildCost}`;
           const buildBtnHtml = t.type === 'PROPERTY'
-            ? `<button type="button" class="btn-quick-up" data-build-idx="${t.index}" ${upCheck.ok ? '' : 'disabled'} title="${upCheck.reason}">+🏠 $${t.buildCost}</button>`
+            ? `<button type="button" class="btn-quick-up" data-build-idx="${t.index}" ${upCheck.ok ? '' : 'disabled'} title="${upCheck.reason}">${btnLabel}</button>`
             : '';
 
           return `
@@ -2770,6 +3241,7 @@
         const owner = prop.ownerId ? getPlayerById(prop.ownerId) : null;
         const viewer = getPlayerById(activePerspectiveId) || currentTurnPlayer();
         const canBuild = canUpgradeProperty(tileIndex, viewer.id);
+        const btnBuildText = gameState.builtThisTurn ? '⏳ Limit 1/turę wykorzystany' : `🏠 Zbuduj dom ($${tile.buildCost})`;
 
         content.innerHTML = `
           <div class="spot-grid">
@@ -2781,7 +3253,7 @@
           <div class="spot-btn-row">
             <button type="button" class="btn-chip" id="btn-spot-details">Szczegóły i Tabela</button>
             ${tile.type === 'PROPERTY' && prop.ownerId === viewer.id
-              ? `<button type="button" class="btn-quick-up" id="btn-spot-build" ${canBuild.ok ? '' : 'disabled'}>🏠 Zbuduj dom ($${tile.buildCost})</button>`
+              ? `<button type="button" class="btn-quick-up" id="btn-spot-build" ${canBuild.ok ? '' : 'disabled'}>${btnBuildText}</button>`
               : ''}
           </div>
         `;
@@ -2854,6 +3326,10 @@
           const btnMort = document.getElementById('btn-pm-mortgage');
 
           btnBuild.disabled = !check.ok;
+          btnBuild.textContent = gameState.builtThisTurn
+            ? '⏳ Limit 1 domu w tej turze wykorzystany'
+            : `🏠 Zbuduj dom (+1 poziom za $${tile.buildCost})`;
+
           btnSell.disabled = !(prop.ownerId === viewer.id && prop.level > 0);
           btnMort.disabled = !(prop.ownerId === viewer.id && prop.level === 0);
           btnMort.textContent = prop.mortgaged
@@ -2978,13 +3454,13 @@
         sender.cash = sender.cash - tr.giveCash + tr.takeCash;
         target.cash = target.cash - tr.takeCash + tr.giveCash;
 
-        tr.giveProps.forEach(idx => {
+        (tr.giveProps || []).forEach(idx => {
           if (gameState.properties[idx]?.ownerId === sender.id) {
             gameState.properties[idx].ownerId = target.id;
             gameState.properties[idx].history.unshift(`${nowTime()} — Przekazane w wymianie do ${target.name}`);
           }
         });
-        tr.takeProps.forEach(idx => {
+        (tr.takeProps || []).forEach(idx => {
           if (gameState.properties[idx]?.ownerId === target.id) {
             gameState.properties[idx].ownerId = sender.id;
             gameState.properties[idx].history.unshift(`${nowTime()} — Przekazane w wymianie do ${sender.name}`);
@@ -3009,7 +3485,7 @@
           return `
             <div class="trade-card-item">
               <div><strong>${from?.name}</strong> ➔ <strong>${to?.name}</strong></div>
-              <div>Daje: $${tr.giveCash} (${tr.giveProps.length} pól) | Żąda: $${tr.takeCash} (${tr.takeProps.length} pól)</div>
+              <div>Daje: $${tr.giveCash} (${(tr.giveProps || []).length} pól) | Żąda: $${tr.takeCash} (${(tr.takeProps || []).length} pól)</div>
               <div class="trade-card-btns">
                 <button type="button" class="btn-quick-up" data-acc-tr="${tr.id}">Akceptuj</button>
                 <button type="button" class="btn-chip" data-rej-tr="${tr.id}">Odrzuć</button>
@@ -3088,15 +3564,55 @@
       }
 
       function updateLobbyWaitingRoom() {
-        if (!gameState || !currentRoomCode || currentRoomCode === 'LOKALNY') return;
+        if (!gameState || !currentRoomCode || currentRoomCode === 'SZYB-RUDA') return;
         const waitBox = document.getElementById('room-waiting-box');
         waitBox.classList.remove('hidden');
         document.getElementById('lobby-room-code-display').textContent = currentRoomCode;
 
         const listEl = document.getElementById('lobby-room-players');
         listEl.innerHTML = gameState.players.map(p => `
-          <div class="btn-chip" style="border-left:4px solid ${p.color}">${p.name} ${p.isBot ? '🤖' : '👤'}</div>
+          <div class="btn-chip" style="border-left:4px solid ${p.color}">
+            ${p.name} ${p.isBot ? '🤖' : '👤'} ${p.clientToken === myClientToken ? '(Ty)' : ''}
+          </div>
         `).join('');
+      }
+
+      function addOrReconnectPlayerToRoom(roomState, myName, myColor) {
+        roomState = normalizeFirebaseState(roomState);
+        const existing = roomState.players.find(p => p.clientToken === myClientToken);
+        if (existing) {
+          existing.name = myName || existing.name;
+          myOnlinePlayerId = existing.id;
+          activePerspectiveId = existing.id;
+          return roomState;
+        }
+
+        const newId = 'p' + (roomState.players.length + 1);
+        const usedColors = roomState.players.map(p => p.color);
+        const finalColor = usedColors.includes(myColor)
+          ? (PLAYER_COLORS.find(c => !usedColors.includes(c.hex))?.hex || myColor)
+          : myColor;
+
+        roomState.players.push({
+          id: newId,
+          clientToken: myClientToken,
+          name: myName,
+          color: finalColor,
+          isBot: false,
+          cash: 2000,
+          position: 0,
+          inJail: false,
+          jailTurns: 0,
+          pardonCards: 0,
+          bankrupt: false
+        });
+        myOnlinePlayerId = newId;
+        activePerspectiveId = newId;
+        roomState.feed.unshift({
+          text: `👋 <strong>${myName}</strong> dołączył do pokoju <strong>${roomState.roomCode}</strong>!`,
+          time: nowTime()
+        });
+        return roomState;
       }
 
       function showGenericModal(title, htmlContent) {
@@ -3134,12 +3650,13 @@
           const mainName = document.getElementById('local-name-input').value.trim() || 'Sztygar';
           const startCash = Number(document.getElementById('local-cash-select').value) || 2000;
           const allPlayers = [
-            { id: 'p1', name: mainName, color: localPickedColor, isBot: false },
+            { id: 'p1', clientToken: myClientToken, name: mainName, color: localPickedColor, isBot: false },
             ...lobbyOpponents.map((o, i) => ({ id: 'p' + (i + 2), name: o.name, color: o.color, isBot: o.isBot }))
           ];
-          gameState = createFreshGameState(allPlayers, startCash, 'SZYB-RUDA');
+          myOnlinePlayerId = null;
+          gameState = createFreshGameState(allPlayers, startCash, 'SZYB-RUDA', false);
           activePerspectiveId = 'p1';
-          setupRoomSync('SZYB-RUDA');
+          setupRoomSync('SZYB-RUDA', false);
           document.getElementById('lobby-overlay').classList.add('hidden');
           pushStateSync();
         };
@@ -3147,10 +3664,11 @@
         document.getElementById('btn-create-room').onclick = () => {
           const hostName = document.getElementById('online-name-input').value.trim() || 'Host_Ruda';
           const code = 'RUDA' + Math.floor(100 + Math.random() * 900);
-          const players = [{ id: 'p1', name: hostName, color: onlinePickedColor, isBot: false }];
-          gameState = createFreshGameState(players, 2000, code);
+          const players = [{ id: 'p1', clientToken: myClientToken, name: hostName, color: onlinePickedColor, isBot: false }];
+          myOnlinePlayerId = 'p1';
           activePerspectiveId = 'p1';
-          setupRoomSync(code);
+          gameState = createFreshGameState(players, 2000, code, true);
+          setupRoomSync(code, true);
           pushStateSync();
           updateLobbyWaitingRoom();
         };
@@ -3159,27 +3677,30 @@
           const code = document.getElementById('join-code-input').value.trim().toUpperCase();
           if (!code) return;
           const myName = document.getElementById('online-name-input').value.trim() || 'Gość';
-          const savedRaw = localStorage.getItem('ruda_room_' + code);
 
-          if (savedRaw) {
-            gameState = JSON.parse(savedRaw);
-            const newId = 'p' + (gameState.players.length + 1);
-            gameState.players.push({
-              id: newId, name: myName, color: onlinePickedColor, isBot: false,
-              cash: 2000, position: 0, inJail: false, jailTurns: 0, pardonCards: 0, bankrupt: false
+          if (firebaseDb) {
+            firebaseDb.ref('rooms/' + code).once('value').then((snap) => {
+              const cloudRoom = snap.val();
+              if (cloudRoom) {
+                gameState = addOrReconnectPlayerToRoom(cloudRoom, myName, onlinePickedColor);
+                setupRoomSync(code, true);
+                pushStateSync();
+                updateLobbyWaitingRoom();
+              } else {
+                alert(`Nie znaleziono pokoju "${code}" w chmurze Firebase. Sprawdź kod u Hosta.`);
+              }
             });
-            activePerspectiveId = newId;
-            setupRoomSync(code);
-            addFeedEvent(`👋 <strong>${myName}</strong> dołączył do pokoju <strong>${code}</strong>!`);
+            return;
+          }
+
+          const savedRaw = localStorage.getItem('ruda_room_' + code);
+          if (savedRaw) {
+            gameState = addOrReconnectPlayerToRoom(JSON.parse(savedRaw), myName, onlinePickedColor);
+            setupRoomSync(code, true);
             pushStateSync();
             updateLobbyWaitingRoom();
           } else {
-            const players = [{ id: 'p1', name: myName, color: onlinePickedColor, isBot: false }];
-            gameState = createFreshGameState(players, 2000, code);
-            activePerspectiveId = 'p1';
-            setupRoomSync(code);
-            pushStateSync();
-            updateLobbyWaitingRoom();
+            alert(`Pokój "${code}" nie istnieje na tym urządzeniu. Jeśli chcesz dołączyć do znajomego z innego komputera/telefonu, użyj jego Linku Zaproszenia z podpiętym Firebase.`);
           }
         };
 
@@ -3187,7 +3708,7 @@
           if (!gameState || gameState.players.length >= 6) return;
           const idx = gameState.players.length + 1;
           gameState.players.push({
-            id: 'p' + idx, name: 'Bot Górnik #' + idx, color: PLAYER_COLORS[idx % PLAYER_COLORS.length].hex,
+            id: 'p' + idx, clientToken: '', name: 'Bot Górnik #' + idx, color: PLAYER_COLORS[idx % PLAYER_COLORS.length].hex,
             isBot: true, cash: 2000, position: 0, inJail: false, jailTurns: 0, pardonCards: 0, bankrupt: false
           });
           pushStateSync();
@@ -3202,22 +3723,29 @@
         };
 
         document.getElementById('btn-copy-invite-lobby').onclick = () => {
-          const url = window.location.origin + window.location.pathname + '?room=' + currentRoomCode;
+          const url = buildInviteUrl(currentRoomCode);
           navigator.clipboard?.writeText(url);
-          document.getElementById('btn-copy-invite-lobby').textContent = '✅ Skopiowano!';
+          document.getElementById('btn-copy-invite-lobby').textContent = '✅ Link Skopiowany! Wyślij znajomym';
+          setTimeout(() => {
+            document.getElementById('btn-copy-invite-lobby').textContent = '📋 Kopiuj Link Zaproszenia dla Znajomych';
+          }, 2500);
         };
 
         document.getElementById('btn-save-firebase').onclick = () => {
-          try {
-            const cfg = JSON.parse(document.getElementById('firebase-json-input').value.trim());
-            if (window.firebase) {
-              if (!firebase.apps.length) firebase.initializeApp(cfg);
-              firebaseDb = firebase.database();
-              document.getElementById('firebase-conn-badge').textContent = 'Połączono z Firebase Realtime DB!';
+          const val = document.getElementById('firebase-json-input').value;
+          if (connectFirebaseConfig(val)) {
+            if (currentRoomCode && currentRoomCode !== 'SZYB-RUDA') {
+              setupRoomSync(currentRoomCode, true);
+              pushStateSync();
             }
-          } catch (e) {
-            alert('Nieprawidłowy format JSON konfiguracji Firebase.');
+          } else {
+            alert('Nie udało się połączyć. Wklej poprawny adres URL bazy Realtime Database (np. https://twoja-baza.firebasedatabase.app) lub obiekt JSON.');
           }
+        };
+
+        document.getElementById('btn-clear-firebase').onclick = () => {
+          localStorage.removeItem('ruda_firebase_cfg');
+          location.reload();
         };
 
         document.getElementById('btn-roll').onclick = handleRollDice;
@@ -3234,6 +3762,7 @@
 
         document.getElementById('btn-jail-pay').onclick = () => {
           const active = currentTurnPlayer();
+          if (!canControlCurrentTurn()) return;
           if (active.inJail && active.cash >= 100) {
             active.cash -= 100;
             active.inJail = false;
@@ -3245,6 +3774,7 @@
 
         document.getElementById('btn-jail-card').onclick = () => {
           const active = currentTurnPlayer();
+          if (!canControlCurrentTurn()) return;
           if (active.inJail && active.pardonCards > 0) {
             active.pardonCards -= 1;
             active.inJail = false;
@@ -3334,7 +3864,7 @@
           showGenericModal(
             '⚒️ Zasady Gry — Ruda Śląska Monopoly',
             `<div style="line-height:1.6;font-size:0.88rem;display:flex;flex-direction:column;gap:10px;">
-              <p><strong>1. Niezależna budowa domów i szybów (Brak wymogu monopolu):</strong> Możesz budować domy i kompleksy górnicze (Poziomy 1–5) na <strong>każdej kupionej dzielnicy od razu</strong>, nawet jeśli nie posiadasz pozostałych pól z tego samego koloru!</p>
+              <p><strong>1. Niezależna budowa domów (Limit 1 na turę):</strong> Możesz budować domy i kompleksy górnicze (Poziomy 1–5) na <strong>każdej kupionej dzielnicy bez wymogu posiadania całego koloru</strong>. W trakcie jednej tury możesz jednak wybudować <strong>maksymalnie 1 domek</strong>!</p>
               <p><strong>2. Premia za cały kolor:</strong> Zgromadzenie wszystkich dzielnic jednego koloru zwiększa bazowy czynsz niezabudowanych działek o +50%.</p>
               <p><strong>3. Hałda Widokowa (Pole 20):</strong> Wszystkie podatki trafiają do puli miasta. Gracz, który stanie na Hałdzie Widokowej, zgarnia całą pulę!</p>
             </div>`
@@ -3366,13 +3896,24 @@
         renderLobbySetup();
         initEvents();
 
+        const params = new URLSearchParams(window.location.search);
+        const dbParam = params.get('db');
+        const savedCfg = localStorage.getItem('ruda_firebase_cfg');
+
+        if (dbParam) {
+          try { connectFirebaseConfig(atob(dbParam)); } catch (e) {}
+        } else if (DEFAULT_FIREBASE_CONFIG.databaseURL) {
+          connectFirebaseConfig(DEFAULT_FIREBASE_CONFIG);
+        } else if (savedCfg) {
+          connectFirebaseConfig(savedCfg);
+        }
+
         gameState = createFreshGameState([
-          { id: 'p1', name: 'Sztygar', color: PLAYER_COLORS[0].hex, isBot: false },
+          { id: 'p1', clientToken: myClientToken, name: 'Sztygar', color: PLAYER_COLORS[0].hex, isBot: false },
           ...lobbyOpponents.map((o, i) => ({ id: 'p' + (i + 2), name: o.name, color: o.color, isBot: o.isBot }))
-        ], 2000, 'SZYB-RUDA');
+        ], 2000, 'SZYB-RUDA', false);
         renderAll();
 
-        const params = new URLSearchParams(window.location.search);
         const roomParam = params.get('room');
         if (roomParam) {
           document.querySelector('[data-tab="online"]').click();
