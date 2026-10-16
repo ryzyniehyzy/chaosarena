@@ -7,7 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
-  <!-- Firebase SDK do synchronizacji przez Internet -->
+  <!-- PeerJS (WebRTC) — natychmiastowy Multiplayer przez Internet bez konfiguracji bazy danych -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <!-- Opcjonalny Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
@@ -51,7 +53,6 @@
       user-select: none;
     }
 
-    /* ==================== UKŁAD 3 KOLUMN ==================== */
     .richup-shell {
       display: grid;
       grid-template-columns: 320px 1fr 345px;
@@ -80,7 +81,6 @@
       box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
     }
 
-    /* ==================== LEWA KOLUMNA ==================== */
     .brand-header-bar {
       display: flex;
       align-items: center;
@@ -184,7 +184,6 @@
       transform: translateY(-1px);
     }
 
-    /* Inspektor Dzielnicy */
     .district-spotlight {
       padding: 0;
       overflow: hidden;
@@ -253,7 +252,6 @@
       margin-top: 8px;
     }
 
-    /* Czat */
     .chat-box {
       flex: 1;
       display: flex;
@@ -368,7 +366,7 @@
       transform: scale(1.08);
     }
 
-    /* ==================== PLANSZA 11x11 (CZYTELNA I PRZEJRZYSTA) ==================== */
+    /* ==================== PLANSZA 11x11 ==================== */
     .board-viewport {
       display: flex;
       align-items: center;
@@ -415,7 +413,6 @@
       overflow: visible;
     }
 
-    /* Wewnętrzny pasek kolorystyczny dzielnicy dla maksymalnej przejrzystości */
     .tile-color-bar {
       position: absolute;
       inset: 0 0 auto 0;
@@ -459,7 +456,6 @@
       filter: grayscale(0.75);
     }
 
-    /* Narożniki */
     .board-tile.corner-tile {
       background: linear-gradient(145deg, #342b52 0%, #1e1831 100%);
       justify-content: center;
@@ -489,7 +485,6 @@
       font-weight: 700;
     }
 
-    /* Czytelne nazwy i ceny na kafelkach */
     .tile-title {
       font-size: 0.62rem;
       font-weight: 800;
@@ -538,7 +533,6 @@
       place-items: center;
     }
 
-    /* Zewnętrzne kapsułki właścicieli i poziomów domów (Richup style) */
     .owner-outer-cap {
       position: absolute;
       display: flex;
@@ -588,7 +582,6 @@
       border-radius: 2px 7px 7px 2px;
     }
 
-    /* Pionki z oczkami i animacją skoku */
     .tile-tokens-box {
       position: absolute;
       inset: 2px;
@@ -630,7 +623,6 @@
       border: 1.5px solid #0e0b16;
     }
 
-    /* ==================== ŚRODEK PLANSZY ==================== */
     .board-center-well {
       grid-column: 2 / 11;
       grid-row: 2 / 11;
@@ -710,7 +702,6 @@
       animation: fadeSlideUp 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Kostki 3D z ulepszoną animacją */
     .dice-stage {
       display: flex;
       gap: 26px;
@@ -848,7 +839,6 @@
       border: 1px solid var(--border-glass);
     }
 
-    /* Strumień zdarzeń na środku planszy */
     .center-feed-log {
       width: 94%;
       height: 140px;
@@ -878,7 +868,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ==================== PRAWA KOLUMNA (GRACZE + ANIMACJA GOTÓWKI) ==================== */
+    /* ==================== PRAWA KOLUMNA ==================== */
     .players-roster {
       display: flex;
       flex-direction: column;
@@ -958,7 +948,6 @@
       font-weight: 800;
     }
 
-    /* Animowana delta gotówki (jak -100 pod pieniędzmi w Richup.io) */
     .cash-delta-float {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.74rem;
@@ -1069,7 +1058,6 @@
       margin-top: 6px;
     }
 
-    /* Moje Nieruchomości */
     .properties-card {
       flex: 1;
       display: flex;
@@ -1630,7 +1618,6 @@
       <div class="lobby-tabs">
         <button type="button" class="lobby-tab active" data-tab="local">⚒️ Gra Lokalna / Boty AI</button>
         <button type="button" class="lobby-tab" data-tab="online">🌐 Pokój Online ze Znajomymi</button>
-        <button type="button" class="lobby-tab" data-tab="firebase">⚙️ Serwer Firebase</button>
       </div>
 
       <!-- ZAKŁADKA 1: LOKALNA / BOTY -->
@@ -1678,12 +1665,12 @@
         </button>
       </div>
 
-      <!-- ZAKŁADKA 2: POKÓJ ONLINE -->
+      <!-- ZAKŁADKA 2: POKÓJ ONLINE (WBUDOWANY SILNIK P2P WEBRTC — BEZ FIREBASE!) -->
       <div id="tab-online" class="lobby-tab-pane">
-        <div id="online-mode-banner" class="coal-rule-banner" style="background:rgba(124,77,255,0.12);border-color:rgba(124,77,255,0.4);">
-          <div class="coal-icon-wrap">🌐</div>
+        <div id="online-mode-banner" class="coal-rule-banner" style="background:rgba(46,204,113,0.12);border-color:rgba(46,204,113,0.45);">
+          <div class="coal-icon-wrap">⚡</div>
           <div id="online-mode-desc">
-            <strong>Status sieci:</strong> Synchronizacja kart przeglądarki aktywna. Aby grać ze znajomymi z innych domów/telefonów, podłącz bazę w zakładce <em>⚙️ Serwer Firebase</em> — link zaproszenia automatycznie przekaże połączenie znajomym!
+            <strong>Bezpośredni Multiplayer Online (P2P WebRTC) Aktywny!</strong> Nie potrzebujesz żadnego serwera ani Firebase. Jedna osoba klika <em>Stwórz Nowy Pokój</em>, a znajomi na telefonach lub komputerach wpisują wygenerowany kod (np. <strong>RUDA694</strong>) i klikają <em>Dołącz do Pokoju</em>!
           </div>
         </div>
 
@@ -1701,21 +1688,23 @@
         <div class="online-cards-grid">
           <div class="online-action-card">
             <h4>Utwórz Prywatny Pokój</h4>
-            <p>Stwórz pokój jako Host i skopiuj link dla znajomych.</p>
-            <button type="button" id="btn-create-room" class="btn-purple-glow">Stwórz Nowy Pokój</button>
+            <p>Otwórz pokój jako Host i podaj kod lub wyślij link znajomym (nie zamykaj karty Hosta).</p>
+            <button type="button" id="btn-create-room" class="btn-purple-glow">Stwórz Nowy Pokój Online</button>
           </div>
 
           <div class="online-action-card">
-            <h4>Dołącz po Kodzie</h4>
-            <input type="text" id="join-code-input" placeholder="Kod pokoju np. RUDA123" maxlength="12" style="text-transform:uppercase;" />
+            <h4>Dołącz do Pokoju Znajomego</h4>
+            <input type="text" id="join-code-input" placeholder="Wpisz kod np. RUDA694" maxlength="12" style="text-transform:uppercase;" />
             <button type="button" id="btn-join-room" class="btn-steel">Dołącz do Pokoju</button>
           </div>
         </div>
 
+        <div id="p2p-status-line" style="font-size:0.8rem;color:#00e5ff;font-weight:700;text-align:center;"></div>
+
         <div id="room-waiting-box" class="room-waiting-box hidden">
           <div class="waiting-top-bar">
             <div>
-              <span class="muted-label">AKTYWNY POKÓJ:</span>
+              <span class="muted-label">AKTYWNY POKÓJ ONLINE:</span>
               <span id="lobby-room-code-display" class="code-pill">------</span>
             </div>
             <button type="button" id="btn-copy-invite-lobby" class="btn-ghost-sm">📋 Kopiuj Link Zaproszenia dla Znajomych</button>
@@ -1725,22 +1714,6 @@
             <button type="button" id="btn-room-add-bot" class="btn-steel">+ Dodaj Bota AI do Pokoju</button>
             <button type="button" id="btn-launch-room-game" class="btn-ember-lg">Rozpocznij Mecz / Wejdź na Planszę</button>
           </div>
-        </div>
-      </div>
-
-      <!-- ZAKŁADKA 3: SERWER FIREBASE -->
-      <div id="tab-firebase" class="lobby-tab-pane">
-        <p style="font-size:0.8rem;color:#9b92b8;line-height:1.5;">
-          Aby grać ze znajomymi na różnych komputerach/telefonach przez Internet:
-          <br/>1. Wejdź na <strong>console.firebase.google.com</strong>, utwórz darmowy projekt i włącz <strong>Realtime Database</strong> (w trybie testowym).
-          <br/>2. Wklej poniżej sam adres URL bazy (np. <code>https://twoja-baza-default-rtdb.europe-west1.firebasedatabase.app</code>) LUB obiekt JSON.
-          <br/>3. <strong>Twoi znajomi nie muszą nic wklejać!</strong> Gdy wyślesz im skopiowany Link Zaproszenia, baza połączy się u nich automatycznie.
-        </p>
-        <textarea id="firebase-json-input" rows="4" placeholder='Wklej sam adres https://twoja-baza.firebasedatabase.app LUB obiekt JSON {"databaseURL": "https://..."}'></textarea>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <button type="button" id="btn-save-firebase" class="btn-purple-glow">Zapisz i Połącz z Chmurą Firebase</button>
-          <button type="button" id="btn-clear-firebase" class="btn-steel">Odłącz</button>
-          <span id="firebase-conn-badge" style="font-size:0.78rem;color:#ffca28;font-weight:700;">Tryb: Lokalny / Multi-Tab</span>
         </div>
       </div>
     </div>
@@ -1764,7 +1737,7 @@
       <div class="glass-card share-box">
         <div class="card-caption-row">
           <span id="share-caption-text">Share this game</span>
-          <span id="sync-status-dot" class="sync-dot" title="Status połączenia"></span>
+          <span id="sync-status-dot" class="sync-dot cloud" title="Połączenie P2P Online aktywne"></span>
         </div>
         <div class="share-controls-row">
           <input type="text" id="share-link-field" readonly value="https://ruda.io/room/SZYB-1" />
@@ -2036,10 +2009,6 @@
     (function () {
       'use strict';
 
-      const DEFAULT_FIREBASE_CONFIG = {
-        databaseURL: ""
-      };
-
       const PLAYER_COLORS = [
         { id: 'ember', name: 'Żar Węglowy', hex: '#ff7849' },
         { id: 'pink',  name: 'Neon Róż',   hex: '#f06292' },
@@ -2062,7 +2031,6 @@
         UTILITY:     { name: 'Huty i Elektrownie',      color: '#ffa000', code: 'PRZ' }
       };
 
-      // Skrócone nazwy kafelków (`shortName`) zapewniające idealną czytelność na planszy jak w Richup.io
       const BOARD_TILES = [
         { index: 0,  type: 'START',      name: 'START', shortName: 'START', subtitle: '+$250 za zjazd' },
         { index: 1,  type: 'PROPERTY',   name: 'Orzegów — Burloch Arena', shortName: 'Burloch Arena', district: 'Orzegów', group: 'ORZEGOW', price: 60, buildCost: 50, rents: [6, 25, 70, 200, 340, 480] },
@@ -2168,10 +2136,11 @@
 
       const sfx = new SoundEngine();
 
-      let myClientToken = localStorage.getItem('ruda_client_token');
+      // Unikalny token gracza w danej karcie przeglądarki
+      let myClientToken = sessionStorage.getItem('ruda_session_token');
       if (!myClientToken) {
         myClientToken = 'cl_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
-        localStorage.setItem('ruda_client_token', myClientToken);
+        sessionStorage.setItem('ruda_session_token', myClientToken);
       }
 
       let gameState = null;
@@ -2181,13 +2150,15 @@
       let isOnlineRoomMode = false;
       let currentRoomCode = null;
       let broadcastChannel = null;
-      let firebaseDb = null;
-      let activeFirebaseUrl = '';
-      let firebaseRoomRef = null;
+
+      // Silnik P2P WebRTC (PeerJS) — Działa przez Internet bez Firebase!
+      let peerInstance = null;
+      let isP2PHost = false;
+      let hostConnections = []; // Połączenia gości podpiętych do Hosta
+      let guestConnToHost = null; // Połączenie Gościa do Hosta
+
       let isRollingLock = false;
       let turnTimerInterval = null;
-
-      // Śledzenie ostatnich kwot graczy do wyświetlania latających animacji +$ / -$
       let previousCashMap = {};
       let activeCashDeltas = {};
 
@@ -2203,6 +2174,14 @@
         return new Date().toTimeString().slice(0, 5);
       }
 
+      function setStatusMsg(txt, color = '#00e5ff') {
+        const el = document.getElementById('p2p-status-line');
+        if (el) {
+          el.textContent = txt;
+          el.style.color = color;
+        }
+      }
+
       function recordCashChanges(players) {
         if (!players) return;
         players.forEach(p => {
@@ -2214,56 +2193,13 @@
         });
       }
 
-      function connectFirebaseConfig(rawInput) {
-        if (!rawInput) return false;
-        let cfg = null;
-        const trimmed = typeof rawInput === 'string' ? rawInput.trim() : JSON.stringify(rawInput);
-        if (!trimmed) return false;
-
-        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-          cfg = { databaseURL: trimmed.replace(/\/$/, '') };
-        } else {
-          try { cfg = JSON.parse(trimmed); } catch (e) { return false; }
-        }
-
-        if (!cfg || !cfg.databaseURL || !window.firebase) return false;
-
-        try {
-          if (!firebase.apps.length) {
-            firebase.initializeApp(cfg);
-          }
-          firebaseDb = firebase.database();
-          activeFirebaseUrl = cfg.databaseURL;
-          localStorage.setItem('ruda_firebase_cfg', JSON.stringify(cfg));
-
-          const badge = document.getElementById('firebase-conn-badge');
-          if (badge) {
-            badge.textContent = '✅ Połączono z Chmurą Firebase (Gra przez Internet aktywna)';
-            badge.style.color = '#2ecc71';
-          }
-          const dot = document.getElementById('sync-status-dot');
-          if (dot) dot.classList.add('cloud');
-          const desc = document.getElementById('online-mode-desc');
-          if (desc) {
-            desc.innerHTML = '<strong>Status sieci: Chmura Firebase Aktywna!</strong> Możesz stworzyć pokój i wysłać Link Zaproszenia znajomym na dowolnym komputerze lub telefonie.';
-          }
-          return true;
-        } catch (err) {
-          console.error('Firebase init error:', err);
-          return false;
-        }
-      }
-
       function buildInviteUrl(roomCode) {
         const url = new URL(window.location.origin + window.location.pathname);
         url.searchParams.set('room', roomCode);
-        if (activeFirebaseUrl) {
-          url.searchParams.set('db', btoa(activeFirebaseUrl));
-        }
         return url.toString();
       }
 
-      function normalizeFirebaseState(state) {
+      function normalizeState(state) {
         if (!state) return null;
         state.players = Array.isArray(state.players) ? state.players : Object.values(state.players || {});
         state.trades = Array.isArray(state.trades) ? state.trades : Object.values(state.trades || {});
@@ -2312,11 +2248,12 @@
         return {
           roomCode: roomCode,
           isOnline: isOnline,
+          lobbyOpen: isOnline, // Czy czekamy w lobby czy już na planszy
           status: 'PLAYING',
           round: 1,
           turnIndex: 0,
           turnPhase: 'ROLL',
-          builtThisTurn: false, // LIMIT: TYLKO 1 DOMEK NA TURĘ
+          builtThisTurn: false,
           lastDice: [6, 5],
           doublesStreak: 0,
           vacationPool: 100,
@@ -2345,6 +2282,158 @@
         };
       }
 
+      /* ==================== SILNIK P2P ONLINE (HOST & GOŚĆ PRZEZ INTERNET) ==================== */
+      function getPeerRoomId(code) {
+        return 'ruda-slaska-monopoly-v3-' + code.trim().toUpperCase();
+      }
+
+      function startP2PHostRoom(roomCode, hostName, hostColor) {
+        setStatusMsg('⏳ Otwieranie pokoju online ' + roomCode + ' w sieci P2P...', '#ffca28');
+        if (peerInstance) {
+          try { peerInstance.destroy(); } catch (e) {}
+        }
+        hostConnections = [];
+        guestConnToHost = null;
+        isP2PHost = true;
+
+        const players = [{ id: 'p1', clientToken: myClientToken, name: hostName, color: hostColor, isBot: false }];
+        myOnlinePlayerId = 'p1';
+        activePerspectiveId = 'p1';
+        gameState = createFreshGameState(players, 2000, roomCode, true);
+        setupRoomSync(roomCode, true);
+        pushStateSync();
+        updateLobbyWaitingRoom();
+
+        if (!window.Peer) {
+          setStatusMsg('✅ Pokój utworzony lokalnie.', '#2ecc71');
+          return;
+        }
+
+        peerInstance = new Peer(getPeerRoomId(roomCode));
+
+        peerInstance.on('open', () => {
+          setStatusMsg(`✅ Pokój ${roomCode} jest AKTYWNY w Internecie! Znajomi mogą teraz wpisać kod ${roomCode} i dołączyć.`, '#2ecc71');
+        });
+
+        peerInstance.on('connection', (conn) => {
+          hostConnections.push(conn);
+
+          conn.on('open', () => {
+            conn.send({ type: 'STATE_SYNC', state: gameState });
+          });
+
+          conn.on('data', (data) => {
+            if (!data) return;
+
+            if (data.type === 'JOIN_REQ') {
+              gameState = addOrReconnectPlayerToRoom(gameState, data.name, data.color, data.clientToken);
+              pushStateSync();
+              updateLobbyWaitingRoom();
+            } else if (data.type === 'STATE_SYNC' && data.state) {
+              gameState = normalizeState(data.state);
+              syncMyOnlineIdentity();
+              // Rozsyłamy zaktualizowany stan do wszystkich pozostałych połączonych znajomych
+              hostConnections.forEach(c => {
+                if (c && c.open && c !== conn) {
+                  try { c.send({ type: 'STATE_SYNC', state: gameState }); } catch (e) {}
+                }
+              });
+              renderAll();
+              updateLobbyWaitingRoom();
+            }
+          });
+
+          conn.on('close', () => {
+            hostConnections = hostConnections.filter(c => c !== conn);
+          });
+        });
+
+        peerInstance.on('error', (err) => {
+          if (err.type === 'unavailable-id') {
+            setStatusMsg(`⚠️ Kod ${roomCode} jest już zajęty. Kliknij Stwórz Nowy Pokój ponownie.`, '#ff5252');
+          } else {
+            setStatusMsg(`ℹ️ Status sieci P2P: ${err.type}`, '#ffca28');
+          }
+        });
+      }
+
+      function joinP2PRoomAsGuest(roomCode, guestName, guestColor) {
+        setStatusMsg(`⏳ Łączenie z pokojem ${roomCode} przez Internet...`, '#ffca28');
+
+        // 1. Sprawdź najpierw, czy pokój nie jest otwarty na tym samym urządzeniu (w innej karcie)
+        const localSaved = localStorage.getItem('ruda_room_' + roomCode);
+        if (localSaved) {
+          gameState = addOrReconnectPlayerToRoom(JSON.parse(localSaved), guestName, guestColor, myClientToken);
+          setupRoomSync(roomCode, true);
+          pushStateSync();
+          updateLobbyWaitingRoom();
+          setStatusMsg(`✅ Połączono z pokojem ${roomCode}!`, '#2ecc71');
+          return;
+        }
+
+        if (!window.Peer) {
+          alert('Biblioteka sieciowa PeerJS nie mogła się załadować. Sprawdź połączenie z Internetem.');
+          return;
+        }
+
+        if (peerInstance) {
+          try { peerInstance.destroy(); } catch (e) {}
+        }
+        isP2PHost = false;
+        hostConnections = [];
+
+        peerInstance = new Peer();
+
+        peerInstance.on('open', () => {
+          const conn = peerInstance.connect(getPeerRoomId(roomCode), { reliable: true });
+          guestConnToHost = conn;
+
+          let connectedFlag = false;
+          const timeoutId = setTimeout(() => {
+            if (!connectedFlag) {
+              setStatusMsg(`❌ Nie udało się połączyć z pokojem ${roomCode}. Upewnij się, że Host stworzył ten pokój i ma otwartą kartę z grą!`, '#ff5252');
+            }
+          }, 8000);
+
+          conn.on('open', () => {
+            connectedFlag = true;
+            clearTimeout(timeoutId);
+            setStatusMsg(`✅ Połączono z pokojem ${roomCode}! Oczekiwanie na dane Hosta...`, '#2ecc71');
+            setupRoomSync(roomCode, true);
+            conn.send({
+              type: 'JOIN_REQ',
+              name: guestName,
+              color: guestColor,
+              clientToken: myClientToken
+            });
+          });
+
+          conn.on('data', (data) => {
+            if (data && data.type === 'STATE_SYNC' && data.state) {
+              gameState = normalizeState(data.state);
+              syncMyOnlineIdentity();
+              if (!gameState.lobbyOpen) {
+                document.getElementById('lobby-overlay').classList.add('hidden');
+              }
+              renderAll();
+              updateLobbyWaitingRoom();
+            }
+          });
+
+          conn.on('error', () => {
+            setStatusMsg(`❌ Błąd połączenia z pokojem ${roomCode}.`, '#ff5252');
+          });
+        });
+
+        peerInstance.on('error', (err) => {
+          if (err.type === 'peer-unavailable') {
+            setStatusMsg(`❌ Pokój "${roomCode}" nie jest teraz aktywny w sieci! Host musi najpierw kliknąć "Stwórz Nowy Pokój Online" i mieć otwartą grę.`, '#ff5252');
+          } else {
+            setStatusMsg(`❌ Błąd sieci: ${err.type}`, '#ff5252');
+          }
+        });
+      }
+
       function setupRoomSync(roomCode, isOnline = false) {
         currentRoomCode = roomCode;
         isOnlineRoomMode = isOnline;
@@ -2359,26 +2448,15 @@
           broadcastChannel = new BroadcastChannel('ruda_monopoly_' + roomCode);
           broadcastChannel.onmessage = (ev) => {
             if (ev.data && ev.data.type === 'STATE_SYNC') {
-              gameState = normalizeFirebaseState(ev.data.state);
+              gameState = normalizeState(ev.data.state);
               syncMyOnlineIdentity();
+              if (gameState.isOnline && !gameState.lobbyOpen) {
+                document.getElementById('lobby-overlay').classList.add('hidden');
+              }
               renderAll();
               updateLobbyWaitingRoom();
             }
           };
-        }
-
-        if (firebaseDb && roomCode !== 'SZYB-RUDA') {
-          if (firebaseRoomRef) firebaseRoomRef.off();
-          firebaseRoomRef = firebaseDb.ref('rooms/' + roomCode);
-          firebaseRoomRef.on('value', (snap) => {
-            const val = snap.val();
-            if (val) {
-              gameState = normalizeFirebaseState(val);
-              syncMyOnlineIdentity();
-              renderAll();
-              updateLobbyWaitingRoom();
-            }
-          });
         }
       }
 
@@ -2395,15 +2473,23 @@
         if (!gameState) return;
         try {
           localStorage.setItem('ruda_room_' + gameState.roomCode, JSON.stringify(gameState));
-          localStorage.setItem('ruda_last_active_room', gameState.roomCode);
         } catch (e) {}
 
         if (broadcastChannel) {
           broadcastChannel.postMessage({ type: 'STATE_SYNC', state: gameState });
         }
-        if (firebaseDb && gameState.roomCode !== 'SZYB-RUDA') {
-          firebaseDb.ref('rooms/' + gameState.roomCode).set(gameState);
+
+        // Synchronizacja P2P przez Internet (Host -> Goście oraz Gość -> Host)
+        if (isP2PHost && hostConnections.length > 0) {
+          hostConnections.forEach(c => {
+            if (c && c.open) {
+              try { c.send({ type: 'STATE_SYNC', state: gameState }); } catch (e) {}
+            }
+          });
+        } else if (!isP2PHost && guestConnToHost && guestConnToHost.open) {
+          try { guestConnToHost.send({ type: 'STATE_SYNC', state: gameState }); } catch (e) {}
         }
+
         renderAll();
       }
 
@@ -2522,12 +2608,6 @@
         return 0;
       }
 
-      /**
-       * ZASADA ROZBUDOWY:
-       * 1. Brak wymogu posiadania całego koloru (monopolu).
-       * 2. Można budować tylko w trakcie swojej tury.
-       * 3. Maksymalnie 1 domek na całą turę (`gameState.builtThisTurn`).
-       */
       function canUpgradeProperty(tileIndex, playerId) {
         const tile = BOARD_TILES[tileIndex];
         const prop = gameState.properties[tileIndex];
@@ -2556,7 +2636,7 @@
 
         player.cash -= tile.buildCost;
         prop.level += 1;
-        gameState.builtThisTurn = true; // BLOKADA KOLEJNYCH DOMKÓW W TEJ TURZE
+        gameState.builtThisTurn = true;
 
         const lvlName = prop.level === 5 ? 'Kompleks Górniczy / Hotel' : `Dom #${prop.level}`;
         prop.history.unshift(`${nowTime()} — ${player.name} zbudował ${lvlName} za $${tile.buildCost}`);
@@ -2620,7 +2700,6 @@
         if (gameState.feed.length > 40) gameState.feed.pop();
       }
 
-      /* ==================== PŁYNNA ANIMACJA RUCHU PIONKA PO POLACH ==================== */
       function animateStepByStepMove(player, stepsCount, onComplete) {
         let remaining = stepsCount;
 
@@ -2723,7 +2802,6 @@
             gameState.doublesStreak = 0;
           }
 
-          // Płynna animacja skakania pionka po polach
           animateStepByStepMove(player, sum, () => {
             resolveLandedTile(player, player.position, sum);
             isRollingLock = false;
@@ -2856,7 +2934,7 @@
 
         if (gameState.doublesStreak > 0 && !player.inJail && !player.bankrupt) {
           gameState.turnPhase = 'ROLL';
-          gameState.builtThisTurn = false; // Odnawia limit 1 domu przy dodatkowym rzucie z dubletu
+          gameState.builtThisTurn = false;
           addFeedEvent(`🎲 <strong>${player.name}</strong> ma dodatkowy rzut za dublet!`);
           pushStateSync();
           if (player.isBot) setTimeout(handleRollDice, 750);
@@ -2876,7 +2954,7 @@
 
         gameState.turnIndex = nextIdx;
         gameState.turnPhase = 'ROLL';
-        gameState.builtThisTurn = false; // RESET LIMITU 1 DOMU NA NOWĄ TURĘ
+        gameState.builtThisTurn = false;
         gameState.doublesStreak = 0;
         gameState.turnSecondsLeft = 120;
 
@@ -2905,7 +2983,6 @@
           }
         }
 
-        // Bot buduje maksymalnie 1 domek w swojej turze
         if (!gameState.builtThisTurn) {
           const myProps = BOARD_TILES.filter(
             t => t.type === 'PROPERTY' && gameState.properties[t.index]?.ownerId === bot.id
@@ -3577,13 +3654,15 @@
         `).join('');
       }
 
-      function addOrReconnectPlayerToRoom(roomState, myName, myColor) {
-        roomState = normalizeFirebaseState(roomState);
-        const existing = roomState.players.find(p => p.clientToken === myClientToken);
+      function addOrReconnectPlayerToRoom(roomState, myName, myColor, tokenToUse = myClientToken) {
+        roomState = normalizeState(roomState);
+        const existing = roomState.players.find(p => p.clientToken === tokenToUse);
         if (existing) {
           existing.name = myName || existing.name;
-          myOnlinePlayerId = existing.id;
-          activePerspectiveId = existing.id;
+          if (tokenToUse === myClientToken) {
+            myOnlinePlayerId = existing.id;
+            activePerspectiveId = existing.id;
+          }
           return roomState;
         }
 
@@ -3595,7 +3674,7 @@
 
         roomState.players.push({
           id: newId,
-          clientToken: myClientToken,
+          clientToken: tokenToUse,
           name: myName,
           color: finalColor,
           isBot: false,
@@ -3606,8 +3685,10 @@
           pardonCards: 0,
           bankrupt: false
         });
-        myOnlinePlayerId = newId;
-        activePerspectiveId = newId;
+        if (tokenToUse === myClientToken) {
+          myOnlinePlayerId = newId;
+          activePerspectiveId = newId;
+        }
         roomState.feed.unshift({
           text: `👋 <strong>${myName}</strong> dołączył do pokoju <strong>${roomState.roomCode}</strong>!`,
           time: nowTime()
@@ -3661,47 +3742,23 @@
           pushStateSync();
         };
 
+        // Tworzenie Pokoju Online P2P (Bez Firebase!)
         document.getElementById('btn-create-room').onclick = () => {
           const hostName = document.getElementById('online-name-input').value.trim() || 'Host_Ruda';
-          const code = 'RUDA' + Math.floor(100 + Math.random() * 900);
-          const players = [{ id: 'p1', clientToken: myClientToken, name: hostName, color: onlinePickedColor, isBot: false }];
-          myOnlinePlayerId = 'p1';
-          activePerspectiveId = 'p1';
-          gameState = createFreshGameState(players, 2000, code, true);
-          setupRoomSync(code, true);
-          pushStateSync();
-          updateLobbyWaitingRoom();
+          const typedCode = document.getElementById('join-code-input').value.trim().toUpperCase();
+          const code = typedCode || ('RUDA' + Math.floor(100 + Math.random() * 900));
+          startP2PHostRoom(code, hostName, onlinePickedColor);
         };
 
+        // Dołączanie do Pokoju Online P2P przez Internet (Bez Firebase!)
         document.getElementById('btn-join-room').onclick = () => {
           const code = document.getElementById('join-code-input').value.trim().toUpperCase();
-          if (!code) return;
-          const myName = document.getElementById('online-name-input').value.trim() || 'Gość';
-
-          if (firebaseDb) {
-            firebaseDb.ref('rooms/' + code).once('value').then((snap) => {
-              const cloudRoom = snap.val();
-              if (cloudRoom) {
-                gameState = addOrReconnectPlayerToRoom(cloudRoom, myName, onlinePickedColor);
-                setupRoomSync(code, true);
-                pushStateSync();
-                updateLobbyWaitingRoom();
-              } else {
-                alert(`Nie znaleziono pokoju "${code}" w chmurze Firebase. Sprawdź kod u Hosta.`);
-              }
-            });
+          if (!code) {
+            setStatusMsg('⚠️ Wpisz najpierw kod pokoju (np. RUDA694)!', '#ffca28');
             return;
           }
-
-          const savedRaw = localStorage.getItem('ruda_room_' + code);
-          if (savedRaw) {
-            gameState = addOrReconnectPlayerToRoom(JSON.parse(savedRaw), myName, onlinePickedColor);
-            setupRoomSync(code, true);
-            pushStateSync();
-            updateLobbyWaitingRoom();
-          } else {
-            alert(`Pokój "${code}" nie istnieje na tym urządzeniu. Jeśli chcesz dołączyć do znajomego z innego komputera/telefonu, użyj jego Linku Zaproszenia z podpiętym Firebase.`);
-          }
+          const myName = document.getElementById('online-name-input').value.trim() || 'Gracz_' + Math.floor(10 + Math.random() * 89);
+          joinP2PRoomAsGuest(code, myName, onlinePickedColor);
         };
 
         document.getElementById('btn-room-add-bot').onclick = () => {
@@ -3718,6 +3775,7 @@
         document.getElementById('btn-launch-room-game').onclick = () => {
           if (!gameState) return;
           if (gameState.players.length < 2) document.getElementById('btn-room-add-bot').click();
+          gameState.lobbyOpen = false;
           document.getElementById('lobby-overlay').classList.add('hidden');
           pushStateSync();
         };
@@ -3729,23 +3787,6 @@
           setTimeout(() => {
             document.getElementById('btn-copy-invite-lobby').textContent = '📋 Kopiuj Link Zaproszenia dla Znajomych';
           }, 2500);
-        };
-
-        document.getElementById('btn-save-firebase').onclick = () => {
-          const val = document.getElementById('firebase-json-input').value;
-          if (connectFirebaseConfig(val)) {
-            if (currentRoomCode && currentRoomCode !== 'SZYB-RUDA') {
-              setupRoomSync(currentRoomCode, true);
-              pushStateSync();
-            }
-          } else {
-            alert('Nie udało się połączyć. Wklej poprawny adres URL bazy Realtime Database (np. https://twoja-baza.firebasedatabase.app) lub obiekt JSON.');
-          }
-        };
-
-        document.getElementById('btn-clear-firebase').onclick = () => {
-          localStorage.removeItem('ruda_firebase_cfg');
-          location.reload();
         };
 
         document.getElementById('btn-roll').onclick = handleRollDice;
@@ -3896,28 +3937,18 @@
         renderLobbySetup();
         initEvents();
 
-        const params = new URLSearchParams(window.location.search);
-        const dbParam = params.get('db');
-        const savedCfg = localStorage.getItem('ruda_firebase_cfg');
-
-        if (dbParam) {
-          try { connectFirebaseConfig(atob(dbParam)); } catch (e) {}
-        } else if (DEFAULT_FIREBASE_CONFIG.databaseURL) {
-          connectFirebaseConfig(DEFAULT_FIREBASE_CONFIG);
-        } else if (savedCfg) {
-          connectFirebaseConfig(savedCfg);
-        }
-
         gameState = createFreshGameState([
           { id: 'p1', clientToken: myClientToken, name: 'Sztygar', color: PLAYER_COLORS[0].hex, isBot: false },
           ...lobbyOpponents.map((o, i) => ({ id: 'p' + (i + 2), name: o.name, color: o.color, isBot: o.isBot }))
         ], 2000, 'SZYB-RUDA', false);
         renderAll();
 
+        const params = new URLSearchParams(window.location.search);
         const roomParam = params.get('room');
         if (roomParam) {
           document.querySelector('[data-tab="online"]').click();
           document.getElementById('join-code-input').value = roomParam.toUpperCase();
+          setStatusMsg(`Wykryto zaproszenie do pokoju ${roomParam.toUpperCase()}! Wpisz swój nick i kliknij "Dołącz do Pokoju".`, '#00e5ff');
         }
       });
     })();
