@@ -14,13 +14,17 @@
 </head>
 <body>
 
-  <!-- ==================== GÓRNY PASEK NAWIGACYJNY (WSZYSTKIE 5 GIER + POKÓJ FIREBASE) ==================== -->
+  <!-- DYNAMICZNE TŁO MAPY RUDY ŚLĄSKIEJ (KAUFHAUS, WIELKI PIEC, SZYB ANDRZEJ, FICINUS) -->
+  <div id="map-bg-layer" class="map-bg-layer"></div>
+  <div class="map-bg-vignette"></div>
+
+  <!-- ==================== GÓRNY PASEK NAWIGACYJNY ==================== -->
   <header class="arena-topbar">
     <div class="topbar-brand">
       <div class="brand-emblem">⚒️</div>
       <div>
         <div class="brand-title">RUDA ŚLĄSKA <span class="brand-gold">ARENA</span></div>
-        <div class="brand-sub">Górnicze Centrum Gier Planszowych Online</div>
+        <div class="brand-sub" id="active-map-subtitle">Mapa: Kolonia Kaufhaus (Chebzie)</div>
       </div>
     </div>
 
@@ -48,17 +52,20 @@
       </button>
     </nav>
 
-    <!-- Status pokoju i szybkie akcje -->
+    <!-- Wybór / Losowanie Mapy i Akcje Pokoju -->
     <div class="topbar-actions">
+      <button type="button" id="btn-random-map" class="btn-top-action" title="Wylosuj lub zmień tło mapy Rudy Śląskiej">
+        🗺️ <span id="top-map-name">Kaufhaus</span>
+      </button>
       <div class="room-badge-pill" id="top-room-pill">
         <span id="top-net-dot" class="net-dot"></span>
         <span id="top-room-label">Pokój: LOKALNY</span>
       </div>
-      <button type="button" id="btn-copy-invite-top" class="btn-top-action" title="Skopiuj link zaproszenia dla znajomych">
+      <button type="button" id="btn-copy-invite-top" class="btn-top-action" title="Skopiuj link zaproszenia">
         📋 Zaproszenie
       </button>
       <button type="button" id="btn-open-lobby" class="btn-top-action btn-top-highlight">
-        🌐 Pokój / Firebase
+        🌐 Pokój / Pionki
       </button>
       <button type="button" id="btn-reset-board" class="btn-top-icon" title="Nowa runda aktualnej gry">🔄</button>
       <button type="button" id="btn-toggle-sound" class="btn-top-icon" title="Włącz/Wyłącz dźwięki">🔊</button>
@@ -72,15 +79,16 @@
     <!-- LEWA/ŚRODKOWA STREFA: DUŻY STÓŁ PLANSZOWY -->
     <main class="board-main-stage">
 
-      <!-- 1. PLANSZA MONOPOLY RUDY ŚLĄSKIEJ (DUŻE, CZYTELNE KAFELKI) -->
+      <!-- 1. PLANSZA MONOPOLY RUDY ŚLĄSKIEJ -->
       <section id="stage-MONOPOLY" class="stage-view">
         <div class="monopoly-frame">
           <div id="monopoly-board" class="monopoly-board">
             <!-- 40 dużych kafelków generowanych przez app.js -->
 
-            <!-- CENTRALNY PANEL STEROWANIA MONOPOLY -->
-            <div class="monopoly-center-hub">
-              <div class="hub-watermark" aria-hidden="true">⚒</div>
+            <!-- CENTRALNY PANEL STEROWANIA MONOPOLY Z TŁEM AKTUALNEJ MAPY -->
+            <div class="monopoly-center-hub" id="monopoly-center-hub">
+              <div class="hub-map-photo" id="hub-map-photo"></div>
+              <div class="hub-map-overlay"></div>
 
               <div class="hub-status-bar">
                 <div class="hub-pill">
@@ -88,11 +96,14 @@
                   <span id="hud-timer">02:00</span>
                 </div>
                 <div class="hub-pill" id="hud-round">Runda 1</div>
-                <div class="hub-pill quota-ready" id="hud-build-quota">🏠 Limit budowy: 1/1 w tej turze</div>
+                <div class="hub-pill quota-ready" id="hud-build-quota">🏠 Budowa: Stań na swoim polu</div>
               </div>
 
-              <!-- Pasek wylosowanej karty Szansa / Skarb -->
+              <!-- Pasek wylosowanej karty Szansa / Skarb lub Alarmu Długu -->
               <div id="center-card-alert" class="hub-card-toast hidden"></div>
+              <div id="debt-warning-banner" class="debt-warning-banner hidden">
+                ⚠️ Masz ujemne saldo! Sprzedaj domy lub działki ze swojej listy po prawej stronie albo poproś znajomego o darowiznę, zanim zakończysz turę!
+              </div>
 
               <!-- Wielkie Kostki 3D -->
               <div class="dice-arena" id="dice-stage" title="Kliknij, aby rzucić kostkami">
@@ -111,7 +122,7 @@
               <!-- Aktualny gracz i duże przyciski akcji -->
               <div class="hub-controls">
                 <div class="active-player-banner">
-                  <span id="playing-now-avatar" class="player-dot-lg"></span>
+                  <span id="playing-now-avatar" class="player-pawn-inline"></span>
                   <span id="playing-now-label">Kolej gracza: Sztygar</span>
                 </div>
 
@@ -123,7 +134,8 @@
                   <button type="button" id="btn-roll" class="btn-hub btn-hub-roll">🎲 Rzuć Kostką</button>
                   <button type="button" id="btn-buy" class="btn-hub btn-hub-buy hidden">💰 Kup Dzielnicę</button>
                   <button type="button" id="btn-auction" class="btn-hub btn-hub-auction hidden">🔨 Licytacja</button>
-                  <button type="button" id="btn-build-quick" class="btn-hub btn-hub-build hidden">🏠 Zbuduj Dom (1/turę)</button>
+                  <button type="button" id="btn-build-quick" class="btn-hub btn-hub-build hidden">🏠 Zbuduj Kolejny Dom tutaj!</button>
+                  <button type="button" id="btn-sell-emergency" class="btn-hub btn-hub-auction hidden">🔨 Sprzedaj Dom / Działkę (Spłać dług)</button>
                   <button type="button" id="btn-jail-pay" class="btn-hub btn-hub-jail hidden">🔓 Wykup z Izby ($100)</button>
                   <button type="button" id="btn-jail-card" class="btn-hub btn-hub-jail hidden">🕊️ Karta Wolności</button>
                   <button type="button" id="btn-end-turn" class="btn-hub btn-hub-end hidden">⏭️ Zakończ Turę</button>
@@ -153,7 +165,7 @@
               </div>
               <button type="button" id="btn-ludo-roll" class="btn-hub btn-hub-roll">🎲 Rzuć Kostką</button>
             </div>
-            <div class="game-hint-pill" id="ludo-hint-text">Wyrzuć 6, aby wyprowadzić górnika z bazy dzielnicy!</div>
+            <div class="game-hint-pill" id="ludo-hint-text">Wyrzuć 6, aby wyprowadzić pionek z bazy dzielnicy!</div>
           </div>
           <div id="ludo-grid" class="ludo-grid"></div>
         </div>
@@ -164,7 +176,7 @@
         <div class="board-card-shell">
           <div class="game-top-bar">
             <div>
-              <span class="game-tag">POJEDYNEK NA SZYBCIE: WĘGIEL VS STAL</span>
+              <span class="game-tag">POJEDYNEK NA SZYCHCIE: WĘGIEL VS STAL</span>
               <h2 id="checkers-turn-text">Ruch: Węgiel (Pomarańczowe)</h2>
             </div>
             <div class="game-hint-pill" id="checkers-score-text">Zbicia: 0 — 0</div>
@@ -203,19 +215,20 @@
 
     </main>
 
-    <!-- PRAWA STREFA: PANEL GRACZY, INSPEKTOR DZIELNICY, HANDEL I CZAT -->
+    <!-- PRAWA STREFA: PANEL GRACZY, PODARUNKI, INSPEKTOR DZIELNICY, HANDEL I CZAT -->
     <aside class="arena-sidebar">
 
-      <!-- Karta Graczy -->
+      <!-- Karta Graczy + Przyciski Handlu, Darowizny i Bankructwa -->
       <div class="side-panel">
         <div class="panel-head">
-          <span>👥 Gracze w Pokoju</span>
+          <span>👥 Gracze przy Stole</span>
           <select id="perspective-select" class="perspective-select" title="Przełącz widok gracza"></select>
         </div>
         <div id="players-roster" class="players-roster"></div>
         <div class="panel-foot-row" id="monopoly-actions-row">
-          <button type="button" id="btn-new-trade" class="btn-side-purple">🤝 Wymiana / Handel</button>
-          <button type="button" id="btn-bankrupt" class="btn-side-danger">🚩 Bankructwo</button>
+          <button type="button" id="btn-open-gift" class="btn-side-gold" title="Podaruj znajomemu gotówkę, działkę lub dom">🎁 Podaruj</button>
+          <button type="button" id="btn-new-trade" class="btn-side-purple">🤝 Wymiana</button>
+          <button type="button" id="btn-bankrupt" class="btn-side-danger">🚩 Bankrut</button>
         </div>
       </div>
 
@@ -225,7 +238,7 @@
         <div id="trades-list-box" class="trades-list-box"></div>
       </div>
 
-      <!-- Inspektor Wybranego Pola + Lista Posiadanych Dzielnic -->
+      <!-- Inspektor Wybranego Pola + Lista Posiadanych Dzielnic (ze szybką sprzedażą domów) -->
       <div class="side-panel props-panel">
         <div class="spotlight-mini" id="spotlight-banner">
           <span class="spot-mini-tag" id="spotlight-tag">PODGLĄD DZIELNICY</span>
@@ -234,8 +247,11 @@
         </div>
 
         <div class="panel-head" style="margin-top:10px;">
-          <span id="my-props-header-text">🏘️ Posiadane Dzielnice (0)</span>
+          <span id="my-props-header-text">🏘️ Twoje Dzielnice (0)</span>
           <span id="my-networth-badge" class="worth-tag">Majątek: $2000</span>
+        </div>
+        <div class="props-rule-hint">
+          💡 <strong>Zasada:</strong> Nowy dom zbudujesz, gdy staniesz pionkiem na swoim polu. Sprzedać dom (<strong>-🏠</strong>) lub działkę możesz w każdej chwili, gdy brakuje Ci gotówki!
         </div>
         <div id="my-properties-scroll" class="my-properties-scroll"></div>
       </div>
@@ -247,7 +263,7 @@
           <div class="emoji-strip">
             <button type="button" class="emoji-chip" data-emoji="⛏️">⛏️</button>
             <button type="button" class="emoji-chip" data-emoji="💰">💰</button>
-            <button type="button" class="emoji-chip" data-emoji="🏠">🏠</button>
+            <button type="button" class="emoji-chip" data-emoji="🎁">🎁</button>
             <button type="button" class="emoji-chip" data-emoji="🔥">🔥</button>
             <button type="button" class="emoji-chip" data-emoji="😎">😎</button>
           </div>
@@ -262,24 +278,24 @@
     </aside>
   </div>
 
-  <!-- ==================== MODAL LOBBY: FIREBASE + TWORZENIE POKOJU ==================== -->
+  <!-- ==================== MODAL LOBBY: PIONKI, MAPY, FIREBASE, BOTY ==================== -->
   <div id="lobby-overlay" class="modal-backdrop">
     <div class="modal-card lobby-modal-card">
       <div class="lobby-header">
         <div>
-          <span class="badge-gold">CENTRUM MULTIPLAYER & AI</span>
+          <span class="badge-gold">CUSTOMOWE PIONKI • MAPY RUDY ŚLĄSKIEJ • ONLINE</span>
           <h1>RUDA ŚLĄSKA — ARENA 5 GIER</h1>
-          <p>Wybierz grę startową, skonfiguruj Firebase do gry przez Internet lub uruchom szybki mecz z Botami AI.</p>
+          <p>Wybierz grę, spersonalizuj swój pionek/twarz i wybierz mapę w tle (Kaufhaus, Huta Pokój, Szyb Andrzej, Ficinus).</p>
         </div>
         <button type="button" id="btn-close-lobby" class="btn-close-x" title="Zamknij i wróć do stołu">✕</button>
       </div>
 
-      <!-- Kafelki wyboru gry startowej -->
+      <!-- Wybór gry startowej -->
       <div class="lobby-game-grid" id="lobby-game-picker">
         <button type="button" class="game-pick-card active" data-game="MONOPOLY">
           <span class="gp-icon">🏭</span>
           <strong>Monopoly Ruda</strong>
-          <small>Dzielnice i Kopalnie</small>
+          <small>Powrót na pole = Dom</small>
         </button>
         <button type="button" class="game-pick-card" data-game="LUDO">
           <span class="gp-icon">🎲</span>
@@ -303,76 +319,22 @@
         </button>
       </div>
 
+      <!-- Wybór / Losowanie Tła Mapy Rudy Śląskiej -->
+      <div class="map-selector-bar">
+        <div class="row-between">
+          <label class="sec-label">🗺️ Wybierz lub wylosuj Mapę Tła Rudy Śląskiej:</label>
+          <button type="button" id="btn-lobby-rand-map" class="btn-ghost">🎲 Wylosuj Mapę</button>
+        </div>
+        <div id="lobby-map-cards" class="map-cards-row"></div>
+      </div>
+
       <div class="lobby-tabs">
-        <button type="button" class="lobby-tab active" data-tab="online">🌐 Multiplayer Online (Firebase Realtime DB)</button>
-        <button type="button" class="lobby-tab" data-tab="local">🤖 Gra Lokalna / z Botami AI</button>
+        <button type="button" class="lobby-tab active" data-tab="local">🤖 Szybka Gra z Botami / Na 1 Ekranie</button>
+        <button type="button" class="lobby-tab" data-tab="online">🌐 Multiplayer Online (Firebase Realtime DB)</button>
       </div>
 
-      <!-- ZAKŁADKA 1: MULTIPLAYER Z FIREBASE -->
-      <div id="tab-online" class="lobby-pane active">
-        <div class="firebase-setup-card">
-          <div class="fb-card-top">
-            <strong>🔥 Krok 1: Baza Firebase Realtime Database (Wymagana do gry między różnymi domami/telefonami)</strong>
-            <span id="fb-conn-pill" class="fb-pill disconnected">Brak podpiętego URL Firebase</span>
-          </div>
-          <p class="fb-help">
-            Wklej adres swojej darmowej bazy z <em>console.firebase.google.com</em> (np. <code>https://twoja-baza-default-rtdb.europe-west1.firebasedatabase.app</code>) lub cały obiekt JSON.
-            <strong>Wystarczy, że wkleisz go tylko Ty (Host)</strong> — gdy skopiujesz Link Zaproszenia, Twoi znajomi połączą się z Twoją bazą automatycznie!
-          </p>
-          <div class="fb-input-row">
-            <input type="text" id="firebase-url-input" placeholder="https://twoja-nazwa-default-rtdb.europe-west1.firebasedatabase.app" />
-            <button type="button" id="btn-save-firebase" class="btn-side-purple">Połącz Firebase</button>
-          </div>
-        </div>
-
-        <div class="form-2col">
-          <div class="inp-group">
-            <label>Twój Nick w Pokoju</label>
-            <input type="text" id="online-name-input" value="Sztygar" maxlength="16" />
-          </div>
-          <div class="inp-group">
-            <label>Twój Kolor Pionka</label>
-            <div id="online-color-picker" class="color-picker-row"></div>
-          </div>
-        </div>
-
-        <div class="form-2col">
-          <div class="action-box">
-            <h4>Krok 2A: Stwórz Nowy Pokój (Host)</h4>
-            <p>Utwórz pokój w bazie Firebase i wyślij znajomym kod lub link zaproszenia.</p>
-            <button type="button" id="btn-create-room" class="btn-ember-full">⚡ Utwórz Pokój Online</button>
-          </div>
-
-          <div class="action-box">
-            <h4>Krok 2B: Dołącz do Pokoju</h4>
-            <input type="text" id="join-code-input" placeholder="Wpisz kod np. RUDA500" maxlength="12" style="text-transform:uppercase;" />
-            <button type="button" id="btn-join-room" class="btn-purple-full">🔗 Dołącz po Kodzie</button>
-          </div>
-        </div>
-
-        <div id="net-status-banner" class="net-status-banner">
-          Gotowy do utworzenia lub dołączenia do pokoju.
-        </div>
-
-        <!-- Poczekalnia utworzonego pokoju -->
-        <div id="room-waiting-box" class="waiting-room-card hidden">
-          <div class="waiting-head">
-            <div>
-              <span>AKTYWNY POKÓJ:</span>
-              <strong id="lobby-room-code-display" class="room-code-big">------</strong>
-            </div>
-            <button type="button" id="btn-copy-invite-lobby" class="btn-side-purple">📋 Kopiuj Link Zaproszenia (z kluczem Firebase)</button>
-          </div>
-          <div id="lobby-room-players" class="waiting-players-list"></div>
-          <div class="waiting-foot">
-            <button type="button" id="btn-room-add-bot" class="btn-ghost">+ Dodaj Bota AI</button>
-            <button type="button" id="btn-launch-room-game" class="btn-ember-full">🚀 Rozpocznij Grę dla Wszystkich w Pokoju</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ZAKŁADKA 2: GRA LOKALNA / Z BOTAMI -->
-      <div id="tab-local" class="lobby-pane">
+      <!-- ZAKŁADKA 1: GRA LOKALNA / BOTY + KREATOR PIONKA -->
+      <div id="tab-local" class="lobby-pane active">
         <div class="form-2col">
           <div class="inp-group">
             <label>Twój Nick</label>
@@ -383,19 +345,25 @@
             <select id="local-cash-select">
               <option value="1500">$1 500 (Klasyczny)</option>
               <option value="2000" selected>$2 000 (Standard Ruda Śląska)</option>
-              <option value="3000">$3 000 (Szybka Inwestycja)</option>
+              <option value="3000">$3 000 (Baron Węglowy)</option>
             </select>
           </div>
         </div>
 
-        <div class="inp-group">
-          <label>Twój Kolor Pionka</label>
-          <div id="local-color-picker" class="color-picker-row"></div>
+        <div class="form-2col">
+          <div class="inp-group">
+            <label>1. Kolor Twojego Pionka</label>
+            <div id="local-color-picker" class="color-picker-row"></div>
+          </div>
+          <div class="inp-group">
+            <label>2. Wybierz Pionek 3D lub Customową Twarz</label>
+            <div id="local-avatar-picker" class="avatar-picker-row"></div>
+          </div>
         </div>
 
         <div class="inp-group">
           <div class="row-between">
-            <label>Przeciwnicy (Boty AI lub Gracze na jednym ekranie)</label>
+            <label>Przeciwnicy przy stole (Boty AI lub Gracze Hot-Seat)</label>
             <div style="display:flex;gap:8px;">
               <button type="button" id="btn-add-bot" class="btn-ghost">+ Dodaj Bota AI</button>
               <button type="button" id="btn-add-human" class="btn-ghost">+ Dodaj Gracza</button>
@@ -404,14 +372,74 @@
           <div id="local-opponents-list" class="opponents-list"></div>
         </div>
 
-        <button type="button" id="btn-start-local-game" class="btn-ember-full" style="padding:15px;font-size:1.05rem;">
-          🚀 Rozpocznij Grę Lokalną / z Botami
+        <button type="button" id="btn-start-local-game" class="btn-ember-full" style="padding:14px;font-size:1.02rem;">
+          🚀 Rozpocznij Grę na Wybranej Mapie
         </button>
+      </div>
+
+      <!-- ZAKŁADKA 2: MULTIPLAYER Z FIREBASE -->
+      <div id="tab-online" class="lobby-pane">
+        <div class="firebase-setup-card">
+          <div class="fb-card-top">
+            <strong>🔥 Krok 1: Baza Firebase Realtime Database</strong>
+            <span id="fb-conn-pill" class="fb-pill disconnected">Brak podpiętego URL Firebase</span>
+          </div>
+          <div class="fb-input-row">
+            <input type="text" id="firebase-url-input" placeholder="https://twoja-nazwa-default-rtdb.europe-west1.firebasedatabase.app" />
+            <button type="button" id="btn-save-firebase" class="btn-side-purple" style="flex:0 0 auto;padding:8px 16px;">Połącz Firebase</button>
+          </div>
+        </div>
+
+        <div class="form-2col">
+          <div class="inp-group">
+            <label>Twój Nick w Pokoju</label>
+            <input type="text" id="online-name-input" value="Hanys" maxlength="16" />
+            <label style="margin-top:6px;">Kolor Pionka</label>
+            <div id="online-color-picker" class="color-picker-row"></div>
+          </div>
+          <div class="inp-group">
+            <label>Wybierz Pionek 3D lub Customową Twarz</label>
+            <div id="online-avatar-picker" class="avatar-picker-row"></div>
+          </div>
+        </div>
+
+        <div class="form-2col">
+          <div class="action-box">
+            <h4>Stwórz Nowy Pokój (Host)</h4>
+            <p>Utwórz pokój z wybraną mapą i wyślij znajomym link zaproszenia.</p>
+            <button type="button" id="btn-create-room" class="btn-ember-full">⚡ Utwórz Pokój Online</button>
+          </div>
+
+          <div class="action-box">
+            <h4>Dołącz do Pokoju</h4>
+            <input type="text" id="join-code-input" placeholder="Wpisz kod np. RUDA500" maxlength="12" style="text-transform:uppercase;" />
+            <button type="button" id="btn-join-room" class="btn-purple-full">🔗 Dołącz po Kodzie</button>
+          </div>
+        </div>
+
+        <div id="net-status-banner" class="net-status-banner">
+          Gotowy do utworzenia lub dołączenia do pokoju.
+        </div>
+
+        <div id="room-waiting-box" class="waiting-room-card hidden">
+          <div class="waiting-head">
+            <div>
+              <span>AKTYWNY POKÓJ:</span>
+              <strong id="lobby-room-code-display" class="room-code-big">------</strong>
+            </div>
+            <button type="button" id="btn-copy-invite-lobby" class="btn-side-purple" style="flex:0 0 auto;">📋 Kopiuj Link Zaproszenia</button>
+          </div>
+          <div id="lobby-room-players" class="waiting-players-list"></div>
+          <div class="waiting-foot">
+            <button type="button" id="btn-room-add-bot" class="btn-ghost">+ Dodaj Bota AI</button>
+            <button type="button" id="btn-launch-room-game" class="btn-ember-full">🚀 Rozpocznij Mecz dla Wszystkich</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL SZCZEGÓŁÓW DZIELNICY I BUDOWY DOMÓW ==================== -->
+  <!-- ==================== MODAL SZCZEGÓŁÓW DZIELNICY, BUDOWY I SPRZEDAŻY AWARYJNEJ ==================== -->
   <div id="prop-modal" class="modal-backdrop hidden">
     <div class="modal-card prop-modal-card">
       <div id="prop-modal-banner" class="prop-modal-header">
@@ -440,8 +468,9 @@
           </div>
           <div id="pm-status-note" class="upgrade-note"></div>
           <div class="upgrade-btn-row">
-            <button type="button" id="btn-pm-build" class="btn-ember-full">🏠 Zbuduj Dom (Limit 1/turę)</button>
+            <button type="button" id="btn-pm-build" class="btn-ember-full">🏠 Zbuduj Dom (Gdy stoisz na tym polu)</button>
             <button type="button" id="btn-pm-sell" class="btn-ghost">🔨 Sprzedaj Dom (+50%)</button>
+            <button type="button" id="btn-pm-sell-land" class="btn-ghost" style="border-color:#ff9800;color:#ffca28;">💵 Sprzedaj Działkę do Banku (+75%)</button>
             <button type="button" id="btn-pm-mortgage" class="btn-ghost">🏦 Hipoteka</button>
           </div>
         </div>
@@ -454,12 +483,48 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL DAROWIZNY: PODARUJ GOTÓWKĘ, DOM LUB DZIAŁKĘ ==================== -->
+  <div id="gift-modal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="row-between">
+        <h2>🎁 Podaruj Pieniądze, Dom lub Działkę</h2>
+        <button type="button" id="btn-close-gift" class="btn-close-x">✕</button>
+      </div>
+      <p style="font-size:0.82rem;color:#a99fc9;margin:6px 0 14px;">
+        Możesz bezpłatnie wspomóc innego gracza gotówką, przekazać mu jedną ze swoich działek lub podarować mu wybudowany dom!
+      </p>
+
+      <div class="inp-group" style="margin-bottom:12px;">
+        <label>Wybierz gracza, któremu chcesz przekazać darowiznę:</label>
+        <select id="gift-target-player"></select>
+      </div>
+
+      <div class="inp-group" style="margin-bottom:12px;">
+        <label>Kwota gotówki do podarowania ($):</label>
+        <input type="number" id="gift-cash-amount" min="0" step="10" value="0" />
+      </div>
+
+      <div class="inp-group" style="margin-bottom:12px;">
+        <label>Przekaż na własność całe pole (Działkę wraz z domami):</label>
+        <div id="gift-props-list" class="trade-checklist"></div>
+      </div>
+
+      <div class="inp-group" style="margin-bottom:12px;">
+        <label>LUB podaruj 1 poziom domu ze swojego zabudowanego pola:</label>
+        <select id="gift-house-source">
+          <option value="">-- Nie przekazuj pojedynczego domu --</option>
+        </select>
+      </div>
+
+      <div id="gift-error-msg" style="color:#ff5252;font-size:0.82rem;margin:8px 0;"></div>
+      <button type="button" id="btn-confirm-gift" class="btn-ember-full">🎁 Wyślij Darowiznę Natychmiast</button>
+    </div>
+  </div>
+
   <!-- MODAL LICYTACJI -->
   <div id="auction-modal" class="modal-backdrop hidden">
     <div class="modal-card" style="max-width:480px;">
-      <div class="row-between">
-        <h3>🔨 Licytacja Publiczna</h3>
-      </div>
+      <div class="row-between"><h3>🔨 Licytacja Publiczna</h3></div>
       <h2 id="auc-title" style="margin-top:6px;color:#ffb300;">Nazwa Dzielnicy</h2>
       <p id="auc-sub" style="font-size:0.85rem;color:#a39ac2;">Cena katalogowa: $200</p>
       <div class="auction-price-box">
