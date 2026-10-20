@@ -1,24 +1,116 @@
 /**
- * RUDA ŚLĄSKA ARENA — KOMPLETNY SILNIK 5 GIER + FIREBASE REALTIME DATABASE (app.js)
+ * RUDA ŚLĄSKA ARENA — KOMPLETNY SILNIK 5 GIER + FIREBASE + MAPY + CUSTOM PIONKI (app.js)
+ * Nowości:
+ * 1. Budowa kolejnego domu w Monopoly wymaga ponownego stanięcia pionkiem na własnym polu!
+ * 2. Awaryjna sprzedaż domów (+50%) oraz całych działek do Banku (+75%), gdy brakuje gotówki.
+ * 3. System Darowizny (🎁 Podaruj): przekazywanie gotówki, działek lub pojedynczych domów znajomym.
+ * 4. 5 Map z autentycznymi zdjęciami z Rudy Śląskiej (Kaufhaus, Wielki Piec Huty Pokój, Szyb Andrzej, Ficinus, Ratusz Nowy Bytom).
+ * 5. Customowe Pionki 3D i Kulki z Twarzami SVG (Kask Górniczy, Wagonik, Korona, Okulary, Wąs Śląski, Diabełek, Pirat, Uśmiech).
  */
 (function () {
   'use strict';
 
   /**
-   * OPCJONALNIE: Możesz wkleić tutaj na stałe adres swojej bazy Firebase Realtime Database,
-   * np. "https://twoja-baza-default-rtdb.europe-west1.firebasedatabase.app"
-   * Wtedy nikt nigdy nie będzie musiał wklejać go nawet w oknie Lobby!
+   * OPCJONALNIE: Możesz tu na stałe wkleić URL swojej bazy Firebase Realtime Database
    */
   const HARDCODED_FIREBASE_URL = "";
 
-  /* ==================== 1. DANE PLANSZY MONOPOLY RUDY ŚLĄSKIEJ ==================== */
+  /* ==================== 1. MAPY TŁA RUDY ŚLĄSKIEJ (PRAWDZIWE FOTOGRAFIE WIKIMEDIA COMMONS) ==================== */
+  const RUDA_MAPS = [
+    {
+      id: 'KAUFHAUS',
+      shortTitle: 'Kaufhaus',
+      fullTitle: 'Kolonia Kaufhaus (Chebzie) — Zabytkowe Familoki',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ruda_Slaska_Chebzie_Kaufhaus_02.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #3b1d16 0%, #140d1f 100%)'
+    },
+    {
+      id: 'HUTA_POKOJ',
+      shortTitle: 'Wielki Piec',
+      fullTitle: 'Wielki Piec Huty Pokój (Nowy Bytom)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Huta_Pok%C3%B3j_-_Wielki_Piec.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #3d2712 0%, #0f1424 100%)'
+    },
+    {
+      id: 'SZYB_ANDRZEJ',
+      shortTitle: 'Szyb Andrzej',
+      fullTitle: 'Zabytkowy Szyb Andrzej (Wirek)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Szyb_Andrzej_w_Rudzie_%C5%9Al%C4%85skiej.JPG?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #16302b 0%, #120e24 100%)'
+    },
+    {
+      id: 'FICINUS',
+      shortTitle: 'Kolonia Ficinus',
+      fullTitle: 'Kolonia Robotnicza Ficinus (Wirek)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ruda_%C5%9Al%C4%85ska_-_Kolonia_Ficinus_01.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #2e2038 0%, #0e1726 100%)'
+    },
+    {
+      id: 'NOWY_BYTOM',
+      shortTitle: 'Ratusz N.Bytom',
+      fullTitle: 'Plac Jana Pawła II i Magistrat (Nowy Bytom)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Urza_Miejski_w_Rudzie_Slaskiej.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #1b2845 0%, #140c1c 100%)'
+    }
+  ];
+
+  /* ==================== 2. CUSTOMOWE PIONKI 3D ORAZ TWARZE (WEKTOROWE SVG) ==================== */
+  const PAWN_AVATARS = [
+    {
+      id: 'helmet',
+      name: 'Hełm Sztygara',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 15C4 9.5 7.5 5 12 5C16.5 5 20 9.5 20 15H4Z" fill="#fff" stroke="#111" stroke-width="1.8"/><path d="M2 15H22V18H2V15Z" fill="#ffca28" stroke="#111" stroke-width="1.5"/><circle cx="12" cy="10" r="2.6" fill="#00e5ff" stroke="#111" stroke-width="1.4"/></svg>`
+    },
+    {
+      id: 'cool',
+      name: 'Okulary Szefa',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M3 9H21L19 14H13.5L12 11.5L10.5 14H5L3 9Z" fill="#111"/><rect x="5" y="10" width="4" height="1.5" fill="#00e5ff"/><rect x="13.5" y="10" width="4" height="1.5" fill="#00e5ff"/><path d="M8 17.5C9.5 19 14.5 19 16 17.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>`
+    },
+    {
+      id: 'mustache',
+      name: 'Śląski Wąs',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="9" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="15.5" cy="9" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="8.5" cy="9" r="1" fill="#111"/><circle cx="15.5" cy="9" r="1" fill="#111"/><path d="M4 15.5C6.5 13 10.5 13.5 12 15.5C13.5 13.5 17.5 13 20 15.5C18 18 14 17.5 12 16.2C10 17.5 6 18 4 15.5Z" fill="#1b1429" stroke="#fff" stroke-width="1"/></svg>`
+    },
+    {
+      id: 'crown',
+      name: 'Korona Barona',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M3 18L5 8L9.5 13L12 6L14.5 13L19 8L21 18H3Z" fill="#ffca28" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="15" r="1.2" fill="#e53935"/><circle cx="15" cy="15" r="1.2" fill="#00e5ff"/></svg>`
+    },
+    {
+      id: 'cart',
+      name: 'Wagonik Węgla',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M5 6L9 3L14 5L18 3L19 7H5V6Z" fill="#111"/><path d="M4 7H20L18 15H6L4 7Z" fill="#fff" stroke="#111" stroke-width="1.8"/><circle cx="8" cy="18" r="2.3" fill="#ff9800" stroke="#111" stroke-width="1.5"/><circle cx="16" cy="18" r="2.3" fill="#ff9800" stroke="#111" stroke-width="1.5"/></svg>`
+    },
+    {
+      id: 'devil',
+      name: 'Skarbnik / Diabełek',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 4L9 8M20 4L15 8" stroke="#111" stroke-width="2.5" stroke-linecap="round"/><circle cx="8.5" cy="11" r="2" fill="#ffeb3b" stroke="#111" stroke-width="1.3"/><circle cx="15.5" cy="11" r="2" fill="#ffeb3b" stroke="#111" stroke-width="1.3"/><path d="M7 16.5C9.5 19 14.5 19 17 16.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>`
+    },
+    {
+      id: 'pirate',
+      name: 'Pirat z Hałdy',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><line x1="4" y1="7" x2="20" y2="13" stroke="#111" stroke-width="2.2"/><circle cx="9" cy="10" r="3" fill="#111"/><circle cx="15.5" cy="10" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="15.5" cy="10" r="1" fill="#111"/><path d="M8 17C10.5 18.5 14 18.5 16.5 16.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>`
+    },
+    {
+      id: 'classic',
+      name: 'Klasyczne Oczka',
+      svg: `<svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="10" r="3" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="15.5" cy="10" r="3" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#111"/><circle cx="16" cy="10" r="1.4" fill="#111"/><path d="M8.5 16.5C10 18.2 14 18.2 15.5 16.5" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg>`
+    }
+  ];
+
+  function getAvatarSvg(avatarId) {
+    const found = PAWN_AVATARS.find(a => a.id === avatarId) || PAWN_AVATARS[0];
+    return found.svg;
+  }
+
+  /* ==================== 3. DANE PLANSZY MONOPOLY RUDY ŚLĄSKIEJ ==================== */
   const PLAYER_COLORS = [
-    { id: 'ember',  name: 'Żar Węglowy (Wirek)',      hex: '#ff7849' },
-    { id: 'cyan',   name: 'Błękit Huty (Nowy Bytom)', hex: '#00e5ff' },
-    { id: 'gold',   name: 'Złoto Skarbnika (Halemba)',hex: '#ffca28' },
-    { id: 'pink',   name: 'Neon Róż (Bykowina)',      hex: '#f06292' },
-    { id: 'violet', name: 'Fiolet Nocy (Godula)',     hex: '#ab47bc' },
-    { id: 'green',  name: 'Szmaragd (Kochłowice)',    hex: '#2ecc71' }
+    { id: 'ember',  name: 'Żar Węglowy (Wirek)',       hex: '#ff7849' },
+    { id: 'cyan',   name: 'Błękit Huty (Nowy Bytom)',  hex: '#00e5ff' },
+    { id: 'gold',   name: 'Złoto Skarbnika (Halemba)', hex: '#ffca28' },
+    { id: 'pink',   name: 'Neon Róż (Bykowina)',       hex: '#f06292' },
+    { id: 'violet', name: 'Fiolet Nocy (Godula)',      hex: '#ab47bc' },
+    { id: 'green',  name: 'Szmaragd (Kochłowice)',     hex: '#2ecc71' }
   ];
 
   const GROUPS = {
@@ -93,7 +185,6 @@
     { text: 'Karczma Piwna! Każdy aktywny gracz wypłaca Ci po $35.', action: 'BIRTHDAY', amount: 35 }
   ];
 
-  /* ==================== 2. DUŻE, WYRAŹNE IKONY GÓRNICZE SVG ==================== */
   const SVG_ICONS = {
     START: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#a6ff00" stroke-width="2.4"><polygon points="5 4 15 12 5 20 5 4" fill="#a6ff00"/><polygon points="13 4 21 12 13 20 13 4" fill="#a6ff00"/></svg>`,
     JAIL: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#ff9800" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
@@ -107,7 +198,7 @@
     MINE_TOWER: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ffffff" stroke-width="2.2"><circle cx="12" cy="6" r="3.5"/><path d="M6 21L10 9m8 12L14 9M5 21h14"/></svg>`
   };
 
-  /* ==================== 3. SYNTEZATOR DŹWIĘKÓW ==================== */
+  /* ==================== 4. SYNTEZATOR DŹWIĘKÓW ==================== */
   class SoundEngine {
     constructor() { this.enabled = true; this.ctx = null; }
     init() {
@@ -141,7 +232,7 @@
   }
   const sfx = new SoundEngine();
 
-  /* ==================== 4. STAN GLOBALNY I FIREBASE REALTIME DATABASE ==================== */
+  /* ==================== 5. STAN GLOBALNY, MAPY I FIREBASE ==================== */
   let myClientToken = localStorage.getItem('ruda_client_token');
   if (!myClientToken) {
     myClientToken = 'cl_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
@@ -150,6 +241,7 @@
 
   let gameState = null;
   let selectedGameMode = 'MONOPOLY';
+  let selectedMapId = RUDA_MAPS[Math.floor(Math.random() * RUDA_MAPS.length)].id;
   let selectedTileIndex = 1;
   let activePerspectiveId = 'p1';
   let myOnlinePlayerId = null;
@@ -163,11 +255,14 @@
   let broadcastChannel = null;
 
   let localPickedColor = PLAYER_COLORS[0].hex;
+  let localPickedAvatar = 'helmet';
   let onlinePickedColor = PLAYER_COLORS[1].hex;
+  let onlinePickedAvatar = 'cool';
+
   let lobbyOpponents = [
-    { name: 'Bot KWK Halemba', isBot: true, color: PLAYER_COLORS[1].hex },
-    { name: 'Bot Huta Pokój',  isBot: true, color: PLAYER_COLORS[2].hex },
-    { name: 'Bot Wirek',       isBot: true, color: PLAYER_COLORS[3].hex }
+    { name: 'Bot KWK Halemba', isBot: true, color: PLAYER_COLORS[1].hex, avatar: 'cart' },
+    { name: 'Bot Huta Pokój',  isBot: true, color: PLAYER_COLORS[2].hex, avatar: 'crown' },
+    { name: 'Bot Wirek',       isBot: true, color: PLAYER_COLORS[3].hex, avatar: 'mustache' }
   ];
 
   function nowTime() { return new Date().toTimeString().slice(0, 5); }
@@ -177,9 +272,26 @@
     if (el) { el.textContent = msg; el.style.color = color; }
   }
 
-  /**
-   * Inicjalizacja Firebase Realtime Database z samego URL lub obiektu JSON
-   */
+  function applyMapTheme(mapId) {
+    const m = RUDA_MAPS.find(x => x.id === mapId) || RUDA_MAPS[0];
+    selectedMapId = m.id;
+
+    const bgLayer = document.getElementById('map-bg-layer');
+    const hubPhoto = document.getElementById('hub-map-photo');
+    const subTitle = document.getElementById('active-map-subtitle');
+    const topName = document.getElementById('top-map-name');
+
+    const bgValue = `url("${m.photoUrl}"), ${m.fallbackGradient}`;
+    if (bgLayer) bgLayer.style.backgroundImage = bgValue;
+    if (hubPhoto) hubPhoto.style.backgroundImage = bgValue;
+    if (subTitle) subTitle.textContent = `Mapa: ${m.fullTitle}`;
+    if (topName) topName.textContent = m.shortTitle;
+
+    document.querySelectorAll('.map-thumb-card').forEach(el => {
+      el.classList.toggle('active', el.dataset.mapId === m.id);
+    });
+  }
+
   function connectFirebaseDatabase(rawInput) {
     if (!rawInput || !window.firebase) return false;
     let cfg = null;
@@ -213,10 +325,9 @@
       const topDot = document.getElementById('top-net-dot');
       if (topDot) topDot.classList.add('firebase');
 
-      setBannerStatus('✅ Połączono z bazą Firebase Realtime Database! Możesz tworzyć i dołączać do pokojów przez Internet.', '#2ecc71');
+      setBannerStatus('✅ Połączono z bazą Firebase Realtime Database!', '#2ecc71');
       return true;
     } catch (err) {
-      console.error('Firebase error:', err);
       return false;
     }
   }
@@ -233,10 +344,14 @@
   function normalizeState(st) {
     if (!st) return null;
     st.players = Array.isArray(st.players) ? st.players : Object.values(st.players || {});
-    st.trades  = Array.isArray(st.trades)  ? st.trades  : Object.values(st.trades || {});
-    st.feed    = Array.isArray(st.feed)    ? st.feed    : Object.values(st.feed || {});
-    st.chat    = Array.isArray(st.chat)    ? st.chat    : Object.values(st.chat || {});
+    st.players.forEach((p, idx) => {
+      if (!p.avatar) p.avatar = PAWN_AVATARS[idx % PAWN_AVATARS.length].id;
+    });
+    st.trades = Array.isArray(st.trades) ? st.trades : Object.values(st.trades || {});
+    st.feed   = Array.isArray(st.feed)   ? st.feed   : Object.values(st.feed || {});
+    st.chat   = Array.isArray(st.chat)   ? st.chat   : Object.values(st.chat || {});
     st.builtThisTurn = !!st.builtThisTurn;
+    if (!st.mapId) st.mapId = selectedMapId;
 
     if (!st.properties) st.properties = {};
     BOARD_TILES.forEach(t => {
@@ -269,7 +384,7 @@
     return st;
   }
 
-  /* ==================== 5. FABRYKA STANÓW WSZYSTKICH 5 GIER ==================== */
+  /* ==================== 6. FABRYKA STANÓW 5 GIER ==================== */
   function createLudoState() {
     return {
       turn: 0,
@@ -305,7 +420,7 @@
       b[6][c] = { p: 0, type: 'P' };
       b[7][c] = { p: 0, type: back[c] };
     }
-    return { turn: 0, boardJson: JSON.stringify(b), winner: null, lastMove: 'Wybierz figurę, aby zobaczyć podświetlone ruchy.' };
+    return { turn: 0, boardJson: JSON.stringify(b), winner: null, lastMove: 'Kliknij figurę, aby zobaczyć podświetlone ruchy.' };
   }
 
   function createConnect4State() {
@@ -313,7 +428,7 @@
     return { turn: 0, boardJson: JSON.stringify(b), winner: null };
   }
 
-  function createFreshGameState(playersList, startingCash, roomCode = 'LOKALNY', isOnline = false, initialGame = 'MONOPOLY') {
+  function createFreshGameState(playersList, startingCash, roomCode = 'LOKALNY', isOnline = false, initialGame = 'MONOPOLY', mapId = selectedMapId) {
     const propertiesState = {};
     BOARD_TILES.forEach(tile => {
       if (tile.type === 'PROPERTY' || tile.type === 'TRANSPORT' || tile.type === 'UTILITY') {
@@ -326,11 +441,14 @@
       }
     });
 
+    const chosenMap = RUDA_MAPS.find(m => m.id === mapId) || RUDA_MAPS[0];
+
     return {
       roomCode: roomCode,
       isOnline: isOnline,
       lobbyOpen: isOnline,
       activeGame: initialGame,
+      mapId: chosenMap.id,
       status: 'PLAYING',
       round: 1,
       turnIndex: 0,
@@ -345,6 +463,7 @@
         clientToken: p.clientToken || '',
         name: p.name,
         color: p.color,
+        avatar: p.avatar || PAWN_AVATARS[idx % PAWN_AVATARS.length].id,
         isBot: !!p.isBot,
         cash: Number(startingCash),
         position: 0,
@@ -360,15 +479,15 @@
       chess: createChessState(),
       connect4: createConnect4State(),
       feed: [
-        { text: '⚒️ Rozpoczęto rozgrywkę w Rudzie Śląskiej! Limit budowy w Monopoly: 1 domek na turę.', time: nowTime() }
+        { text: `🗺️ Wylosowano mapę: <strong>${chosenMap.fullTitle}</strong>! Aby wybudować kolejny dom, musisz ponownie stanąć pionkiem na swoim polu.`, time: nowTime() }
       ],
       chat: [
-        { author: 'Skarbnik', color: '#ffca28', text: 'Szczęść Boże! Możecie w każdej chwili przełączać 5 gier na górnym pasku.', time: nowTime() }
+        { author: 'Skarbnik', color: '#ffca28', text: `Szczęść Boże na mapie ${chosenMap.shortTitle}! Możecie darować sobie kasę i domy przyciskiem 🎁 Podaruj.`, time: nowTime() }
       ]
     };
   }
 
-  /* ==================== 6. SYNCHRONIZACJA POKOJU (FIREBASE + MULTI-TAB) ==================== */
+  /* ==================== 7. SYNCHRONIZACJA POKOJU ==================== */
   function subscribeToRoom(roomCode) {
     currentRoomCode = roomCode;
     const topLabel = document.getElementById('top-room-label');
@@ -430,7 +549,7 @@
     renderAll();
   }
 
-  /* ==================== 7. LOGIKA GRY 1: MONOPOLY RUDY ŚLĄSKIEJ ==================== */
+  /* ==================== 8. MONOPOLY: BUDOWA PO POWROCIE NA POLE, SPRZEDAŻ AWARYJNA I DAROWIZNY ==================== */
   function getGridPosition(index) {
     if (index === 0) return { row: 1, col: 1, edge: 'corner' };
     if (index > 0 && index < 10) return { row: 1, col: index + 1, edge: 'edge-top' };
@@ -534,9 +653,11 @@
   }
 
   /**
-   * ZASADA ROZBUDOWY:
-   * - Nie wymaga posiadania całego koloru (monopolu)
-   * - Limit: tylko 1 domek na turę (`gameState.builtThisTurn`)
+   * ZASADA BUDOWY DOMU:
+   * 1. Musisz być właścicielem tego pola.
+   * 2. MUSISZ AKTUALNIE STAĆ PIONKIEM NA TYM POLU (`player.position === tileIndex`) po rzucie w swojej turze!
+   * 3. Nie możesz wybudować domu w tej samej turze, w której dopiero kupiłeś pustą działkę — musisz zrobić kółko i ponownie na niej wylądować!
+   * 4. Limit: maksymalnie 1 dom na turę.
    */
   function canUpgradeProperty(tileIndex, playerId) {
     const tile = BOARD_TILES[tileIndex];
@@ -547,11 +668,21 @@
     if (!tile || tile.type !== 'PROPERTY') return { ok: false, reason: 'Tego pola nie można rozbudowywać.' };
     if (!prop || prop.ownerId !== playerId) return { ok: false, reason: 'Nie jesteś właścicielem tej dzielnicy.' };
     if (!active || active.id !== playerId) return { ok: false, reason: 'Budować możesz tylko podczas swojej tury.' };
-    if (gameState.builtThisTurn) return { ok: false, reason: '⏳ Wykorzystano już limit budowy (1 domek na turę).' };
+    if (player.position !== tileIndex) {
+      return { ok: false, reason: '🚶 Aby dokupić kolejny dom, musisz ponownie stanąć swoim pionkiem dokładnie na tym polu!' };
+    }
+    if (gameState.turnPhase === 'ROLL') {
+      return { ok: false, reason: '🎲 Najpierw rzuć kostką w tej turze!' };
+    }
+    if (gameState.builtThisTurn) {
+      return { ok: false, reason: '⏳ W tej turze kupiłeś już tę działkę lub wybudowałeś dom. Wróć tu w kolejnym okrążeniu!' };
+    }
     if (prop.mortgaged) return { ok: false, reason: 'Nieruchomość jest pod hipoteką.' };
-    if (prop.level >= 5) return { ok: false, reason: 'Osiągnięto maksymalny poziom (Poziom 5).' };
-    if (!player || player.cash < tile.buildCost) return { ok: false, reason: `Brakuje Ci $${tile.buildCost - (player?.cash || 0)}.` };
-    return { ok: true, reason: '✅ Możesz wybudować 1 domek w tej turze (monopol nie jest wymagany).' };
+    if (prop.level >= 5) return { ok: false, reason: 'Osiągnięto maksymalny poziom (Poziom 5 — Hotel).' };
+    if (!player || player.cash < tile.buildCost) {
+      return { ok: false, reason: `Brakuje Ci $${tile.buildCost - (player?.cash || 0)}. Możesz sprzedać dom na innym polu!` };
+    }
+    return { ok: true, reason: '✅ Stoisz na swoim polu! Możesz dobudować kolejny poziom domu.' };
   }
 
   function buildHouseOnProperty(tileIndex, playerId) {
@@ -565,8 +696,8 @@
     prop.level += 1;
     gameState.builtThisTurn = true;
     const lvlName = prop.level === 5 ? 'Kompleks Górniczy / Hotel' : `Dom #${prop.level}`;
-    prop.history.unshift(`${nowTime()} — ${player.name} zbudował ${lvlName} za $${tile.buildCost}`);
-    addFeedEvent(`<strong>${player.name}</strong> zbudował 🏠 (${lvlName}) w <strong>${tile.shortName}</strong>`);
+    prop.history.unshift(`${nowTime()} — ${player.name} wrócił na pole i zbudował ${lvlName} za $${tile.buildCost}`);
+    addFeedEvent(`🏠 <strong>${player.name}</strong> odwiedził swoje pole <strong>${tile.shortName}</strong> i zbudował <strong>${lvlName}</strong>!`);
     sfx.build();
 
     const cellEl = document.querySelector(`.board-tile[data-index="${tileIndex}"]`);
@@ -580,16 +711,42 @@
     return true;
   }
 
+  /**
+   * AWARYJNA SPRZEDAŻ DOMÓW (+50%) LUB CAŁEJ DZIAŁKI DO BANKU (+75%), GDY BRAKUJE PIENIĘDZY
+   */
   function sellHouseOnProperty(tileIndex, playerId) {
     const tile = BOARD_TILES[tileIndex];
     const prop = gameState.properties[tileIndex];
     const player = getPlayerById(playerId);
     if (!prop || prop.ownerId !== playerId || prop.level <= 0) return false;
+
     const refund = Math.floor(tile.buildCost * 0.5);
     prop.level -= 1;
     player.cash += refund;
-    prop.history.unshift(`${nowTime()} — Sprzedano dom (+$${refund})`);
-    addFeedEvent(`<strong>${player.name}</strong> sprzedał dom w <strong>${tile.shortName}</strong> (+$${refund})`);
+    prop.history.unshift(`${nowTime()} — ${player.name} sprzedał dom (+$${refund})`);
+    addFeedEvent(`🔨 <strong>${player.name}</strong> sprzedał dom w <strong>${tile.shortName}</strong> za <strong>+$${refund}</strong>.`);
+    sfx.buy();
+    pushStateSync();
+    return true;
+  }
+
+  function sellLandToBank(tileIndex, playerId) {
+    const tile = BOARD_TILES[tileIndex];
+    const prop = gameState.properties[tileIndex];
+    const player = getPlayerById(playerId);
+    if (!prop || prop.ownerId !== playerId) return false;
+
+    const housesValue = prop.level * Math.floor((tile.buildCost || 0) * 0.5);
+    const landValue = prop.mortgaged ? Math.floor(tile.price * 0.25) : Math.floor(tile.price * 0.75);
+    const totalRefund = housesValue + landValue;
+
+    prop.ownerId = null;
+    prop.level = 0;
+    prop.mortgaged = false;
+    player.cash += totalRefund;
+    prop.history.unshift(`${nowTime()} — Odpsrzedane do Banku przez ${player.name} (+$${totalRefund})`);
+    addFeedEvent(`💵 <strong>${player.name}</strong> odsprzedał działkę <strong>${tile.shortName}</strong> do Banku za <strong>+$${totalRefund}</strong>!`);
+    sfx.buy();
     pushStateSync();
     return true;
   }
@@ -605,13 +762,13 @@
       const val = Math.floor(tile.price * 0.5);
       prop.mortgaged = true;
       player.cash += val;
-      addFeedEvent(`<strong>${player.name}</strong> zastawił hipoteką <strong>${tile.shortName}</strong> (+$${val})`);
+      addFeedEvent(`🏦 <strong>${player.name}</strong> zastawił hipoteką <strong>${tile.shortName}</strong> (+$${val})`);
     } else {
       const payoff = Math.ceil(tile.price * 0.55);
       if (player.cash < payoff) return false;
       player.cash -= payoff;
       prop.mortgaged = false;
-      addFeedEvent(`<strong>${player.name}</strong> spłacił hipotekę <strong>${tile.shortName}</strong> (-$${payoff})`);
+      addFeedEvent(`🏦 <strong>${player.name}</strong> spłacił hipotekę <strong>${tile.shortName}</strong> (-$${payoff})`);
     }
     pushStateSync();
     return true;
@@ -740,6 +897,14 @@
         gameState.turnPhase = 'DECIDE';
         return;
       }
+      if (prop.ownerId === player.id) {
+        // Gracz ponownie wylądował na swoim własnym polu — może teraz wybudować kolejny dom!
+        if (tile.type === 'PROPERTY' && prop.level < 5 && !prop.mortgaged) {
+          addFeedEvent(`🏗️ <strong>${player.name}</strong> wrócił na swoje pole <strong>${tile.shortName}</strong>! Może teraz dokupić kolejny dom.`);
+        }
+        gameState.turnPhase = 'END';
+        return;
+      }
       if (prop.ownerId !== player.id && !prop.mortgaged) {
         const owner = getPlayerById(prop.ownerId);
         const rent = calculateRent(tileIndex, diceSum);
@@ -747,7 +912,6 @@
         owner.cash += rent;
         sfx.rent();
         addFeedEvent(`💸 <strong>${player.name}</strong> zapłacił <strong>$${rent}</strong> czynszu dla <strong>${owner.name}</strong>`);
-        if (player.cash < 0) declareBankruptcy(player.id, owner.id);
       }
       gameState.turnPhase = 'END';
       return;
@@ -757,8 +921,7 @@
       const tax = tile.taxAmount || 120;
       player.cash -= tax;
       gameState.vacationPool += tax;
-      addFeedEvent(`🏛️ <strong>${player.name}</strong> wpłacił <strong>$${tax}</strong> podatku do puli miasta.`);
-      if (player.cash < 0) declareBankruptcy(player.id, null);
+      addFeedEvent(`🏛️ <strong>${player.name}</strong> naliczono <strong>$${tax}</strong> podatku miejskiego.`);
       gameState.turnPhase = 'END';
       return;
     }
@@ -802,7 +965,6 @@
           if (o.id !== player.id && !o.bankrupt) { o.cash -= card.amount; player.cash += card.amount; }
         });
       }
-      if (player.cash < 0) declareBankruptcy(player.id, null);
       gameState.turnPhase = 'END';
       return;
     }
@@ -819,9 +981,11 @@
 
     player.cash -= tile.price;
     prop.ownerId = player.id;
+    // Zaznaczamy builtThisTurn = true przy pierwszym zakupie działki, żeby pierwszy dom można było postawić dopiero przy KOLEJNYM powrocie na to pole!
+    gameState.builtThisTurn = true;
     prop.history.unshift(`${nowTime()} — Kupione przez ${player.name} za $${tile.price}`);
     sfx.buy();
-    addFeedEvent(`<strong>${player.name}</strong> kupił <strong>${tile.name}</strong> za <strong>$${tile.price}</strong>`);
+    addFeedEvent(`💰 <strong>${player.name}</strong> kupił działkę <strong>${tile.name}</strong> za <strong>$${tile.price}</strong> (Domy zbudujesz przy kolejnej wizycie na tym polu!)`);
     gameState.turnPhase = 'END';
     pushStateSync();
     if (player.isBot) setTimeout(botMonopolyTurn, 550);
@@ -831,6 +995,19 @@
     if (!gameState) return;
     const player = currentTurnPlayer();
     if (!player.isBot && !canControlTurn()) return;
+
+    // Jeżeli gracz ma dług (< $0), ale posiada jeszcze domy lub działki — podpowiedz mu sprzedaż zamiast od razu bankrutować
+    if (player.cash < 0 && !player.isBot) {
+      const myOwned = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === player.id);
+      if (myOwned.length > 0) {
+        const confirmBankrupt = confirm(
+          `Masz ujemne saldo ($${player.cash}), ale posiadasz jeszcze nieruchomości (${myOwned.length})!\n\nKliknij "Anuluj", aby najpierw sprzedać dom lub działkę i wyjść na plus, albo "OK", aby ogłosić bankructwo.`
+        );
+        if (!confirmBankrupt) return;
+      }
+      declareBankruptcy(player.id, null);
+      return;
+    }
 
     if (gameState.doublesStreak > 0 && !player.inJail && !player.bankrupt) {
       gameState.turnPhase = 'ROLL';
@@ -874,7 +1051,7 @@
 
     if (gameState.turnPhase === 'DECIDE') {
       const tile = BOARD_TILES[bot.position];
-      if (bot.cash >= tile.price + 80) {
+      if (bot.cash >= tile.price + 60) {
         buyCurrentField();
         return;
       } else {
@@ -882,15 +1059,27 @@
       }
     }
 
-    if (!gameState.builtThisTurn) {
-      const myProps = BOARD_TILES.filter(t => t.type === 'PROPERTY' && gameState.properties[t.index]?.ownerId === bot.id);
-      for (const t of myProps) {
-        if (bot.cash > t.buildCost + 250 && canUpgradeProperty(t.index, bot.id).ok) {
-          buildHouseOnProperty(t.index, bot.id);
-          break;
-        }
-      }
+    // Jeśli Bot wylądował ponownie na swoim własnym polu -> buduje dom!
+    if (!gameState.builtThisTurn && canUpgradeProperty(bot.position, bot.id).ok && bot.cash > 200) {
+      buildHouseOnProperty(bot.position, bot.id);
     }
+
+    // Jeśli Bot wpadł w dług -> sprzedaje domy lub działki, żeby się uratować!
+    while (bot.cash < 0) {
+      const withHouses = BOARD_TILES.find(t => gameState.properties[t.index]?.ownerId === bot.id && gameState.properties[t.index]?.level > 0);
+      if (withHouses) {
+        sellHouseOnProperty(withHouses.index, bot.id);
+        continue;
+      }
+      const anyLand = BOARD_TILES.find(t => gameState.properties[t.index]?.ownerId === bot.id);
+      if (anyLand) {
+        sellLandToBank(anyLand.index, bot.id);
+        continue;
+      }
+      declareBankruptcy(bot.id, null);
+      return;
+    }
+
     setTimeout(endCurrentTurn, 600);
   }
 
@@ -915,7 +1104,91 @@
     else pushStateSync();
   }
 
-  /* ==================== 8. GRA 2: CHIŃCZYK (SZYCHTA 4 DZIELNIC) ==================== */
+  /* ==================== 9. SYSTEM DAROWIZNY (🎁 PODARUJ PIENIĄDZE, DZIAŁKĘ LUB DOM) ==================== */
+  function openGiftModal() {
+    const sender = getPlayerById(activePerspectiveId) || currentTurnPlayer();
+    const others = gameState.players.filter(p => !p.bankrupt && p.id !== sender.id);
+    if (!others.length) return;
+
+    document.getElementById('gift-error-msg').textContent = '';
+    document.getElementById('gift-cash-amount').value = 0;
+
+    const targetSel = document.getElementById('gift-target-player');
+    targetSel.innerHTML = others.map(p => `<option value="${p.id}">${p.name} ($${p.cash})</option>`).join('');
+
+    const myProps = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === sender.id);
+    const propsBox = document.getElementById('gift-props-list');
+    propsBox.innerHTML = myProps.length
+      ? myProps.map(t => `<label><input type="checkbox" value="${t.index}" class="chk-gift-prop"/> ${t.name} (Poz. ${gameState.properties[t.index].level})</label>`).join('')
+      : '<span style="color:#b0a6d1;font-size:0.76rem;">Nie posiadasz obecnie żadnych działek do oddania.</span>';
+
+    const myBuiltProps = myProps.filter(t => t.type === 'PROPERTY' && gameState.properties[t.index]?.level > 0);
+    const houseSel = document.getElementById('gift-house-source');
+    houseSel.innerHTML = `<option value="">-- Nie przekazuj pojedynczego domu --</option>` +
+      myBuiltProps.map(t => `<option value="${t.index}">Przekaż 1 dom z: ${t.name} (obecnie Poz. ${gameState.properties[t.index].level})</option>`).join('');
+
+    document.getElementById('gift-modal').classList.remove('hidden');
+  }
+
+  function executeGiftTransfer() {
+    const sender = getPlayerById(activePerspectiveId) || currentTurnPlayer();
+    const receiver = getPlayerById(document.getElementById('gift-target-player').value);
+    const cashVal = Math.max(0, Number(document.getElementById('gift-cash-amount').value) || 0);
+    const propIndices = Array.from(document.querySelectorAll('.chk-gift-prop:checked')).map(el => Number(el.value));
+    const houseSourceIdx = document.getElementById('gift-house-source').value;
+
+    if (!receiver) return;
+    if (cashVal > sender.cash) {
+      document.getElementById('gift-error-msg').textContent = 'Nie masz tylu pieniędzy w portfelu!';
+      return;
+    }
+    if (cashVal === 0 && propIndices.length === 0 && !houseSourceIdx) {
+      document.getElementById('gift-error-msg').textContent = 'Wybierz kwotę gotówki, działkę lub dom do podarowania.';
+      return;
+    }
+
+    const summaryParts = [];
+
+    if (cashVal > 0) {
+      sender.cash -= cashVal;
+      receiver.cash += cashVal;
+      summaryParts.push(`$${cashVal} gotówki`);
+    }
+
+    propIndices.forEach(idx => {
+      const pr = gameState.properties[idx];
+      if (pr && pr.ownerId === sender.id) {
+        pr.ownerId = receiver.id;
+        pr.history.unshift(`${nowTime()} — Podarowane za darmo przez ${sender.name} dla ${receiver.name}`);
+        summaryParts.push(`działkę ${BOARD_TILES[idx].shortName}`);
+      }
+    });
+
+    if (houseSourceIdx !== '') {
+      const hIdx = Number(houseSourceIdx);
+      const srcProp = gameState.properties[hIdx];
+      const srcTile = BOARD_TILES[hIdx];
+      if (srcProp && srcProp.ownerId === sender.id && srcProp.level > 0) {
+        srcProp.level -= 1;
+        // Jeśli obdarowany ma jakąś własną działkę, dobuduj mu na niej darmowy dom; jeśli nie — otrzymuje pełną wartość domu w gotówce
+        const receiverProp = BOARD_TILES.find(t => t.type === 'PROPERTY' && gameState.properties[t.index]?.ownerId === receiver.id && gameState.properties[t.index].level < 5);
+        if (receiverProp) {
+          gameState.properties[receiverProp.index].level += 1;
+          summaryParts.push(`1 dom (przeniesiony na ${receiverProp.shortName})`);
+        } else {
+          receiver.cash += srcTile.buildCost;
+          summaryParts.push(`równowartość 1 domu ($${srcTile.buildCost})`);
+        }
+      }
+    }
+
+    addFeedEvent(`🎁 <strong>${sender.name}</strong> podarował graczowi <strong>${receiver.name}</strong>: <strong>${summaryParts.join(', ')}</strong>!`);
+    sfx.buy();
+    document.getElementById('gift-modal').classList.add('hidden');
+    pushStateSync();
+  }
+
+  /* ==================== 10. POZOSTAŁE 4 GRY (CHIŃCZYK, WARCABY, SZACHY, 4 W RZĘDZIE) ==================== */
   const LUDO_TRACK = [
     [4,0],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4],[1,4],[0,4],[0,5],
     [0,6],[1,6],[2,6],[3,6],[4,6],[4,7],[4,8],[4,9],[4,10],[5,10],
@@ -1034,7 +1307,7 @@
       : `Kolej: ${curP?.name || LUDO_NAMES[ludo.turn]} (${LUDO_NAMES[ludo.turn]})`;
     document.getElementById('ludo-die').dataset.val = ludo.dice;
     document.getElementById('ludo-hint-text').textContent = ludo.rolled
-      ? `Wyrzucono ${ludo.dice}! Kliknij migającego górnika na planszy.`
+      ? `Wyrzucono ${ludo.dice}! Kliknij migający pionek na planszy.`
       : `Kliknij "Rzuć Kostką", aby wykonać ruch.`;
 
     grid.innerHTML = '';
@@ -1074,6 +1347,8 @@
     }
 
     for (let p = 0; p < pCount; p++) {
+      const plObj = gameState.players[p];
+      const avSvg = getAvatarSvg(plObj?.avatar || 'helmet');
       for (let k = 0; k < 4; k++) {
         const step = ludo.pawns[p][k];
         const coords = (step === -1) ? LUDO_BASES[p][k] : (step < 40 ? LUDO_TRACK[(step + p * 10) % 40] : LUDO_HOMES[p][step - 40]);
@@ -1081,8 +1356,8 @@
           const pawnEl = document.createElement('div');
           const movable = ludo.rolled && ludo.turn === p && canMoveLudoPawn(p, k, ludo.dice);
           pawnEl.className = `ludo-pawn ${movable ? 'movable-pawn' : ''}`;
-          pawnEl.style.background = LUDO_COLORS[p];
-          pawnEl.textContent = k + 1;
+          pawnEl.style.background = plObj?.color || LUDO_COLORS[p];
+          pawnEl.innerHTML = avSvg;
           pawnEl.onclick = () => moveLudoPawn(p, k);
           cells[coords[0]][coords[1]].appendChild(pawnEl);
         }
@@ -1090,9 +1365,7 @@
     }
   }
 
-  /* ==================== 9. GRA 3: WARCABY GÓRNICZE ==================== */
   let selectedChecker = null;
-
   function getCheckerMoves(board, r, c) {
     const piece = board[r][c];
     if (!piece) return [];
@@ -1186,7 +1459,6 @@
     checkBotForOtherGames();
   }
 
-  /* ==================== 10. GRA 4: SZACHY ŚLĄSKIE ==================== */
   const CHESS_GLYPHS = {
     0: { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙' },
     1: { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' }
@@ -1303,7 +1575,6 @@
     checkBotForOtherGames();
   }
 
-  /* ==================== 11. GRA 5: SZTOLNIA 4 W RZĘDZIE ==================== */
   function dropConnect4Disc(col) {
     const c4 = gameState.connect4;
     if (!c4 || c4.winner !== null) return;
@@ -1375,7 +1646,6 @@
     }
   }
 
-  /* ==================== 12. RUCHY BOTÓW W GRACH 2–5 ==================== */
   function checkBotForOtherGames() {
     if (!gameState) return;
     const mode = gameState.activeGame;
@@ -1443,9 +1713,11 @@
     }
   }
 
-  /* ==================== 13. RENDEROWANIE INTERFEJSU ==================== */
+  /* ==================== 11. RENDEROWANIE INTERFEJSU ==================== */
   function renderAll() {
     if (!gameState) return;
+    if (gameState.mapId) applyMapTheme(gameState.mapId);
+
     const activeMode = gameState.activeGame || 'MONOPOLY';
     ['MONOPOLY', 'LUDO', 'CHECKERS', 'CHESS', 'CONNECT4'].forEach(g => {
       const st = document.getElementById('stage-' + g);
@@ -1500,9 +1772,10 @@
           .filter(p => !p.bankrupt && p.position === tile.index)
           .forEach(p => {
             const tok = document.createElement('div');
-            tok.className = 'eye-token';
+            tok.className = 'custom-pawn-token';
             tok.style.background = p.color;
             tok.title = p.name;
+            tok.innerHTML = getAvatarSvg(p.avatar);
             tokenBox.appendChild(tok);
           });
       }
@@ -1523,16 +1796,28 @@
     document.getElementById('die-box-1').dataset.val = gameState.lastDice[0];
     document.getElementById('die-box-2').dataset.val = gameState.lastDice[1];
 
+    const canBuildHere = canUpgradeProperty(active.position, active.id);
     const quotaEl = document.getElementById('hud-build-quota');
     if (quotaEl) {
-      quotaEl.textContent = gameState.builtThisTurn ? '⏳ Budowa: 0/1 w tej turze' : '🏠 Limit budowy: 1/1 w tej turze';
-      quotaEl.className = gameState.builtThisTurn ? 'hub-pill quota-used' : 'hub-pill quota-ready';
+      if (canBuildHere.ok) {
+        quotaEl.textContent = '🏠 Stoisz na swoim polu — możesz zbudować dom!';
+        quotaEl.className = 'hub-pill quota-ready';
+      } else {
+        quotaEl.textContent = '🏠 Budowa: Wyląduj ponownie na swoim polu';
+        quotaEl.className = 'hub-pill quota-used';
+      }
+    }
+
+    const debtBanner = document.getElementById('debt-warning-banner');
+    if (debtBanner) {
+      debtBanner.classList.toggle('hidden', !(active.cash < 0));
     }
 
     const avatarDot = document.getElementById('playing-now-avatar');
     const labelEl = document.getElementById('playing-now-label');
     if (active) {
       avatarDot.style.background = active.color;
+      avatarDot.innerHTML = getAvatarSvg(active.avatar);
       labelEl.textContent = `Kolej gracza: ${active.name}`;
     }
 
@@ -1552,8 +1837,16 @@
       btnBuy.disabled = active.cash < tile.price;
     }
 
-    const hasBuildable = BOARD_TILES.some(t => canUpgradeProperty(t.index, active.id).ok);
-    document.getElementById('btn-build-quick').classList.toggle('hidden', !hasBuildable);
+    const btnBuildQuick = document.getElementById('btn-build-quick');
+    btnBuildQuick.classList.toggle('hidden', !canBuildHere.ok);
+    if (canBuildHere.ok && tile) {
+      btnBuildQuick.textContent = `🏠 Zbuduj Dom na ${tile.shortName} ($${tile.buildCost})`;
+    }
+
+    const hasAnythingToSell = BOARD_TILES.some(t => gameState.properties[t.index]?.ownerId === active.id);
+    const btnSellEmergency = document.getElementById('btn-sell-emergency');
+    btnSellEmergency.classList.toggle('hidden', !(active.cash < 150 && hasAnythingToSell));
+
     document.getElementById('btn-jail-pay').classList.toggle('hidden', !(active.inJail && gameState.turnPhase === 'ROLL' && active.cash >= 100));
     document.getElementById('btn-jail-card').classList.toggle('hidden', !(active.inJail && gameState.turnPhase === 'ROLL' && active.pardonCards > 0));
 
@@ -1569,13 +1862,13 @@
       return `
         <div class="roster-player-row ${isTurn ? 'is-active' : ''} ${p.bankrupt ? 'is-bankrupt' : ''}" style="border-left-color:${p.color}">
           <div class="roster-left">
-            <div class="roster-avatar" style="background:${p.color}"></div>
+            <div class="roster-avatar" style="background:${p.color}">${getAvatarSvg(p.avatar)}</div>
             <div>
               <div class="roster-name-title">${p.name}${youTag} ${crown} ${p.isBot ? '🤖' : ''}</div>
               <div class="roster-meta-sub">${BOARD_TILES[p.position].shortName}</div>
             </div>
           </div>
-          <div class="roster-money">$${p.cash}</div>
+          <div class="roster-money ${p.cash < 0 ? 'negative' : ''}">$${p.cash}</div>
         </div>
       `;
     }).join('');
@@ -1593,7 +1886,7 @@
     if (!viewer) return;
 
     const ownedTiles = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === viewer.id);
-    document.getElementById('my-props-header-text').textContent = `🏘️ Posiadane Dzielnice (${ownedTiles.length})`;
+    document.getElementById('my-props-header-text').textContent = `🏘️ Twoje Dzielnice (${ownedTiles.length})`;
 
     let totalWorth = viewer.cash;
     ownedTiles.forEach(t => {
@@ -1603,7 +1896,7 @@
     document.getElementById('my-networth-badge').textContent = `Majątek: $${totalWorth}`;
 
     if (ownedTiles.length === 0) {
-      listEl.innerHTML = `<div style="font-size:0.76rem;color:#a99fc9;">Brak kupionych dzielnic. Rzuć kostką na planszy Monopoly!</div>`;
+      listEl.innerHTML = `<div style="font-size:0.76rem;color:#b0a6d1;">Brak kupionych dzielnic. Rzuć kostką na planszy Monopoly!</div>`;
       return;
     }
 
@@ -1612,20 +1905,25 @@
       const grp = GROUPS[t.group];
       const upCheck = canUpgradeProperty(t.index, viewer.id);
       const lvlBadge = pr.mortgaged ? '🔒 Hipoteka' : (t.type === 'PROPERTY' ? `🏠 Poz. ${pr.level}/5` : 'Aktywne');
-      const btnLabel = gameState.builtThisTurn ? '⏳ Limit 1/1' : `+🏠 $${t.buildCost}`;
-      const buildBtnHtml = t.type === 'PROPERTY'
-        ? `<button type="button" class="btn-quick-up" data-build-idx="${t.index}" ${upCheck.ok ? '' : 'disabled'} title="${upCheck.reason}">${btnLabel}</button>`
+
+      const buildBtnHtml = (t.type === 'PROPERTY' && upCheck.ok)
+        ? `<button type="button" class="btn-quick-up" data-build-idx="${t.index}" title="${upCheck.reason}">+🏠 $${t.buildCost}</button>`
         : '';
+
+      const sellHouseBtnHtml = (t.type === 'PROPERTY' && pr.level > 0)
+        ? `<button type="button" class="btn-quick-sell" data-sell-house-idx="${t.index}" title="Sprzedaj 1 dom za +$${Math.floor(t.buildCost * 0.5)}">-🏠 +$${Math.floor(t.buildCost * 0.5)}</button>`
+        : `<button type="button" class="btn-quick-sell" data-sell-land-idx="${t.index}" title="Odsprzedaj działkę do Banku za +$${Math.floor(t.price * 0.75)}">💵 +$${Math.floor(t.price * 0.75)}</button>`;
 
       return `
         <div class="owned-prop-item" data-open-idx="${t.index}">
           <div class="owned-prop-left">
             <span class="owned-dot" style="background:${grp ? grp.color : '#888'}"></span>
-            <span class="owned-name">${t.name}</span>
+            <span class="owned-name">${t.shortName}</span>
           </div>
           <div class="owned-prop-right">
             <span class="lvl-tag">${lvlBadge}</span>
             ${buildBtnHtml}
+            ${sellHouseBtnHtml}
           </div>
         </div>
       `;
@@ -1633,7 +1931,7 @@
 
     listEl.querySelectorAll('[data-open-idx]').forEach(row => {
       row.onclick = (e) => {
-        if (e.target.closest('[data-build-idx]')) return;
+        if (e.target.closest('button')) return;
         openPropertyModal(Number(row.dataset.openIdx));
       };
     });
@@ -1641,6 +1939,21 @@
       btn.onclick = (e) => {
         e.stopPropagation();
         buildHouseOnProperty(Number(btn.dataset.buildIdx), viewer.id);
+      };
+    });
+    listEl.querySelectorAll('[data-sell-house-idx]').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        sellHouseOnProperty(Number(btn.dataset.sellHouseIdx), viewer.id);
+      };
+    });
+    listEl.querySelectorAll('[data-sell-land-idx]').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const idx = Number(btn.dataset.sellLandIdx);
+        if (confirm(`Sprzedać działkę ${BOARD_TILES[idx].name} do Banku za +$${Math.floor(BOARD_TILES[idx].price * 0.75)}?`)) {
+          sellLandToBank(idx, viewer.id);
+        }
       };
     });
   }
@@ -1655,7 +1968,7 @@
 
     const content = document.getElementById('spotlight-content');
     if (!prop) {
-      content.innerHTML = `<div style="font-size:0.78rem;color:#a99fc9;">${tile.subtitle || 'Pole specjalne na planszy Rudy Śląskiej.'}</div>`;
+      content.innerHTML = `<div style="font-size:0.78rem;color:#b0a6d1;">${tile.subtitle || 'Pole specjalne na planszy Rudy Śląskiej.'}</div>`;
       return;
     }
     const owner = prop.ownerId ? getPlayerById(prop.ownerId) : null;
@@ -1701,8 +2014,13 @@
     }
 
     const upBox = document.getElementById('pm-upgrade-box');
+    const btnBuild = document.getElementById('btn-pm-build');
+    const btnSell = document.getElementById('btn-pm-sell');
+    const btnSellLand = document.getElementById('btn-pm-sell-land');
+    const btnMort = document.getElementById('btn-pm-mortgage');
+
+    upBox.classList.remove('hidden');
     if (tile.type === 'PROPERTY') {
-      upBox.classList.remove('hidden');
       document.getElementById('pm-build-cost').textContent = `$${tile.buildCost}`;
       const nextDiff = prop.level < 5 ? (tile.rents[prop.level + 1] - tile.rents[prop.level]) : 0;
       document.getElementById('pm-rent-diff').textContent = prop.level < 5 ? `+$${nextDiff}` : 'MAX';
@@ -1710,26 +2028,34 @@
       const check = canUpgradeProperty(tileIndex, viewer.id);
       document.getElementById('pm-status-note').textContent = check.reason;
 
-      const btnBuild = document.getElementById('btn-pm-build');
-      const btnSell = document.getElementById('btn-pm-sell');
-      const btnMort = document.getElementById('btn-pm-mortgage');
-
+      btnBuild.classList.remove('hidden');
+      btnSell.classList.remove('hidden');
       btnBuild.disabled = !check.ok;
       btnSell.disabled = !(prop.ownerId === viewer.id && prop.level > 0);
-      btnMort.disabled = !(prop.ownerId === viewer.id && prop.level === 0);
-
       btnBuild.onclick = () => { if (buildHouseOnProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
       btnSell.onclick = () => { if (sellHouseOnProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
-      btnMort.onclick = () => { if (toggleMortgageProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
     } else {
-      upBox.classList.add('hidden');
+      btnBuild.classList.add('hidden');
+      btnSell.classList.add('hidden');
+      document.getElementById('pm-status-note').textContent = 'Możesz odsprzedać ten obiekt do Banku lub zastawić hipoteką.';
     }
+
+    btnSellLand.disabled = !(prop.ownerId === viewer.id);
+    btnSellLand.textContent = `💵 Sprzedaj Działkę do Banku (+$${Math.floor(tile.price * 0.75)})`;
+    btnSellLand.onclick = () => {
+      if (sellLandToBank(tileIndex, viewer.id)) {
+        document.getElementById('prop-modal').classList.add('hidden');
+      }
+    };
+
+    btnMort.disabled = !(prop.ownerId === viewer.id && prop.level === 0);
+    btnMort.onclick = () => { if (toggleMortgageProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
 
     document.getElementById('pm-history-list').innerHTML = prop.history.map(h => `<li>${h}</li>`).join('');
     modal.classList.remove('hidden');
   }
 
-  /* ==================== 14. HANDEL, CZAT I LOBBY ==================== */
+  /* ==================== 12. HANDEL, CZAT I KREATOR LOBBY ==================== */
   function renderTradesList() {
     const panel = document.getElementById('trades-panel-box');
     const box = document.getElementById('trades-list-box');
@@ -1779,7 +2105,7 @@
     const stream = document.getElementById('chat-stream');
     stream.innerHTML = gameState.chat.map(m => `
       <div class="chat-bubble-row">
-        <span class="player-dot-lg" style="background:${m.color || '#7c4dff'};width:14px;height:14px;flex-shrink:0;margin-top:3px;"></span>
+        <span class="player-pawn-inline" style="background:${m.color || '#7c4dff'};width:16px;height:16px;flex-shrink:0;margin-top:3px;"></span>
         <div class="chat-msg-bubble">
           <span class="chat-msg-author">${m.author} • ${m.time}</span>
           <div>${m.text}</div>
@@ -1797,6 +2123,26 @@
   }
 
   function renderLobbySetup() {
+    // Karty wyboru mapy tła w Lobby
+    const mapCardsEl = document.getElementById('lobby-map-cards');
+    if (mapCardsEl) {
+      mapCardsEl.innerHTML = RUDA_MAPS.map(m => `
+        <div class="map-thumb-card ${m.id === selectedMapId ? 'active' : ''}" data-map-id="${m.id}" style="background-image:url('${m.photoUrl}'), ${m.fallbackGradient}">
+          <span>${m.shortTitle}</span>
+        </div>
+      `).join('');
+      mapCardsEl.querySelectorAll('.map-thumb-card').forEach(card => {
+        card.onclick = () => {
+          applyMapTheme(card.dataset.mapId);
+          if (gameState) {
+            gameState.mapId = card.dataset.mapId;
+            pushStateSync();
+          }
+        };
+      });
+    }
+
+    // Kolory lokalne
     const localPicker = document.getElementById('local-color-picker');
     localPicker.innerHTML = PLAYER_COLORS.map(c => `
       <button type="button" class="color-dot-pick ${c.hex === localPickedColor ? 'active' : ''}" style="background:${c.hex}" data-hex="${c.hex}"></button>
@@ -1805,6 +2151,18 @@
       btn.onclick = () => { localPickedColor = btn.dataset.hex; renderLobbySetup(); };
     });
 
+    // Wybór Pionka 3D / Twarzy (Lokalnie)
+    const localAvPicker = document.getElementById('local-avatar-picker');
+    if (localAvPicker) {
+      localAvPicker.innerHTML = PAWN_AVATARS.map(a => `
+        <button type="button" class="avatar-pick-btn ${a.id === localPickedAvatar ? 'active' : ''}" data-av="${a.id}" title="${a.name}">${a.svg}</button>
+      `).join('');
+      localAvPicker.querySelectorAll('.avatar-pick-btn').forEach(btn => {
+        btn.onclick = () => { localPickedAvatar = btn.dataset.av; renderLobbySetup(); };
+      });
+    }
+
+    // Kolory online
     const onlinePicker = document.getElementById('online-color-picker');
     onlinePicker.innerHTML = PLAYER_COLORS.map(c => `
       <button type="button" class="color-dot-pick ${c.hex === onlinePickedColor ? 'active' : ''}" style="background:${c.hex}" data-hex="${c.hex}"></button>
@@ -1813,13 +2171,24 @@
       btn.onclick = () => { onlinePickedColor = btn.dataset.hex; renderLobbySetup(); };
     });
 
+    // Wybór Pionka 3D / Twarzy (Online)
+    const onlineAvPicker = document.getElementById('online-avatar-picker');
+    if (onlineAvPicker) {
+      onlineAvPicker.innerHTML = PAWN_AVATARS.map(a => `
+        <button type="button" class="avatar-pick-btn ${a.id === onlinePickedAvatar ? 'active' : ''}" data-av="${a.id}" title="${a.name}">${a.svg}</button>
+      `).join('');
+      onlineAvPicker.querySelectorAll('.avatar-pick-btn').forEach(btn => {
+        btn.onclick = () => { onlinePickedAvatar = btn.dataset.av; renderLobbySetup(); };
+      });
+    }
+
     const oppBox = document.getElementById('local-opponents-list');
     oppBox.innerHTML = lobbyOpponents.map((o, idx) => `
       <div class="opp-row">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="player-dot-lg" style="background:${o.color};width:14px;height:14px;"></span>
+          <span class="player-pawn-inline" style="background:${o.color};">${getAvatarSvg(o.avatar)}</span>
           <strong>${o.name}</strong>
-          <span style="font-size:0.72rem;color:#a99fc9;">(${o.isBot ? 'Bot AI' : 'Gracz Hot-Seat'})</span>
+          <span style="font-size:0.72rem;color:#b0a6d1;">(${o.isBot ? 'Bot AI' : 'Gracz Hot-Seat'})</span>
         </div>
         ${lobbyOpponents.length > 1 ? `<button type="button" class="btn-ghost" data-rm-opp="${idx}">Usuń</button>` : ''}
       </div>
@@ -1835,17 +2204,19 @@
     document.getElementById('room-waiting-box').classList.remove('hidden');
     document.getElementById('lobby-room-code-display').textContent = currentRoomCode;
     document.getElementById('lobby-room-players').innerHTML = gameState.players.map(p => `
-      <div class="btn-ghost" style="border-left:4px solid ${p.color}">
-        ${p.name} ${p.isBot ? '🤖' : '👤'} ${p.clientToken === myClientToken ? '(Ty)' : ''}
+      <div class="btn-ghost" style="border-left:4px solid ${p.color};display:flex;align-items:center;gap:6px;">
+        <span class="player-pawn-inline" style="background:${p.color};width:18px;height:18px;">${getAvatarSvg(p.avatar)}</span>
+        <span>${p.name} ${p.isBot ? '🤖' : ''} ${p.clientToken === myClientToken ? '(Ty)' : ''}</span>
       </div>
     `).join('');
   }
 
-  function addOrReconnectPlayerToRoom(roomState, myName, myColor, tokenToUse = myClientToken) {
+  function addOrReconnectPlayerToRoom(roomState, myName, myColor, myAvatar, tokenToUse = myClientToken) {
     roomState = normalizeState(roomState);
     const existing = roomState.players.find(p => p.clientToken === tokenToUse);
     if (existing) {
       existing.name = myName || existing.name;
+      existing.avatar = myAvatar || existing.avatar;
       myOnlinePlayerId = existing.id;
       activePerspectiveId = existing.id;
       return roomState;
@@ -1857,7 +2228,8 @@
       : myColor;
 
     roomState.players.push({
-      id: newId, clientToken: tokenToUse, name: myName, color: finalColor, isBot: false,
+      id: newId, clientToken: tokenToUse, name: myName, color: finalColor,
+      avatar: myAvatar || 'cool', isBot: false,
       cash: 2000, position: 0, inJail: false, jailTurns: 0, pardonCards: 0, bankrupt: false
     });
     myOnlinePlayerId = newId;
@@ -1872,7 +2244,7 @@
     document.getElementById('generic-modal').classList.remove('hidden');
   }
 
-  /* ==================== 15. INICJALIZACJA WSZYSTKICH PRZYCISKÓW ==================== */
+  /* ==================== 13. PODPIĘCIE WSZYSTKICH EVENTÓW ==================== */
   function initEvents() {
     document.querySelectorAll('.game-pick-card').forEach(card => {
       card.onclick = () => {
@@ -1891,6 +2263,20 @@
       };
     });
 
+    // Przycisk losowania/zmiany mapy (Kaufhaus, Wielki Piec, Szyb Andrzej, Ficinus)
+    const cycleOrRandomMap = () => {
+      const idx = RUDA_MAPS.findIndex(m => m.id === selectedMapId);
+      const nextMap = RUDA_MAPS[(idx + 1) % RUDA_MAPS.length];
+      applyMapTheme(nextMap.id);
+      if (gameState) {
+        gameState.mapId = nextMap.id;
+        addFeedEvent(`🗺️ Zmieniono tło mapy na: <strong>${nextMap.fullTitle}</strong>!`);
+        pushStateSync();
+      }
+    };
+    document.getElementById('btn-random-map').onclick = cycleOrRandomMap;
+    document.getElementById('btn-lobby-rand-map').onclick = cycleOrRandomMap;
+
     document.querySelectorAll('.lobby-tab').forEach(tab => {
       tab.onclick = () => {
         document.querySelectorAll('.lobby-tab').forEach(t => t.classList.remove('active'));
@@ -1903,11 +2289,10 @@
     document.getElementById('btn-save-firebase').onclick = () => {
       const val = document.getElementById('firebase-url-input').value;
       if (!connectFirebaseDatabase(val)) {
-        setBannerStatus('❌ Nieprawidłowy adres URL Firebase. Wklej pełny link https://twoja-baza...firebasedatabase.app', '#ff5252');
+        setBannerStatus('❌ Nieprawidłowy adres URL Firebase.', '#ff5252');
       }
     };
 
-    // Tworzenie Pokoju Online w Firebase
     document.getElementById('btn-create-room').onclick = () => {
       const typedUrl = document.getElementById('firebase-url-input').value.trim();
       if (typedUrl && !firebaseDb) connectFirebaseDatabase(typedUrl);
@@ -1916,61 +2301,58 @@
       const typedCode = document.getElementById('join-code-input').value.trim().toUpperCase();
       const code = typedCode || ('RUDA' + Math.floor(100 + Math.random() * 900));
 
-      const players = [{ id: 'p1', clientToken: myClientToken, name: hostName, color: onlinePickedColor, isBot: false }];
+      const players = [{ id: 'p1', clientToken: myClientToken, name: hostName, color: onlinePickedColor, avatar: onlinePickedAvatar, isBot: false }];
       myOnlinePlayerId = 'p1';
       activePerspectiveId = 'p1';
-      gameState = createFreshGameState(players, 2000, code, true, selectedGameMode);
+      gameState = createFreshGameState(players, 2000, code, true, selectedGameMode, selectedMapId);
       subscribeToRoom(code);
       pushStateSync();
       updateLobbyWaitingRoom();
 
       if (firebaseDb) {
-        setBannerStatus(`✅ Pokój ${code} został zapisany w chmurze Firebase! Kliknij "Kopiuj Link Zaproszenia" i wyślij znajomym.`, '#2ecc71');
+        setBannerStatus(`✅ Pokój ${code} utworzony w chmurze Firebase! Skopiuj Link Zaproszenia dla znajomych.`, '#2ecc71');
       } else {
-        setBannerStatus(`⚠️ Pokój ${code} działa w trybie lokalnym. Aby połączyć znajomych z innych domów, wklej wyżej URL swojej bazy Firebase!`, '#ffca28');
+        setBannerStatus(`⚠️ Pokój ${code} działa lokalnie. Aby grać przez Internet, wklej wyżej URL bazy Firebase!`, '#ffca28');
       }
     };
 
-    // Dołączanie do Pokoju w Firebase
     document.getElementById('btn-join-room').onclick = () => {
       const typedUrl = document.getElementById('firebase-url-input').value.trim();
       if (typedUrl && !firebaseDb) connectFirebaseDatabase(typedUrl);
 
       const code = document.getElementById('join-code-input').value.trim().toUpperCase();
       if (!code) {
-        setBannerStatus('⚠️ Wpisz najpierw kod pokoju (np. RUDA500)!', '#ffca28');
+        setBannerStatus('⚠️ Wpisz kod pokoju (np. RUDA500)!', '#ffca28');
         return;
       }
       const myName = document.getElementById('online-name-input').value.trim() || ('Górnik_' + Math.floor(10 + Math.random() * 89));
 
       if (firebaseDb) {
-        setBannerStatus(`⏳ Pobieranie pokoju ${code} z bazy Firebase...`, '#00e5ff');
+        setBannerStatus(`⏳ Pobieranie pokoju ${code} z Firebase...`, '#00e5ff');
         firebaseDb.ref('rooms/' + code).once('value').then((snap) => {
           const cloudRoom = snap.val();
           if (cloudRoom) {
-            gameState = addOrReconnectPlayerToRoom(cloudRoom, myName, onlinePickedColor, myClientToken);
+            gameState = addOrReconnectPlayerToRoom(cloudRoom, myName, onlinePickedColor, onlinePickedAvatar, myClientToken);
             subscribeToRoom(code);
             pushStateSync();
             updateLobbyWaitingRoom();
-            setBannerStatus(`✅ Dołączono do pokoju ${code} w chmurze Firebase!`, '#2ecc71');
+            setBannerStatus(`✅ Dołączono do pokoju ${code}!`, '#2ecc71');
           } else {
-            setBannerStatus(`❌ Pokój "${code}" nie istnieje w tej bazie Firebase. Upewnij się, że Host go utworzył.`, '#ff5252');
+            setBannerStatus(`❌ Pokój "${code}" nie istnieje w tej bazie Firebase.`, '#ff5252');
           }
-        }).catch((err) => {
-          setBannerStatus(`❌ Błąd dostępu do Firebase (${err.message}). Sprawdź czy w Realtime Database -> Rules ustawiono ".read": true, ".write": true.`, '#ff5252');
         });
         return;
       }
 
       const savedRaw = localStorage.getItem('ruda_room_' + code);
       if (savedRaw) {
-        gameState = addOrReconnectPlayerToRoom(JSON.parse(savedRaw), myName, onlinePickedColor, myClientToken);
+        gameState = addOrReconnectPlayerToRoom(JSON.parse(savedRaw), myName, onlinePickedColor, onlinePickedAvatar, myClientToken);
         subscribeToRoom(code);
         pushStateSync();
         updateLobbyWaitingRoom();
         setBannerStatus(`✅ Dołączono do pokoju ${code}!`, '#2ecc71');
       } else {
-        setBannerStatus(`❌ Nie podpięto bazy Firebase! Wklej wyżej URL bazy Firebase lub otwórz Link Zaproszenia wygenerowany przez Hosta.`, '#ff5252');
+        setBannerStatus(`❌ Podłącz wyżej URL bazy Firebase lub użyj Linku Zaproszenia od Hosta.`, '#ff5252');
       }
     };
 
@@ -1978,7 +2360,9 @@
       if (!gameState || gameState.players.length >= 6) return;
       const idx = gameState.players.length + 1;
       gameState.players.push({
-        id: 'p' + idx, clientToken: '', name: 'Bot Górnik #' + idx, color: PLAYER_COLORS[idx % PLAYER_COLORS.length].hex,
+        id: 'p' + idx, clientToken: '', name: 'Bot Górnik #' + idx,
+        color: PLAYER_COLORS[idx % PLAYER_COLORS.length].hex,
+        avatar: PAWN_AVATARS[idx % PAWN_AVATARS.length].id,
         isBot: true, cash: 2000, position: 0, inJail: false, jailTurns: 0, pardonCards: 0, bankrupt: false
       });
       pushStateSync();
@@ -1990,6 +2374,7 @@
       if (gameState.players.length < 2) document.getElementById('btn-room-add-bot').click();
       gameState.lobbyOpen = false;
       gameState.activeGame = selectedGameMode;
+      gameState.mapId = selectedMapId;
       document.getElementById('lobby-overlay').classList.add('hidden');
       pushStateSync();
       checkBotForOtherGames();
@@ -1997,10 +2382,8 @@
 
     document.getElementById('btn-copy-invite-lobby').onclick = () => {
       navigator.clipboard?.writeText(buildShareInviteLink(currentRoomCode));
-      document.getElementById('btn-copy-invite-lobby').textContent = '✅ Skopiowano Link Zaproszenia!';
-      setTimeout(() => {
-        document.getElementById('btn-copy-invite-lobby').textContent = '📋 Kopiuj Link Zaproszenia (z kluczem Firebase)';
-      }, 2200);
+      document.getElementById('btn-copy-invite-lobby').textContent = '✅ Skopiowano!';
+      setTimeout(() => { document.getElementById('btn-copy-invite-lobby').textContent = '📋 Kopiuj Link Zaproszenia'; }, 2000);
     };
 
     document.getElementById('btn-copy-invite-top').onclick = () => {
@@ -2009,19 +2392,20 @@
       setTimeout(() => { document.getElementById('btn-copy-invite-top').textContent = '📋 Zaproszenie'; }, 1800);
     };
 
-    // Gra lokalna / Boty
     document.getElementById('btn-add-bot').onclick = () => {
       if (lobbyOpponents.length >= 5) return;
       const nextColor = PLAYER_COLORS[(lobbyOpponents.length + 1) % PLAYER_COLORS.length].hex;
+      const nextAv = PAWN_AVATARS[(lobbyOpponents.length + 2) % PAWN_AVATARS.length].id;
       const names = ['Bot KWK Bielszowice', 'Bot Kochłowice', 'Bot Orzegów', 'Bot Czarny Las', 'Bot Godula'];
-      lobbyOpponents.push({ name: names[lobbyOpponents.length % names.length], isBot: true, color: nextColor });
+      lobbyOpponents.push({ name: names[lobbyOpponents.length % names.length], isBot: true, color: nextColor, avatar: nextAv });
       renderLobbySetup();
     };
 
     document.getElementById('btn-add-human').onclick = () => {
       if (lobbyOpponents.length >= 5) return;
       const nextColor = PLAYER_COLORS[(lobbyOpponents.length + 1) % PLAYER_COLORS.length].hex;
-      lobbyOpponents.push({ name: `Gracz ${lobbyOpponents.length + 2}`, isBot: false, color: nextColor });
+      const nextAv = PAWN_AVATARS[(lobbyOpponents.length + 2) % PAWN_AVATARS.length].id;
+      lobbyOpponents.push({ name: `Gracz ${lobbyOpponents.length + 2}`, isBot: false, color: nextColor, avatar: nextAv });
       renderLobbySetup();
     };
 
@@ -2029,11 +2413,11 @@
       const mainName = document.getElementById('local-name-input').value.trim() || 'Sztygar';
       const startCash = Number(document.getElementById('local-cash-select').value) || 2000;
       const allPlayers = [
-        { id: 'p1', clientToken: myClientToken, name: mainName, color: localPickedColor, isBot: false },
-        ...lobbyOpponents.map((o, i) => ({ id: 'p' + (i + 2), name: o.name, color: o.color, isBot: o.isBot }))
+        { id: 'p1', clientToken: myClientToken, name: mainName, color: localPickedColor, avatar: localPickedAvatar, isBot: false },
+        ...lobbyOpponents.map((o, i) => ({ id: 'p' + (i + 2), name: o.name, color: o.color, avatar: o.avatar, isBot: o.isBot }))
       ];
       myOnlinePlayerId = null;
-      gameState = createFreshGameState(allPlayers, startCash, 'LOKALNY', false, selectedGameMode);
+      gameState = createFreshGameState(allPlayers, startCash, 'LOKALNY', false, selectedGameMode, selectedMapId);
       activePerspectiveId = 'p1';
       subscribeToRoom('LOKALNY');
       document.getElementById('lobby-overlay').classList.add('hidden');
@@ -2041,7 +2425,7 @@
       checkBotForOtherGames();
     };
 
-    // Przyciski na stole gry
+    // Przyciski na stole
     document.getElementById('btn-roll').onclick = handleRollDice;
     document.getElementById('dice-stage').onclick = handleRollDice;
     document.getElementById('btn-buy').onclick = buyCurrentField;
@@ -2051,8 +2435,15 @@
 
     document.getElementById('btn-build-quick').onclick = () => {
       const active = currentTurnPlayer();
-      const b = BOARD_TILES.find(t => canUpgradeProperty(t.index, active.id).ok);
-      if (b) openPropertyModal(b.index);
+      if (canUpgradeProperty(active.position, active.id).ok) {
+        buildHouseOnProperty(active.position, active.id);
+      }
+    };
+
+    document.getElementById('btn-sell-emergency').onclick = () => {
+      const active = currentTurnPlayer();
+      const firstOwned = BOARD_TILES.find(t => gameState.properties[t.index]?.ownerId === active.id);
+      if (firstOwned) openPropertyModal(firstOwned.index);
     };
 
     document.getElementById('btn-jail-pay').onclick = () => {
@@ -2094,6 +2485,11 @@
       const viewer = getPlayerById(activePerspectiveId) || currentTurnPlayer();
       if (confirm(`Ogłosić bankructwo dla ${viewer.name}?`)) declareBankruptcy(viewer.id, null);
     };
+
+    // Darowizny (🎁 Podaruj)
+    document.getElementById('btn-open-gift').onclick = openGiftModal;
+    document.getElementById('btn-confirm-gift').onclick = executeGiftTransfer;
+    document.getElementById('btn-close-gift').onclick = () => document.getElementById('gift-modal').classList.add('hidden');
 
     // Aukcje i Wymiany
     let auctionState = null;
@@ -2190,12 +2586,11 @@
     document.getElementById('btn-open-rules').onclick = () => {
       showGenericModal(
         '⚒️ Zasady 5 Gier — Ruda Śląska Arena',
-        `<div style="line-height:1.65;font-size:0.88rem;display:flex;flex-direction:column;gap:8px;">
-          <p><strong>🏭 1. Monopoly Ruda Śląska:</strong> Kupuj dzielnice, kopalnie i huty. Możesz budować domy na każdym posiadanym polu <strong>bez konieczności zbierania całego koloru</strong>, z limitem <strong>maksymalnie 1 wybudowanego domu na turę</strong>.</p>
-          <p><strong>🎲 2. Chińczyk (4 Dzielnice):</strong> Wyrzuć 6, aby wyprowadzić górnika z bazy i przeprowadź wszystkie 4 pionki do mety.</p>
-          <p><strong>⚫ 3. Warcaby Górnicze:</strong> Węgiel kontra Stal — klasyczne bicie po przekątnej z promocją na Damkę (👑).</p>
-          <p><strong>♟️ 4. Szachy Śląskie:</strong> Pełna szachownica 8×8 z podświetlaniem legalnych ruchów.</p>
-          <p><strong>🪙 5. Sztolnia 4 w Rzędzie:</strong> Zrzucaj krążki do kolumn i ułóż 4 w jednej linii.</p>
+        `<div style="line-height:1.65;font-size:0.86rem;display:flex;flex-direction:column;gap:8px;">
+          <p><strong>🏭 1. Monopoly Ruda Śląska:</strong> Pierwsze wejście na wolne pole pozwala kupić działkę. Aby wybudować kolejny dom (lub hotel), <strong>musisz ponownie wylądować swoim pionkiem na tym samym polu</strong> w kolejnym okrążeniu!</p>
+          <p><strong>🔨 Sprzedaż domów i działek:</strong> Gdy brakuje Ci pieniędzy, w każdej chwili możesz kliknąć <strong>-🏠</strong> przy swojej dzielnicy (zwrot 50% kosztu domu) lub sprzedać całą działkę do Banku (+75%).</p>
+          <p><strong>🎁 Darowizny (Podaruj):</strong> Kliknij przycisk <em>🎁 Podaruj</em> w prawym panelu, aby przekazać znajomemu gotówkę, działkę lub pojedynczy dom.</p>
+          <p><strong>🗺️ Mapy Rudy Śląskiej:</strong> Kliknij przycisk mapy na górnym pasku, aby losować tła (Kaufhaus, Wielki Piec Huty Pokój, Szyb Andrzej, Kolonia Ficinus).</p>
         </div>`
       );
     };
@@ -2215,9 +2610,10 @@
     }, 1000);
   }
 
-  /* ==================== 16. START APLIKACJI ==================== */
+  /* ==================== 14. START APLIKACJI ==================== */
   window.addEventListener('DOMContentLoaded', () => {
     buildMonopolyBoardDOM();
+    applyMapTheme(selectedMapId);
     renderLobbySetup();
     initEvents();
 
@@ -2234,16 +2630,16 @@
     }
 
     gameState = createFreshGameState([
-      { id: 'p1', clientToken: myClientToken, name: 'Sztygar', color: PLAYER_COLORS[0].hex, isBot: false },
-      ...lobbyOpponents.map((o, i) => ({ id: 'p' + (i + 2), name: o.name, color: o.color, isBot: o.isBot }))
-    ], 2000, 'LOKALNY', false, 'MONOPOLY');
+      { id: 'p1', clientToken: myClientToken, name: 'Sztygar', color: PLAYER_COLORS[0].hex, avatar: localPickedAvatar, isBot: false },
+      ...lobbyOpponents.map((o, i) => ({ id: 'p' + (i + 2), name: o.name, color: o.color, avatar: o.avatar, isBot: o.isBot }))
+    ], 2000, 'LOKALNY', false, 'MONOPOLY', selectedMapId);
     renderAll();
 
     const roomParam = params.get('room');
     if (roomParam && roomParam.toUpperCase() !== 'LOKALNY') {
       document.querySelector('[data-tab="online"]').click();
       document.getElementById('join-code-input').value = roomParam.toUpperCase();
-      setBannerStatus(`Wykryto zaproszenie do pokoju ${roomParam.toUpperCase()}! Wpisz swój nick i kliknij "Dołącz po Kodzie".`, '#00e5ff');
+      setBannerStatus(`Wykryto zaproszenie do pokoju ${roomParam.toUpperCase()}! Wpisz swój nick, wybierz pionek i kliknij "Dołącz po Kodzie".`, '#00e5ff');
     }
   });
 })();
