@@ -1,39 +1,87 @@
 /**
- * RUDA ŚLĄSKA ARENA ULTIMATE — PEŁNY SILNIK 7 GIER (app.js)
+ * RUDA ŚLĄSKA ARENA ULTIMATE — NAPRAWIONY SILNIK GRY Z BOTAMI I ONLINE (app.js)
+ * - Automatyczne czyszczenie uszkodzonych starych zapisów z localStorage
+ * - W 100% działające Boty AI we wszystkich 7 grach (Monopoly, Szynk Kłamców, Kwiaciarnia Godula, Chińczyk, Warcaby, Szachy, 4 w Rzędzie)
+ * - 4 Lotniska = Natychmiastowa wygrana, wrogi wykup cudzych pól po zawyżonej cenie, budowa domu po pełnym okrążeniu
  */
 (function () {
   'use strict';
 
   const HARDCODED_FIREBASE_URL = "";
+  const STORAGE_VERSION = "v9_bots_fixed";
 
+  // Automatyczne wyczyszczenie starych, niekompatybilnych zapisów, które blokowały grę z botami
+  try {
+    if (localStorage.getItem('ruda_arena_version') !== STORAGE_VERSION) {
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('ruda_room_')) localStorage.removeItem(k);
+      });
+      localStorage.setItem('ruda_arena_version', STORAGE_VERSION);
+    }
+  } catch (e) {}
+
+  /* ==================== 1. MAPY RUDY ŚLĄSKIEJ ==================== */
   const RUDA_MAPS = [
-    { id: 'KAUFHAUS', shortTitle: 'Kaufhaus', fullTitle: 'Kolonia Kaufhaus (Chebzie)', photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ruda_Slaska_Chebzie_Kaufhaus_02.jpg?width=1440', fallbackGradient: 'linear-gradient(135deg, #4a2118 0%, #160f29 100%)' },
-    { id: 'HUTA_POKOJ', shortTitle: 'Wielki Piec', fullTitle: 'Wielki Piec Huty Pokój', photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Huta_Pok%C3%B3j_-_Wielki_Piec.jpg?width=1440', fallbackGradient: 'linear-gradient(135deg, #4d3014 0%, #10172b 100%)' },
-    { id: 'SZYB_ANDRZEJ', shortTitle: 'Szyb Andrzej', fullTitle: 'Zabytkowy Szyb Andrzej (Wirek)', photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Szyb_Andrzej_w_Rudzie_%C5%9Al%C4%85skiej.JPG?width=1440', fallbackGradient: 'linear-gradient(135deg, #173b34 0%, #140f24 100%)' },
-    { id: 'FICINUS', shortTitle: 'Kolonia Ficinus', fullTitle: 'Kolonia Robotnicza Ficinus', photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ruda_%C5%9Al%C4%85ska_-_Kolonia_Ficinus_01.jpg?width=1440', fallbackGradient: 'linear-gradient(135deg, #3b2447 0%, #0f1c30 100%)' },
-    { id: 'NOWY_BYTOM', shortTitle: 'Ratusz N.Bytom', fullTitle: 'Magistrat (Nowy Bytom)', photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Urza_Miejski_w_Rudzie_Slaskiej.jpg?width=1440', fallbackGradient: 'linear-gradient(135deg, #1e3054 0%, #190e26 100%)' }
+    {
+      id: 'KAUFHAUS',
+      shortTitle: 'Kaufhaus',
+      fullTitle: 'Kolonia Kaufhaus (Chebzie) — Zabytkowe Familoki',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ruda_Slaska_Chebzie_Kaufhaus_02.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #4a2118 0%, #160f29 100%)'
+    },
+    {
+      id: 'HUTA_POKOJ',
+      shortTitle: 'Wielki Piec',
+      fullTitle: 'Wielki Piec Huty Pokój (Nowy Bytom)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Huta_Pok%C3%B3j_-_Wielki_Piec.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #4d3014 0%, #10172b 100%)'
+    },
+    {
+      id: 'SZYB_ANDRZEJ',
+      shortTitle: 'Szyb Andrzej',
+      fullTitle: 'Zabytkowy Szyb Andrzej (Wirek)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Szyb_Andrzej_w_Rudzie_%C5%9Al%C4%85skiej.JPG?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #173b34 0%, #140f2b 100%)'
+    },
+    {
+      id: 'FICINUS',
+      shortTitle: 'Kolonia Ficinus',
+      fullTitle: 'Kolonia Robotnicza Ficinus (Wirek)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ruda_%C5%9Al%C4%85ska_-_Kolonia_Ficinus_01.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #3b2447 0%, #0f1c30 100%)'
+    },
+    {
+      id: 'NOWY_BYTOM',
+      shortTitle: 'Ratusz N.Bytom',
+      fullTitle: 'Plac Jana Pawła II i Magistrat (Nowy Bytom)',
+      photoUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Urza_Miejski_w_Rudzie_Slaskiej.jpg?width=1440',
+      fallbackGradient: 'linear-gradient(135deg, #1e3054 0%, #190e26 100%)'
+    }
   ];
 
+  /* ==================== 2. CUSTOMOWE PIONKI 3D I TWARZE ==================== */
   const PAWN_AVATARS = [
-    { id: 'helmet', name: 'Hełm Sztygara', svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 15C4 9.5 7.5 5 12 5C16.5 5 20 9.5 20 15H4Z" fill="#fff" stroke="#111" stroke-width="1.8"/><path d="M2 15H22V18H2V15Z" fill="#ffca28" stroke="#111" stroke-width="1.5"/><circle cx="12" cy="10" r="2.6" fill="#00e5ff" stroke="#111" stroke-width="1.4"/></svg>` },
-    { id: 'cool', name: 'Okulary Szefa', svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M3 9H21L19 14H13.5L12 11.5L10.5 14H5L3 9Z" fill="#111"/><rect x="5" y="10" width="4" height="1.5" fill="#00e5ff"/><rect x="13.5" y="10" width="4" height="1.5" fill="#00e5ff"/><path d="M8 17.5C9.5 19 14.5 19 16 17.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>` },
-    { id: 'mustache', name: 'Śląski Wąs', svg: `<svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="9" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="15.5" cy="9" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="8.5" cy="9" r="1" fill="#111"/><circle cx="15.5" cy="9" r="1" fill="#111"/><path d="M4 15.5C6.5 13 10.5 13.5 12 15.5C13.5 13.5 17.5 13 20 15.5C18 18 14 17.5 12 16.2C10 17.5 6 18 4 15.5Z" fill="#1b1429" stroke="#fff" stroke-width="1"/></svg>` },
-    { id: 'crown', name: 'Korona Barona', svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M3 18L5 8L9.5 13L12 6L14.5 13L19 8L21 18H3Z" fill="#ffca28" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="15" r="1.2" fill="#e53935"/><circle cx="15" cy="15" r="1.2" fill="#00e5ff"/></svg>` },
-    { id: 'cart', name: 'Wagonik Węgla', svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M5 6L9 3L14 5L18 3L19 7H5V6Z" fill="#111"/><path d="M4 7H20L18 15H6L4 7Z" fill="#fff" stroke="#111" stroke-width="1.8"/><circle cx="8" cy="18" r="2.3" fill="#ff9800" stroke="#111" stroke-width="1.5"/><circle cx="16" cy="18" r="2.3" fill="#ff9800" stroke="#111" stroke-width="1.5"/></svg>` },
-    { id: 'devil', name: 'Skarbnik', svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 4L9 8M20 4L15 8" stroke="#111" stroke-width="2.5" stroke-linecap="round"/><circle cx="8.5" cy="11" r="2" fill="#ffeb3b" stroke="#111" stroke-width="1.3"/><circle cx="15.5" cy="11" r="2" fill="#ffeb3b" stroke="#111" stroke-width="1.3"/><path d="M7 16.5C9.5 19 14.5 19 17 16.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>` },
-    { id: 'pirate', name: 'Pirat z Hałdy', svg: `<svg viewBox="0 0 24 24" fill="none"><line x1="4" y1="7" x2="20" y2="13" stroke="#111" stroke-width="2.2"/><circle cx="9" cy="10" r="3" fill="#111"/><circle cx="15.5" cy="10" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="15.5" cy="10" r="1" fill="#111"/><path d="M8 17C10.5 18.5 14 18.5 16.5 16.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>` },
-    { id: 'classic', name: 'Klasyczne Oczka', svg: `<svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="10" r="3" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="15.5" cy="10" r="3" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#111"/><circle cx="16" cy="10" r="1.4" fill="#111"/><path d="M8.5 16.5C10 18.2 14 18.2 15.5 16.5" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg>` }
+    { id: 'helmet',   name: 'Hełm Sztygara',   svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 15C4 9.5 7.5 5 12 5C16.5 5 20 9.5 20 15H4Z" fill="#fff" stroke="#111" stroke-width="1.8"/><path d="M2 15H22V18H2V15Z" fill="#ffca28" stroke="#111" stroke-width="1.5"/><circle cx="12" cy="10" r="2.6" fill="#00e5ff" stroke="#111" stroke-width="1.4"/></svg>` },
+    { id: 'cool',     name: 'Okulary Szefa',   svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M3 9H21L19 14H13.5L12 11.5L10.5 14H5L3 9Z" fill="#111"/><rect x="5" y="10" width="4" height="1.5" fill="#00e5ff"/><rect x="13.5" y="10" width="4" height="1.5" fill="#00e5ff"/><path d="M8 17.5C9.5 19 14.5 19 16 17.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>` },
+    { id: 'mustache', name: 'Śląski Wąs',      svg: `<svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="9" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="15.5" cy="9" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="8.5" cy="9" r="1" fill="#111"/><circle cx="15.5" cy="9" r="1" fill="#111"/><path d="M4 15.5C6.5 13 10.5 13.5 12 15.5C13.5 13.5 17.5 13 20 15.5C18 18 14 17.5 12 16.2C10 17.5 6 18 4 15.5Z" fill="#1b1429" stroke="#fff" stroke-width="1"/></svg>` },
+    { id: 'crown',    name: 'Korona Barona',   svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M3 18L5 8L9.5 13L12 6L14.5 13L19 8L21 18H3Z" fill="#ffca28" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="15" r="1.2" fill="#e53935"/><circle cx="15" cy="15" r="1.2" fill="#00e5ff"/></svg>` },
+    { id: 'cart',     name: 'Wagonik Węgla',   svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M5 6L9 3L14 5L18 3L19 7H5V6Z" fill="#111"/><path d="M4 7H20L18 15H6L4 7Z" fill="#fff" stroke="#111" stroke-width="1.8"/><circle cx="8" cy="18" r="2.3" fill="#ff9800" stroke="#111" stroke-width="1.5"/><circle cx="16" cy="18" r="2.3" fill="#ff9800" stroke="#111" stroke-width="1.5"/></svg>` },
+    { id: 'devil',    name: 'Skarbnik',        svg: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 4L9 8M20 4L15 8" stroke="#111" stroke-width="2.5" stroke-linecap="round"/><circle cx="8.5" cy="11" r="2" fill="#ffeb3b" stroke="#111" stroke-width="1.3"/><circle cx="15.5" cy="11" r="2" fill="#ffeb3b" stroke="#111" stroke-width="1.3"/><path d="M7 16.5C9.5 19 14.5 19 17 16.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>` },
+    { id: 'pirate',   name: 'Pirat z Hałdy',   svg: `<svg viewBox="0 0 24 24" fill="none"><line x1="4" y1="7" x2="20" y2="13" stroke="#111" stroke-width="2.2"/><circle cx="9" cy="10" r="3" fill="#111"/><circle cx="15.5" cy="10" r="2.2" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="15.5" cy="10" r="1" fill="#111"/><path d="M8 17C10.5 18.5 14 18.5 16.5 16.5" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>` },
+    { id: 'classic',  name: 'Klasyczne Oczka', svg: `<svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="10" r="3" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="15.5" cy="10" r="3" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#111"/><circle cx="16" cy="10" r="1.4" fill="#111"/><path d="M8.5 16.5C10 18.2 14 18.2 15.5 16.5" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg>` }
   ];
 
-  function getAvatarSvg(avatarId) { return (PAWN_AVATARS.find(a => a.id === avatarId) || PAWN_AVATARS[0]).svg; }
+  function getAvatarSvg(avatarId) {
+    return (PAWN_AVATARS.find(a => a.id === avatarId) || PAWN_AVATARS[0]).svg;
+  }
 
   const PLAYER_COLORS = [
-    { id: 'ember', name: 'Żar Węglowy', hex: '#ff7849' },
-    { id: 'cyan', name: 'Błękit Huty', hex: '#00e5ff' },
-    { id: 'gold', name: 'Złoto', hex: '#ffca28' },
-    { id: 'pink', name: 'Neon Róż', hex: '#f06292' },
-    { id: 'violet', name: 'Fiolet', hex: '#ab47bc' },
-    { id: 'green', name: 'Szmaragd', hex: '#2ecc71' }
+    { id: 'ember',  name: 'Żar Węglowy', hex: '#ff7849' },
+    { id: 'cyan',   name: 'Błękit Huty', hex: '#00e5ff' },
+    { id: 'gold',   name: 'Złoto',       hex: '#ffca28' },
+    { id: 'pink',   name: 'Neon Róż',    hex: '#f06292' },
+    { id: 'violet', name: 'Fiolet',      hex: '#ab47bc' },
+    { id: 'green',  name: 'Szmaragd',    hex: '#2ecc71' }
   ];
 
   const GROUPS = {
@@ -55,7 +103,7 @@
     { index: 0,  type: 'START',      name: 'START — Zjazd Szybem', shortName: 'START', subtitle: '+$250 za okrążenie' },
     { index: 1,  type: 'PROPERTY',   name: 'Orzegów — Burloch Arena', shortName: 'Burloch Arena', district: 'Orzegów', group: 'ORZEGOW', price: 60, buildCost: 50, rents: [10, 35, 90, 220, 360, 500] },
     { index: 2,  type: 'TREASURE',   name: 'Skarb Skarbnika', shortName: 'Skarb', district: 'Kasa Kopalni' },
-    { index: 3,  type: 'PROPERTY',   name: 'Chebzie — Kolonia Kaufhaus', shortName: 'Kaufhaus', district: 'Chebzie', group: 'ORZEGOW', price: 70, buildCost: 50, rents: [8, 35, 100, 280, 420, 560] },
+    { index: 3,  type: 'PROPERTY',   name: 'Chebzie — Kolonia Kaufhaus', shortName: 'Kaufhaus', district: 'Chebzie', group: 'ORZEGOW', price: 70, buildCost: 50, rents: [12, 45, 110, 280, 420, 580] },
     { index: 4,  type: 'TAX',        name: 'Podatek Górniczy', shortName: 'Podatek', district: 'Urząd Miasta', taxAmount: 150 },
     { index: 5,  type: 'AIRPORT',    name: 'Lotnisko Chebzie-DTŚ (1/4)', shortName: '✈️ Lotnisko DTŚ', district: 'Lotnisko Strategiczne', group: 'AIRPORT', price: 220, rents: [50, 110, 220, 500] },
     { index: 6,  type: 'PROPERTY',   name: 'Godula — Szyb Godula', shortName: 'Szyb Godula', district: 'Godula', group: 'GODULA', price: 100, buildCost: 60, rents: [16, 55, 140, 330, 480, 650] },
@@ -123,6 +171,7 @@
     MINE_TOWER: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ffffff" stroke-width="2.2"><circle cx="12" cy="6" r="3.5"/><path d="M6 21L10 9m8 12L14 9M5 21h14"/></svg>`
   };
 
+  /* ==================== 3. DŹWIĘKI ==================== */
   class SoundEngine {
     constructor() { this.enabled = true; this.ctx = null; }
     init() {
@@ -157,6 +206,7 @@
   }
   const sfx = new SoundEngine();
 
+  /* ==================== 4. STAN GLOBALNY ==================== */
   let myClientToken = localStorage.getItem('ruda_client_token');
   if (!myClientToken) {
     myClientToken = 'cl_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
@@ -189,6 +239,7 @@
     { name: 'Bot Wirek',       isBot: true, color: PLAYER_COLORS[3].hex, avatar: 'mustache' }
   ];
 
+  // Bezpieczny helper do podpinania kliknięć (nigdy nie wyrzuci błędu, nawet jeśli elementu nie ma w HTML)
   function bindClick(id, fn) {
     const el = document.getElementById(id);
     if (el) el.onclick = fn;
@@ -347,7 +398,7 @@
       b[0][c] = { p: 1, type: back[c] }; b[1][c] = { p: 1, type: 'P' };
       b[6][c] = { p: 0, type: 'P' };     b[7][c] = { p: 0, type: back[c] };
     }
-    return { turn: 0, boardJson: JSON.stringify(b), winner: null, lastMove: 'Kliknij figurę, aby zobaczyć ruchy.' };
+    return { turn: 0, boardJson: JSON.stringify(b), winner: null, lastMove: 'Kliknij swoją figurę, aby zobaczyć ruchy.' };
   }
 
   function createConnect4State() {
@@ -430,11 +481,13 @@
       chess: createChessState(),
       connect4: createConnect4State(),
       feed: [{ text: `🗺️ Arena: <strong>${chosenMap.fullTitle}</strong>! Zdobądź wszystkie 4 Lotniska (✈️) lub doprowadź rywali do bankructwa, aby wygrać!`, time: nowTime() }],
-      chat: [{ author: 'Skarbnik', color: '#ffca28', text: `Szczęść Boże! Nowe tryby: 🃏 Szynk Kłamców oraz 🌸 Kwiaciarnia Godula są gotowe na górnym pasku!`, time: nowTime() }]
+      chat: [{ author: 'Skarbnik', color: '#ffca28', text: `Szczęść Boże! Gra z Botami i Online gotowa!`, time: nowTime() }]
     };
   }
 
   /* ==================== 6. SYNCHRONIZACJA POKOJU ==================== */
+  let lastWinnerShown = null;
+
   function subscribeToRoom(roomCode) {
     currentRoomCode = roomCode;
     const topLabel = document.getElementById('top-room-label');
@@ -484,7 +537,7 @@
     renderAll();
   }
 
-  /* ==================== 7. MONOPOLY ==================== */
+  /* ==================== 7. MONOPOLY: 4 LOTNISKA, WROGI WYKUP I PRZYMUSOWA SPRZEDAŻ ==================== */
   function getGridPosition(index) {
     if (index === 0) return { row: 1, col: 1, edge: 'corner' };
     if (index > 0 && index < 10) return { row: 1, col: index + 1, edge: 'edge-top' };
@@ -540,7 +593,7 @@
       cell.addEventListener('click', () => {
         selectedTileIndex = tile.index;
         renderInspector(tile.index);
-        if (tile.type === 'PROPERTY' || tile.type === 'TRANSPORT' || tile.type === 'UTILITY') openPropertyModal(tile.index);
+        if (tile.type === 'PROPERTY' || tile.type === 'AIRPORT' || tile.type === 'UTILITY') openPropertyModal(tile.index);
         renderBoardHighlights();
       });
 
@@ -684,7 +737,7 @@
 
     if (!tile || tile.type !== 'PROPERTY') return { ok: false, reason: 'Na tym polu nie buduje się domów.' };
     if (!prop || prop.ownerId !== playerId) return { ok: false, reason: 'Nie jesteś właścicielem tej dzielnicy.' };
-    if (!active || active.id !== playerId) return { ok: false, reason: 'Budować możesz tylko podczas swojej tury.' };
+    if (!active || active.id !== playerId) return { ok: false, reason: 'Budować możesz tylko w swojej turze.' };
     if (player.position !== tileIndex) {
       return { ok: false, reason: '🚶 Musisz stać swoim pionkiem centralnie na tym polu, aby wybudować na nim dom!' };
     }
@@ -715,9 +768,9 @@
     player.cash -= tile.buildCost;
     prop.level += 1;
     gameState.builtThisTurn = true;
-    const lvlName = prop.level === 5 ? 'Kompleks Górniczy / Hotel' : `Dom #${prop.level}`;
-    prop.history.unshift(`${nowTime()} — ${player.name} wrócił na pole i zbudował ${lvlName} za $${tile.buildCost}`);
-    addFeedEvent(`🏠 <strong>${player.name}</strong> odwiedził swoje pole <strong>${tile.shortName}</strong> i zbudował <strong>${lvlName}</strong>!`);
+    const lvlName = prop.level === 5 ? 'HOTEL (Poziom 5)' : `Dom #${prop.level}`;
+    prop.history.unshift(`${nowTime()} — ${player.name} zbudował ${lvlName} za $${tile.buildCost}`);
+    addFeedEvent(`🏠 <strong>${player.name}</strong> zbudował <strong>${lvlName}</strong> w <strong>${tile.shortName}</strong>!`);
     sfx.build();
     pushStateSync();
     return true;
@@ -733,7 +786,7 @@
     prop.level -= 1;
     player.cash += refund;
     prop.history.unshift(`${nowTime()} — Sprzedano dom (+$${refund})`);
-    addFeedEvent(`🔨 <strong>${player.name}</strong> sprzedał dom w <strong>${tile.shortName}</strong> za <strong>+$${refund}</strong>.`);
+    addFeedEvent(`🔨 <strong>${player.name}</strong> sprzedał dom w <strong>${tile.shortName}</strong> (+$${refund}).`);
     sfx.buy();
     pushStateSync();
     return true;
@@ -797,16 +850,7 @@
   function animateStepByStepMove(player, stepsCount, onComplete) {
     let rem = stepsCount;
     function step() {
-      if (rem <= 0) {
-        const landedCell = document.querySelector(`.board-tile[data-index="${player.position}"]`);
-        if (landedCell) {
-          landedCell.classList.remove('active-landed-tile');
-          void landedCell.offsetWidth;
-          landedCell.classList.add('active-landed-tile');
-        }
-        onComplete();
-        return;
-      }
+      if (rem <= 0) { onComplete(); return; }
       rem -= 1;
       player.position = (player.position + 1) % 40;
       if (player.position === 0) {
@@ -818,7 +862,7 @@
       }
       selectedTileIndex = player.position;
       renderMonopolyBoard();
-      setTimeout(step, 105);
+      setTimeout(step, 95);
     }
     step();
   }
@@ -864,7 +908,7 @@
             gameState.turnPhase = 'END';
             isRollingLock = false;
             pushStateSync();
-            if (player.isBot) setTimeout(botMonopolyTurn, 650);
+            if (player.isBot) setTimeout(botMonopolyTurn, 600);
             return;
           }
         }
@@ -877,7 +921,7 @@
           addFeedEvent(`🚨 <strong>${player.name}</strong> wyrzucił 3 dublety i trafia na Izbę!`);
           isRollingLock = false;
           pushStateSync();
-          if (player.isBot) setTimeout(botMonopolyTurn, 650);
+          if (player.isBot) setTimeout(botMonopolyTurn, 600);
           return;
         }
       } else {
@@ -889,9 +933,9 @@
         isRollingLock = false;
         checkMonopolyVictory();
         pushStateSync();
-        if (player.isBot && gameState.status === 'PLAYING') setTimeout(botMonopolyTurn, 750);
+        if (player.isBot && gameState.status === 'PLAYING') setTimeout(botMonopolyTurn, 650);
       });
-    }, 430);
+    }, 420);
   }
 
   function resolveLandedTile(player, tileIndex, diceSum) {
@@ -909,7 +953,7 @@
       }
       if (prop.ownerId === player.id) {
         if (tile.type === 'PROPERTY' && prop.boughtInRound < gameState.round && prop.level < 5 && !prop.mortgaged) {
-          addFeedEvent(`🏗️ <strong>${player.name}</strong> wrócił na swoje pole <strong>${tile.shortName}</strong>! Może teraz dokupić dom.`);
+          addFeedEvent(`🏗️ <strong>${player.name}</strong> wrócił na swoje pole <strong>${tile.shortName}</strong> po pełnym okrążeniu! Może teraz dokupić dom.`);
         }
         gameState.turnPhase = 'END';
         return;
@@ -1021,7 +1065,7 @@
       gameState.builtThisTurn = false;
       addFeedEvent(`🎲 <strong>${player.name}</strong> ma dodatkowy rzut za dublet!`);
       pushStateSync();
-      if (player.isBot) setTimeout(handleRollDice, 700);
+      if (player.isBot) setTimeout(handleRollDice, 650);
       return;
     }
 
@@ -1046,7 +1090,7 @@
     if (!gameState.isOnline && !nextP.isBot) activePerspectiveId = nextP.id;
     pushStateSync();
 
-    if (nextP.isBot && gameState.activeGame === 'MONOPOLY') setTimeout(handleRollDice, 750);
+    if (nextP.isBot && gameState.activeGame === 'MONOPOLY') setTimeout(handleRollDice, 650);
   }
 
   function botMonopolyTurn() {
@@ -1094,6 +1138,1043 @@
     if (checkMonopolyVictory()) return;
     if (currentTurnPlayer().id === playerId) endCurrentTurn();
     else pushStateSync();
+  }
+
+  /* ==================== 8. SZYNK KŁAMCÓW (Z OBSŁUGĄ BOTÓW) ==================== */
+  let selectedLiarCardIds = [];
+
+  function renderLiarsGame() {
+    if (!gameState || !gameState.liars) return;
+    const liars = gameState.liars;
+    const hands = JSON.parse(liars.handsJson || '{}');
+    const activeP = gameState.players[liars.turnIndex % gameState.players.length];
+    const viewer = getPlayerById(activePerspectiveId) || gameState.players[0];
+
+    const titleEl = document.getElementById('liars-turn-title');
+    if (titleEl) {
+      titleEl.textContent = liars.winnerName
+        ? `🏆 Wygrywa Szynk Kłamców: ${liars.winnerName}!`
+        : `Kolej przy stole: ${activeP?.name || '...'}`;
+    }
+
+    const reqBadge = document.getElementById('liars-required-rank');
+    const selWrap = document.getElementById('liars-rank-selector-wrap');
+    if (reqBadge && selWrap) {
+      if (liars.requiredRank) {
+        reqBadge.textContent = `Wymagana figura w tej kolejce: ${liars.requiredRank}`;
+        selWrap.classList.add('hidden');
+      } else {
+        reqBadge.textContent = `Nowe rozdanie na stole — wybierz deklarowaną figurę!`;
+        selWrap.classList.remove('hidden');
+      }
+    }
+
+    const oppRow = document.getElementById('liars-opponents-row');
+    if (oppRow) {
+      oppRow.innerHTML = gameState.players.map((p, idx) => {
+        const cnt = (hands[p.id] || []).length;
+        return `
+          <div class="liars-opp-card ${idx === liars.turnIndex ? 'active-liar' : ''}">
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;">
+              <span class="player-pawn-inline" style="background:${p.color};width:20px;height:20px;">${getAvatarSvg(p.avatar)}</span>
+              <strong>${p.name} ${p.isBot ? '🤖' : ''}</strong>
+            </div>
+            <div style="font-size:0.8rem;color:#ffca28;">🂠 Kart w ręce: <strong>${cnt}</strong></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const pileEl = document.getElementById('liars-pile-count');
+    if (pileEl) pileEl.textContent = `🂠 Zakrytych kart w puli na stole: ${liars.pile.length}`;
+
+    const claimEl = document.getElementById('liars-last-claim');
+    if (claimEl) {
+      claimEl.innerHTML = liars.lastPlay
+        ? `🗣️ <strong>${liars.lastPlay.playerName}</strong> twierdzi, że położył: <strong>${liars.lastPlay.count}× ${liars.lastPlay.claimedRank}</strong>`
+        : `Stół jest pusty. Wyłóż od 1 do 4 zakrytych kart!`;
+    }
+
+    const revBanner = document.getElementById('liars-reveal-banner');
+    if (revBanner) {
+      if (liars.lastRevealMsg) {
+        revBanner.innerHTML = liars.lastRevealMsg;
+        revBanner.classList.remove('hidden');
+      } else {
+        revBanner.classList.add('hidden');
+      }
+    }
+
+    const isHumanTurn = !activeP.isBot && canControlTurn(liars.turnIndex);
+    const canCallLiar = isHumanTurn && !!liars.lastPlay && liars.lastPlay.playerId !== activeP.id && !liars.winnerName;
+    const btnCall = document.getElementById('btn-liars-call');
+    const btnPlay = document.getElementById('btn-liars-play');
+    if (btnCall) btnCall.disabled = !canCallLiar;
+    if (btnPlay) btnPlay.disabled = !isHumanTurn || !!liars.winnerName;
+
+    const myCards = hands[viewer.id] || [];
+    const handLabel = document.getElementById('liars-my-hand-label');
+    if (handLabel) handLabel.textContent = `Karty gracza ${viewer.name} (${myCards.length} szt. — widoczne tylko dla Ciebie):`;
+
+    const strip = document.getElementById('liars-my-cards');
+    if (strip) {
+      strip.innerHTML = myCards.map(c => {
+        const isRed = c.suit === '♥' || c.suit === '♦';
+        const isSel = selectedLiarCardIds.includes(c.id);
+        return `
+          <div class="playing-card ${isRed ? 'red-suit' : ''} ${isSel ? 'selected-card' : ''}" data-cid="${c.id}">
+            <span style="align-self:flex-start;font-size:0.85rem;">${c.rank}${c.suit}</span>
+            <span style="font-size:1.6rem;">${c.suit}</span>
+            <span style="align-self:flex-end;font-size:0.85rem;">${c.rank}</span>
+          </div>
+        `;
+      }).join('');
+
+      strip.querySelectorAll('.playing-card').forEach(el => {
+        el.onclick = () => {
+          const cid = el.dataset.cid;
+          if (selectedLiarCardIds.includes(cid)) {
+            selectedLiarCardIds = selectedLiarCardIds.filter(x => x !== cid);
+          } else if (selectedLiarCardIds.length < 4) {
+            selectedLiarCardIds.push(cid);
+          }
+          renderLiarsGame();
+        };
+      });
+    }
+  }
+
+  function playLiarsCards() {
+    const liars = gameState.liars;
+    if (!liars || liars.winnerName) return;
+    const activeP = gameState.players[liars.turnIndex % gameState.players.length];
+    const hands = JSON.parse(liars.handsJson);
+    const myHand = hands[activeP.id] || [];
+
+    const chosenCards = myHand.filter(c => selectedLiarCardIds.includes(c.id));
+    if (chosenCards.length === 0) {
+      alert('Kliknij najpierw od 1 do 4 swoich kart na dole ekranu!');
+      return;
+    }
+
+    const claimedRank = liars.requiredRank || document.getElementById('liars-declare-select').value;
+    liars.requiredRank = claimedRank;
+
+    hands[activeP.id] = myHand.filter(c => !selectedLiarCardIds.includes(c.id));
+    liars.pile.push(...chosenCards);
+    liars.lastPlay = {
+      playerId: activeP.id,
+      playerName: activeP.name,
+      count: chosenCards.length,
+      claimedRank: claimedRank,
+      actualCards: chosenCards
+    };
+    liars.lastRevealMsg = '';
+    selectedLiarCardIds = [];
+    sfx.step();
+
+    liars.handsJson = JSON.stringify(hands);
+    liars.turnIndex = (liars.turnIndex + 1) % gameState.players.length;
+    const nextP = gameState.players[liars.turnIndex];
+    if (!gameState.isOnline && !nextP.isBot) activePerspectiveId = nextP.id;
+
+    pushStateSync();
+    checkBotForOtherGames();
+  }
+
+  function callLiarOnLastPlay() {
+    const liars = gameState.liars;
+    if (!liars || !liars.lastPlay) return;
+    const caller = gameState.players[liars.turnIndex % gameState.players.length];
+    const accused = getPlayerById(liars.lastPlay.playerId);
+    const hands = JSON.parse(liars.handsJson);
+
+    const actualStr = liars.lastPlay.actualCards.map(c => `${c.rank}${c.suit}`).join(', ');
+    const wasTruth = liars.lastPlay.actualCards.every(c => c.rank === liars.lastPlay.claimedRank);
+
+    if (wasTruth) {
+      hands[caller.id].push(...liars.pile);
+      liars.lastRevealMsg = `✅ PRAWDA! <strong>${accused.name}</strong> położył [${actualStr}]! Sprawdzający <strong>${caller.name}</strong> zabiera całą pulę!`;
+      sfx.rent();
+    } else {
+      hands[accused.id].push(...liars.pile);
+      liars.lastRevealMsg = `🚨 KŁAMSTWO! <strong>${accused.name}</strong> deklarował ${liars.lastPlay.claimedRank}, a położył [${actualStr}]! Zabiera całą pulę!`;
+      sfx.buy();
+    }
+
+    liars.pile = [];
+    liars.lastPlay = null;
+    liars.requiredRank = null;
+
+    for (const p of gameState.players) {
+      if ((hands[p.id] || []).length === 0) {
+        liars.winnerName = p.name;
+        sfx.win();
+      }
+    }
+
+    liars.handsJson = JSON.stringify(hands);
+    pushStateSync();
+    checkBotForOtherGames();
+  }
+
+  /* ==================== 9. KWIACIARNIA GODULA (KASYNO) ==================== */
+  let rouletteSpinAngle = 0;
+  let isCasinoBusy = false;
+
+  function renderCasinoGame() {
+    const viewer = getPlayerById(activePerspectiveId) || currentTurnPlayer();
+    const header = document.getElementById('casino-player-header');
+    if (header && viewer) {
+      header.textContent = `Grasz w Kwiaciarni Godula jako: ${viewer.name} (Portfel: $${viewer.cash})`;
+    }
+  }
+
+  function spinGodulaRoulette(betType) {
+    if (isCasinoBusy || !gameState) return;
+    const player = getPlayerById(activePerspectiveId) || currentTurnPlayer();
+    const bet = Math.max(10, Number(document.getElementById('casino-bet-input')?.value) || 100);
+    if (player.cash < bet) {
+      document.getElementById('roulette-msg').textContent = '❌ Nie masz wystarczająco gotówki na ten zakład!';
+      return;
+    }
+
+    isCasinoBusy = true;
+    player.cash -= bet;
+    sfx.dice();
+
+    const outcomeNum = Math.floor(Math.random() * 37);
+    const isRed = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(outcomeNum);
+    const wheel = document.getElementById('godula-roulette-wheel');
+    rouletteSpinAngle += 1080 + Math.floor(Math.random() * 360);
+    if (wheel) wheel.style.transform = `rotate(${rouletteSpinAngle}deg)`;
+
+    document.getElementById('roulette-msg').textContent = '🎡 Koło w Kwiaciarni Godula kręci się...';
+
+    setTimeout(() => {
+      document.getElementById('roulette-result-num').textContent = outcomeNum;
+      let mult = 0;
+      if (betType === 'ZERO' && outcomeNum === 0) mult = 14;
+      if (betType === 'RED' && isRed) mult = 2;
+      if (betType === 'BLACK' && outcomeNum !== 0 && !isRed) mult = 2;
+      if (betType === 'EVEN' && outcomeNum !== 0 && outcomeNum % 2 === 0) mult = 2;
+      if (betType === 'ODD' && outcomeNum % 2 === 1) mult = 2;
+
+      if (mult > 0) {
+        const winAmount = bet * mult;
+        player.cash += winAmount;
+        document.getElementById('roulette-msg').textContent = `🎉 Wypadło ${outcomeNum}! Wygrywasz +$${winAmount}!`;
+        sfx.win();
+      } else {
+        document.getElementById('roulette-msg').textContent = `💸 Wypadło ${outcomeNum}. Zakład ($${bet}) przepadł.`;
+      }
+      isCasinoBusy = false;
+      pushStateSync();
+    }, 2200);
+  }
+
+  function spinGodulaSlots() {
+    if (isCasinoBusy || !gameState) return;
+    const player = getPlayerById(activePerspectiveId) || currentTurnPlayer();
+    const bet = Math.max(10, Number(document.getElementById('casino-bet-input')?.value) || 100);
+    if (player.cash < bet) {
+      document.getElementById('slots-msg').textContent = '❌ Brak środków na zakręcenie automatem!';
+      return;
+    }
+
+    isCasinoBusy = true;
+    player.cash -= bet;
+    const symbols = ['🌹', '💎', '7️⃣', '⚒️', '🍀', '🔔'];
+    const r1 = document.getElementById('slot-r1');
+    const r2 = document.getElementById('slot-r2');
+    const r3 = document.getElementById('slot-r3');
+
+    let ticks = 0;
+    const timer = setInterval(() => {
+      r1.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      r2.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      r3.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      sfx.step();
+      ticks++;
+      if (ticks >= 12) {
+        clearInterval(timer);
+        const s1 = r1.textContent, s2 = r2.textContent, s3 = r3.textContent;
+        let mult = 0;
+        if (s1 === s2 && s2 === s3) mult = (s1 === '7️⃣' || s1 === '💎') ? 15 : 8;
+        else if (s1 === s2 || s2 === s3 || s1 === s3) mult = 2;
+
+        if (mult > 0) {
+          const prize = bet * mult;
+          player.cash += prize;
+          document.getElementById('slots-msg').textContent = `🎰 TRAFIONE (${s1}${s2}${s3})! Wygrywasz +$${prize}!`;
+          sfx.win();
+        } else {
+          document.getElementById('slots-msg').textContent = `Spróbuj ponownie (${s1} ${s2} ${s3}).`;
+        }
+        isCasinoBusy = false;
+        pushStateSync();
+      }
+    }, 90);
+  }
+
+  /* ==================== 10. CHIŃCZYK, WARCABY, SZACHY, 4 W RZĘDZIE (Z NAPRAWIONYMI BOTAMI) ==================== */
+  const LUDO_TRACK = [[4,0],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4],[1,4],[0,4],[0,5],[0,6],[1,6],[2,6],[3,6],[4,6],[4,7],[4,8],[4,9],[4,10],[5,10],[6,10],[6,9],[6,8],[6,7],[6,6],[7,6],[8,6],[9,6],[10,6],[10,5],[10,4],[9,4],[8,4],[7,4],[6,4],[6,3],[6,2],[6,1],[6,0],[5,0]];
+  const LUDO_BASES = [[[1,1],[1,2],[2,1],[2,2]],[[1,8],[1,9],[2,8],[2,9]],[[8,8],[8,9],[9,8],[9,9]],[[8,1],[8,2],[9,1],[9,2]]];
+  const LUDO_HOMES = [[[5,1],[5,2],[5,3],[5,4]],[[1,5],[2,5],[3,5],[4,5]],[[5,9],[5,8],[5,7],[5,6]],[[9,5],[8,5],[7,5],[6,5]]];
+  const LUDO_COLORS = ['#ff7849', '#00e5ff', '#ffca28', '#f06292'];
+  const LUDO_NAMES  = ['Wirek', 'Nowy Bytom', 'Halemba', 'Bykowina'];
+
+  function canMoveLudoPawn(pIdx, pawnIdx, dice) {
+    const step = gameState.ludo.pawns[pIdx][pawnIdx];
+    if (step === -1) return dice === 6;
+    if (step + dice > 43) return false;
+    if (step + dice >= 40) return !gameState.ludo.pawns[pIdx].includes(step + dice);
+    return true;
+  }
+
+  function rollLudoDice() {
+    if (!gameState || gameState.activeGame !== 'LUDO') return;
+    const ludo = gameState.ludo;
+    if (ludo.rolled || ludo.winner !== null) return;
+    const pCount = Math.min(4, gameState.players.length);
+    const curPlayer = gameState.players[ludo.turn % pCount];
+    if (!curPlayer.isBot && !canControlTurn(ludo.turn % pCount)) return;
+
+    sfx.dice();
+    const dieEl = document.getElementById('ludo-die');
+    dieEl?.classList.add('rolling');
+
+    setTimeout(() => {
+      dieEl?.classList.remove('rolling');
+      const allInBase = ludo.pawns[ludo.turn].every(s => s === -1);
+      const d = (allInBase && Math.random() < 0.45) ? 6 : (Math.floor(Math.random() * 6) + 1);
+      ludo.dice = d; ludo.rolled = true;
+      if (dieEl) dieEl.dataset.val = d;
+
+      const anyMove = [0,1,2,3].some(i => canMoveLudoPawn(ludo.turn, i, d));
+      if (!anyMove) {
+        setTimeout(() => { ludo.rolled = false; ludo.turn = (ludo.turn + 1) % pCount; pushStateSync(); checkBotForOtherGames(); }, 550);
+      } else {
+        pushStateSync();
+        if (curPlayer.isBot) {
+          setTimeout(() => {
+            const movableIdx = [0,1,2,3].find(i => canMoveLudoPawn(ludo.turn, i, ludo.dice));
+            if (movableIdx !== undefined) moveLudoPawn(ludo.turn, movableIdx, true);
+          }, 500);
+        }
+      }
+    }, 350);
+  }
+
+  function moveLudoPawn(pIdx, pawnIdx, isBotCall = false) {
+    const ludo = gameState.ludo;
+    const pCount = Math.min(4, gameState.players.length);
+    if (!ludo.rolled || ludo.turn !== pIdx) return;
+    if (!isBotCall && !canControlTurn(pIdx)) return;
+    if (!canMoveLudoPawn(pIdx, pawnIdx, ludo.dice)) return;
+
+    let step = ludo.pawns[pIdx][pawnIdx];
+    step = (step === -1) ? 0 : (step + ludo.dice);
+    ludo.pawns[pIdx][pawnIdx] = step;
+    sfx.step();
+
+    if (step < 40) {
+      const myGlobalIdx = (step + pIdx * 10) % 40;
+      for (let otherP = 0; otherP < pCount; otherP++) {
+        if (otherP === pIdx) continue;
+        for (let k = 0; k < 4; k++) {
+          const oStep = ludo.pawns[otherP][k];
+          if (oStep >= 0 && oStep < 40 && ((oStep + otherP * 10) % 40) === myGlobalIdx) { ludo.pawns[otherP][k] = -1; sfx.rent(); }
+        }
+      }
+    }
+    if (ludo.pawns[pIdx].every(s => s >= 40)) { ludo.winner = pIdx; sfx.win(); }
+    const extra = (ludo.dice === 6 && ludo.winner === null);
+    ludo.rolled = false;
+    if (!extra) ludo.turn = (ludo.turn + 1) % pCount;
+    pushStateSync();
+    checkBotForOtherGames();
+  }
+
+  function renderLudoGame() {
+    const grid = document.getElementById('ludo-grid');
+    if (!grid || !gameState.ludo) return;
+    const ludo = gameState.ludo;
+    const pCount = Math.min(4, gameState.players.length);
+    const curP = gameState.players[ludo.turn % pCount];
+
+    document.getElementById('ludo-turn-text').textContent = ludo.winner !== null ? `🏆 Wygrywa: ${LUDO_NAMES[ludo.winner]}!` : `Kolej: ${curP?.name || LUDO_NAMES[ludo.turn]}`;
+    document.getElementById('ludo-die').dataset.val = ludo.dice;
+
+    grid.innerHTML = '';
+    const cells = Array(11).fill(null).map(() => Array(11).fill(null));
+    for (let r = 0; r < 11; r++) {
+      for (let c = 0; c < 11; c++) {
+        const div = document.createElement('div');
+        div.className = 'ludo-cell';
+        if (r === 5 && c === 5) { div.style.background = '#ff9800'; div.textContent = '⚒️'; }
+        cells[r][c] = div;
+        grid.appendChild(div);
+      }
+    }
+    LUDO_TRACK.forEach(([r, c]) => cells[r][c].classList.add('track-cell'));
+    for (let p = 0; p < 4; p++) {
+      LUDO_BASES[p].forEach(([r, c]) => { cells[r][c].style.background = LUDO_COLORS[p] + '24'; cells[r][c].style.border = `2px solid ${LUDO_COLORS[p]}`; });
+      LUDO_HOMES[p].forEach(([r, c]) => { cells[r][c].style.background = LUDO_COLORS[p] + '38'; cells[r][c].style.border = `2px solid ${LUDO_COLORS[p]}`; });
+    }
+    for (let p = 0; p < pCount; p++) {
+      const plObj = gameState.players[p];
+      const avSvg = getAvatarSvg(plObj?.avatar || 'helmet');
+      for (let k = 0; k < 4; k++) {
+        const step = ludo.pawns[p][k];
+        const coords = (step === -1) ? LUDO_BASES[p][k] : (step < 40 ? LUDO_TRACK[(step + p * 10) % 40] : LUDO_HOMES[p][step - 40]);
+        if (coords) {
+          const pawnEl = document.createElement('div');
+          const movable = ludo.rolled && ludo.turn === p && canControlTurn(p) && canMoveLudoPawn(p, k, ludo.dice);
+          pawnEl.className = `ludo-pawn ${movable ? 'movable-pawn' : ''}`;
+          pawnEl.style.background = plObj?.color || LUDO_COLORS[p];
+          pawnEl.innerHTML = avSvg;
+          if (movable) pawnEl.onclick = () => moveLudoPawn(p, k, false);
+          cells[coords[0]][coords[1]].appendChild(pawnEl);
+        }
+      }
+    }
+  }
+
+  let selectedChecker = null;
+  function getCheckerMoves(board, r, c) {
+    const piece = board[r][c];
+    if (!piece) return [];
+    const dirs = piece.king ? [[-1,-1],[-1,1],[1,-1],[1,1]] : (piece.p === 0 ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]]);
+    const moves = [];
+    dirs.forEach(([dr, dc]) => {
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+        if (!board[nr][nc]) moves.push({ r: nr, c: nc, jump: null });
+        else if (board[nr][nc].p !== piece.p) {
+          const jr = r + dr * 2, jc = c + dc * 2;
+          if (jr >= 0 && jr < 8 && jc >= 0 && jc < 8 && !board[jr][jc]) moves.push({ r: jr, c: jc, jump: [nr, nc] });
+        }
+      }
+    });
+    return moves;
+  }
+
+  function renderCheckersGame() {
+    const grid = document.getElementById('checkers-grid');
+    if (!grid || !gameState.checkers) return;
+    const chk = gameState.checkers;
+    const board = JSON.parse(chk.boardJson);
+    const p0 = gameState.players[0]?.name || 'Węgiel';
+    const p1 = gameState.players[1]?.name || 'Stal';
+    document.getElementById('checkers-turn-text').textContent = chk.winner !== null ? `🏆 Wygrywa: ${chk.winner === 0 ? p0 : p1}!` : `Ruch: ${chk.turn === 0 ? p0 : p1}`;
+    document.getElementById('checkers-score-text').textContent = `Zbicia: ${chk.captured[0]} — ${chk.captured[1]}`;
+
+    const validTargets = selectedChecker ? getCheckerMoves(board, selectedChecker.r, selectedChecker.c) : [];
+    grid.innerHTML = '';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const sq = document.createElement('div');
+        const isDark = (r + c) % 2 === 1;
+        const isSel = selectedChecker && selectedChecker.r === r && selectedChecker.c === c;
+        const targetMove = validTargets.find(m => m.r === r && m.c === c);
+        sq.className = `board-sq ${isDark ? 'sq-dark' : 'sq-light'} ${isSel ? 'sq-selected' : ''} ${targetMove ? 'sq-valid-move' : ''}`;
+        const cell = board[r][c];
+        if (cell) {
+          const disc = document.createElement('div');
+          disc.className = `checker-disc ${cell.p === 0 ? 'p1-disc' : 'p2-disc'}`;
+          if (cell.king) disc.textContent = '👑';
+          sq.appendChild(disc);
+        }
+        sq.onclick = () => {
+          if (chk.winner !== null || !canControlTurn(chk.turn)) return;
+          if (targetMove) { executeCheckerMove(selectedChecker.r, selectedChecker.c, targetMove); selectedChecker = null; return; }
+          if (cell && cell.p === chk.turn) { selectedChecker = { r, c }; renderCheckersGame(); }
+        };
+        grid.appendChild(sq);
+      }
+    }
+  }
+
+  function executeCheckerMove(fr, fc, move) {
+    const chk = gameState.checkers;
+    const board = JSON.parse(chk.boardJson);
+    const piece = board[fr][fc];
+    board[fr][fc] = null;
+    board[move.r][move.c] = piece;
+    if (move.jump) { board[move.jump[0]][move.jump[1]] = null; chk.captured[piece.p] += 1; sfx.rent(); }
+    else sfx.step();
+    if ((piece.p === 0 && move.r === 0) || (piece.p === 1 && move.r === 7)) piece.king = true;
+    if (chk.captured[0] >= 12) chk.winner = 0;
+    if (chk.captured[1] >= 12) chk.winner = 1;
+    chk.boardJson = JSON.stringify(board);
+    chk.turn = 1 - chk.turn;
+    pushStateSync();
+    checkBotForOtherGames();
+  }
+
+  const CHESS_GLYPHS = { 0: { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙' }, 1: { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' } };
+  let selectedChessSq = null;
+  function getValidChessMoves(board, r, c) {
+    const piece = board[r][c];
+    if (!piece) return [];
+    const moves = [];
+    const p = piece.p;
+    const addIfValid = (nr, nc) => {
+      if (nr < 0 || nr > 7 || nc < 0 || nc > 7) return false;
+      if (!board[nr][nc]) { moves.push({ r: nr, c: nc }); return true; }
+      if (board[nr][nc].p !== p) { moves.push({ r: nr, c: nc }); return false; }
+      return false;
+    };
+    if (piece.type === 'P') {
+      const dir = p === 0 ? -1 : 1, startRow = p === 0 ? 6 : 1;
+      if (r + dir >= 0 && r + dir < 8 && !board[r + dir][c]) {
+        moves.push({ r: r + dir, c });
+        if (r === startRow && !board[r + dir * 2][c]) moves.push({ r: r + dir * 2, c });
+      }
+      [-1, 1].forEach(dc => {
+        const nr = r + dir, nc = c + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] && board[nr][nc].p !== p) moves.push({ r: nr, c: nc });
+      });
+    }
+    if (piece.type === 'N') [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr, dc]) => addIfValid(r + dr, c + dc));
+    if (piece.type === 'K') [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr, dc]) => addIfValid(r + dr, c + dc));
+    const slideDirs = [];
+    if (piece.type === 'R' || piece.type === 'Q') slideDirs.push([-1,0],[1,0],[0,-1],[0,1]);
+    if (piece.type === 'B' || piece.type === 'Q') slideDirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
+    slideDirs.forEach(([dr, dc]) => { for (let s = 1; s < 8; s++) if (!addIfValid(r + dr * s, c + dc * s)) break; });
+    return moves;
+  }
+
+  function renderChessGame() {
+    const grid = document.getElementById('chess-grid');
+    if (!grid || !gameState.chess) return;
+    const ch = gameState.chess;
+    const board = JSON.parse(ch.boardJson);
+    const validMoves = selectedChessSq ? getValidChessMoves(board, selectedChessSq.r, selectedChessSq.c) : [];
+    grid.innerHTML = '';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const sq = document.createElement('div');
+        const isDark = (r + c) % 2 === 1;
+        const isSel = selectedChessSq && selectedChessSq.r === r && selectedChessSq.c === c;
+        const target = validMoves.find(m => m.r === r && m.c === c);
+        sq.className = `board-sq ${isDark ? 'sq-dark' : 'sq-light'} ${isSel ? 'sq-selected' : ''} ${target ? 'sq-valid-move' : ''}`;
+        const piece = board[r][c];
+        if (piece) {
+          const span = document.createElement('span');
+          span.className = `chess-piece-glyph ${piece.p === 0 ? 'white-side' : 'black-side'}`;
+          span.textContent = CHESS_GLYPHS[piece.p][piece.type];
+          sq.appendChild(span);
+        }
+        sq.onclick = () => {
+          if (ch.winner !== null || !canControlTurn(ch.turn)) return;
+          if (target) { executeChessMove(selectedChessSq.r, selectedChessSq.c, target.r, target.c); selectedChessSq = null; return; }
+          if (piece && piece.p === ch.turn) { selectedChessSq = { r, c }; renderChessGame(); }
+        };
+        grid.appendChild(sq);
+      }
+    }
+  }
+
+  function executeChessMove(fr, fc, tr, tc) {
+    const ch = gameState.chess;
+    const board = JSON.parse(ch.boardJson);
+    const moving = board[fr][fc], target = board[tr][tc];
+    board[fr][fc] = null; board[tr][tc] = moving;
+    if (moving.type === 'P' && (tr === 0 || tr === 7)) moving.type = 'Q';
+    if (target && target.type === 'K') { ch.winner = moving.p; sfx.win(); } else sfx.step();
+    ch.boardJson = JSON.stringify(board);
+    ch.turn = 1 - ch.turn;
+    pushStateSync();
+    checkBotForOtherGames();
+  }
+
+  function dropConnect4Disc(col) {
+    const c4 = gameState.connect4;
+    if (!c4 || c4.winner !== null) return;
+    const board = JSON.parse(c4.boardJson);
+    let placedRow = -1;
+    for (let r = 5; r >= 0; r--) { if (board[r][col] === null) { board[r][col] = c4.turn; placedRow = r; break; } }
+    if (placedRow === -1) return;
+    sfx.step();
+    const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+    const won = dirs.some(([dr, dc]) => {
+      let count = 1;
+      for (let s = 1; s < 4; s++) { const nr = placedRow + dr * s, nc = col + dc * s; if (nr >= 0 && nr < 6 && nc >= 0 && nc < 7 && board[nr][nc] === c4.turn) count++; else break; }
+      for (let s = 1; s < 4; s++) { const nr = placedRow - dr * s, nc = col - dc * s; if (nr >= 0 && nr < 6 && nc >= 0 && nc < 7 && board[nr][nc] === c4.turn) count++; else break; }
+      return count >= 4;
+    });
+    c4.boardJson = JSON.stringify(board);
+    if (won) { c4.winner = c4.turn; sfx.win(); } else c4.turn = 1 - c4.turn;
+    pushStateSync();
+    checkBotForOtherGames();
+  }
+
+  function renderConnect4Game() {
+    const grid = document.getElementById('c4-grid');
+    if (!grid || !gameState.connect4) return;
+    const c4 = gameState.connect4;
+    const board = JSON.parse(c4.boardJson);
+    const p0 = gameState.players[0]?.name || 'Gracz 1';
+    const p1 = gameState.players[1]?.name || 'Gracz 2';
+    document.getElementById('c4-turn-text').textContent = c4.winner !== null ? `🏆 Wygrywa: ${c4.winner === 0 ? p0 : p1}!` : `Ruch: ${c4.turn === 0 ? p0 : p1}`;
+
+    grid.innerHTML = '';
+    for (let r = 0; r < 6; r++) {
+      for (let c = 0; c < 7; c++) {
+        const slot = document.createElement('div');
+        slot.className = 'c4-slot';
+        const val = board[r][c];
+        if (val !== null) {
+          const disc = document.createElement('div');
+          disc.className = 'c4-disc';
+          disc.style.background = val === 0 ? '#ff7849' : '#00e5ff';
+          slot.appendChild(disc);
+        }
+        slot.onclick = () => {
+          const curP = gameState.players[c4.turn];
+          if (!curP?.isBot && canControlTurn(c4.turn)) dropConnect4Disc(c);
+        };
+        grid.appendChild(slot);
+      }
+    }
+  }
+
+  function checkBotForOtherGames() {
+    if (!gameState) return;
+    const mode = gameState.activeGame;
+
+    if (mode === 'MONOPOLY' && gameState.status === 'PLAYING') {
+      const cur = currentTurnPlayer();
+      if (cur && cur.isBot && gameState.turnPhase === 'ROLL' && !isRollingLock) {
+        setTimeout(handleRollDice, 650);
+      }
+    }
+
+    if (mode === 'LIARS' && !gameState.liars.winnerName) {
+      const liars = gameState.liars;
+      const cur = gameState.players[liars.turnIndex % gameState.players.length];
+      if (cur && cur.isBot) {
+        setTimeout(() => {
+          const hands = JSON.parse(liars.handsJson);
+          const botHand = hands[cur.id] || [];
+          if (liars.lastPlay && Math.random() < 0.38) {
+            callLiarOnLastPlay();
+            return;
+          }
+          if (botHand.length > 0) {
+            const rank = liars.requiredRank || ['A','K','Q','J','10'][Math.floor(Math.random() * 5)];
+            liars.requiredRank = rank;
+            const matching = botHand.filter(c => c.rank === rank);
+            const played = matching.length > 0 ? [matching[0]] : [botHand[0]];
+            hands[cur.id] = botHand.filter(c => c.id !== played[0].id);
+            liars.pile.push(...played);
+            liars.lastPlay = { playerId: cur.id, playerName: cur.name, count: played.length, claimedRank: rank, actualCards: played };
+            if (hands[cur.id].length === 0) liars.winnerName = cur.name;
+            liars.handsJson = JSON.stringify(hands);
+            liars.turnIndex = (liars.turnIndex + 1) % gameState.players.length;
+            pushStateSync();
+            checkBotForOtherGames();
+          }
+        }, 700);
+      }
+    }
+
+    if (mode === 'LUDO') {
+      const pCount = Math.min(4, gameState.players.length);
+      const cur = gameState.players[gameState.ludo.turn % pCount];
+      if (cur && cur.isBot && gameState.ludo.winner === null && !gameState.ludo.rolled) setTimeout(rollLudoDice, 600);
+    }
+
+    if (mode === 'CHECKERS' && gameState.checkers.winner === null) {
+      const cur = gameState.players[gameState.checkers.turn];
+      if (cur && cur.isBot) {
+        setTimeout(() => {
+          const board = JSON.parse(gameState.checkers.boardJson);
+          const all = [];
+          for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c]?.p === gameState.checkers.turn) getCheckerMoves(board, r, c).forEach(m => all.push({ fr: r, fc: c, m }));
+          if (all.length) { const pick = all.find(x => x.m.jump) || all[Math.floor(Math.random() * all.length)]; executeCheckerMove(pick.fr, pick.fc, pick.m); }
+        }, 600);
+      }
+    }
+
+    if (mode === 'CHESS' && gameState.chess.winner === null) {
+      const cur = gameState.players[gameState.chess.turn];
+      if (cur && cur.isBot) {
+        setTimeout(() => {
+          const board = JSON.parse(gameState.chess.boardJson);
+          const all = [];
+          for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c]?.p === gameState.chess.turn) getValidChessMoves(board, r, c).forEach(m => all.push({ fr: r, fc: c, tr: m.r, tc: m.c }));
+          if (all.length) { const pick = all.find(x => board[x.tr][x.tc] !== null) || all[Math.floor(Math.random() * all.length)]; executeChessMove(pick.fr, pick.fc, pick.tr, pick.tc); }
+        }, 650);
+      }
+    }
+
+    if (mode === 'CONNECT4' && gameState.connect4.winner === null) {
+      const cur = gameState.players[gameState.connect4.turn];
+      if (cur && cur.isBot) {
+        setTimeout(() => {
+          const board = JSON.parse(gameState.connect4.boardJson);
+          const cols = [0,1,2,3,4,5,6].filter(c => board[0][c] === null);
+          if (cols.length) dropConnect4Disc(cols[Math.floor(Math.random() * cols.length)]);
+        }, 550);
+      }
+    }
+  }
+
+  /* ==================== 11. RENDEROWANIE INTERFEJSU ==================== */
+  function renderAll() {
+    if (!gameState) return;
+    if (gameState.mapId) applyMapTheme(gameState.mapId);
+
+    if (gameState.status === 'FINISHED' && gameState.winnerAnnouncement && lastWinnerShown !== gameState.winnerAnnouncement.winnerName) {
+      lastWinnerShown = gameState.winnerAnnouncement.winnerName;
+      showGenericModal(
+        `👑 ZWYCIĘZCA GRY: ${gameState.winnerAnnouncement.winnerName}!`,
+        `<div style="text-align:center;padding:18px;">
+          <div style="font-size:3.5rem;margin-bottom:8px;">🏆</div>
+          <h2 style="color:#ffca28;margin-bottom:10px;">${gameState.winnerAnnouncement.winnerName} wygrywa Ruda Śląska Monopoly!</h2>
+          <p style="font-size:0.95rem;line-height:1.5;margin-bottom:14px;">${gameState.winnerAnnouncement.reason}</p>
+          <div style="font-weight:900;color:#2ecc71;font-size:1.1rem;">Końcowy stan konta: $${gameState.winnerAnnouncement.cash}</div>
+        </div>`
+      );
+    }
+
+    const activeMode = gameState.activeGame || 'MONOPOLY';
+    ['MONOPOLY', 'LIARS', 'CASINO', 'LUDO', 'CHECKERS', 'CHESS', 'CONNECT4'].forEach(g => {
+      const st = document.getElementById('stage-' + g);
+      if (st) st.classList.toggle('hidden', g !== activeMode);
+    });
+    document.querySelectorAll('.game-nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.switchGame === activeMode));
+
+    renderMonopolyBoard();
+    renderCenterHUD();
+    renderLiarsGame();
+    renderCasinoGame();
+    renderLudoGame();
+    renderCheckersGame();
+    renderChessGame();
+    renderConnect4Game();
+    renderPlayersRoster();
+    renderMyProperties();
+    renderTradesList();
+    renderChat();
+    renderInspector(selectedTileIndex);
+  }
+
+  function renderMonopolyBoard() {
+    const sub20 = document.getElementById('corner-sub-20');
+    if (sub20) sub20.textContent = `$${gameState.vacationPool} w puli`;
+
+    BOARD_TILES.forEach(tile => {
+      const prop = gameState.properties[tile.index];
+      const capEl = document.getElementById('cap-' + tile.index);
+      const bannerEl = document.getElementById('houses-banner-' + tile.index);
+      const cellEl = document.querySelector(`.board-tile[data-index="${tile.index}"]`);
+
+      if (capEl && prop) {
+        if (prop.ownerId) {
+          const owner = getPlayerById(prop.ownerId);
+          capEl.classList.remove('hidden');
+          capEl.style.background = owner ? owner.color : '#888';
+          capEl.textContent = prop.mortgaged ? '🔒' : (prop.level === 5 ? '🏨 HOTEL' : (prop.level > 0 ? `🏠×${prop.level}` : '✓'));
+          if (cellEl && owner) cellEl.style.borderColor = owner.color;
+        } else {
+          capEl.classList.add('hidden');
+          if (cellEl) cellEl.style.borderColor = '';
+        }
+      }
+
+      if (bannerEl && prop) {
+        if (prop.level === 5) {
+          bannerEl.className = 'tile-houses-banner hotel-banner';
+          bannerEl.textContent = '🏨 HOTEL';
+        } else if (prop.level > 0) {
+          bannerEl.className = 'tile-houses-banner';
+          bannerEl.textContent = '🏠'.repeat(prop.level);
+        } else {
+          bannerEl.className = 'tile-houses-banner hidden';
+        }
+      }
+
+      if (cellEl && prop) cellEl.classList.toggle('mortgaged-tile', !!prop.mortgaged);
+
+      const tokenBox = document.getElementById('tokens-' + tile.index);
+      if (tokenBox) {
+        tokenBox.innerHTML = '';
+        gameState.players.filter(p => !p.bankrupt && p.position === tile.index).forEach(p => {
+          const tok = document.createElement('div');
+          tok.className = 'custom-pawn-token';
+          tok.style.background = p.color;
+          tok.title = p.name;
+          tok.innerHTML = getAvatarSvg(p.avatar);
+          tokenBox.appendChild(tok);
+        });
+      }
+    });
+    renderBoardHighlights();
+  }
+
+  function renderBoardHighlights() {
+    document.querySelectorAll('.board-tile').forEach(el => el.classList.toggle('selected-tile', Number(el.dataset.index) === selectedTileIndex));
+  }
+
+  function renderCenterHUD() {
+    const active = currentTurnPlayer();
+    const roundEl = document.getElementById('hud-round');
+    if (roundEl) roundEl.textContent = `Okrążenie #${gameState.round}`;
+    const d1El = document.getElementById('die-box-1');
+    const d2El = document.getElementById('die-box-2');
+    if (d1El) d1El.dataset.val = gameState.lastDice[0];
+    if (d2El) d2El.dataset.val = gameState.lastDice[1];
+
+    const canBuildHere = canUpgradeProperty(active.position, active.id);
+    const buyoutHere = canBuyoutProperty(active.position, active.id);
+    const quotaEl = document.getElementById('hud-build-quota');
+    if (quotaEl) {
+      const airCount = AIRPORT_INDICES.filter(idx => gameState.properties[idx]?.ownerId === active.id).length;
+      quotaEl.textContent = canBuildHere.ok
+        ? '🏠 Stoisz na swoim polu — możesz zbudować dom!'
+        : `✈️ Lotniska gracza ${active.name}: ${airCount}/4`;
+      quotaEl.className = canBuildHere.ok ? 'hub-pill quota-ready' : 'hub-pill quota-used';
+    }
+
+    document.getElementById('debt-warning-banner')?.classList.toggle('hidden', !(active.cash < 0));
+    const avatarDot = document.getElementById('playing-now-avatar');
+    if (avatarDot && active) {
+      avatarDot.style.background = active.color;
+      avatarDot.innerHTML = getAvatarSvg(active.avatar);
+      document.getElementById('playing-now-label').textContent = `Kolej gracza: ${active.name}`;
+    }
+
+    const isMyTurn = canControlTurn();
+    document.getElementById('wait-turn-notice')?.classList.toggle('hidden', isMyTurn);
+    document.getElementById('action-buttons-wrap')?.classList.toggle('hidden', !isMyTurn);
+
+    const tile = BOARD_TILES[active.position];
+    document.getElementById('btn-roll')?.classList.toggle('hidden', gameState.turnPhase !== 'ROLL');
+    document.getElementById('btn-buy')?.classList.toggle('hidden', gameState.turnPhase !== 'DECIDE');
+    document.getElementById('btn-auction')?.classList.toggle('hidden', gameState.turnPhase !== 'DECIDE');
+    document.getElementById('btn-end-turn')?.classList.toggle('hidden', gameState.turnPhase === 'ROLL');
+
+    if (gameState.turnPhase === 'DECIDE' && tile) {
+      const btnBuy = document.getElementById('btn-buy');
+      if (btnBuy) {
+        btnBuy.textContent = `💰 Kup ${tile.shortName} ($${tile.price})`;
+        btnBuy.disabled = active.cash < tile.price;
+      }
+    }
+
+    const btnBuildQuick = document.getElementById('btn-build-quick');
+    if (btnBuildQuick) {
+      btnBuildQuick.classList.toggle('hidden', !canBuildHere.ok);
+      if (canBuildHere.ok && tile) btnBuildQuick.textContent = `🏠 Zbuduj Dom na ${tile.shortName} ($${tile.buildCost})`;
+    }
+
+    const btnBuyout = document.getElementById('btn-buyout-field');
+    if (btnBuyout) {
+      btnBuyout.classList.toggle('hidden', !buyoutHere.ok);
+      if (buyoutHere.ok && tile) btnBuyout.textContent = `💼 Wykup ${tile.shortName} od właściciela ($${buyoutHere.cost})`;
+    }
+
+    const hasAnythingToSell = BOARD_TILES.some(t => gameState.properties[t.index]?.ownerId === active.id);
+    document.getElementById('btn-sell-emergency')?.classList.toggle('hidden', !(active.cash < 150 && hasAnythingToSell));
+    document.getElementById('btn-jail-pay')?.classList.toggle('hidden', !(active.inJail && gameState.turnPhase === 'ROLL' && active.cash >= 100));
+    document.getElementById('btn-jail-card')?.classList.toggle('hidden', !(active.inJail && gameState.turnPhase === 'ROLL' && active.pardonCards > 0));
+    const feedEl = document.getElementById('center-feed-log');
+    if (feedEl) feedEl.innerHTML = gameState.feed.map(item => `<div class="feed-line">${item.text}</div>`).join('');
+  }
+
+  function renderPlayersRoster() {
+    const rosterEl = document.getElementById('players-roster');
+    if (rosterEl) {
+      rosterEl.innerHTML = gameState.players.map((p, idx) => {
+        const airCnt = AIRPORT_INDICES.filter(i => gameState.properties[i]?.ownerId === p.id).length;
+        return `
+          <div class="roster-player-row ${idx === gameState.turnIndex ? 'is-active' : ''} ${p.bankrupt ? 'is-bankrupt' : ''}" style="border-left-color:${p.color}">
+            <div class="roster-left">
+              <div class="roster-avatar" style="background:${p.color}">${getAvatarSvg(p.avatar)}</div>
+              <div>
+                <div class="roster-name-title">${p.name} ${idx === 0 ? '👑' : ''} ${p.isBot ? '🤖' : ''}</div>
+                <div class="roster-meta-sub">${BOARD_TILES[p.position].shortName} ${airCnt > 0 ? `• ✈️×${airCnt}` : ''}</div>
+              </div>
+            </div>
+            <div class="roster-money ${p.cash < 0 ? 'negative' : ''}">$${p.cash}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const sel = document.getElementById('perspective-select');
+    if (sel) {
+      sel.innerHTML = gameState.players
+        .filter(p => !p.bankrupt)
+        .map(p => `<option value="${p.id}" ${p.id === activePerspectiveId ? 'selected' : ''}>${p.name} ($${p.cash})</option>`)
+        .join('');
+    }
+  }
+
+  function renderMyProperties() {
+    const viewer = getPlayerById(activePerspectiveId) || currentTurnPlayer();
+    const listEl = document.getElementById('my-properties-scroll');
+    if (!viewer || !listEl) return;
+
+    const ownedTiles = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === viewer.id);
+    const headTxt = document.getElementById('my-props-header-text');
+    if (headTxt) headTxt.textContent = `🏘️ Twoje Pola i Lotniska (${ownedTiles.length})`;
+    let totalWorth = viewer.cash;
+    ownedTiles.forEach(t => { totalWorth += t.price + (gameState.properties[t.index].level * (t.buildCost || 0)); });
+    const worthBadge = document.getElementById('my-networth-badge');
+    if (worthBadge) worthBadge.textContent = `Majątek: $${totalWorth}`;
+
+    if (!ownedTiles.length) {
+      listEl.innerHTML = `<div style="font-size:0.76rem;color:var(--text-muted);">Brak kupionych pól.</div>`;
+      return;
+    }
+
+    listEl.innerHTML = ownedTiles.map(t => {
+      const pr = gameState.properties[t.index];
+      const grp = GROUPS[t.group];
+      const upCheck = canUpgradeProperty(t.index, viewer.id);
+      const lvlBadge = pr.mortgaged ? '🔒 Hipoteka' : (t.type === 'PROPERTY' ? (pr.level === 5 ? '🏨 HOTEL' : `🏠 Poz. ${pr.level}/5`) : '✈️ Lotnisko');
+      const buildBtnHtml = (t.type === 'PROPERTY' && upCheck.ok) ? `<button type="button" class="btn-quick-up" data-build-idx="${t.index}">+🏠 $${t.buildCost}</button>` : '';
+      const sellBtnHtml = (t.type === 'PROPERTY' && pr.level > 0)
+        ? `<button type="button" class="btn-quick-sell" data-sell-house-idx="${t.index}">-🏠 +$${Math.floor(t.buildCost * 0.5)}</button>`
+        : `<button type="button" class="btn-quick-sell" data-sell-land-idx="${t.index}">💵 Sprzedaj (+$${Math.floor(t.price * 0.75)})</button>`;
+
+      return `
+        <div class="owned-prop-item" data-open-idx="${t.index}">
+          <div class="owned-prop-left"><span class="owned-dot" style="background:${grp ? grp.color : '#888'}"></span><span class="owned-name">${t.shortName}</span></div>
+          <div class="owned-prop-right"><span class="lvl-tag">${lvlBadge}</span>${buildBtnHtml}${sellBtnHtml}</div>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('[data-open-idx]').forEach(row => {
+      row.onclick = (e) => { if (!e.target.closest('button')) openPropertyModal(Number(row.dataset.openIdx)); };
+    });
+    listEl.querySelectorAll('[data-build-idx]').forEach(btn => {
+      btn.onclick = (e) => { e.stopPropagation(); buildHouseOnProperty(Number(btn.dataset.buildIdx), viewer.id); };
+    });
+    listEl.querySelectorAll('[data-sell-house-idx]').forEach(btn => {
+      btn.onclick = (e) => { e.stopPropagation(); sellHouseOnProperty(Number(btn.dataset.sellHouseIdx), viewer.id); };
+    });
+    listEl.querySelectorAll('[data-sell-land-idx]').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const idx = Number(btn.dataset.sellLandIdx);
+        sellLandToBank(idx, viewer.id);
+      };
+    });
+  }
+
+  function renderInspector(tileIndex) {
+    const tile = BOARD_TILES[tileIndex];
+    if (!tile) return;
+    const prop = gameState.properties[tileIndex];
+    const grp = tile.group ? GROUPS[tile.group] : null;
+    const tagEl = document.getElementById('spotlight-tag');
+    const titleEl = document.getElementById('spotlight-title');
+    const content = document.getElementById('spotlight-content');
+    if (tagEl) tagEl.textContent = tile.district || grp?.name || 'RUDA ŚLĄSKA';
+    if (titleEl) titleEl.textContent = tile.name;
+    if (!content) return;
+    if (!prop) { content.innerHTML = `<div style="font-size:0.78rem;color:#b5abd6;">${tile.subtitle || 'Pole specjalne.'}</div>`; return; }
+    const owner = prop.ownerId ? getPlayerById(prop.ownerId) : null;
+    const bCost = getBuyoutCost(tileIndex);
+    content.innerHTML = `
+      <div class="spot-grid">
+        <div class="spot-stat"><span>Cena</span><strong>$${tile.price}</strong></div>
+        <div class="spot-stat"><span>Właściciel</span><strong>${owner ? owner.name : 'Wolne'}</strong></div>
+        <div class="spot-stat"><span>Poziom</span><strong>${tile.type === 'AIRPORT' ? '✈️' : prop.level+'/5'}</strong></div>
+        <div class="spot-stat"><span>Wykup</span><strong>${bCost ? '$'+bCost : 'Chronione'}</strong></div>
+      </div>
+    `;
+  }
+
+  function openPropertyModal(tileIndex) {
+    selectedTileIndex = tileIndex;
+    const tile = BOARD_TILES[tileIndex];
+    const prop = gameState.properties[tileIndex];
+    if (!tile || !prop) return;
+
+    const modal = document.getElementById('prop-modal');
+    if (!modal) return;
+    const viewer = getPlayerById(activePerspectiveId) || currentTurnPlayer();
+    const owner = prop.ownerId ? getPlayerById(prop.ownerId) : null;
+    const grp = tile.group ? GROUPS[tile.group] : null;
+
+    document.getElementById('prop-modal-banner').style.background = grp ? `linear-gradient(135deg, ${grp.color}, #1c162e)` : '#2a2244';
+    document.getElementById('prop-modal-group').textContent = grp ? grp.name : tile.district;
+    document.getElementById('prop-modal-name').textContent = tile.name;
+    document.getElementById('pm-price').textContent = `$${tile.price}`;
+    document.getElementById('pm-owner').textContent = owner ? owner.name : 'Brak (Wolne)';
+    document.getElementById('pm-level').textContent = tile.type === 'AIRPORT' ? 'Lotnisko (4 = Wygrana)' : `${prop.level} / 5`;
+    document.getElementById('pm-rent').textContent = `$${calculateRent(tileIndex)}`;
+
+    const bCost = getBuyoutCost(tileIndex);
+    const buyoutEl = document.getElementById('pm-buyout-cost');
+    if (buyoutEl) buyoutEl.textContent = bCost ? `$${bCost}` : 'Chronione (Lotnisko)';
+
+    const tbody = document.getElementById('pm-rent-tbody');
+    if (tile.type === 'PROPERTY') {
+      const labels = ['Poziom 0 (Działka)','Poziom 1 (1 Dom)','Poziom 2 (2 Domy)','Poziom 3 (3 Domy)','Poziom 4 (4 Domy)','Poziom 5 (Hotel — Chroniony)'];
+      tbody.innerHTML = tile.rents.map((r, lvl) => `<tr class="${prop.level === lvl ? 'current-lvl-row' : ''}"><td>${labels[lvl]}</td><td>${lvl === 5 ? '🏨' : (lvl > 0 ? '🏠×'+lvl : '—')}</td><td><strong>$${r}</strong></td></tr>`).join('');
+    } else if (tile.type === 'AIRPORT') {
+      tbody.innerHTML = `
+        <tr><td>1 Lotnisko</td><td>✈️</td><td><strong>$50</strong></td></tr>
+        <tr><td>2 Lotniska</td><td>✈️✈️</td><td><strong>$110</strong></td></tr>
+        <tr><td>3 Lotniska</td><td>✈️✈️✈️</td><td><strong>$220</strong></td></tr>
+        <tr class="current-lvl-row"><td>4 Lotniska</td><td>🏆</td><td><strong>NATYCHMIASTOWA WYGRANA GRY!</strong></td></tr>
+      `;
+    } else {
+      tbody.innerHTML = `<tr><td>Czynsz przemysłowy</td><td>⚡</td><td><strong>$${calculateRent(tileIndex)}</strong></td></tr>`;
+    }
+
+    const btnBuild = document.getElementById('btn-pm-build');
+    const btnBuyout = document.getElementById('btn-pm-buyout');
+    const btnSell = document.getElementById('btn-pm-sell');
+    const btnSellLand = document.getElementById('btn-pm-sell-land');
+    const btnMort = document.getElementById('btn-pm-mortgage');
+
+    const upCheck = canUpgradeProperty(tileIndex, viewer.id);
+    const buyoutCheck = canBuyoutProperty(tileIndex, viewer.id);
+
+    document.getElementById('pm-build-cost').textContent = tile.buildCost ? `$${tile.buildCost}` : '—';
+    document.getElementById('pm-status-note').textContent = prop.ownerId === viewer.id ? upCheck.reason : buyoutCheck.reason;
+
+    if (btnBuild) {
+      btnBuild.classList.toggle('hidden', tile.type !== 'PROPERTY');
+      btnBuild.disabled = !upCheck.ok;
+      btnBuild.onclick = () => { if (buildHouseOnProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
+    }
+    if (btnSell) {
+      btnSell.classList.toggle('hidden', tile.type !== 'PROPERTY');
+      btnSell.disabled = !(prop.ownerId === viewer.id && prop.level > 0);
+      btnSell.onclick = () => { if (sellHouseOnProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
+    }
+    if (btnBuyout) {
+      btnBuyout.classList.toggle('hidden', !buyoutCheck.ok);
+      if (buyoutCheck.ok) {
+        btnBuyout.textContent = `💼 Wykup to pole od gracza za $${buyoutCheck.cost}!`;
+        btnBuyout.onclick = () => {
+          if (executeHostileBuyout(tileIndex, viewer.id)) openPropertyModal(tileIndex);
+        };
+      }
+    }
+    if (btnSellLand) {
+      btnSellLand.disabled = !(prop.ownerId === viewer.id);
+      btnSellLand.textContent = `💵 Sprzedaj Pole do Banku (+$${Math.floor(tile.price * 0.75)})`;
+      btnSellLand.onclick = () => { if (sellLandToBank(tileIndex, viewer.id)) modal.classList.add('hidden'); };
+    }
+    if (btnMort) {
+      btnMort.disabled = !(prop.ownerId === viewer.id && prop.level === 0);
+      btnMort.onclick = () => { if (toggleMortgageProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
+    }
+
+    document.getElementById('pm-history-list').innerHTML = prop.history.map(h => `<li>${h}</li>`).join('');
+    modal.classList.remove('hidden');
   }
 
   function openGiftModal() {
@@ -1173,7 +2254,7 @@
           (tr.giveProps || []).forEach(idx => { if (gameState.properties[idx]) gameState.properties[idx].ownerId = t.id; });
           (tr.takeProps || []).forEach(idx => { if (gameState.properties[idx]) gameState.properties[idx].ownerId = s.id; });
         }
-        gameState.trades = gameState.trades.filter(x => x.id !== b.dataset.acc);
+        gameState.trades = gameState.trades.filter(x => x.id !== tr.id);
         checkMonopolyVictory();
         pushStateSync();
       };
@@ -1267,7 +2348,7 @@
       plBox.innerHTML = gameState.players.map(p => `
         <div class="btn-ghost" style="border-left:4px solid ${p.color};display:flex;align-items:center;gap:6px;">
           <span class="player-pawn-inline" style="background:${p.color};width:18px;height:18px;">${getAvatarSvg(p.avatar)}</span>
-          <span>${p.name} ${p.isBot ? '🤖' : '👤'} ${p.clientToken === myClientToken ? '(Ty)' : ''}</span>
+          <span>${p.name} ${p.clientToken === myClientToken ? '(Ty)' : ''}</span>
         </div>
       `).join('');
     }
@@ -1293,46 +2374,6 @@
     return roomState;
   }
 
-  function showRankingModal() {
-    if (!gameState) return;
-    const sorted = [...gameState.players].sort((a, b) => {
-      if (a.bankrupt !== b.bankrupt) return a.bankrupt ? 1 : -1;
-      let netA = a.cash, netB = b.cash;
-      BOARD_TILES.forEach(t => {
-        if (gameState.properties[t.index]?.ownerId === a.id) netA += t.price;
-        if (gameState.properties[t.index]?.ownerId === b.id) netB += t.price;
-      });
-      return netB - netA;
-    });
-
-    const winner = sorted[0];
-    const spot = document.getElementById('ranking-champion-spotlight');
-    if (spot && winner) {
-      spot.innerHTML = `
-        <span class="champ-crown-icon">👑</span>
-        <h3 style="color:#ffca28;font-size:1.3rem;margin:4px 0;">Król Areny: ${winner.name}</h3>
-        <p style="font-size:0.85rem;color:#b5abd6;">Najbogatszy magnat Rudy Śląskiej z majątkiem $${winner.cash}</p>
-      `;
-    }
-
-    const tbody = document.getElementById('ranking-tbody');
-    if (tbody) {
-      tbody.innerHTML = sorted.map((p, idx) => `
-        <tr class="${idx === 0 ? 'top-winner-row' : ''}">
-          <td><strong>#${idx + 1}</strong></td>
-          <td style="display:flex;align-items:center;gap:7px;">
-            <span class="player-pawn-inline" style="background:${p.color};width:20px;height:20px;">${getAvatarSvg(p.avatar)}</span>
-            ${p.name} ${idx === 0 ? '👑' : ''} ${p.isBot ? '🤖' : ''}
-          </td>
-          <td>${p.bankrupt ? '❌ Zbankrutował' : '🟢 Aktywny'}</td>
-          <td><strong>$${p.cash}</strong></td>
-        </tr>
-      `).join('');
-    }
-
-    document.getElementById('ranking-modal')?.classList.remove('hidden');
-  }
-
   function showGenericModal(title, htmlContent) {
     const tEl = document.getElementById('generic-modal-title');
     const bEl = document.getElementById('generic-modal-body');
@@ -1342,40 +2383,6 @@
   }
 
   function initEvents() {
-    document.querySelectorAll('.mob-nav-btn').forEach(btn => {
-      btn.onclick = () => {
-        document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.mobTab;
-        if (tab === 'ranking') { showRankingModal(); return; }
-        if (tab === 'lobby') { document.getElementById('lobby-overlay')?.classList.remove('hidden'); return; }
-
-        const stageBoard = document.getElementById('mobile-pane-board');
-        const sidePanel = document.getElementById('mobile-pane-sidebar');
-        if (stageBoard && sidePanel) {
-          if (tab === 'board') {
-            stageBoard.style.display = 'flex';
-            sidePanel.style.display = 'none';
-          } else if (tab === 'players') {
-            stageBoard.style.display = 'none';
-            sidePanel.style.display = 'flex';
-            document.getElementById('side-panel-players')?.scrollIntoView({ behavior: 'smooth' });
-          } else if (tab === 'chat') {
-            stageBoard.style.display = 'none';
-            sidePanel.style.display = 'flex';
-            document.getElementById('side-panel-chat')?.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
-      };
-    });
-
-    bindClick('btn-show-ranking', showRankingModal);
-    bindClick('btn-ranking-continue', () => document.getElementById('ranking-modal')?.classList.add('hidden'));
-    bindClick('btn-ranking-rematch', () => {
-      document.getElementById('ranking-modal')?.classList.add('hidden');
-      document.getElementById('btn-reset-board')?.click();
-    });
-
     bindClick('btn-toggle-theme', () => {
       document.body.classList.toggle('theme-light');
       document.body.classList.toggle('theme-dark');
@@ -1491,6 +2498,7 @@
       renderLobbySetup();
     });
 
+    // START GRY Z BOTAMI — Bezpieczne zamknięcie Lobby, zresetowanie blokad i uruchomienie gry
     bindClick('btn-start-local-game', () => {
       const mainName = document.getElementById('local-name-input')?.value.trim() || 'Sztygar';
       const startCash = Number(document.getElementById('local-cash-select')?.value) || 2000;
@@ -1574,6 +2582,7 @@
       if (gameState.activeGame === 'CHESS') gameState.chess = createChessState();
       if (gameState.activeGame === 'CONNECT4') gameState.connect4 = createConnect4State();
       pushStateSync();
+      checkBotForOtherGames();
     });
 
     const perspSel = document.getElementById('perspective-select');
@@ -1625,7 +2634,11 @@
       pushStateSync();
     });
 
-    bindClick('btn-auc-cancel', () => { document.getElementById('auction-modal')?.classList.add('hidden'); gameState.turnPhase = 'END'; pushStateSync(); });
+    bindClick('btn-auc-cancel', () => {
+      document.getElementById('auction-modal')?.classList.add('hidden');
+      gameState.turnPhase = 'END';
+      pushStateSync();
+    });
 
     bindClick('btn-new-trade', () => {
       const sender = getPlayerById(activePerspectiveId) || currentTurnPlayer();
@@ -1671,7 +2684,7 @@
     bindClick('btn-open-rules', () => {
       showGenericModal(
         '⚒️ Zasady 7 Gier — Ruda Śląska Arena Ultimate',
-        `<div style="line-height:1.65;font-size:0.86rem;display:flex;flex-direction:column;gap:8px;">
+        `<div style="line-height:1.6;font-size:0.86rem;display:flex;flex-direction:column;gap:8px;">
           <p><strong>✈️ 1. 4 Lotniska = Wygrana:</strong> Na planszy są 4 Lotniska. Zgromadzenie wszystkich 4 daje natychmiastowe zwycięstwo! Lotnisk nie da się od nikogo odkupić siłą — można je przejąć tylko wtedy, gdy właściciel musi je sprzedać przez brak gotówki.</p>
           <p><strong>💼 2. Odkup cudzych pól:</strong> Gdy staniesz na zwykłej dzielnicy innego gracza, płacisz mu czynsz, a następnie możesz przymusowo odkupić od niego to pole po zawyżonej cenie.</p>
           <p><strong>🏠 3. Budowa domów:</strong> Po zakupie pustej działki musisz przejechać całą mapę i ponownie stanąć na tym polu w kolejnym okrążeniu, aby wybudować dom.</p>
