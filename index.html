@@ -369,4 +369,391 @@
 
       <!-- 7. SZTOLNIA 4 W RZĘDZIE -->
       <section id="stage-CONNECT4" class="stage-view hidden">
-        <div class="board-card
+        <div class="board-card-shell">
+           <div class="game-top-bar">
+            <div><span class="game-tag">HUTA POKÓJ VS KWK HALEMBA</span><h2 id="chess-turn-text">Ruch: Złote</h2></div>
+            <div class="game-hint-pill" id="chess-status-text">Kliknij swoją figurę, a następnie podświetlone pole</div>
+          </div>
+          <div id="chess-grid" class="chess-grid"></div>
+        </div>
+      </section>
+
+      <!-- 7. SZTOLNIA 4 W RZĘDZIE -->
+      <section id="stage-CONNECT4" class="stage-view hidden">
+        <div class="board-card-shell">
+          <div class="game-top-bar">
+            <div><span class="game-tag">SZYB WYDOBYWCZY: 4 W LINII</span><h2 id="c4-turn-text">Ruch: Żar Węglowy</h2></div>
+            <div class="game-hint-pill" id="c4-status-text">Dotknij wybranej kolumny, aby zrzucić urobek</div>
+          </div>
+          <div id="c4-grid" class="c4-grid"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- PRAWA STREFA BOCZNA -->
+    <aside class="arena-sidebar" id="mobile-pane-sidebar">
+      <div class="side-panel" id="side-panel-players">
+        <div class="panel-head">
+          <span>👥 Gracze (👑 = Lider)</span>
+          <select id="perspective-select" class="perspective-select" title="Twoja perspektywa"></select>
+        </div>
+        <div id="players-roster" class="players-roster"></div>
+        <div class="panel-foot-row">
+          <button type="button" id="btn-open-gift" class="btn-side-gold">🎁 Podaruj</button>
+          <button type="button" id="btn-new-trade" class="btn-side-purple">🤝 Wymiana</button>
+          <button type="button" id="btn-bankrupt" class="btn-side-danger">🚩 Bankrut</button>
+        </div>
+      </div>
+
+      <div class="side-panel hidden" id="trades-panel-box">
+        <div class="panel-head"><span>🤝 Aktywne Oferty Wymiany</span></div>
+        <div id="trades-list-box" class="trades-list-box"></div>
+      </div>
+
+      <div class="side-panel props-panel" id="side-panel-props">
+        <div class="spotlight-mini" id="spotlight-banner">
+          <span class="spot-mini-tag" id="spotlight-tag">PODGLĄD POLA</span>
+          <h4 id="spotlight-title">Kliknij dowolne pole na planszy</h4>
+          <div id="spotlight-content" class="spot-mini-body"></div>
+        </div>
+
+        <div class="panel-head" style="margin-top:8px;">
+          <span id="my-props-header-text">🏘️ Twoje Pola i Lotniska (0)</span>
+          <span id="my-networth-badge" class="worth-tag">Majątek: $2000</span>
+        </div>
+        <div class="props-rule-hint">
+          ✈️ <strong>4 Lotniska = Wygrana!</strong> Lotniska można przejąć tylko wtedy, gdy właściciel musi je sprzedać przez brak pieniędzy!
+        </div>
+        <div id="my-properties-scroll" class="my-properties-scroll"></div>
+      </div>
+
+      <div class="side-panel chat-panel" id="side-panel-chat">
+        <div class="panel-head">
+          <span>💬 Czat Górniczy</span>
+          <div class="emoji-strip">
+            <button type="button" class="emoji-chip" data-emoji="⛏️">⛏️</button>
+            <button type="button" class="emoji-chip" data-emoji="✈️">✈️</button>
+            <button type="button" class="emoji-chip" data-emoji="🃏">🃏</button>
+            <button type="button" class="emoji-chip" data-emoji="🎰">🎰</button>
+            <button type="button" class="emoji-chip" data-emoji="👑">👑</button>
+          </div>
+        </div>
+        <div id="chat-stream" class="chat-stream"></div>
+        <form id="chat-form" class="chat-form">
+          <input type="text" id="chat-text-input" placeholder="Napisz wiadomość..." maxlength="140" autocomplete="off" />
+          <button type="submit" class="btn-chat-send">➤</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ==================== DOLNY PASEK NAWIGACJI MOBILNEJ (NA TELEFONY) ==================== -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <button type="button" class="mob-nav-btn active" data-mob-tab="board">
+      <span>🎲</span><small>Plansza</small>
+    </button>
+    <button type="button" class="mob-nav-btn" data-mob-tab="players">
+      <span>👥</span><small>Gracze i Pola</small>
+    </button>
+    <button type="button" class="mob-nav-btn" data-mob-tab="chat">
+      <span>💬</span><small>Czat</small>
+    </button>
+    <button type="button" class="mob-nav-btn" data-mob-tab="ranking">
+      <span>🏆</span><small>Ranking</small>
+    </button>
+    <button type="button" class="mob-nav-btn" data-mob-tab="lobby">
+      <span>🌐</span><small>Gry / Pokój</small>
+    </button>
+  </nav>
+
+  <!-- ==================== MODAL PODIUM I TABELI RANKINGOWEJ (Z KORONĄ 👑 NAD ZWYCIĘZCĄ) ==================== -->
+  <div id="ranking-modal" class="modal-backdrop hidden">
+    <div class="modal-card ranking-modal-card">
+      <div class="row-between">
+        <div>
+          <span class="badge-gold" id="ranking-mode-badge">PODSUMOWANIE I KLASYFIKACJA GRACZY</span>
+          <h2 id="ranking-modal-title" style="margin-top:4px;">🏆 Tabela Rankingowa — Ruda Śląska Arena</h2>
+        </div>
+        <button type="button" id="btn-close-ranking" class="btn-close-x">✕</button>
+      </div>
+
+      <!-- Podium Zwycięzcy z Koroną nad Nazwą -->
+      <div id="ranking-champion-spotlight" class="ranking-champion-spotlight"></div>
+
+      <!-- Pełna Tabela Rankingowa -->
+      <div class="ranking-table-wrap">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>Miejsce</th>
+              <th>Gracz</th>
+              <th>Status / Wynik w Trybie</th>
+              <th>Majątek Całkowity</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="row-between" style="margin-top:14px;">
+        <button type="button" id="btn-ranking-continue" class="btn-ghost">Wróć do Stołu</button>
+        <button type="button" id="btn-ranking-rematch" class="btn-ember-full" style="width:auto;padding:10px 22px;">🔄 Zagraj Nową Rundę</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL LOBBY (7 GIER, PIONKI, MAPY, FIREBASE) ==================== -->
+  <div id="lobby-overlay" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="lobby-header">
+        <div>
+          <span class="badge-gold">7 GIER • PEŁNA RULETKA GODULA • SZYNK KŁAMCÓW • MOBILE READY</span>
+          <h1>RUDA ŚLĄSKA — ARENA ULTIMATE</h1>
+          <p>Wybierz grę, spersonalizuj swój pionek/twarz i wylosuj mapę Rudy Śląskiej.</p>
+        </div>
+        <button type="button" id="btn-close-lobby" class="btn-close-x">✕</button>
+      </div>
+
+      <div class="lobby-game-grid" id="lobby-game-picker">
+        <button type="button" class="game-pick-card active" data-game="MONOPOLY"><span class="gp-icon">🏭</span><strong>Monopoly Ruda</strong><small>4 Lotniska & Wykupy</small></button>
+        <button type="button" class="game-pick-card" data-game="LIARS"><span class="gp-icon">🃏</span><strong>Szynk Kłamców</strong><small>Blef Karciany</small></button>
+        <button type="button" class="game-pick-card" data-game="CASINO"><span class="gp-icon">🌸</span><strong>Kwiaciarnia Godula</strong><small>Ruletka 0-36 & Cel</small></button>
+        <button type="button" class="game-pick-card" data-game="LUDO"><span class="gp-icon">🎲</span><strong>Chińczyk</strong><small>4 Dzielnice</small></button>
+        <button type="button" class="game-pick-card" data-game="CHECKERS"><span class="gp-icon">⚫</span><strong>Warcaby</strong><small>Węgiel vs Stal</small></button>
+        <button type="button" class="game-pick-card" data-game="CHESS"><span class="gp-icon">♟️</span><strong>Szachy</strong><small>Królewskie</small></button>
+        <button type="button" class="game-pick-card" data-game="CONNECT4"><span class="gp-icon">🪙</span><strong>4 w Rzędzie</strong><small>Sztolnia</small></button>
+      </div>
+
+      <div class="map-selector-bar">
+        <div class="row-between">
+          <label class="sec-label">🗺️ Wybierz lub wylosuj Mapę Tła Rudy Śląskiej:</label>
+          <button type="button" id="btn-lobby-rand-map" class="btn-ghost">🎲 Losuj z Animacją</button>
+        </div>
+        <div id="lobby-map-cards" class="map-cards-row"></div>
+      </div>
+
+      <div class="lobby-tabs">
+        <button type="button" class="lobby-tab active" data-tab="local">🤖 Szybka Gra z Botami / Na 1 Ekranie</button>
+        <button type="button" class="lobby-tab" data-tab="online">🌐 Multiplayer Online (Firebase Realtime DB)</button>
+      </div>
+
+      <div id="tab-local" class="lobby-pane active">
+        <div class="form-2col">
+          <div class="inp-group">
+            <label>Twój Nick</label>
+            <input type="text" id="local-name-input" value="Sztygar" maxlength="16" />
+          </div>
+          <div class="inp-group">
+            <label>Kapitał Początkowy</label>
+            <select id="local-cash-select">
+              <option value="1500">$1 500 (Klasyczny)</option>
+              <option value="2000" selected>$2 000 (Standard Ruda Śląska)</option>
+              <option value="3000">$3 000 (Baron Węglowy)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-2col">
+          <div class="inp-group">
+            <label>1. Kolor Twojego Pionka</label>
+            <div id="local-color-picker" class="color-picker-row"></div>
+          </div>
+          <div class="inp-group">
+            <label>2. Wybierz Pionek 3D lub Twarz</label>
+            <div id="local-avatar-picker" class="avatar-picker-row"></div>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="row-between">
+            <label>Przeciwnicy przy stole</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" id="btn-add-bot" class="btn-ghost">+ Dodaj Bota AI</button>
+              <button type="button" id="btn-add-human" class="btn-ghost">+ Dodaj Gracza</button>
+            </div>
+          </div>
+          <div id="local-opponents-list" class="opponents-list"></div>
+        </div>
+
+        <button type="button" id="btn-start-local-game" class="btn-ember-full" style="padding:14px;font-size:1.02rem;">
+          🚀 Wylosuj Mapę i Rozpocznij Grę!
+        </button>
+      </div>
+
+      <div id="tab-online" class="lobby-pane">
+        <div class="firebase-setup-card">
+          <div class="fb-card-top">
+            <strong>🔥 Krok 1: Baza Firebase Realtime Database</strong>
+            <span id="fb-conn-pill" class="fb-pill disconnected">Brak podpiętego URL Firebase</span>
+          </div>
+          <div class="fb-input-row">
+            <input type="text" id="firebase-url-input" placeholder="https://twoja-nazwa-default-rtdb.europe-west1.firebasedatabase.app" />
+            <button type="button" id="btn-save-firebase" class="btn-side-purple" style="flex:0 0 auto;padding:8px 16px;">Połącz Firebase</button>
+          </div>
+        </div>
+
+        <div class="form-2col">
+          <div class="inp-group">
+            <label>Twój Nick w Pokoju</label>
+            <input type="text" id="online-name-input" value="Hanys" maxlength="16" />
+            <label style="margin-top:6px;">Kolor Pionka</label>
+            <div id="online-color-picker" class="color-picker-row"></div>
+          </div>
+          <div class="inp-group">
+            <label>Wybierz Pionek 3D lub Twarz</label>
+            <div id="online-avatar-picker" class="avatar-picker-row"></div>
+          </div>
+        </div>
+
+        <div class="form-2col">
+          <div class="action-box">
+            <h4>Stwórz Nowy Pokój (Host)</h4>
+            <p>Utwórz pokój i wyślij znajomym link zaproszenia.</p>
+            <button type="button" id="btn-create-room" class="btn-ember-full">⚡ Utwórz Pokój Online</button>
+          </div>
+          <div class="action-box">
+            <h4>Dołącz do Pokoju</h4>
+            <input type="text" id="join-code-input" placeholder="Wpisz kod np. RUDA500" maxlength="12" style="text-transform:uppercase;" />
+            <button type="button" id="btn-join-room" class="btn-purple-full">🔗 Dołącz po Kodzie</button>
+          </div>
+        </div>
+
+        <div id="net-status-banner" class="net-status-banner">Gotowy do utworzenia lub dołączenia do pokoju.</div>
+
+        <div id="room-waiting-box" class="waiting-room-card hidden">
+          <div class="waiting-head">
+            <div><span>AKTYWNY POKÓJ:</span><strong id="lobby-room-code-display" class="room-code-big">------</strong></div>
+            <button type="button" id="btn-copy-invite-lobby" class="btn-side-purple" style="flex:0 0 auto;">📋 Kopiuj Link Zaproszenia</button>
+          </div>
+          <div id="lobby-room-players" class="waiting-players-list"></div>
+          <div class="waiting-foot">
+            <button type="button" id="btn-room-add-bot" class="btn-ghost">+ Dodaj Bota AI</button>
+            <button type="button" id="btn-launch-room-game" class="btn-ember-full">🚀 Wylosuj Mapę i Rozpocznij Mecz!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SZCZEGÓŁÓW NIERUCHOMOŚCI I WYKUPU -->
+  <div id="prop-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div id="prop-modal-banner" class="prop-modal-header">
+        <span id="prop-modal-group" class="prop-group-badge">DZIELNICA</span>
+        <h2 id="prop-modal-name">Nazwa Nieruchomości</h2>
+        <button type="button" id="btn-close-prop-modal" class="btn-close-x">✕</button>
+      </div>
+      <div class="prop-modal-body">
+        <div class="kpi-grid-4">
+          <div class="kpi-box"><span>Cena zakupu</span><strong id="pm-price">$0</strong></div>
+          <div class="kpi-box"><span>Właściciel</span><strong id="pm-owner">Wolne</strong></div>
+          <div class="kpi-box"><span>Poziom zabudowy</span><strong id="pm-level">0 / 5</strong></div>
+          <div class="kpi-box kpi-gold"><span>Aktualny czynsz</span><strong id="pm-rent">$0</strong></div>
+        </div>
+        <table class="rent-table">
+          <thead><tr><th>Poziom rozbudowy</th><th>Oznaczenie</th><th>Czynsz</th></tr></thead>
+          <tbody id="pm-rent-tbody"></tbody>
+        </table>
+        <div id="pm-upgrade-box" class="upgrade-box">
+          <div class="row-between">
+            <span>Koszt wybudowania domu: <strong id="pm-build-cost">$0</strong></span>
+            <span>Cena przymusowego wykupu: <strong id="pm-buyout-cost" style="color:#ffca28;">$0</strong></span>
+          </div>
+          <div id="pm-status-note" class="upgrade-note"></div>
+          <div class="upgrade-btn-row">
+            <button type="button" id="btn-pm-build" class="btn-ember-full">🏠 Zbuduj Dom (Gdy stoisz na tym polu)</button>
+            <button type="button" id="btn-pm-buyout" class="btn-purple-full hidden">💼 Wykup to pole od właściciela!</button>
+            <button type="button" id="btn-pm-sell" class="btn-ghost">🔨 Sprzedaj Dom (+50%)</button>
+            <button type="button" id="btn-pm-sell-land" class="btn-ghost" style="border-color:#ff9800;color:#ffca28;">💵 Sprzedaj Pole do Banku (+75%)</button>
+            <button type="button" id="btn-pm-mortgage" class="btn-ghost">🏦 Hipoteka</button>
+          </div>
+        </div>
+        <div class="history-box"><h4>Historia transakcji</h4><ul id="pm-history-list"></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DAROWIZNY (🎁 PODARUJ) -->
+  <div id="gift-modal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="row-between">
+        <h2>🎁 Podaruj Pieniądze, Dom lub Działkę</h2>
+        <button type="button" id="btn-close-gift" class="btn-close-x">✕</button>
+      </div>
+      <div class="inp-group" style="margin:12px 0;">
+        <label>Wybierz gracza:</label>
+        <select id="gift-target-player"></select>
+      </div>
+      <div class="inp-group" style="margin-bottom:12px;">
+        <label>Kwota gotówki do podarowania ($):</label>
+        <input type="number" id="gift-cash-amount" min="0" step="10" value="0" />
+      </div>
+      <div class="inp-group" style="margin-bottom:12px;">
+        <label>Przekaż całe pole (Działkę):</label>
+        <div id="gift-props-list" class="trade-checklist"></div>
+      </div>
+      <div class="inp-group" style="margin-bottom:12px;">
+        <label>LUB podaruj 1 poziom domu ze swojego pola:</label>
+        <select id="gift-house-source"><option value="">-- Nie przekazuj pojedynczego domu --</option></select>
+      </div>
+      <div id="gift-error-msg" style="color:#ff5252;font-size:0.82rem;margin:8px 0;"></div>
+      <button type="button" id="btn-confirm-gift" class="btn-ember-full">🎁 Wyślij Darowiznę</button>
+    </div>
+  </div>
+
+  <!-- MODAL LICYTACJI -->
+  <div id="auction-modal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:480px;">
+      <h3>🔨 Licytacja Publiczna</h3>
+      <h2 id="auc-title" style="margin-top:6px;color:#ffb300;">Nazwa Dzielnicy</h2>
+      <p id="auc-sub" style="font-size:0.85rem;color:#a39ac2;">Cena katalogowa: $200</p>
+      <div class="auction-price-box">
+        <span>Najwyższa oferta:</span><strong id="auc-current-bid">$50</strong><small id="auc-leader-name">Brak ofert</small>
+      </div>
+      <div class="inp-group"><label>Licytujesz jako:</label><select id="auc-bidder-select"></select></div>
+      <div class="upgrade-btn-row" style="margin:12px 0;">
+        <button type="button" class="btn-side-purple btn-auc-add" data-inc="10">+$10</button>
+        <button type="button" class="btn-side-purple btn-auc-add" data-inc="25">+$25</button>
+        <button type="button" class="btn-side-purple btn-auc-add" data-inc="50">+$50</button>
+        <button type="button" class="btn-side-purple btn-auc-add" data-inc="100">+$100</button>
+      </div>
+      <div class="row-between">
+        <button type="button" id="btn-auc-cancel" class="btn-ghost">Pomiń</button>
+        <button type="button" id="btn-auc-finalize" class="btn-ember-full" style="width:auto;">Sprzedaj najwyższej ofercie</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL WYMIANY HANDLOWEJ -->
+  <div id="trade-modal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:620px;">
+      <div class="row-between"><h2>🤝 Kreator Wymiany Handlowej</h2><button type="button" id="btn-close-trade" class="btn-close-x">✕</button></div>
+      <div class="form-2col" style="margin-top:14px;">
+        <div class="action-box">
+          <h4 id="trade-sender-title">Twoja Oferta</h4>
+          <label>Gotówka ($)</label><input type="number" id="trade-give-cash" min="0" step="10" value="0" />
+          <label>Twoje dzielnice:</label><div id="trade-give-props" class="trade-checklist"></div>
+        </div>
+        <div class="action-box">
+          <label>Partner wymiany:</label><select id="trade-partner-select"></select>
+          <label>Żądana gotówka ($)</label><input type="number" id="trade-take-cash" min="0" step="10" value="0" />
+          <label>Żądane dzielnice partnera:</label><div id="trade-take-props" class="trade-checklist"></div>
+        </div>
+      </div>
+      <div id="trade-error-msg" style="color:#ff5252;font-size:0.82rem;margin:8px 0;"></div>
+      <button type="button" id="btn-send-trade-offer" class="btn-ember-full">Wyślij Ofertę Wymiany</button>
+    </div>
+  </div>
+
+  <!-- MODAL ZASAD / INFORMACJI -->
+  <div id="generic-modal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:580px;">
+      <div class="row-between"><h2 id="generic-modal-title">Informacje</h2><button type="button" id="btn-close-generic" class="btn-close-x">✕</button></div>
+      <div id="generic-modal-body" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+                               </html>
