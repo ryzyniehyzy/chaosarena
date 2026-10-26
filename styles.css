@@ -651,3 +651,48 @@ body {
   .felt-num-btn { height: 28px; font-size: 0.6rem; }
   .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
+/* NAPRAWA WYŚWIETLANIA SZTOLNI LABIRYNTU (QUORIDOR 9x9) */
+#stage-QUORIDOR .quoridor-board-wrap {
+  width: 100%;
+  min-height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+#stage-QUORIDOR .quoridor-grid {
+  width: min(62vh, 86vw, 560px) !important;
+  height: min(62vh, 86vw, 560px) !important;
+  min-width: 300px;
+  min-height: 300px;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 8px;
+  background: #120e21;
+  padding: 12px;
+  border-radius: 18px;
+  border: 4px solid #3c3063;
+  position: relative;
+}
+
+.q-cell {
+  background: #261f3d;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.q-cell.q-valid-step {
+  background: rgba(46, 204, 113, 0.35) !important;
+  border: 2px solid #2ecc71 !important;
+  box-shadow: inset 0 0 10px rgba(46, 204, 113, 0.6);
+}
