@@ -1,12 +1,12 @@
 /**
  * RUDA ŚLĄSKA ARENA ULTIMATE — KOMPLETNY SILNIK 8 GIER (app.js)
- * Wklej ten kod jako CAŁą zawartość pliku app.js!
+ * Wklej ten kod jako CAŁĄ zawartość pliku app.js!
  */
 (function () {
   'use strict';
 
   const HARDCODED_FIREBASE_URL = "";
-  const STORAGE_VERSION = "v14_complete_8games";
+  const STORAGE_VERSION = "v15_final_ultimate";
 
   try {
     if (localStorage.getItem('ruda_arena_version') !== STORAGE_VERSION) {
@@ -57,16 +57,16 @@
   }
 
   const GROUPS = {
-    ORZEGOW:     { name: 'Orzegów / Chebzie',       color: '#7cb342', code: 'ORZ' },
-    GODULA:      { name: 'Godula / Ruda',           color: '#29b6f6', code: 'GOD' },
+    ORZEGOW:     { name: 'Orzegów / Chebzie',        color: '#7cb342', code: 'ORZ' },
+    GODULA:      { name: 'Godula / Ruda',            color: '#29b6f6', code: 'GOD' },
     KOCHLOWICE:  { name: 'Kochłowice / Czarny Las', color: '#ab47bc', code: 'KOC' },
-    BYKOWINA:    { name: 'Bykowina',                color: '#ffa726', code: 'BYK' },
-    BIELSZOWICE: { name: 'Bielszowice',             color: '#ef5350', code: 'BIE' },
-    HALEMBA:     { name: 'Halemba',                 color: '#fdd835', code: 'HAL' },
-    WIREK:       { name: 'Wirek (Zagłębie)',        color: '#26a69a', code: 'WIR' },
-    NOWY_BYTOM:  { name: 'Nowy Bytom (Centrum)',    color: '#5c6bc0', code: 'NBY' },
+    BYKOWINA:    { name: 'Bykowina',                 color: '#ffa726', code: 'BYK' },
+    BIELSZOWICE: { name: 'Bielszowice',              color: '#ef5350', code: 'BIE' },
+    HALEMBA:     { name: 'Halemba',                  color: '#fdd835', code: 'HAL' },
+    WIREK:       { name: 'Wirek (Zagłębie)',         color: '#26a69a', code: 'WIR' },
+    NOWY_BYTOM:  { name: 'Nowy Bytom (Centrum)',     color: '#5c6bc0', code: 'NBY' },
     AIRPORT:     { name: 'Lotniska (4 = Wygrana!)', color: '#00e5ff', code: 'LOT' },
-    UTILITY:     { name: 'Huty i Elektrownie',      color: '#ffa000', code: 'HUT' }
+    UTILITY:     { name: 'Huty i Elektrownie',       color: '#ffa000', code: 'HUT' }
   };
 
   const AIRPORT_INDICES = [5, 15, 25, 35];
@@ -206,7 +206,6 @@
     dot.style.cssText = secretLuckEnabled
       ? 'position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#00ff66;box-shadow:0 0 10px #00ff66;border:1.5px solid #000;display:block;z-index:20;'
       : 'display:none;';
-
     emblem.style.boxShadow = secretLuckEnabled ? '0 0 14px rgba(0, 255, 102, 0.65)' : '';
   }
 
@@ -227,6 +226,7 @@
   let turnTimerInterval = null;
   let botActionTimeout = null;
   let lastWinnerShown = null;
+  let lastShownRentEventId = null;
 
   let firebaseDb = null;
   let activeFirebaseUrl = '';
@@ -241,7 +241,7 @@
   let lobbyOpponents = [
     { name: 'Bot KWK Halemba', isBot: true, color: PLAYER_COLORS[1].hex, avatar: 'cart' },
     { name: 'Bot Huta Pokój',  isBot: true, color: PLAYER_COLORS[2].hex, avatar: 'crown' },
-    { name: 'Bot Wirek',       isBot: true, color: PLAYER_COLORS[3].hex, avatar: 'mustache' }
+    { name: 'Bot Wirek',        isBot: true, color: PLAYER_COLORS[3].hex, avatar: 'mustache' }
   ];
 
   function bindClick(id, fn) {
@@ -254,6 +254,57 @@
   function setBannerStatus(msg, color = '#00e5ff') {
     const el = document.getElementById('net-status-banner');
     if (el) { el.textContent = msg; el.style.color = color; }
+  }
+
+  function isRoomHost() {
+    if (!gameState || !gameState.isOnline) return true;
+    if (gameState.hostToken) return gameState.hostToken === myClientToken;
+    return gameState.players[0]?.clientToken === myClientToken;
+  }
+
+  function enforceAdminControlsUI() {
+    const amHost = isRoomHost();
+    document.body.classList.toggle('not-room-host', !amHost);
+
+    document.querySelectorAll('[data-switch-game]').forEach(btn => {
+      btn.disabled = !amHost;
+      btn.style.opacity = amHost ? '1' : '0.55';
+    });
+
+    ['btn-random-map', 'btn-lobby-rand-map', 'btn-reset-board', 'btn-liars-new-match', 'casino-target-select', 'btn-room-add-bot', 'btn-launch-room-game'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.disabled = !amHost;
+        el.style.opacity = amHost ? '1' : '0.45';
+      }
+    });
+  }
+
+  function removePlayerOrBotFromGame(targetPlayerId) {
+    if (!gameState || !isRoomHost() || gameState.players.length <= 1) return;
+    const idx = gameState.players.findIndex(p => p.id === targetPlayerId);
+    if (idx === -1) return;
+    const removed = gameState.players[idx];
+    if (!removed.isBot && removed.clientToken === myClientToken) return;
+
+    if (gameState.properties) {
+      Object.keys(gameState.properties).forEach(tileIdx => {
+        if (gameState.properties[tileIdx]?.ownerId === targetPlayerId) {
+          gameState.properties[tileIdx].ownerId = null;
+          gameState.properties[tileIdx].level = 0;
+          gameState.properties[tileIdx].boughtInRound = 0;
+          gameState.properties[tileIdx].mortgaged = false;
+        }
+      });
+    }
+
+    gameState.players.splice(idx, 1);
+    if (gameState.turnIndex >= gameState.players.length) gameState.turnIndex = 0;
+    gameState.liars = createLiarsGameState(gameState.players);
+    addFeedEvent(`🗑️ Admin usunął ze stołu: <strong>${removed.name}</strong>.`);
+    pushStateSync();
+    updateLobbyWaitingRoom();
+    checkBotForOtherGames();
   }
 
   function hasSecretLuck(player) {
@@ -272,7 +323,7 @@
     return gameState.players.find(p => !p.isBot) || gameState.players[0];
   }
 
-  /* ==================== SYSTEM 2 DRUŻYN DLA GIER 2-OSOBOWYCH ==================== */
+  /* ==================== SYSTEM 2 DRUŻYN ==================== */
   function getTeamActivePlayer(sideIndex, subGameObj) {
     if (!gameState || !gameState.players.length) return null;
     if (gameState.players.length <= 2) {
@@ -403,7 +454,7 @@
     return url.toString();
   }
 
-  /* ==================== 5. FABRYKI STANÓW WSZYSTKICH 8 GIER ==================== */
+  /* ==================== 5. FABRYKI STANÓW ==================== */
   function createLiarsGameState(playersList) {
     const ranks = ['A', 'K', 'Q', 'J', '10'];
     const suits = ['♠', '♥', '♦', '♣'];
@@ -435,15 +486,7 @@
   }
 
   function createQuoridorState() {
-    return {
-      turn: 0,
-      teamRot: [0, 0],
-      pos: [{ r: 8, c: 4 }, { r: 0, c: 4 }],
-      wallsLeft: [10, 10],
-      hWalls: [],
-      vWalls: [],
-      winner: null
-    };
+    return { turn: 0, teamRot: [0, 0], pos: [{ r: 8, c: 4 }, { r: 0, c: 4 }], wallsLeft: [10, 10], hWalls: [], vWalls: [], winner: null };
   }
 
   function createLudoState() {
@@ -464,7 +507,7 @@
       b[0][c] = { p: 1, type: back[c] }; b[1][c] = { p: 1, type: 'P' };
       b[6][c] = { p: 0, type: 'P' };     b[7][c] = { p: 0, type: back[c] };
     }
-    return { turn: 0, teamRot: [0, 0], boardJson: JSON.stringify(b), winner: null, lastMove: 'Kliknij swoją figurę, aby zobaczyć dozwolone ruchy.' };
+    return { turn: 0, teamRot: [0, 0], boardJson: JSON.stringify(b), winner: null, lastMove: 'Kliknij figurę.' };
   }
 
   function createConnect4State() {
@@ -494,7 +537,7 @@
     BOARD_TILES.forEach(t => {
       if (t.type === 'PROPERTY' || t.type === 'AIRPORT' || t.type === 'UTILITY') {
         if (!st.properties[t.index]) {
-          st.properties[t.index] = { ownerId: null, level: 0, boughtInRound: 0, mortgaged: false, history: ['Dostępne w zasobach Miasta'] };
+          st.properties[t.index] = { ownerId: null, level: 0, boughtInRound: 0, mortgaged: false, history: ['Dostępne'] };
         } else {
           const p = st.properties[t.index];
           if (!p.ownerId) p.ownerId = null;
@@ -507,37 +550,11 @@
     });
 
     if (!st.liars || !st.liars.handsJson) st.liars = createLiarsGameState(st.players);
-    else {
-      st.liars.pile = Array.isArray(st.liars.pile) ? st.liars.pile : Object.values(st.liars.pile || {});
-      if (st.liars.lastPlay && st.liars.lastPlay.actualCards) {
-        st.liars.lastPlay.actualCards = Array.isArray(st.liars.lastPlay.actualCards) ? st.liars.lastPlay.actualCards : Object.values(st.liars.lastPlay.actualCards || {});
-      }
-    }
-
     if (!st.quoridor || !st.quoridor.pos) st.quoridor = createQuoridorState();
-    else {
-      st.quoridor.pos = Array.isArray(st.quoridor.pos) ? st.quoridor.pos : Object.values(st.quoridor.pos);
-      st.quoridor.wallsLeft = Array.isArray(st.quoridor.wallsLeft) ? st.quoridor.wallsLeft : Object.values(st.quoridor.wallsLeft || [10, 10]);
-      st.quoridor.hWalls = Array.isArray(st.quoridor.hWalls) ? st.quoridor.hWalls : Object.values(st.quoridor.hWalls || {});
-      st.quoridor.vWalls = Array.isArray(st.quoridor.vWalls) ? st.quoridor.vWalls : Object.values(st.quoridor.vWalls || {});
-      st.quoridor.teamRot = Array.isArray(st.quoridor.teamRot) ? st.quoridor.teamRot : [0, 0];
-      if (st.quoridor.winner === undefined) st.quoridor.winner = null;
-    }
-
     if (!st.ludo || !st.ludo.pawns) st.ludo = createLudoState();
-    else {
-      st.ludo.pawns = [0,1,2,3].map(i => Array.isArray(st.ludo.pawns[i]) ? st.ludo.pawns[i] : Object.values(st.ludo.pawns[i] || [-1,-1,-1,-1]));
-      if (st.ludo.winner === undefined) st.ludo.winner = null;
-    }
     if (!st.checkers || !st.checkers.boardJson) st.checkers = createCheckersState();
-    else st.checkers.teamRot = Array.isArray(st.checkers.teamRot) ? st.checkers.teamRot : [0, 0];
-
     if (!st.chess || !st.chess.boardJson) st.chess = createChessState();
-    else st.chess.teamRot = Array.isArray(st.chess.teamRot) ? st.chess.teamRot : [0, 0];
-
     if (!st.connect4 || !st.connect4.boardJson) st.connect4 = createConnect4State();
-    else st.connect4.teamRot = Array.isArray(st.connect4.teamRot) ? st.connect4.teamRot : [0, 0];
-
     return st;
   }
 
@@ -545,7 +562,7 @@
     const propertiesState = {};
     BOARD_TILES.forEach(tile => {
       if (tile.type === 'PROPERTY' || tile.type === 'AIRPORT' || tile.type === 'UTILITY') {
-        propertiesState[tile.index] = { ownerId: null, level: 0, boughtInRound: 0, mortgaged: false, history: ['Dostępne w zasobach Miasta'] };
+        propertiesState[tile.index] = { ownerId: null, level: 0, boughtInRound: 0, mortgaged: false, history: ['Dostępne'] };
       }
     });
     const chosenMap = RUDA_MAPS.find(m => m.id === mapId) || RUDA_MAPS[0];
@@ -570,7 +587,7 @@
     });
 
     return {
-      roomCode, isOnline, lobbyOpen: isOnline, activeGame: initialGame, mapId: chosenMap.id,
+      roomCode, hostToken: myClientToken, isOnline, lobbyOpen: isOnline, activeGame: initialGame, mapId: chosenMap.id,
       status: 'PLAYING', winnerAnnouncement: null, casinoGoal: 5000,
       round: 1, turnIndex: 0, turnPhase: 'ROLL', builtThisTurn: false,
       lastDice: [6, 5], doublesStreak: 0, vacationPool: 100, turnSecondsLeft: 120,
@@ -583,12 +600,12 @@
       checkers: createCheckersState(),
       chess: createChessState(),
       connect4: createConnect4State(),
-      feed: [{ text: `🗺️ Arena: <strong>${chosenMap.fullTitle}</strong>! Zdobądź wszystkie 4 Lotniska (✈️) lub doprowadź rywali do bankructwa!`, time: nowTime() }],
-      chat: [{ author: 'Skarbnik', color: '#ffca28', text: `Szczęść Boże! Wszystkie 8 gier (w tym 🧱 Sztolnia Labirynt i 2 Drużyny) są gotowe!`, time: nowTime() }]
+      feed: [{ text: `🗺️ Arena: <strong>${chosenMap.fullTitle}</strong>! Zdobądź 4 Lotniska (✈️) lub zbankrutuj rywali!`, time: nowTime() }],
+      chat: [{ author: 'Skarbnik', color: '#ffca28', text: `Szczęść Boże! Runda rozpoczęta.`, time: nowTime() }]
     };
   }
 
-  /* ==================== 6. SYNCHRONIZACJA POKOJU ==================== */
+  /* ==================== 6. SYNCHRONIZACJA ==================== */
   function subscribeToRoom(roomCode) {
     currentRoomCode = roomCode;
     const topLabel = document.getElementById('top-room-label');
@@ -647,7 +664,7 @@
     renderAll();
   }
 
-  /* ==================== 7. MONOPOLY ==================== */
+  /* ==================== 7. MONOPOLY I WROGI WYKUP ==================== */
   function getGridPosition(index) {
     if (index === 0) return { row: 1, col: 1, edge: 'corner' };
     if (index > 0 && index < 10) return { row: 1, col: index + 1, edge: 'edge-top' };
@@ -727,31 +744,40 @@
     const prop = gameState.properties[tileIndex];
     if (!prop || !prop.ownerId || prop.mortgaged) return 0;
 
+    let base = 0;
     if (tile.type === 'PROPERTY') {
-      let base = tile.rents[prop.level];
+      base = tile.rents[prop.level];
       if (prop.level === 0) {
         const groupTiles = BOARD_TILES.filter(t => t.group === tile.group);
         if (groupTiles.every(t => gameState.properties[t.index]?.ownerId === prop.ownerId)) base = Math.round(base * 1.5);
       }
-      return base;
-    }
-    if (tile.type === 'AIRPORT') {
+    } else if (tile.type === 'AIRPORT') {
       const cnt = AIRPORT_INDICES.filter(idx => gameState.properties[idx]?.ownerId === prop.ownerId).length;
-      return tile.rents[Math.max(0, cnt - 1)] || 50;
-    }
-    if (tile.type === 'UTILITY') {
+      base = tile.rents[Math.max(0, cnt - 1)] || 50;
+    } else if (tile.type === 'UTILITY') {
       const cnt = BOARD_TILES.filter(t => t.type === 'UTILITY' && gameState.properties[t.index]?.ownerId === prop.ownerId).length;
-      return cnt >= 2 ? diceSum * 10 : diceSum * 5;
+      base = cnt >= 2 ? diceSum * 10 : diceSum * 5;
     }
-    return 0;
+
+    // Efekt globalny: Hossa Węglowa (+50% czynszu)
+    if (gameState.hossaActive) base = Math.round(base * 1.5);
+    return base;
   }
 
+  /* BRUTALNA EKONOMIA WROGIEGO WYKUPU */
   function getBuyoutCost(tileIndex) {
     const tile = BOARD_TILES[tileIndex];
     const prop = gameState.properties[tileIndex];
     if (!tile || !prop || tile.type === 'AIRPORT') return null;
-    if (tile.type === 'UTILITY') return tile.price * 2;
-    return Math.round((tile.price * 2) + (prop.level * (tile.buildCost || 100) * 2.5));
+
+    let cost = Math.round(tile.price * 3.5) + 200;
+    if (tile.type === 'UTILITY') return Math.round(tile.price * 4) + 250;
+
+    cost += prop.level * ((tile.buildCost || 100) * 4);
+    const groupTiles = BOARD_TILES.filter(t => t.group === tile.group);
+    const hasFullSet = groupTiles.length > 1 && groupTiles.every(t => gameState.properties[t.index]?.ownerId === prop.ownerId);
+    if (hasFullSet) cost = Math.round(cost * 1.5);
+    return cost;
   }
 
   function canBuyoutProperty(tileIndex, buyerId) {
@@ -761,21 +787,17 @@
     const active = currentTurnPlayer();
 
     if (!tile || !prop || !prop.ownerId) return { ok: false, reason: 'Pole jest niczyje.' };
-    if (prop.ownerId === buyerId) return { ok: false, reason: 'To już jest Twoje pole.' };
-    if (tile.type === 'AIRPORT') {
-      return { ok: false, reason: '✈️ Lotnisk NIE MOŻNA odkupić siłą! Możesz je przejąć tylko wtedy, gdy właściciel będzie musiał je sprzedać z braku pieniędzy.' };
-    }
+    if (prop.ownerId === buyerId) return { ok: false, reason: 'To już Twoje pole.' };
+    if (tile.type === 'AIRPORT') return { ok: false, reason: '✈️ Lotnisk nie można odkupić siłą!' };
     if (!active || active.id !== buyerId || buyer.position !== tileIndex || gameState.turnPhase === 'ROLL') {
-      return { ok: false, reason: '🚶 Odkupić cudze pole możesz wyłącznie wtedy, gdy staniesz na nim swoim pionkiem w swojej turze!' };
+      return { ok: false, reason: '🚶 Musisz stać swoim pionkiem na tym polu w swojej turze!' };
     }
-    if (prop.level >= 5) {
-      return { ok: false, reason: '🏨 Na tym polu stoi już Hotel (Poziom 5) — jest chronione przed wykupem!' };
-    }
+    if (prop.level >= 3) return { ok: false, reason: `🛡️ Dzielnice z ${prop.level} domami są chronione przed wrogim wykupem!` };
+    if (buyer.lastBuyoutRound === gameState.round) return { ok: false, reason: '⏳ Limit: 1 wrogi wykup na okrążenie.' };
+
     const cost = getBuyoutCost(tileIndex);
-    if (!buyer || buyer.cash < cost) {
-      return { ok: false, reason: `Brakuje Ci $${cost - (buyer?.cash || 0)} do przymusowego wykupu (Koszt: $${cost}).` };
-    }
-    return { ok: true, cost, reason: `💼 Możesz odkupić to pole od właściciela za zawyżoną cenę $${cost}!` };
+    if (!buyer || buyer.cash < cost) return { ok: false, reason: `💰 Koszt wrogiego wykupu to $${cost} (brakuje Ci $${cost - buyer.cash}).` };
+    return { ok: true, cost, reason: `💼 Możesz siłą przejąć to pole za $${cost}!` };
   }
 
   function executeHostileBuyout(tileIndex, buyerId) {
@@ -789,13 +811,15 @@
     const oldOwner = getPlayerById(prop.ownerId);
 
     buyer.cash -= check.cost;
+    buyer.lastBuyoutRound = gameState.round;
     if (oldOwner) oldOwner.cash += check.cost;
     prop.ownerId = buyer.id;
     prop.boughtInRound = gameState.round;
     gameState.builtThisTurn = true;
-    prop.history.unshift(`${nowTime()} — Przymusowy wykup przez ${buyer.name} od ${oldOwner?.name} za $${check.cost}`);
+    prop.history.unshift(`${nowTime()} — Wrogi wykup przez ${buyer.name} za $${check.cost}`);
 
-    addFeedEvent(`💼 <strong>${buyer.name}</strong> wykupił pole <strong>${tile.shortName}</strong> od <strong>${oldOwner?.name}</strong> za <strong>$${check.cost}</strong>!`);
+    addFeedEvent(`💼🔥 <strong>${buyer.name}</strong> przepłacił fortunę (<strong>$${check.cost}</strong>), aby siłą przejąć <strong>${tile.shortName}</strong> od <strong>${oldOwner?.name}</strong>!`);
+    triggerMobileVibrate([40, 60, 100]);
     sfx.buy();
     pushStateSync();
     return true;
@@ -828,7 +852,7 @@
         gameState.status = 'FINISHED';
         gameState.winnerAnnouncement = {
           winnerName: winner.name,
-          reason: `👑 Wszyscy pozostali gracze zbankrutowali! ${winner.name} zostaje jedynym Magnatem Rudy Śląskiej!`,
+          reason: `👑 Wszyscy pozostali gracze zbankrutowali! ${winner.name} zostaje Magnatem Rudy Śląskiej!`,
           cash: winner.cash
         };
         addFeedEvent(`👑 <strong>${winner.name}</strong> WYGRYWA MONOPOLY RUDA ŚLĄSKA!`);
@@ -846,27 +870,16 @@
     const player = getPlayerById(playerId);
     const active = currentTurnPlayer();
 
-    if (!tile || tile.type !== 'PROPERTY') return { ok: false, reason: 'Na tym polu nie buduje się domów.' };
-    if (!prop || prop.ownerId !== playerId) return { ok: false, reason: 'Nie jesteś właścicielem tej dzielnicy.' };
-    if (!active || active.id !== playerId) return { ok: false, reason: 'Budować możesz tylko w swojej turze.' };
-    if (player.position !== tileIndex) {
-      return { ok: false, reason: '🚶 Musisz stać swoim pionkiem na tym polu, aby wybudować dom!' };
-    }
-    if (gameState.turnPhase === 'ROLL') {
-      return { ok: false, reason: '🎲 Najpierw wykonaj rzut kostką w tej turze!' };
-    }
-    if (prop.boughtInRound >= gameState.round) {
-      return { ok: false, reason: '🔄 Kupiłeś to pole w tym okrążeniu! Musisz przejechać całą mapę i stanąć tu ponownie w kolejnym okrążeniu.' };
-    }
-    if (gameState.builtThisTurn) {
-      return { ok: false, reason: '⏳ Wykorzystałeś już limit 1 wybudowanego domu w tej turze!' };
-    }
-    if (prop.mortgaged) return { ok: false, reason: 'Pole jest obciążone hipoteką.' };
-    if (prop.level >= 5) return { ok: false, reason: 'Osiągnięto maksymalny poziom (Poziom 5 — Hotel).' };
-    if (!player || player.cash < tile.buildCost) {
-      return { ok: false, reason: `Brakuje Ci $${tile.buildCost - (player?.cash || 0)}.` };
-    }
-    return { ok: true, reason: '✅ Wróciłeś na swoje pole po okrążeniu! Możesz zbudować dom.' };
+    if (!tile || tile.type !== 'PROPERTY') return { ok: false, reason: 'Brak budynków.' };
+    if (!prop || prop.ownerId !== playerId) return { ok: false, reason: 'Nie jesteś właścicielem.' };
+    if (!active || active.id !== playerId) return { ok: false, reason: 'Tylko w swojej turze.' };
+    if (player.position !== tileIndex) return { ok: false, reason: 'Musisz stać na tym polu.' };
+    if (gameState.turnPhase === 'ROLL') return { ok: false, reason: 'Najpierw rzuć kostką.' };
+    if (prop.boughtInRound >= gameState.round) return { ok: false, reason: 'Musisz przejechać pełne okrążenie.' };
+    if (gameState.builtThisTurn) return { ok: false, reason: 'Limit 1 domu na turę.' };
+    if (prop.mortgaged || prop.level >= 5) return { ok: false, reason: 'Hipoteka lub maksymalny Hotel.' };
+    if (!player || player.cash < tile.buildCost) return { ok: false, reason: `Brakuje $${tile.buildCost - player.cash}.` };
+    return { ok: true, reason: 'Możesz zbudować dom.' };
   }
 
   function buildHouseOnProperty(tileIndex, playerId) {
@@ -879,9 +892,9 @@
     player.cash -= tile.buildCost;
     prop.level += 1;
     gameState.builtThisTurn = true;
-    const lvlName = prop.level === 5 ? 'HOTEL (Poziom 5)' : `Dom #${prop.level}`;
-    prop.history.unshift(`${nowTime()} — ${player.name} zbudował ${lvlName} za $${tile.buildCost}`);
-    addFeedEvent(`🏠 <strong>${player.name}</strong> zbudował <strong>${lvlName}</strong> w <strong>${tile.shortName}</strong>!`);
+    const lvlName = prop.level === 5 ? 'HOTEL' : `Dom #${prop.level}`;
+    prop.history.unshift(`${nowTime()} — Zbudowano ${lvlName} za $${tile.buildCost}`);
+    addFeedEvent(`🏠 <strong>${player.name}</strong> wybudował <strong>${lvlName}</strong> w <strong>${tile.shortName}</strong>!`);
     sfx.build();
     pushStateSync();
     return true;
@@ -918,8 +931,7 @@
     prop.boughtInRound = 0;
     prop.mortgaged = false;
     player.cash += totalRefund;
-    prop.history.unshift(`${nowTime()} — Sprzedane do Banku przez ${player.name} (+$${totalRefund})`);
-
+    prop.history.unshift(`${nowTime()} — Sprzedano do Banku (+$${totalRefund})`);
     addFeedEvent(`💵 <strong>${player.name}</strong> sprzedał <strong>${tile.shortName}</strong> do Banku za <strong>+$${totalRefund}</strong>!`);
     sfx.buy();
     pushStateSync();
@@ -954,6 +966,135 @@
     if (gameState.feed.length > 40) gameState.feed.pop();
   }
 
+  /* ==================== WIBRACJE, ZOOM, SZYCHTA I ZDRAPKA ==================== */
+  function triggerMobileVibrate(pattern = 35) {
+    try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+  }
+
+  const SZYCHTA_EVENTS = [
+    {
+      title: '⚒️ BARBÓRKA W RUDZIE ŚLĄSKIEJ!',
+      desc: 'Święto Górnika! Ratusz w Nowym Bytomiu wypłaca każdemu aktywnemu graczowi po +$200 premii barbórkowej!',
+      apply: (st) => { st.players.forEach(p => { if (!p.bankrupt) p.cash += 200; }); }
+    },
+    {
+      title: '⚠️ TĄPNIĘCIE NA SZYBIE!',
+      desc: 'Wstrząs górniczy! Każdy właściciel płaci $45 za każdy posiadany dom/hotel na naprawy konstrukcyjne.',
+      apply: (st) => {
+        st.players.forEach(p => {
+          if (p.bankrupt) return;
+          let houses = 0;
+          Object.values(st.properties).forEach(pr => { if (pr.ownerId === p.id) houses += (pr.level || 0); });
+          const fee = houses * 45;
+          if (fee > 0) { p.cash -= fee; st.vacationPool += fee; }
+        });
+      }
+    },
+    {
+      title: '📈 HOSSA WĘGLOWA I CZYNSZOWA!',
+      desc: 'Zapotrzebowanie na węgiel rośnie! Przez najbliższe rundy wszystkie czynsze na planszy są wyższe o +50%!',
+      apply: (st) => { st.hossaActive = true; }
+    },
+    {
+      title: '✈️ BOOM LOGISTYCZNY NA A4!',
+      desc: 'Właściciele lotnisk otrzymują dywidendę +$150 za każde posiadane Lotnisko!',
+      apply: (st) => {
+        st.players.forEach(p => {
+          if (p.bankrupt) return;
+          const cnt = AIRPORT_INDICES.filter(idx => st.properties[idx]?.ownerId === p.id).length;
+          if (cnt > 0) p.cash += cnt * 150;
+        });
+      }
+    }
+  ];
+
+  function triggerRandomSzychtaEventIfNeeded() {
+    if (!gameState || gameState.round % 3 !== 0 || gameState.lastEventRound === gameState.round) return;
+    gameState.lastEventRound = gameState.round;
+    const ev = SZYCHTA_EVENTS[Math.floor(Math.random() * SZYCHTA_EVENTS.length)];
+    ev.apply(gameState);
+    addFeedEvent(`📢 <strong>${ev.title}</strong> ${ev.desc}`);
+    sfx.win();
+    triggerMobileVibrate([50, 50, 120]);
+  }
+
+  function openGoldenPickaxeScratchcard() {
+    if (!gameState) return;
+    const player = getMyViewerPlayer();
+    if (!player || player.isBot) return;
+    if (player.cash < 150) {
+      alert('Potrzebujesz minimum $150, aby kupić Zdrapkę „Złoty Kilof”!');
+      return;
+    }
+
+    player.cash -= 150;
+    gameState.vacationPool += 50;
+    triggerMobileVibrate(40);
+    sfx.dice();
+
+    const lucky = hasSecretLuck(player);
+    const roll = Math.random();
+    let prizeText = '';
+
+    if (roll < (lucky ? 0.3 : 0.08)) {
+      player.cash += 1000;
+      prizeText = `💎 <strong>JACKPOT SKARBNIKA!</strong> Węgiel skrywał diament! Otrzymujesz <strong>+$1 000</strong>!`;
+      sfx.win();
+    } else if (roll < (lucky ? 0.7 : 0.35)) {
+      player.cash += 350;
+      prizeText = `⚒️ <strong>BOGATA ŻYŁA!</strong> Trafiłeś świetny urobek — zyskujesz <strong>+$350</strong>!`;
+      sfx.buy();
+    } else if (roll < (lucky ? 0.9 : 0.5)) {
+      player.pardonCards = (player.pardonCards || 0) + 1;
+      prizeText = `🕊️ <strong>KARTA WOLNOŚCI OUG!</strong> Otrzymujesz glejt zwalniający z Izby!`;
+      sfx.buy();
+    } else {
+      prizeText = `🪨 <strong>PUSTY KAMIEŃ...</strong> Sam łupek. $50 z Twojego losu zasiliło pulę na Hałdzie Widokowej!`;
+      sfx.rent();
+    }
+
+    addFeedEvent(`🎫 <strong>${player.name}</strong> zdrapał „Złoty Kilof”: ${prizeText}`);
+    showGenericModal(
+      '🎫 Zdrapka Górnicza „Złoty Kilof”',
+      `<div style="text-align:center;padding:16px;">
+        <div style="font-size:3.2rem;margin-bottom:10px;">⛏️✨</div>
+        <p style="font-size:0.98rem;line-height:1.55;">${prizeText}</p>
+        <div style="margin-top:14px;font-weight:800;color:#ffca28;">Twój portfel: $${player.cash}</div>
+      </div>`
+    );
+    pushStateSync();
+  }
+
+  function injectExtraFeaturesUI() {
+    const statusBar = document.querySelector('.hub-status-bar');
+    if (statusBar && !document.getElementById('btn-scratchcard-hub')) {
+      const btnScratch = document.createElement('button');
+      btnScratch.type = 'button';
+      btnScratch.id = 'btn-scratchcard-hub';
+      btnScratch.className = 'hub-pill';
+      btnScratch.style.cssText = 'cursor:pointer;background:linear-gradient(135deg,#ff9800,#e65100);color:#111;border:1.5px solid #fff;font-weight:900;';
+      btnScratch.innerHTML = '🎫 Zdrapka ($150)';
+      btnScratch.onclick = openGoldenPickaxeScratchcard;
+      statusBar.appendChild(btnScratch);
+    }
+
+    if (!document.getElementById('btn-mobile-board-zoom')) {
+      const zoomBtn = document.createElement('button');
+      zoomBtn.type = 'button';
+      zoomBtn.id = 'btn-mobile-board-zoom';
+      zoomBtn.className = 'mobile-zoom-fab';
+      zoomBtn.innerHTML = '🔍 Zoom';
+      let zoomed = false;
+      zoomBtn.onclick = () => {
+        zoomed = !zoomed;
+        document.body.classList.toggle('mobile-board-zoomed', zoomed);
+        zoomBtn.innerHTML = zoomed ? '🔎 Pomniejsz' : '🔍 Powiększ';
+        triggerMobileVibrate(25);
+      };
+      document.body.appendChild(zoomBtn);
+    }
+  }
+
   function rollMonopolyDicePair(player) {
     let bestD1 = Math.floor(Math.random() * 6) + 1;
     let bestD2 = Math.floor(Math.random() * 6) + 1;
@@ -974,11 +1115,11 @@
       let score = 0;
 
       if (dest < player.position) score += 50;
-      if (tile.type === 'AIRPORT' && !prop?.ownerId && player.cash >= tile.price) score += 130;
-      else if (tile.type === 'PROPERTY' && !prop?.ownerId && player.cash >= tile.price) score += 55;
-      else if (prop?.ownerId === player.id && prop.boughtInRound < gameState.round && prop.level < 5) score += 70;
+      if (tile.type === 'AIRPORT' && !prop?.ownerId && player.cash >= tile.price) score += 140;
+      else if (tile.type === 'PROPERTY' && !prop?.ownerId && player.cash >= tile.price) score += 60;
+      else if (prop?.ownerId === player.id && prop.boughtInRound < gameState.round && prop.level < 5) score += 75;
       else if (tile.type === 'VACATION') score += 45;
-      else if (tile.type === 'GO_TO_JAIL' || tile.type === 'TAX') score -= 100;
+      else if (tile.type === 'GO_TO_JAIL' || tile.type === 'TAX') score -= 110;
       else if (prop?.ownerId && prop.ownerId !== player.id && !prop.mortgaged) {
         score -= calculateRent(dest, c1 + c2);
       }
@@ -992,301 +1133,64 @@
     return [bestD1, bestD2];
   }
 
-  function animateStepByStepMove(player, stepsCount, onComplete) {
-    let rem = stepsCount;
-    function step() {
-      if (rem <= 0) { onComplete(); return; }
-      rem -= 1;
-      player.position = (player.position + 1) % 40;
-      if (player.position === 0) {
-        player.cash += 250;
-        addFeedEvent(`⏩ <strong>${player.name}</strong> minął START i odebrał <strong>+$250</strong>!`);
-        sfx.buy();
-      } else {
-        sfx.step();
-      }
-      selectedTileIndex = player.position;
-      renderMonopolyBoard();
-      setTimeout(step, 90);
+  function showRentPaymentAnimation(evData) {
+    if (!evData) return;
+    let overlay = document.getElementById('rent-payment-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'rent-payment-overlay';
+      overlay.className = 'rent-payment-overlay hidden';
+      document.body.appendChild(overlay);
     }
-    step();
+
+    overlay.innerHTML = `
+      <div class="rent-payment-card">
+        <span class="rent-alert-badge">💸 OPŁATA CZYNSZOWA W RUDZIE ŚLĄSKIEJ!</span>
+        <div class="rent-tile-title">📍 ${evData.tileName}</div>
+
+        <div class="rent-transfer-row">
+          <div class="rent-player-box">
+            <div class="rent-avatar-big" style="background:${evData.payerColor}">
+              ${getAvatarSvg(evData.payerAvatar)}
+            </div>
+            <div class="rent-p-name">${evData.payerName}</div>
+            <span class="rent-p-delta minus">-$${evData.amount}</span>
+          </div>
+
+          <div class="rent-arrow-stream">
+            <div class="rent-big-amount">$${evData.amount}</div>
+            <div class="flying-cash-bills">💵 💸 🪙 ➤</div>
+            <small style="font-size:0.68rem;color:#b5abd6;">Przelew gotówki</small>
+          </div>
+
+          <div class="rent-player-box">
+            <div class="rent-avatar-big" style="background:${evData.ownerColor}">
+              ${getAvatarSvg(evData.ownerAvatar)}
+            </div>
+            <div class="rent-p-name">${evData.ownerName}</div>
+            <span class="rent-p-delta plus">+$${evData.amount}</span>
+          </div>
+        </div>
+
+        <div style="font-size:0.8rem;color:#dcd6f7;margin-bottom:12px;">
+          Gracz <strong>${evData.payerName}</strong> stanął na terenie należącym do <strong>${evData.ownerName}</strong>!
+        </div>
+        <button type="button" id="btn-dismiss-rent-anim" class="btn-ember-full" style="width:auto;padding:8px 24px;">
+          OK, Rozumiem!
+        </button>
+      </div>
+    `;
+
+    overlay.classList.remove('hidden');
+    triggerMobileVibrate([60, 40, 90]);
+
+    const closeAnim = () => overlay.classList.add('hidden');
+    document.getElementById('btn-dismiss-rent-anim').onclick = closeAnim;
+    if (overlay.hideTimer) clearTimeout(overlay.hideTimer);
+    overlay.hideTimer = setTimeout(closeAnim, 3400);
   }
 
-  function handleRollDice() {
-    if (!gameState || gameState.activeGame !== 'MONOPOLY' || gameState.status !== 'PLAYING' || gameState.turnPhase !== 'ROLL' || isRollingLock) return;
-    const player = currentTurnPlayer();
-    if (!player || player.bankrupt) return;
-    if (!player.isBot && !canControlTurn()) return;
-
-    isRollingLock = true;
-    sfx.dice();
-
-    const d1El = document.getElementById('die-box-1');
-    const d2El = document.getElementById('die-box-2');
-    d1El?.classList.add('rolling');
-    d2El?.classList.add('rolling');
-
-    setTimeout(() => {
-      d1El?.classList.remove('rolling');
-      d2El?.classList.remove('rolling');
-
-      const [d1, d2] = rollMonopolyDicePair(player);
-      const sum = d1 + d2;
-      const isDouble = d1 === d2;
-
-      gameState.lastDice = [d1, d2];
-      if (d1El) d1El.dataset.val = d1;
-      if (d2El) d2El.dataset.val = d2;
-
-      if (player.inJail) {
-        if (isDouble) {
-          player.inJail = false; player.jailTurns = 0;
-          addFeedEvent(`<strong>${player.name}</strong> wyrzucił dublet (${d1}+${d2}) i wychodzi z Izby!`);
-        } else {
-          player.jailTurns += 1;
-          if (player.jailTurns >= 3) {
-            player.cash -= 100; player.inJail = false; player.jailTurns = 0;
-            addFeedEvent(`<strong>${player.name}</strong> opłacił $100 kaucji po 3 turach na Izbie.`);
-          } else {
-            addFeedEvent(`<strong>${player.name}</strong> zostaje na Izbie (${d1}+${d2}).`);
-            gameState.turnPhase = 'END';
-            isRollingLock = false;
-            pushStateSync();
-            if (player.isBot) setTimeout(botMonopolyTurn, 600);
-            return;
-          }
-        }
-      }
-
-      if (isDouble) {
-        gameState.doublesStreak += 1;
-        if (gameState.doublesStreak >= 3) {
-          player.position = 10; player.inJail = true; gameState.doublesStreak = 0; gameState.turnPhase = 'END';
-          addFeedEvent(`🚨 <strong>${player.name}</strong> wyrzucił 3 dublety i trafia na Izbę!`);
-          isRollingLock = false;
-          pushStateSync();
-          if (player.isBot) setTimeout(botMonopolyTurn, 600);
-          return;
-        }
-      } else {
-        gameState.doublesStreak = 0;
-      }
-
-      animateStepByStepMove(player, sum, () => {
-        resolveLandedTile(player, player.position, sum);
-        isRollingLock = false;
-        checkMonopolyVictory();
-        pushStateSync();
-        if (player.isBot && gameState.status === 'PLAYING') setTimeout(botMonopolyTurn, 600);
-      });
-    }, 400);
-  }
-
-  function resolveLandedTile(player, tileIndex, diceSum) {
-    const tile = BOARD_TILES[tileIndex];
-    const prop = gameState.properties[tileIndex];
-    const alertEl = document.getElementById('center-card-alert');
-    alertEl?.classList.add('hidden');
-
-    addFeedEvent(`<strong>${player.name}</strong> wyrzucił ${gameState.lastDice[0]}+${gameState.lastDice[1]} ➔ <strong>${tile.name}</strong>`);
-
-    if (tile.type === 'PROPERTY' || tile.type === 'AIRPORT' || tile.type === 'UTILITY') {
-      if (!prop.ownerId) {
-        gameState.turnPhase = 'DECIDE';
-        return;
-      }
-      if (prop.ownerId === player.id) {
-        if (tile.type === 'PROPERTY' && prop.boughtInRound < gameState.round && prop.level < 5 && !prop.mortgaged) {
-          addFeedEvent(`🏗️ <strong>${player.name}</strong> wrócił na swoje pole <strong>${tile.shortName}</strong>! Może wybudować dom.`);
-        }
-        gameState.turnPhase = 'END';
-        return;
-      }
-      if (prop.ownerId !== player.id && !prop.mortgaged) {
-        const owner = getPlayerById(prop.ownerId);
-        const rent = calculateRent(tileIndex, diceSum);
-        player.cash -= rent;
-        if (owner) owner.cash += rent;
-        sfx.rent();
-        addFeedEvent(`💸 <strong>${player.name}</strong> zapłacił <strong>$${rent}</strong> czynszu dla <strong>${owner?.name}</strong> (${tile.shortName})`);
-      }
-      gameState.turnPhase = 'END';
-      return;
-    }
-
-    if (tile.type === 'TAX') {
-      const tax = tile.taxAmount || 120;
-      player.cash -= tax;
-      gameState.vacationPool += tax;
-      addFeedEvent(`🏛️ <strong>${player.name}</strong> zapłacił <strong>$${tax}</strong> podatku.`);
-      gameState.turnPhase = 'END';
-      return;
-    }
-
-    if (tile.type === 'VACATION') {
-      const bonus = gameState.vacationPool;
-      player.cash += bonus;
-      gameState.vacationPool = 50;
-      addFeedEvent(`🏖️ <strong>${player.name}</strong> zgarnia pulę z Hałdy: <strong>+$${bonus}</strong>!`);
-      gameState.turnPhase = 'END';
-      return;
-    }
-
-    if (tile.type === 'GO_TO_JAIL') {
-      player.position = 10; player.inJail = true; player.jailTurns = 0; gameState.doublesStreak = 0;
-      addFeedEvent(`🚨 <strong>${player.name}</strong> skierowany na Izbę!`);
-      gameState.turnPhase = 'END';
-      return;
-    }
-
-    if (tile.type === 'SURPRISE' || tile.type === 'TREASURE') {
-      let deck = tile.type === 'SURPRISE' ? SURPRISE_CARDS : TREASURE_CARDS;
-      if (hasSecretLuck(player) && Math.random() < 0.75) {
-        const goodOnes = deck.filter(c => c.good);
-        if (goodOnes.length) deck = goodOnes;
-      }
-      const card = deck[Math.floor(Math.random() * deck.length)];
-      if (alertEl) {
-        alertEl.textContent = card.text;
-        alertEl.classList.remove('hidden');
-      }
-      addFeedEvent(`🃏 <strong>${player.name}</strong>: "${card.text}"`);
-      if (card.action === 'CASH') player.cash += card.amount;
-      if (card.action === 'TAX_POOL') { player.cash -= card.amount; gameState.vacationPool += card.amount; }
-      if (card.action === 'PARDON') player.pardonCards += 1;
-      if (card.action === 'GO_JAIL') { player.position = 10; player.inJail = true; }
-      if (card.action === 'MOVE_TO') { if (card.target < player.position) player.cash += 250; player.position = card.target; }
-      if (card.action === 'BIRTHDAY') {
-        gameState.players.forEach(o => { if (o.id !== player.id && !o.bankrupt) { o.cash -= card.amount; player.cash += card.amount; } });
-      }
-      gameState.turnPhase = 'END';
-      return;
-    }
-
-    gameState.turnPhase = 'END';
-  }
-
-  function buyCurrentField() {
-    const player = currentTurnPlayer();
-    if (!player.isBot && !canControlTurn()) return;
-    const tile = BOARD_TILES[player.position];
-    const prop = gameState.properties[player.position];
-    if (!prop || prop.ownerId || player.cash < tile.price) return;
-
-    player.cash -= tile.price;
-    prop.ownerId = player.id;
-    prop.boughtInRound = gameState.round;
-    gameState.builtThisTurn = true;
-    prop.history.unshift(`${nowTime()} — Kupione przez ${player.name} za $${tile.price} (Okrążenie #${gameState.round})`);
-    sfx.buy();
-
-    if (tile.type === 'AIRPORT') {
-      const ownedAirports = AIRPORT_INDICES.filter(idx => gameState.properties[idx]?.ownerId === player.id).length;
-      addFeedEvent(`✈️ <strong>${player.name}</strong> kupił <strong>${tile.name}</strong>! Posiada już <strong>${ownedAirports}/4 Lotnisk</strong>!`);
-    } else {
-      addFeedEvent(`💰 <strong>${player.name}</strong> kupił <strong>${tile.name}</strong> za <strong>$${tile.price}</strong>!`);
-    }
-
-    gameState.turnPhase = 'END';
-    if (checkMonopolyVictory()) return;
-    pushStateSync();
-    if (player.isBot) setTimeout(botMonopolyTurn, 500);
-  }
-
-  function endCurrentTurn() {
-    if (!gameState || gameState.status !== 'PLAYING') return;
-    const player = currentTurnPlayer();
-    if (!player.isBot && !canControlTurn()) return;
-
-    if (player.cash < 0) {
-      const myOwned = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === player.id);
-      if (myOwned.length > 0 && !player.isBot) {
-        alert(`🚨 Masz dług ($${player.cash})!\n\nMusisz sprzedać swoje domy lub działki z listy po prawej stronie, aby wyjść na minimum $0!`);
-        return;
-      }
-      declareBankruptcy(player.id, null);
-      return;
-    }
-
-    if (gameState.doublesStreak > 0 && !player.inJail && !player.bankrupt) {
-      gameState.turnPhase = 'ROLL';
-      gameState.builtThisTurn = false;
-      addFeedEvent(`🎲 <strong>${player.name}</strong> ma dodatkowy rzut za dublet!`);
-      pushStateSync();
-      if (player.isBot) setTimeout(handleRollDice, 600);
-      return;
-    }
-
-    const total = gameState.players.length;
-    let nextIdx = gameState.turnIndex;
-    for (let i = 1; i <= total; i++) {
-      const cand = (gameState.turnIndex + i) % total;
-      if (!gameState.players[cand].bankrupt) {
-        if (cand <= gameState.turnIndex) gameState.round += 1;
-        nextIdx = cand;
-        break;
-      }
-    }
-
-    gameState.turnIndex = nextIdx;
-    gameState.turnPhase = 'ROLL';
-    gameState.builtThisTurn = false;
-    gameState.doublesStreak = 0;
-    gameState.turnSecondsLeft = 120;
-
-    pushStateSync();
-    const nextP = currentTurnPlayer();
-    if (nextP.isBot && gameState.activeGame === 'MONOPOLY') setTimeout(handleRollDice, 650);
-  }
-
-  function botMonopolyTurn() {
-    if (!gameState || gameState.activeGame !== 'MONOPOLY' || gameState.status !== 'PLAYING') return;
-    const bot = currentTurnPlayer();
-    if (!bot || !bot.isBot || bot.bankrupt) return;
-
-    if (gameState.turnPhase === 'DECIDE') {
-      const tile = BOARD_TILES[bot.position];
-      if (bot.cash >= tile.price) { buyCurrentField(); return; }
-      else gameState.turnPhase = 'END';
-    }
-
-    if (!gameState.builtThisTurn && canUpgradeProperty(bot.position, bot.id).ok && bot.cash > 200) {
-      buildHouseOnProperty(bot.position, bot.id);
-    }
-
-    while (bot.cash < 0) {
-      const withHouses = BOARD_TILES.find(t => gameState.properties[t.index]?.ownerId === bot.id && gameState.properties[t.index]?.level > 0);
-      if (withHouses) { sellHouseOnProperty(withHouses.index, bot.id); continue; }
-      const normalLand = BOARD_TILES.find(t => t.type !== 'AIRPORT' && gameState.properties[t.index]?.ownerId === bot.id);
-      if (normalLand) { sellLandToBank(normalLand.index, bot.id); continue; }
-      const airportLand = BOARD_TILES.find(t => t.type === 'AIRPORT' && gameState.properties[t.index]?.ownerId === bot.id);
-      if (airportLand) { sellLandToBank(airportLand.index, bot.id); continue; }
-      declareBankruptcy(bot.id, null);
-      return;
-    }
-
-    setTimeout(endCurrentTurn, 500);
-  }
-
-  function declareBankruptcy(playerId, creditorId = null) {
-    const player = getPlayerById(playerId);
-    if (!player || player.bankrupt) return;
-    player.bankrupt = true;
-    player.cash = 0;
-    Object.keys(gameState.properties).forEach(idx => {
-      const prop = gameState.properties[idx];
-      if (prop.ownerId === playerId) {
-        prop.ownerId = creditorId || null;
-        if (!creditorId) { prop.level = 0; prop.boughtInRound = 0; prop.mortgaged = false; }
-      }
-    });
-    addFeedEvent(`💀 <strong>${player.name}</strong> ogłosił bankructwo i odpada z gry!`);
-    if (checkMonopolyVictory()) return;
-    if (currentTurnPlayer().id === playerId) endCurrentTurn();
-    else pushStateSync();
-  }
-
-  /* ==================== 8. SZYNK KŁAMCÓW ==================== */
+  /* ==================== SZYNK KŁAMCÓW ==================== */
   let selectedLiarCardIds = [];
 
   function renderLiarsGame() {
@@ -1298,9 +1202,7 @@
 
     const titleEl = document.getElementById('liars-turn-title');
     if (titleEl) {
-      titleEl.textContent = liars.winnerName
-        ? `🏆 Wygrywa Szynk Kłamców: ${liars.winnerName}!`
-        : `Kolej przy stole: ${activeP?.name || '...'}`;
+      titleEl.textContent = liars.winnerName ? `🏆 Wygrywa Szynk Kłamców: ${liars.winnerName}!` : `Kolej: ${activeP?.name || '...'}`;
     }
 
     const reqBadge = document.getElementById('liars-required-rank');
@@ -1410,13 +1312,7 @@
 
     hands[activeP.id] = myHand.filter(c => !selectedLiarCardIds.includes(c.id));
     liars.pile.push(...chosenCards);
-    liars.lastPlay = {
-      playerId: activeP.id,
-      playerName: activeP.name,
-      count: chosenCards.length,
-      claimedRank: claimedRank,
-      actualCards: chosenCards
-    };
+    liars.lastPlay = { playerId: activeP.id, playerName: activeP.name, count: chosenCards.length, claimedRank: claimedRank, actualCards: chosenCards };
     liars.lastRevealMsg = '';
     selectedLiarCardIds = [];
     sfx.step();
@@ -1439,11 +1335,11 @@
 
     if (wasTruth) {
       hands[caller.id].push(...liars.pile);
-      liars.lastRevealMsg = `✅ PRAWDA! <strong>${accused?.name}</strong> położył [${actualStr}]! Sprawdzający <strong>${caller.name}</strong> zabiera całą pulę!`;
+      liars.lastRevealMsg = `✅ PRAWDA! <strong>${accused?.name}</strong> położył [${actualStr}]! <strong>${caller.name}</strong> zabiera pulę!`;
       sfx.rent();
     } else {
       hands[accused.id].push(...liars.pile);
-      liars.lastRevealMsg = `🚨 KŁAMSTWO! <strong>${accused?.name}</strong> deklarował ${liars.lastPlay.claimedRank}, a położył [${actualStr}]! Zabiera całą pulę!`;
+      liars.lastRevealMsg = `🚨 KŁAMSTWO! <strong>${accused?.name}</strong> kłamał (${actualStr})! Zabiera pulę!`;
       sfx.buy();
     }
 
@@ -1465,8 +1361,7 @@
     checkBotForOtherGames();
   }
 
-  /* ==================== 9. KWIACIARNIA GODULA (PEŁNY STÓŁ 0-36 + CEL GRY) ==================== */
-  const RED_NUMS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  /* ==================== KWIACIARNIA GODULA (KASYNO VIP) ==================== */
   let selectedCasinoChip = 25;
   let currentRouletteBets = {};
   let rouletteHistory = [];
@@ -1505,8 +1400,8 @@
     if (!player) return;
     const staked = getTotalRouletteStaked();
     if (player.cash < staked + selectedCasinoChip) {
-      const msgEl = document.getElementById('roulette-msg');
-      if (msgEl) msgEl.textContent = '❌ Nie masz tyle gotówki w portfelu na kolejny żeton!';
+      const msg = document.getElementById('roulette-msg');
+      if (msg) msg.textContent = '❌ Brak gotówki w portfelu na ten żeton!';
       return;
     }
     currentRouletteBets[betKey] = (currentRouletteBets[betKey] || 0) + selectedCasinoChip;
@@ -1550,7 +1445,7 @@
     if (histEl && rouletteHistory.length) {
       histEl.innerHTML = `<span>Ostatnie:</span>` + rouletteHistory.slice(0, 7).map(n => {
         const bg = n === 0 ? '#2e7d32' : (RED_NUMS.includes(n) ? '#c62828' : '#212121');
-        return `<span class="hist-num-pill" style="background:${bg};padding:2px 6px;border-radius:4px;color:#fff;font-weight:800;">${n}</span>`;
+        return `<span class="hist-num-pill" style="background:${bg}">${n}</span>`;
       }).join('');
     }
   }
@@ -1565,28 +1460,10 @@
         `<div style="text-align:center;padding:14px;">
           <div style="font-size:3rem;">🎰👑</div>
           <h3 style="color:#ffca28;margin:8px 0;">${player.name} osiągnął cel majątkowy $${goal}!</h3>
-          <p>Aktualny stan konta: <strong style="color:#2ecc71;">$${player.cash}</strong></p>
+          <p>Stan konta: <strong style="color:#2ecc71;">$${player.cash}</strong></p>
         </div>`
       );
     }
-  }
-
-  function evaluateRoulettePayout(betsMap, outcomeNum) {
-    let totalReturn = 0;
-    const isRed = RED_NUMS.includes(outcomeNum);
-    Object.entries(betsMap).forEach(([key, amt]) => {
-      if (key === `NUM_${outcomeNum}`) totalReturn += amt * 36;
-      else if (key === 'RED' && isRed) totalReturn += amt * 2;
-      else if (key === 'BLACK' && outcomeNum !== 0 && !isRed) totalReturn += amt * 2;
-      else if (key === 'EVEN' && outcomeNum !== 0 && outcomeNum % 2 === 0) totalReturn += amt * 2;
-      else if (key === 'ODD' && outcomeNum % 2 === 1) totalReturn += amt * 2;
-      else if (key === 'LOW' && outcomeNum >= 1 && outcomeNum <= 18) totalReturn += amt * 2;
-      else if (key === 'HIGH' && outcomeNum >= 19 && outcomeNum <= 36) totalReturn += amt * 2;
-      else if (key === 'DOZ_1' && outcomeNum >= 1 && outcomeNum <= 12) totalReturn += amt * 3;
-      else if (key === 'DOZ_2' && outcomeNum >= 13 && outcomeNum <= 24) totalReturn += amt * 3;
-      else if (key === 'DOZ_3' && outcomeNum >= 25 && outcomeNum <= 36) totalReturn += amt * 3;
-    });
-    return totalReturn;
   }
 
   function spinFullGodulaRoulette() {
@@ -1595,11 +1472,11 @@
     const totalBet = getTotalRouletteStaked();
     const msgEl = document.getElementById('roulette-msg');
     if (!player || totalBet <= 0) {
-      if (msgEl) msgEl.textContent = '⚠️ Najpierw połóż przynajmniej jeden żeton na stole ruletki!';
+      if (msgEl) msgEl.textContent = '⚠️ Połóż przynajmniej jeden żeton na stole!';
       return;
     }
     if (player.cash < totalBet) {
-      if (msgEl) msgEl.textContent = '❌ Nie masz wystarczająco gotówki!';
+      if (msgEl) msgEl.textContent = '❌ Za mało gotówki!';
       return;
     }
 
@@ -1608,7 +1485,7 @@
     sfx.dice();
 
     let outcomeNum = Math.floor(Math.random() * 37);
-    if (hasSecretLuck(player) && Math.random() < 0.6) {
+    if (hasSecretLuck(player) && Math.random() < 0.65) {
       for (let i = 0; i < 8; i++) {
         const cand = Math.floor(Math.random() * 37);
         if (evaluateRoulettePayout(currentRouletteBets, cand) > totalBet) {
@@ -1623,7 +1500,7 @@
     rouletteSpinAngle += 1440 + Math.floor(Math.random() * 360);
     if (wheel) wheel.style.transform = `rotate(${rouletteSpinAngle}deg)`;
     orbit?.classList.add('spinning');
-    if (msgEl) msgEl.textContent = '🎡 Kulka kręci się w Kwiaciarni Godula...';
+    if (msgEl) msgEl.textContent = '🎡 Kulka kręci się na kole...';
 
     setTimeout(() => {
       orbit?.classList.remove('spinning');
@@ -1640,7 +1517,7 @@
         sfx.win();
         checkCasinoGoalReached(player);
       } else {
-        if (msgEl) msgEl.textContent = `💸 Wypadło ${outcomeNum}. Spróbuj kolejnego spinu!`;
+        if (msgEl) msgEl.textContent = `💸 Wypadło ${outcomeNum}. Zakład przepadł.`;
       }
       isCasinoBusy = false;
       pushStateSync();
@@ -1673,7 +1550,7 @@
       ticks++;
       if (ticks >= 11) {
         clearInterval(timer);
-        if (hasSecretLuck(player) && Math.random() < 0.45 && r1 && r2) {
+        if (hasSecretLuck(player) && Math.random() < 0.5 && r1 && r2) {
           r2.textContent = r1.textContent;
         }
         const s1 = r1?.textContent, s2 = r2?.textContent, s3 = r3?.textContent;
@@ -1688,7 +1565,7 @@
           sfx.win();
           checkCasinoGoalReached(player);
         } else {
-          if (msgEl) msgEl.textContent = `Układ: ${s1} ${s2} ${s3} — graj dalej!`;
+          if (msgEl) msgEl.textContent = `Układ: ${s1} ${s2} ${s3}`;
         }
         isCasinoBusy = false;
         pushStateSync();
@@ -1696,7 +1573,7 @@
     }, 85);
   }
 
-  /* ==================== 10. SZTOLNIA LABIRYNT (QUORIDOR 9x9 + ŚCIANY + BFS) ==================== */
+  /* ==================== 10. SZTOLNIA LABIRYNT (QUORIDOR 9x9) ==================== */
   let quoridorActionMode = 'MOVE';
 
   function ensureQuoridorDOMExists() {
@@ -1718,7 +1595,7 @@
       btn.dataset.switchGame = 'QUORIDOR';
       btn.innerHTML = `<span class="g-icon">🧱</span><span>Sztolnia Labirynt</span>`;
       btn.onclick = () => {
-        if (!gameState) return;
+        if (!gameState || !isRoomHost()) return;
         gameState.activeGame = 'QUORIDOR';
         pushStateSync();
         checkBotForOtherGames();
@@ -1746,7 +1623,7 @@
             </div>
           </div>
           <div style="width:100%;background:rgba(124,77,255,0.14);border:1px solid rgba(124,77,255,0.4);border-radius:11px;padding:7px 12px;font-size:0.76rem;text-align:center;margin:6px 0;">
-            🎯 <strong>Cel:</strong> Dojdź pionkiem na przeciwległy koniec planszy! W swojej turze kliknij zielone pole ruchu LUB wybierz powyżej tryb ściany i postaw tamę przed rywalem.
+            🎯 <strong>Cel:</strong> Dojdź pionkiem na przeciwległy koniec planszy!
           </div>
           <div style="width:100%;flex:1;min-height:420px;display:flex;align-items:center;justify-content:center;padding:8px 0;">
             <div id="quoridor-grid"></div>
@@ -1763,18 +1640,10 @@
 
   function isQuoridorStepOpen(r1, c1, r2, c2, hWalls, vWalls) {
     if (r2 < 0 || r2 > 8 || c2 < 0 || c2 > 8) return false;
-    if (r2 === r1 - 1 && c2 === c1) {
-      return !hWalls.includes(`${r2},${c1}`) && !hWalls.includes(`${r2},${c1 - 1}`);
-    }
-    if (r2 === r1 + 1 && c2 === c1) {
-      return !hWalls.includes(`${r1},${c1}`) && !hWalls.includes(`${r1},${c1 - 1}`);
-    }
-    if (c2 === c1 - 1 && r2 === r1) {
-      return !vWalls.includes(`${r1},${c2}`) && !vWalls.includes(`${r1 - 1},${c2}`);
-    }
-    if (c2 === c1 + 1 && r2 === r1) {
-      return !vWalls.includes(`${r1},${c1}`) && !vWalls.includes(`${r1 - 1},${c1}`);
-    }
+    if (r2 === r1 - 1 && c2 === c1) return !hWalls.includes(`${r2},${c1}`) && !hWalls.includes(`${r2},${c1 - 1}`);
+    if (r2 === r1 + 1 && c2 === c1) return !hWalls.includes(`${r1},${c1}`) && !hWalls.includes(`${r1},${c1 - 1}`);
+    if (c2 === c1 - 1 && r2 === r1) return !vWalls.includes(`${r1},${c2}`) && !vWalls.includes(`${r1 - 1},${c2}`);
+    if (c2 === c1 + 1 && r2 === r1) return !vWalls.includes(`${r1},${c1}`) && !vWalls.includes(`${r1 - 1},${c1}`);
     return false;
   }
 
@@ -1828,9 +1697,7 @@
       if (!isQuoridorStepOpen(me.r, me.c, nr, nc, qState.hWalls, qState.vWalls)) return;
       if (nr === opp.r && nc === opp.c) {
         const jr = nr + dr, jc = nc + dc;
-        if (isQuoridorStepOpen(nr, nc, jr, jc, qState.hWalls, qState.vWalls)) {
-          moves.push({ r: jr, c: jc });
-        }
+        if (isQuoridorStepOpen(nr, nc, jr, jc, qState.hWalls, qState.vWalls)) moves.push({ r: jr, c: jc });
       } else {
         moves.push({ r: nr, c: nc });
       }
@@ -1849,7 +1716,7 @@
       q.winner = side;
       sfx.win();
       const winPlayer = getTeamActivePlayer(side, q);
-      addFeedEvent(`🧱 <strong>${winPlayer?.name}</strong> przeszedł na drugą stronę Sztolni Labiryntu i wygrał mecz!`);
+      addFeedEvent(`🧱 <strong>${winPlayer?.name}</strong> wygrał Sztolnię Labirynt!`);
     } else {
       advance2PGameTurn(q);
     }
@@ -1861,14 +1728,8 @@
     const q = gameState.quoridor;
     if (!q || q.winner !== null) return;
     const side = q.turn;
-    if (q.wallsLeft[side] <= 0) {
-      alert('Nie masz już więcej ścian do postawienia!');
-      return;
-    }
-    if (!canPlaceQuoridorWall(orient, r, c, q)) {
-      alert('Nie można tu postawić ściany (nachodzi na inną lub całkowicie odcina rywalowi jedyną drogę do mety)!');
-      return;
-    }
+    if (q.wallsLeft[side] <= 0) { alert('Brak ścian!'); return; }
+    if (!canPlaceQuoridorWall(orient, r, c, q)) { alert('Niedozwolone miejsce (odcina drogę do mety)!'); return; }
 
     if (orient === 'H') q.hWalls.push(`${r},${c}`);
     else q.vWalls.push(`${r},${c}`);
@@ -1882,32 +1743,20 @@
 
   function renderQuoridorGame() {
     ensureQuoridorDOMExists();
-    if (!gameState) return;
-    if (!gameState.quoridor || !Array.isArray(gameState.quoridor.pos)) {
-      gameState.quoridor = createQuoridorState();
-    }
-
+    if (!gameState || !gameState.quoridor) return;
     const grid = document.getElementById('quoridor-grid');
     if (!grid) return;
     grid.style.cssText = 'width:min(62vh,86vw,540px);height:min(62vh,86vw,540px);min-width:290px;min-height:290px;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);gap:8px;background:#120e21;padding:12px;border-radius:18px;border:4px solid #3c3063;position:relative;';
 
     const q = gameState.quoridor;
     const activePlayer = getTeamActivePlayer(q.turn, q);
-
-    const teamsTag = document.getElementById('quoridor-teams-tag');
-    if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
-        ? `DRUŻYNA A (${getTeamNamesSummary(0)}) VS DRUŻYNA B (${getTeamNamesSummary(1)})`
-        : `WYŚCIG PRZEZ CHODNIK GÓRNICZY — QUORIDOR 9×9`;
-    }
-
     const turnTxt = document.getElementById('quoridor-turn-text');
     if (turnTxt) {
       if (q.winner !== null) {
-        const wName = getTeamActivePlayer(q.winner, q)?.name || (q.winner === 0 ? 'Drużyna A' : 'Drużyna B');
-        turnTxt.textContent = `🏆 Zwycięstwo w Sztolni: ${wName}!`;
+        const wName = getTeamActivePlayer(q.winner, q)?.name || 'Drużyna';
+        turnTxt.textContent = `🏆 Zwycięstwo: ${wName}!`;
       } else {
-        turnTxt.textContent = `Ruch: ${activePlayer?.name} (${q.turn === 0 ? 'Idzie w GÓRĘ ▲' : 'Idzie w DÓŁ ▼'})`;
+        turnTxt.textContent = `Ruch: ${activePlayer?.name} (${q.turn === 0 ? '▲ w górę' : '▼ w dół'})`;
       }
     }
 
@@ -1963,7 +1812,6 @@
             if (r < 8 && c < 8) executeQuoridorWall('V', r, c);
           }
         };
-
         grid.appendChild(cell);
       }
     }
@@ -2000,9 +1848,7 @@
       dieEl?.classList.remove('rolling');
       const allInBase = ludo.pawns[ludo.turn].every(s => s === -1);
       const luckBoost = hasSecretLuck(curPlayer) ? 0.65 : 0.38;
-      const d = (allInBase && Math.random() < luckBoost)
-        ? 6
-        : (hasSecretLuck(curPlayer) && Math.random() < 0.35 ? 6 : (Math.floor(Math.random() * 6) + 1));
+      const d = (allInBase && Math.random() < luckBoost) ? 6 : (hasSecretLuck(curPlayer) && Math.random() < 0.35 ? 6 : (Math.floor(Math.random() * 6) + 1));
 
       ludo.dice = d;
       ludo.rolled = true;
@@ -2010,12 +1856,7 @@
 
       const anyMove = [0,1,2,3].some(i => canMoveLudoPawn(ludo.turn, i, d));
       if (!anyMove) {
-        setTimeout(() => {
-          ludo.rolled = false;
-          ludo.turn = (ludo.turn + 1) % pCount;
-          pushStateSync();
-          checkBotForOtherGames();
-        }, 550);
+        setTimeout(() => { ludo.rolled = false; ludo.turn = (ludo.turn + 1) % pCount; pushStateSync(); checkBotForOtherGames(); }, 550);
       } else {
         pushStateSync();
         if (curPlayer.isBot) {
@@ -2053,10 +1894,7 @@
         }
       }
     }
-    if (ludo.pawns[pIdx].every(s => s >= 40)) {
-      ludo.winner = pIdx;
-      sfx.win();
-    }
+    if (ludo.pawns[pIdx].every(s => s >= 40)) { ludo.winner = pIdx; sfx.win(); }
     const extra = (ludo.dice === 6 && ludo.winner === null);
     ludo.rolled = false;
     if (!extra) ludo.turn = (ludo.turn + 1) % pCount;
@@ -2073,9 +1911,7 @@
 
     const turnTxt = document.getElementById('ludo-turn-text');
     if (turnTxt) {
-      turnTxt.textContent = ludo.winner !== null
-        ? `🏆 Wygrywa: ${gameState.players[ludo.winner]?.name || LUDO_NAMES[ludo.winner]}!`
-        : `Kolej: ${curP?.name || LUDO_NAMES[ludo.turn]}`;
+      turnTxt.textContent = ludo.winner !== null ? `🏆 Wygrywa: ${gameState.players[ludo.winner]?.name}!` : `Kolej: ${curP?.name || LUDO_NAMES[ludo.turn]}`;
     }
     const dieEl = document.getElementById('ludo-die');
     if (dieEl) dieEl.dataset.val = ludo.dice;
@@ -2144,16 +1980,12 @@
 
     const teamsTag = document.getElementById('checkers-teams-tag');
     if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
-        ? `DRUŻYNA WĘGLA (${getTeamNamesSummary(0)}) VS DRUŻYNA STALI (${getTeamNamesSummary(1)})`
-        : `WĘGIEL VS STAL`;
+      teamsTag.textContent = gameState.players.length > 2 ? `DRUŻYNA WĘGLA VS DRUŻYNA STALI` : `WĘGIEL VS STAL`;
     }
 
     const turnEl = document.getElementById('checkers-turn-text');
     if (turnEl) {
-      turnEl.textContent = chk.winner !== null
-        ? `🏆 Zwycięstwo: ${getTeamActivePlayer(chk.winner, chk)?.name}!`
-        : `Ruch: ${activeP?.name} (${chk.turn === 0 ? 'Pomarańczowe ▲' : 'Błękitne ▼'})`;
+      turnEl.textContent = chk.winner !== null ? `🏆 Zwycięstwo: ${getTeamActivePlayer(chk.winner, chk)?.name}!` : `Ruch: ${activeP?.name}`;
     }
     const scoreEl = document.getElementById('checkers-score-text');
     if (scoreEl) scoreEl.textContent = `Zbicia: ${chk.captured[0]} — ${chk.captured[1]}`;
@@ -2204,10 +2036,7 @@
     checkBotForOtherGames();
   }
 
-  const CHESS_GLYPHS = {
-    0: { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙' },
-    1: { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' }
-  };
+  const CHESS_GLYPHS = { 0: { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙' }, 1: { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' } };
   let selectedChessSq = null;
 
   function getValidChessMoves(board, r, c) {
@@ -2248,22 +2077,10 @@
     const board = JSON.parse(ch.boardJson);
     const activeP = getTeamActivePlayer(ch.turn, ch);
 
-    const teamsTag = document.getElementById('chess-teams-tag');
-    if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
-        ? `DRUŻYNA ZŁOTYCH (${getTeamNamesSummary(0)}) VS DRUŻYNA BŁĘKITNYCH (${getTeamNamesSummary(1)})`
-        : `HUTA POKÓJ VS KWK HALEMBA`;
-    }
-
     const turnEl = document.getElementById('chess-turn-text');
     if (turnEl) {
-      turnEl.textContent = ch.winner !== null
-        ? `🏆 Szach-Mat! Wygrywa: ${getTeamActivePlayer(ch.winner, ch)?.name}!`
-        : `Ruch: ${activeP?.name} (${ch.turn === 0 ? 'Złote ♔' : 'Błękitne ♚'})`;
+      turnEl.textContent = ch.winner !== null ? `🏆 Wygrywa: ${getTeamActivePlayer(ch.winner, ch)?.name}!` : `Ruch: ${activeP?.name}`;
     }
-    const statusEl = document.getElementById('chess-status-text');
-    if (statusEl) statusEl.textContent = ch.lastMove || 'Kliknij swoją figurę, a następnie podświetlone pole';
-
     const canControl = canControl2PSide(ch.turn, ch) && ch.winner === null;
     const validMoves = (canControl && selectedChessSq) ? getValidChessMoves(board, selectedChessSq.r, selectedChessSq.c) : [];
     grid.innerHTML = '';
@@ -2284,15 +2101,8 @@
         }
         sq.onclick = () => {
           if (!canControl) return;
-          if (target) {
-            executeChessMove(selectedChessSq.r, selectedChessSq.c, target.r, target.c);
-            selectedChessSq = null;
-            return;
-          }
-          if (piece && piece.p === ch.turn) {
-            selectedChessSq = { r, c };
-            renderChessGame();
-          }
+          if (target) { executeChessMove(selectedChessSq.r, selectedChessSq.c, target.r, target.c); selectedChessSq = null; return; }
+          if (piece && piece.p === ch.turn) { selectedChessSq = { r, c }; renderChessGame(); }
         };
         grid.appendChild(sq);
       }
@@ -2305,20 +2115,13 @@
     const moving = board[fr][fc];
     if (!moving) return;
     const target = board[tr][tc];
-    const activeP = getTeamActivePlayer(ch.turn, ch);
 
     board[fr][fc] = null;
     board[tr][tc] = moving;
     if (moving.type === 'P' && (tr === 0 || tr === 7)) moving.type = 'Q';
 
-    if (target && target.type === 'K') {
-      ch.winner = moving.p;
-      ch.lastMove = `👑 ${activeP?.name} zbija Króla i wygrywa partię!`;
-      sfx.win();
-    } else {
-      ch.lastMove = `${activeP?.name}: ${CHESS_GLYPHS[moving.p][moving.type]} ➔ (${tr + 1}, ${tc + 1})`;
-      if (target) sfx.rent(); else sfx.step();
-    }
+    if (target && target.type === 'K') { ch.winner = moving.p; sfx.win(); }
+    else { if (target) sfx.rent(); else sfx.step(); }
 
     ch.boardJson = JSON.stringify(board);
     if (ch.winner === null) advance2PGameTurn(ch);
@@ -2346,12 +2149,7 @@
     });
 
     c4.boardJson = JSON.stringify(board);
-    if (won) {
-      c4.winner = c4.turn;
-      sfx.win();
-    } else {
-      advance2PGameTurn(c4);
-    }
+    if (won) { c4.winner = c4.turn; sfx.win(); } else advance2PGameTurn(c4);
     pushStateSync();
     checkBotForOtherGames();
   }
@@ -2363,18 +2161,9 @@
     const board = JSON.parse(c4.boardJson);
     const activeP = getTeamActivePlayer(c4.turn, c4);
 
-    const teamsTag = document.getElementById('c4-teams-tag');
-    if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
-        ? `DRUŻYNA A (${getTeamNamesSummary(0)}) VS DRUŻYNA B (${getTeamNamesSummary(1)})`
-        : `SZYB WYDOBYWCZY: 4 W LINII`;
-    }
-
     const turnEl = document.getElementById('c4-turn-text');
     if (turnEl) {
-      turnEl.textContent = c4.winner !== null
-        ? `🏆 Wygrywa: ${getTeamActivePlayer(c4.winner, c4)?.name}!`
-        : `Ruch: ${activeP?.name} (${c4.turn === 0 ? 'Pomarańczowe' : 'Błękitne'})`;
+      turnEl.textContent = c4.winner !== null ? `🏆 Wygrywa: ${getTeamActivePlayer(c4.winner, c4)?.name}!` : `Ruch: ${activeP?.name}`;
     }
 
     const canControl = canControl2PSide(c4.turn, c4) && c4.winner === null;
@@ -2390,21 +2179,16 @@
           disc.style.background = val === 0 ? '#ff7849' : '#00e5ff';
           slot.appendChild(disc);
         }
-        slot.onclick = () => {
-          if (canControl) dropConnect4Disc(c);
-        };
+        slot.onclick = () => { if (canControl) dropConnect4Disc(c); };
         grid.appendChild(slot);
       }
     }
   }
 
-  /* ==================== CENTRALNY STEROWNIK BOTÓW WE WSZYSTKICH 8 GRACH ==================== */
+  /* ==================== STEROWNIK BOTÓW ==================== */
   function checkBotForOtherGames() {
     if (!gameState) return;
-    if (botActionTimeout) {
-      clearTimeout(botActionTimeout);
-      botActionTimeout = null;
-    }
+    if (botActionTimeout) { clearTimeout(botActionTimeout); botActionTimeout = null; }
 
     const mode = gameState.activeGame;
 
@@ -2422,10 +2206,7 @@
         botActionTimeout = setTimeout(() => {
           const hands = JSON.parse(liars.handsJson);
           const botHand = hands[cur.id] || [];
-          if (liars.lastPlay && Math.random() < 0.38) {
-            callLiarOnLastPlay();
-            return;
-          }
+          if (liars.lastPlay && Math.random() < 0.38) { callLiarOnLastPlay(); return; }
           if (botHand.length > 0) {
             const rank = liars.requiredRank || ['A','K','Q','J','10'][Math.floor(Math.random() * 5)];
             liars.requiredRank = rank;
@@ -2450,16 +2231,6 @@
       if (activeP && activeP.isBot) {
         botActionTimeout = setTimeout(() => {
           const side = q.turn;
-          const opp = 1 - side;
-          if (q.wallsLeft[side] > 0 && Math.random() < 0.3) {
-            const oppPos = q.pos[opp];
-            const wallR = opp === 0 ? Math.max(0, oppPos.r - 1) : Math.min(7, oppPos.r);
-            const wallC = Math.min(7, oppPos.c);
-            if (canPlaceQuoridorWall('H', wallR, wallC, q)) {
-              executeQuoridorWall('H', wallR, wallC);
-              return;
-            }
-          }
           const targetRow = side === 0 ? 0 : 8;
           const shortest = getShortestQuoridorPath(q.pos[side], targetRow, q.hWalls, q.vWalls);
           const validSteps = getValidQuoridorPawnMoves(q, side);
@@ -2489,18 +2260,11 @@
         botActionTimeout = setTimeout(() => {
           const board = JSON.parse(chk.boardJson);
           const all = [];
-          for (let r = 0; r < 8; r++) {
-            for (let c = 0; c < 8; c++) {
-              if (board[r][c]?.p === chk.turn) getCheckerMoves(board, r, c).forEach(m => all.push({ fr: r, fc: c, m }));
-            }
-          }
+          for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c]?.p === chk.turn) getCheckerMoves(board, r, c).forEach(m => all.push({ fr: r, fc: c, m }));
           if (all.length) {
             const pick = all.find(x => x.m.jump) || all[Math.floor(Math.random() * all.length)];
             executeCheckerMove(pick.fr, pick.fc, pick.m);
-          } else {
-            chk.winner = 1 - chk.turn;
-            pushStateSync();
-          }
+          } else { chk.winner = 1 - chk.turn; pushStateSync(); }
         }, 600);
       }
     }
@@ -2512,15 +2276,9 @@
         botActionTimeout = setTimeout(() => {
           const board = JSON.parse(ch.boardJson);
           const all = [];
-          for (let r = 0; r < 8; r++) {
-            for (let c = 0; c < 8; c++) {
-              if (board[r][c]?.p === ch.turn) getValidChessMoves(board, r, c).forEach(m => all.push({ fr: r, fc: c, tr: m.r, tc: m.c }));
-            }
-          }
+          for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c]?.p === ch.turn) getValidChessMoves(board, r, c).forEach(m => all.push({ fr: r, fc: c, tr: m.r, tc: m.c }));
           if (all.length) {
-            const kingMove = all.find(x => board[x.tr][x.tc]?.type === 'K');
-            const captureMove = all.find(x => board[x.tr][x.tc] !== null);
-            const pick = kingMove || captureMove || all[Math.floor(Math.random() * all.length)];
+            const pick = all.find(x => board[x.tr][x.tc]?.type === 'K') || all[Math.floor(Math.random() * all.length)];
             executeChessMove(pick.fr, pick.fc, pick.tr, pick.tc);
           }
         }, 600);
@@ -2540,23 +2298,29 @@
     }
   }
 
-  /* ==================== 12. RENDEROWANIE INTERFEJSU ==================== */
+  /* ==================== RENDEROWANIE ==================== */
   function renderAll() {
     if (!gameState) return;
     ensureQuoridorDOMExists();
     syncMyOnlineIdentity();
+
+    const amHost = isRoomHost();
+    document.body.classList.toggle('not-room-host', !amHost);
+    enforceAdminControlsUI();
+
+    if (gameState.lastRentEvent && gameState.lastRentEvent.id !== lastShownRentEventId) {
+      lastShownRentEventId = gameState.lastRentEvent.id;
+      showRentPaymentAnimation(gameState.lastRentEvent);
+    }
+
     if (gameState.mapId) applyMapTheme(gameState.mapId);
+    injectExtraFeaturesUI();
 
     if (gameState.status === 'FINISHED' && gameState.winnerAnnouncement && lastWinnerShown !== gameState.winnerAnnouncement.winnerName) {
       lastWinnerShown = gameState.winnerAnnouncement.winnerName;
       showGenericModal(
-        `👑 ZWYCIĘZCA GRY: ${gameState.winnerAnnouncement.winnerName}!`,
-        `<div style="text-align:center;padding:18px;">
-          <div style="font-size:3.5rem;margin-bottom:8px;">🏆</div>
-          <h2 style="color:#ffca28;margin-bottom:10px;">${gameState.winnerAnnouncement.winnerName} wygrywa Ruda Śląska Monopoly!</h2>
-          <p style="font-size:0.95rem;line-height:1.5;margin-bottom:14px;">${gameState.winnerAnnouncement.reason}</p>
-          <div style="font-weight:900;color:#2ecc71;font-size:1.1rem;">Końcowy stan konta: $${gameState.winnerAnnouncement.cash}</div>
-        </div>`
+        `👑 ZWYCIĘZCA: ${gameState.winnerAnnouncement.winnerName}!`,
+        `<div style="text-align:center;padding:18px;"><div style="font-size:3.5rem;">🏆</div><h2 style="color:#ffca28;">${gameState.winnerAnnouncement.winnerName} wygrywa!</h2><p>${gameState.winnerAnnouncement.reason}</p></div>`
       );
     }
 
@@ -2655,9 +2419,7 @@
     const quotaEl = document.getElementById('hud-build-quota');
     if (quotaEl) {
       const airCount = AIRPORT_INDICES.filter(idx => gameState.properties[idx]?.ownerId === active.id).length;
-      quotaEl.textContent = canBuildHere.ok
-        ? '🏠 Stoisz na swoim polu — możesz zbudować dom!'
-        : `✈️ Lotniska gracza ${active.name}: ${airCount}/4`;
+      quotaEl.textContent = canBuildHere.ok ? '🏠 Możesz zbudować dom!' : `✈️ Lotniska: ${airCount}/4`;
       quotaEl.className = canBuildHere.ok ? 'hub-pill quota-ready' : 'hub-pill quota-used';
     }
 
@@ -2666,7 +2428,7 @@
     if (avatarDot) {
       avatarDot.style.background = active.color;
       avatarDot.innerHTML = getAvatarSvg(active.avatar);
-      document.getElementById('playing-now-label').textContent = `Kolej gracza: ${active.name}`;
+      document.getElementById('playing-now-label').textContent = `Kolej: ${active.name}`;
     }
 
     const isMyTurn = canControlTurn();
@@ -2681,22 +2443,19 @@
 
     if (gameState.turnPhase === 'DECIDE' && tile) {
       const btnBuy = document.getElementById('btn-buy');
-      if (btnBuy) {
-        btnBuy.textContent = `💰 Kup ${tile.shortName} ($${tile.price})`;
-        btnBuy.disabled = active.cash < tile.price;
-      }
+      if (btnBuy) { btnBuy.textContent = `💰 Kup ${tile.shortName} ($${tile.price})`; btnBuy.disabled = active.cash < tile.price; }
     }
 
     const btnBuildQuick = document.getElementById('btn-build-quick');
     if (btnBuildQuick) {
       btnBuildQuick.classList.toggle('hidden', !canBuildHere.ok);
-      if (canBuildHere.ok && tile) btnBuildQuick.textContent = `🏠 Zbuduj Dom na ${tile.shortName} ($${tile.buildCost})`;
+      if (canBuildHere.ok && tile) btnBuildQuick.textContent = `🏠 Zbuduj Dom ($${tile.buildCost})`;
     }
 
     const btnBuyout = document.getElementById('btn-buyout-field');
     if (btnBuyout) {
       btnBuyout.classList.toggle('hidden', !buyoutHere.ok);
-      if (buyoutHere.ok && tile) btnBuyout.textContent = `💼 Wykup ${tile.shortName} ($${buyoutHere.cost})`;
+      if (buyoutHere.ok && tile) btnBuyout.textContent = `💼 Wrogi Wykup ($${buyoutHere.cost})`;
     }
 
     const hasAnythingToSell = BOARD_TILES.some(t => gameState.properties[t.index]?.ownerId === active.id);
@@ -2709,9 +2468,10 @@
 
   function renderPlayersRoster() {
     const viewer = getMyViewerPlayer();
+    const amHost = isRoomHost();
     const idBadge = document.getElementById('my-identity-badge');
     if (idBadge && viewer) {
-      idBadge.textContent = `Ty: ${viewer.name}`;
+      idBadge.textContent = `${amHost ? '👑 Admin: ' : 'Ty: '}${viewer.name}`;
       idBadge.style.borderColor = viewer.color;
     }
 
@@ -2719,20 +2479,29 @@
     if (rosterEl) {
       rosterEl.innerHTML = gameState.players.map((p, idx) => {
         const airCnt = AIRPORT_INDICES.filter(i => gameState.properties[i]?.ownerId === p.id).length;
-        const teamLabel = gameState.players.length > 2 ? ((idx % 2 === 0) ? ' • Druż. A' : ' • Druż. B') : '';
+        const isHostPlayer = idx === 0 || (gameState.hostToken && p.clientToken === gameState.hostToken);
+        const canKick = amHost && gameState.players.length > 1 && (p.isBot || p.clientToken !== myClientToken);
+
         return `
           <div class="roster-player-row ${idx === gameState.turnIndex ? 'is-active' : ''} ${p.bankrupt ? 'is-bankrupt' : ''}" style="border-left-color:${p.color}">
             <div class="roster-left">
               <div class="roster-avatar" style="background:${p.color}">${getAvatarSvg(p.avatar)}</div>
               <div>
-                <div class="roster-name-title">${p.name} ${p.id === viewer?.id ? '(Ty)' : ''} ${p.isBot ? '🤖' : ''}</div>
-                <div class="roster-meta-sub">${BOARD_TILES[p.position].shortName}${teamLabel} ${airCnt > 0 ? `• ✈️×${airCnt}` : ''}</div>
+                <div class="roster-name-title">${p.name} ${isHostPlayer ? '👑' : ''} ${p.id === viewer?.id ? '(Ty)' : ''} ${p.isBot ? '🤖' : ''}</div>
+                <div class="roster-meta-sub">${BOARD_TILES[p.position].shortName} • ✈️×${airCnt}</div>
               </div>
             </div>
-            <div class="roster-money ${p.cash < 0 ? 'negative' : ''}">$${p.cash}</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="roster-money ${p.cash < 0 ? 'negative' : ''}">$${p.cash}</div>
+              ${canKick ? `<button type="button" data-roster-kick="${p.id}" style="background:rgba(255,82,82,0.2);color:#ff5252;border:1px solid rgba(255,82,82,0.5);border-radius:6px;padding:2px 6px;font-size:0.68rem;font-weight:900;cursor:pointer;">✕</button>` : ''}
+            </div>
           </div>
         `;
       }).join('');
+
+      rosterEl.querySelectorAll('[data-roster-kick]').forEach(btn => {
+        btn.onclick = () => removePlayerOrBotFromGame(btn.dataset.rosterKick);
+      });
     }
   }
 
@@ -2743,7 +2512,7 @@
 
     const ownedTiles = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === viewer.id);
     const headTxt = document.getElementById('my-props-header-text');
-    if (headTxt) headTxt.textContent = `🏘️ Pola gracza ${viewer.name} (${ownedTiles.length})`;
+    if (headTxt) headTxt.textContent = `🏘️ Pola (${ownedTiles.length})`;
     let totalWorth = viewer.cash;
     ownedTiles.forEach(t => { totalWorth += t.price + (gameState.properties[t.index].level * (t.buildCost || 0)); });
     const worthBadge = document.getElementById('my-networth-badge');
@@ -2759,10 +2528,8 @@
       const grp = GROUPS[t.group];
       const upCheck = canUpgradeProperty(t.index, viewer.id);
       const lvlBadge = pr.mortgaged ? '🔒 Hipoteka' : (t.type === 'PROPERTY' ? (pr.level === 5 ? '🏨 HOTEL' : `🏠 Poz. ${pr.level}/5`) : '✈️ Lotnisko');
-      const buildBtnHtml = (t.type === 'PROPERTY' && upCheck.ok) ? `<button type="button" class="btn-quick-up" data-build-idx="${t.index}">+🏠 $${t.buildCost}</button>` : '';
-      const sellBtnHtml = (t.type === 'PROPERTY' && pr.level > 0)
-        ? `<button type="button" class="btn-quick-sell" data-sell-house-idx="${t.index}">-🏠 +$${Math.floor(t.buildCost * 0.5)}</button>`
-        : `<button type="button" class="btn-quick-sell" data-sell-land-idx="${t.index}">💵 Sprzedaj (+$${Math.floor(t.price * 0.75)})</button>`;
+      const buildBtnHtml = (t.type === 'PROPERTY' && upCheck.ok) ? `<button type="button" class="btn-quick-up" data-build-idx="${t.index}">+🏠</button>` : '';
+      const sellBtnHtml = (t.type === 'PROPERTY' && pr.level > 0) ? `<button type="button" class="btn-quick-sell" data-sell-house-idx="${t.index}">-🏠</button>` : `<button type="button" class="btn-quick-sell" data-sell-land-idx="${t.index}">💵 Sprzedaj</button>`;
 
       return `
         <div class="owned-prop-item" data-open-idx="${t.index}">
@@ -2836,17 +2603,10 @@
 
     const tbody = document.getElementById('pm-rent-tbody');
     if (tile.type === 'PROPERTY') {
-      const labels = ['Poziom 0 (Działka)','Poziom 1 (1 Dom)','Poziom 2 (2 Domy)','Poziom 3 (3 Domy)','Poziom 4 (4 Domy)','Poziom 5 (Hotel — Chroniony)'];
+      const labels = ['Poziom 0','Poziom 1','Poziom 2','Poziom 3','Poziom 4','Hotel (Chroniony)'];
       tbody.innerHTML = tile.rents.map((r, lvl) => `<tr class="${prop.level === lvl ? 'current-lvl-row' : ''}"><td>${labels[lvl]}</td><td>${lvl === 5 ? '🏨' : (lvl > 0 ? '🏠×'+lvl : '—')}</td><td><strong>$${r}</strong></td></tr>`).join('');
-    } else if (tile.type === 'AIRPORT') {
-      tbody.innerHTML = `
-        <tr><td>1 Lotnisko</td><td>✈️</td><td><strong>$50</strong></td></tr>
-        <tr><td>2 Lotniska</td><td>✈️✈️</td><td><strong>$110</strong></td></tr>
-        <tr><td>3 Lotniska</td><td>✈️✈️✈️</td><td><strong>$220</strong></td></tr>
-        <tr class="current-lvl-row"><td>4 Lotniska</td><td>🏆</td><td><strong>NATYCHMIASTOWA WYGRANA GRY!</strong></td></tr>
-      `;
     } else {
-      tbody.innerHTML = `<tr><td>Czynsz przemysłowy</td><td>⚡</td><td><strong>$${calculateRent(tileIndex)}</strong></td></tr>`;
+      tbody.innerHTML = `<tr><td>Czynsz</td><td>⚡</td><td><strong>$${calculateRent(tileIndex)}</strong></td></tr>`;
     }
 
     const btnBuild = document.getElementById('btn-pm-build');
@@ -2871,18 +2631,15 @@
       btnSell.disabled = !(prop.ownerId === viewer.id && prop.level > 0);
       btnSell.onclick = () => { if (sellHouseOnProperty(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
     }
-         if (btnBuyout) {
+    if (btnBuyout) {
       btnBuyout.classList.toggle('hidden', !buyoutCheck.ok);
       if (buyoutCheck.ok) {
-        btnBuyout.textContent = `💼 Wykup to pole od gracza za $${buyoutCheck.cost}!`;
-        btnBuyout.onclick = () => {
-          if (executeHostileBuyout(tileIndex, viewer.id)) openPropertyModal(tileIndex);
-        };
+        btnBuyout.textContent = `💼 Wrogi wykup za $${buyoutCheck.cost}!`;
+        btnBuyout.onclick = () => { if (executeHostileBuyout(tileIndex, viewer.id)) openPropertyModal(tileIndex); };
       }
     }
     if (btnSellLand) {
       btnSellLand.disabled = !(prop.ownerId === viewer.id);
-      btnSellLand.textContent = `💵 Sprzedaj Pole do Banku (+$${Math.floor(tile.price * 0.75)})`;
       btnSellLand.onclick = () => { if (sellLandToBank(tileIndex, viewer.id)) modal.classList.add('hidden'); };
     }
     if (btnMort) {
@@ -2894,14 +2651,12 @@
     modal.classList.remove('hidden');
   }
 
-  /* ==================== ZABEZPIECZONA DAROWIZNA ==================== */
   function openGiftModal() {
     const sender = getMyViewerPlayer();
     if (!sender || sender.isBot) return;
     const others = gameState.players.filter(p => !p.bankrupt && p.id !== sender.id);
     if (!others.length) return;
-    const sNameEl = document.getElementById('gift-sender-name');
-    if (sNameEl) sNameEl.textContent = `${sender.name} ($${sender.cash})`;
+    document.getElementById('gift-sender-name').textContent = `${sender.name} ($${sender.cash})`;
     document.getElementById('gift-error-msg').textContent = '';
     document.getElementById('gift-cash-amount').value = 0;
     document.getElementById('gift-target-player').innerHTML = others.map(p => `<option value="${p.id}">${p.name} ($${p.cash})</option>`).join('');
@@ -2919,10 +2674,7 @@
     const cashVal = Math.max(0, Number(document.getElementById('gift-cash-amount').value) || 0);
     const propIndices = Array.from(document.querySelectorAll('.chk-gift-prop:checked')).map(el => Number(el.value));
     if (!receiver || receiver.id === sender.id) return;
-    if (cashVal > sender.cash) {
-      document.getElementById('gift-error-msg').textContent = 'Nie masz tylu własnych pieniędzy!';
-      return;
-    }
+    if (cashVal > sender.cash) { document.getElementById('gift-error-msg').textContent = 'Nie masz tylu własnych pieniędzy!'; return; }
     if (cashVal === 0 && propIndices.length === 0) return;
 
     const summary = [];
@@ -2931,14 +2683,13 @@
       const pr = gameState.properties[idx];
       if (pr && pr.ownerId === sender.id) { pr.ownerId = receiver.id; summary.push(BOARD_TILES[idx].shortName); }
     });
-    addFeedEvent(`🎁 <strong>${sender.name}</strong> podarował graczowi <strong>${receiver.name}</strong>: <strong>${summary.join(', ')}</strong>!`);
+    addFeedEvent(`🎁 <strong>${sender.name}</strong> podarował <strong>${receiver.name}</strong>: <strong>${summary.join(', ')}</strong>!`);
     sfx.buy();
     document.getElementById('gift-modal')?.classList.add('hidden');
     checkMonopolyVictory();
     pushStateSync();
   }
 
-  /* ==================== ZABEZPIECZONA WYMIANA HANDLOWA ==================== */
   function renderTradesList() {
     const panel = document.getElementById('trades-panel-box');
     const box = document.getElementById('trades-list-box');
@@ -2947,28 +2698,16 @@
     panel.classList.remove('hidden');
 
     const viewer = getMyViewerPlayer();
-
     box.innerHTML = gameState.trades.map(tr => {
       const from = getPlayerById(tr.fromId), to = getPlayerById(tr.toId);
-      const giveNames = (tr.giveProps || []).map(i => BOARD_TILES[i]?.shortName).join(', ') || 'brak działek';
-      const takeNames = (tr.takeProps || []).map(i => BOARD_TILES[i]?.shortName).join(', ') || 'brak działek';
-
-      const canAccept = gameState.isOnline
-        ? (viewer && viewer.id === tr.toId)
-        : (currentTurnPlayer()?.id === tr.toId);
-
+      const canAccept = gameState.isOnline ? (viewer && viewer.id === tr.toId) : (currentTurnPlayer()?.id === tr.toId);
       return `
-        <div class="trade-offer-card" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);padding:8px;border-radius:10px;font-size:0.75rem;margin-bottom:6px;">
+        <div class="trade-offer-card">
           <div><strong>${from?.name}</strong> ➔ <strong>${to?.name}</strong></div>
-          <div style="font-size:0.71rem;color:#b5abd6;margin:3px 0;">
-            Daje: <strong>$${tr.giveCash}</strong> (${giveNames})<br/>
-            Żąda: <strong>$${tr.takeCash}</strong> (${takeNames})
-          </div>
+          <div style="font-size:0.71rem;color:#b5abd6;margin:3px 0;">Daje: $${tr.giveCash} | Żąda: $${tr.takeCash}</div>
           <div style="display:flex;gap:6px;margin-top:6px;align-items:center;">
-            ${canAccept
-              ? `<button type="button" class="btn-quick-up" data-acc="${tr.id}">✅ Akceptuj (Jako ${to?.name})</button>`
-              : `<span style="font-size:0.68rem;color:#ffca28;">⏳ Czeka na decyzję: ${to?.name}</span>`}
-            <button type="button" class="btn-ghost" data-rej="${tr.id}">Odrzuć / Anuluj</button>
+            ${canAccept ? `<button type="button" class="btn-quick-up" data-acc="${tr.id}">✅ Akceptuj</button>` : `<span style="font-size:0.68rem;color:#ffca28;">Czeka na: ${to?.name}</span>`}
+            <button type="button" class="btn-ghost" data-rej="${tr.id}">Odrzuć</button>
           </div>
         </div>
       `;
@@ -2979,26 +2718,17 @@
         const tr = gameState.trades.find(x => x.id === b.dataset.acc);
         if (!tr) return;
         const s = getPlayerById(tr.fromId), t = getPlayerById(tr.toId);
-        if (!s || !t || s.cash < tr.giveCash || t.cash < tr.takeCash) {
-          alert('Jedna ze stron nie ma już wymaganej gotówki!');
-          return;
-        }
+        if (!s || !t || s.cash < tr.giveCash || t.cash < tr.takeCash) { alert('Brak gotówki!'); return; }
         s.cash = s.cash - tr.giveCash + tr.takeCash;
         t.cash = t.cash - tr.takeCash + tr.giveCash;
         (tr.giveProps || []).forEach(idx => { if (gameState.properties[idx]?.ownerId === s.id) gameState.properties[idx].ownerId = t.id; });
         (tr.takeProps || []).forEach(idx => { if (gameState.properties[idx]?.ownerId === t.id) gameState.properties[idx].ownerId = s.id; });
-        addFeedEvent(`🤝 <strong>${t.name}</strong> zaakceptował wymianę z <strong>${s.name}</strong>!`);
         gameState.trades = gameState.trades.filter(x => x.id !== tr.id);
-        checkMonopolyVictory();
         pushStateSync();
       };
     });
-
     box.querySelectorAll('[data-rej]').forEach(b => {
-      b.onclick = () => {
-        gameState.trades = gameState.trades.filter(x => x.id !== b.dataset.rej);
-        pushStateSync();
-      };
+      b.onclick = () => { gameState.trades = gameState.trades.filter(x => x.id !== b.dataset.rej); pushStateSync(); };
     });
   }
 
@@ -3021,21 +2751,16 @@
     pushStateSync();
   }
 
-  /* ==================== LOBBY Z UNIKALNYMI KOLORAMI ==================== */
   function ensureUniqueLobbyColors() {
     const used = [localPickedColor];
     lobbyOpponents.forEach(o => {
-      if (!o.color || used.includes(o.color)) {
-        o.color = getFirstAvailableColor(used);
-      }
+      if (!o.color || used.includes(o.color)) o.color = getFirstAvailableColor(used);
       used.push(o.color);
     });
   }
 
   function renderLobbySetup() {
     ensureUniqueLobbyColors();
-
-    // Dynamiczne dodanie kafelka Sztolnia Labirynt w Lobby, jeśli brakowało go w HTML
     const lobbyGrid = document.getElementById('lobby-game-picker');
     if (lobbyGrid && !lobbyGrid.querySelector('[data-game="QUORIDOR"]')) {
       const card = document.createElement('button');
@@ -3044,6 +2769,7 @@
       card.dataset.game = 'QUORIDOR';
       card.innerHTML = `<span class="gp-icon">🧱</span><strong>Sztolnia Labirynt</strong><small>Ściany & Ścieżka</small>`;
       card.onclick = () => {
+        if (!isRoomHost()) return;
         document.querySelectorAll('.game-pick-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         selectedGameMode = 'QUORIDOR';
@@ -3060,6 +2786,7 @@
       `).join('');
       mapCardsEl.querySelectorAll('.map-thumb-card').forEach(card => {
         card.onclick = () => {
+          if (!isRoomHost()) return;
           applyMapTheme(card.dataset.mapId);
           if (gameState) { gameState.mapId = card.dataset.mapId; pushStateSync(); }
         };
@@ -3068,40 +2795,16 @@
 
     const localPicker = document.getElementById('local-color-picker');
     if (localPicker) {
-      localPicker.innerHTML = PLAYER_COLORS.map(c => `<button type="button" class="color-dot-pick ${c.hex === localPickedColor ? 'active' : ''}" style="background:${c.hex}" data-hex="${c.hex}" title="${c.name}"></button>`).join('');
+      localPicker.innerHTML = PLAYER_COLORS.map(c => `<button type="button" class="color-dot-pick ${c.hex === localPickedColor ? 'active' : ''}" style="background:${c.hex}" data-hex="${c.hex}"></button>`).join('');
       localPicker.querySelectorAll('.color-dot-pick').forEach(btn => {
-        btn.onclick = () => {
-          localPickedColor = btn.dataset.hex;
-          ensureUniqueLobbyColors();
-          renderLobbySetup();
-        };
+        btn.onclick = () => { localPickedColor = btn.dataset.hex; ensureUniqueLobbyColors(); renderLobbySetup(); };
       });
     }
 
     const localAvPicker = document.getElementById('local-avatar-picker');
     if (localAvPicker) {
-      localAvPicker.innerHTML = PAWN_AVATARS.map(a => `<button type="button" class="avatar-pick-btn ${a.id === localPickedAvatar ? 'active' : ''}" data-av="${a.id}" title="${a.name}">${a.svg}</button>`).join('');
+      localAvPicker.innerHTML = PAWN_AVATARS.map(a => `<button type="button" class="avatar-pick-btn ${a.id === localPickedAvatar ? 'active' : ''}" data-av="${a.id}">${a.svg}</button>`).join('');
       localAvPicker.querySelectorAll('.avatar-pick-btn').forEach(btn => { btn.onclick = () => { localPickedAvatar = btn.dataset.av; renderLobbySetup(); }; });
-    }
-
-    const onlinePicker = document.getElementById('online-color-picker');
-    if (onlinePicker) {
-      const takenOnline = (gameState && gameState.isOnline)
-        ? gameState.players.filter(p => p.clientToken !== myClientToken).map(p => p.color)
-        : [];
-      onlinePicker.innerHTML = PLAYER_COLORS.map(c => {
-        const isTaken = takenOnline.includes(c.hex);
-        return `<button type="button" class="color-dot-pick ${c.hex === onlinePickedColor ? 'active' : ''}" style="background:${c.hex};${isTaken ? 'opacity:0.2;cursor:not-allowed;' : ''}" data-hex="${c.hex}" ${isTaken ? 'disabled title="Zajęty przez innego gracza"' : ''}></button>`;
-      }).join('');
-      onlinePicker.querySelectorAll('.color-dot-pick:not([disabled])').forEach(btn => {
-        btn.onclick = () => { onlinePickedColor = btn.dataset.hex; renderLobbySetup(); };
-      });
-    }
-
-    const onlineAvPicker = document.getElementById('online-avatar-picker');
-    if (onlineAvPicker) {
-      onlineAvPicker.innerHTML = PAWN_AVATARS.map(a => `<button type="button" class="avatar-pick-btn ${a.id === onlinePickedAvatar ? 'active' : ''}" data-av="${a.id}" title="${a.name}">${a.svg}</button>`).join('');
-      onlineAvPicker.querySelectorAll('.avatar-pick-btn').forEach(btn => { btn.onclick = () => { onlinePickedAvatar = btn.dataset.av; renderLobbySetup(); }; });
     }
 
     const oppBox = document.getElementById('local-opponents-list');
@@ -3111,9 +2814,8 @@
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="player-pawn-inline" style="background:${o.color};">${getAvatarSvg(o.avatar)}</span>
             <strong>${o.name}</strong>
-            <span style="font-size:0.68rem;color:#b5abd6;">(${o.isBot ? 'Bot AI' : 'Człowiek'})</span>
           </div>
-          ${lobbyOpponents.length > 1 ? `<button type="button" class="btn-ghost" data-rm-opp="${idx}">Usuń</button>` : ''}
+          ${lobbyOpponents.length > 1 ? `<button type="button" class="btn-ghost" style="color:#ff5252;" data-rm-opp="${idx}">✕ Usuń</button>` : ''}
         </div>
       `).join('');
       oppBox.querySelectorAll('[data-rm-opp]').forEach(btn => {
@@ -3127,224 +2829,67 @@
     document.getElementById('room-waiting-box')?.classList.remove('hidden');
     const codeDisp = document.getElementById('lobby-room-code-display');
     if (codeDisp) codeDisp.textContent = currentRoomCode;
+
+    const amHost = isRoomHost();
+    const btnAddBot = document.getElementById('btn-room-add-bot');
+    const btnLaunch = document.getElementById('btn-launch-room-game');
+    if (btnAddBot) btnAddBot.classList.toggle('hidden', !amHost);
+    if (btnLaunch) {
+      btnLaunch.disabled = !amHost;
+      btnLaunch.textContent = amHost ? '🚀 Rozpocznij Mecz! (Admin)' : '⏳ Czekanie na Admina...';
+    }
+
     const plBox = document.getElementById('lobby-room-players');
     if (plBox) {
-      plBox.innerHTML = gameState.players.map(p => `
-        <div class="btn-ghost" style="border-left:4px solid ${p.color};display:flex;align-items:center;gap:6px;">
-          <span class="player-pawn-inline" style="background:${p.color};width:18px;height:18px;">${getAvatarSvg(p.avatar)}</span>
-          <span>${p.name} ${p.isBot ? '🤖' : '👤'} ${p.clientToken === myClientToken ? '(Ty)' : ''}</span>
-        </div>
-      `).join('');
-    }
-  }
-
-  function addOrReconnectPlayerToRoom(roomState, myName, myColor, myAvatar, tokenToUse = myClientToken) {
-    roomState = normalizeState(roomState);
-    const existing = roomState.players.find(p => p.clientToken === tokenToUse);
-    if (existing) {
-      existing.name = myName || existing.name;
-      existing.avatar = myAvatar || existing.avatar;
-      myOnlinePlayerId = existing.id;
-      activePerspectiveId = existing.id;
-      return roomState;
-    }
-    const usedColors = roomState.players.map(p => p.color);
-    const uniqueColor = (!myColor || usedColors.includes(myColor)) ? getFirstAvailableColor(usedColors) : myColor;
-    const newId = 'p' + (roomState.players.length + 1);
-    roomState.players.push({
-      id: newId, clientToken: tokenToUse, name: myName, color: uniqueColor, avatar: myAvatar || 'cool',
-      isBot: false, cash: 2000, position: 0, inJail: false, jailTurns: 0, pardonCards: 0, bankrupt: false
-    });
-    myOnlinePlayerId = newId;
-    activePerspectiveId = newId;
-    roomState.liars = createLiarsGameState(roomState.players);
-    roomState.feed.unshift({ text: `👋 <strong>${myName}</strong> dołączył do pokoju!`, time: nowTime() });
-    return roomState;
-  }
-
-  function showRankingModal() {
-    if (!gameState) return;
-    const getNetWorth = (pl) => {
-      let w = pl.cash;
-      BOARD_TILES.forEach(t => {
-        if (gameState.properties[t.index]?.ownerId === pl.id) {
-          w += t.price + (gameState.properties[t.index].level * (t.buildCost || 0));
-        }
-      });
-      return w;
-    };
-
-    const sorted = [...gameState.players].sort((a, b) => {
-      if (a.bankrupt !== b.bankrupt) return a.bankrupt ? 1 : -1;
-      return getNetWorth(b) - getNetWorth(a);
-    });
-
-    const winner = sorted[0];
-    const spot = document.getElementById('ranking-champion-spotlight');
-    if (spot && winner) {
-      spot.innerHTML = `
-        <span class="champ-crown-icon">👑</span>
-        <h3 style="color:#ffca28;font-size:1.3rem;margin:4px 0;">Lider Areny: ${winner.name}</h3>
-        <p style="font-size:0.84rem;color:#b5abd6;">Łączny majątek: <strong>$${getNetWorth(winner)}</strong> (Gotówka: $${winner.cash})</p>
-      `;
-    }
-
-    const tbody = document.getElementById('ranking-tbody');
-    if (tbody) {
-      tbody.innerHTML = sorted.map((p, idx) => {
-        const airCnt = AIRPORT_INDICES.filter(i => gameState.properties[i]?.ownerId === p.id).length;
+      plBox.innerHTML = gameState.players.map((p, idx) => {
+        const isHostPlayer = idx === 0 || (gameState.hostToken && p.clientToken === gameState.hostToken);
+        const canRemoveThis = amHost && (p.isBot || p.clientToken !== myClientToken);
         return `
-          <tr class="${idx === 0 ? 'top-winner-row' : ''}">
-            <td><strong>#${idx + 1}</strong></td>
-            <td style="display:flex;align-items:center;gap:7px;">
-              <span class="player-pawn-inline" style="background:${p.color};width:20px;height:20px;">${getAvatarSvg(p.avatar)}</span>
-              ${p.name} ${idx === 0 ? '👑' : ''} ${p.isBot ? '🤖' : ''}
-            </td>
-            <td>${p.bankrupt ? '❌ Bankrut' : `🟢 Aktywny • ✈️×${airCnt}/4`}</td>
-            <td><strong>$${getNetWorth(p)}</strong> <small style="color:#b5abd6;">($${p.cash})</small></td>
-          </tr>
+          <div class="btn-ghost" style="border-left:4px solid ${p.color};display:flex;align-items:center;gap:7px;">
+            <span class="player-pawn-inline" style="background:${p.color};width:18px;height:18px;">${getAvatarSvg(p.avatar)}</span>
+            <span>${p.name} ${isHostPlayer ? '👑' : ''} ${p.clientToken === myClientToken ? '(Ty)' : ''}</span>
+            ${canRemoveThis ? `<button type="button" data-kick-id="${p.id}" style="background:#ff5252;color:#fff;border:none;border-radius:5px;padding:1px 6px;font-size:0.68rem;cursor:pointer;margin-left:4px;">✕</button>` : ''}
+          </div>
         `;
       }).join('');
+      plBox.querySelectorAll('[data-kick-id]').forEach(btn => {
+        btn.onclick = (e) => { e.stopPropagation(); removePlayerOrBotFromGame(btn.dataset.kickId); };
+      });
     }
-    document.getElementById('ranking-modal')?.classList.remove('hidden');
   }
 
-  /* ==================== KSIĘGA ZASAD WSZYSTKICH 8 GIER ==================== */
-  function openRulesModal(initialTab = null) {
-    const activeTab = initialTab || (gameState ? gameState.activeGame : 'MONOPOLY');
-    const rulesData = {
-      MONOPOLY: {
-        title: '🏭 Monopoly Ruda Śląska',
-        body: `
-          <p><strong>✈️ 1. 4 Lotniska = Natychmiastowa Wygrana:</strong> Na planszy są 4 Lotniska Strategiczne. Zgromadzenie wszystkich 4 daje natychmiastowe zwycięstwo! Lotnisk nie da się od nikogo odkupić siłą.</p>
-          <p><strong>💼 2. Przymusowy wykup cudzych pól:</strong> Gdy staniesz na zwykłej dzielnicy innego gracza (poniżej Hotelu), płacisz czynsz, a następnie możesz odkupić to pole po zawyżonej cenie.</p>
-          <p><strong>🏠 3. Budowa domów:</strong> Po zakupie działki musisz przejechać pełne okrążenie planszy i stanąć na niej ponownie, aby wybudować dom.</p>
-        `
-      },
-      LIARS: {
-        title: '🃏 Szynk Kłamców (Blef Karciany)',
-        body: `
-          <p><strong>🎯 Cel gry:</strong> Pozbądź się wszystkich swoich kart z ręki jako pierwszy (+$500 nagrody).</p>
-          <p><strong>🂠 Rozgrywka:</strong> Pierwszy gracz wybiera figurę (A, K, Q, J, 10) i wykłada od 1 do 4 zakrytych kart. Kolejni gracze dokładają karty albo klikają <strong>„SPRAWDZAM!”</strong>.</p>
-          <p><strong>🚨 Sprawdzanie:</strong> Jeśli poprzednik kłamał — zabiera całą pulę ze stołu. Jeśli mówił prawdę — pulę zabiera sprawdzający!</p>
-        `
-      },
-      CASINO: {
-        title: '🌸 Kwiaciarnia Godula (Ruletka 0–36 & Automat 777)',
-        body: `
-          <p><strong>🏆 Cel zwycięstwa:</strong> Jako pierwszy osiągnij wybrany cel majątkowy ($5 000, $10 000 lub $25 000).</p>
-          <p><strong>🎡 Stół Ruletki (0–36):</strong> Wybierz żeton ($10–$500), klikaj na liczby (wypłata <strong>x36</strong>), tuziny (<strong>x3</strong>) lub kolory (<strong>x2</strong>) i zakręć kołem!</p>
-        `
-      },
-      QUORIDOR: {
-        title: '🧱 Sztolnia Labirynt (Quoridor 9×9)',
-        body: `
-          <p><strong>🎯 Cel gry:</strong> Przeprowadź swojego górnika na przeciwległy koniec planszy 9×9 jako pierwszy!</p>
-          <p><strong>🧱 Stawianie ścian:</strong> W swojej turze przesuń pionek o 1 pole ALBO postaw jedną ze swoich 10 ścian (poziomą lub pionową), aby zablokować rywala.</p>
-          <p><strong>⚠️ Zakaz zamurowania:</strong> Nie wolno zamknąć przeciwnikowi ostatniej możliwej drogi do mety.</p>
-        `
-      },
-      LUDO: {
-        title: '🎲 Chińczyk (Wyścig 4 Dzielnic)',
-        body: `
-          <p><strong>🎯 Cel gry:</strong> Wprowadź wszystkie 4 swoje pionki z bazy do domku na środku. Wyjście z bazy wymaga wyrzucenia <strong>6</strong>.</p>
-        `
-      },
-      CHECKERS: {
-        title: '⚫ Warcaby (2 Graczy lub 2 Drużyny)',
-        body: `
-          <p><strong>🎯 Zasady:</strong> Ruch po ciemnych polach na ukos. Przy >2 graczach przy stole tworzone są 2 drużyny wykonujące ruchy rotacyjnie.</p>
-        `
-      },
-      CHESS: {
-        title: '♟️ Szachy (2 Graczy lub 2 Drużyny)',
-        body: `
-          <p><strong>🎯 Zasady:</strong> Kliknij swoją figurę, a następnie zielone pole. Zbicie Króla rywala kończy partię. Przy >2 graczach działa tryb 2 drużyn.</p>
-        `
-      },
-      CONNECT4: {
-        title: '🪙 Sztolnia 4 w Rzędzie',
-        body: `
-          <p><strong>🎯 Zasady:</strong> Ułóż 4 krążki swojego koloru w linii poziomej, pionowej lub ukośnej.</p>
-        `
-      }
-    };
-
-    const tabsHtml = Object.keys(rulesData).map(k => `
-      <button type="button" class="btn-ghost rules-tab-btn" style="${k === activeTab ? 'background:#ffca28;color:#111;font-weight:900;' : ''}" data-rtab="${k}">${rulesData[k].title.split(' ')[0]} ${k}</button>
-    `).join('');
-
-    const cur = rulesData[activeTab] || rulesData.MONOPOLY;
-    showGenericModal(
-      '❓ Księga Zasad — 8 Gier Ruda Śląska Arena',
-      `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">${tabsHtml}</div>
-       <div class="action-box" style="line-height:1.65;font-size:0.86rem;">
-         <h3 style="color:#ffca28;margin-bottom:6px;">${cur.title}</h3>
-         ${cur.body}
-       </div>`
-    );
-
-    document.querySelectorAll('.rules-tab-btn').forEach(btn => {
-      btn.onclick = () => openRulesModal(btn.dataset.rtab);
-    });
-  }
-
-  function showGenericModal(title, htmlContent) {
-    const tEl = document.getElementById('generic-modal-title');
-    const bEl = document.getElementById('generic-modal-body');
-    if (tEl) tEl.textContent = title;
-    if (bEl) bEl.innerHTML = htmlContent;
-    document.getElementById('generic-modal')?.classList.remove('hidden');
-  }
-
-  /* ==================== 13. INICJALIZACJA ZDARZEŃ I CHEATÓW ==================== */
+  /* ==================== INICJALIZACJA ZDARZEŃ ==================== */
   function initEvents() {
-    // Wyzwalacz Cheatów #1: 5 kliknięć w logo ⚒️ w lewym górnym rogu
     const secretLogo = document.querySelector('.brand-emblem');
     if (secretLogo) {
       secretLogo.onclick = () => {
         emblemTapCount += 1;
         if (emblemTapTimer) clearTimeout(emblemTapTimer);
-        if (emblemTapCount >= 5) {
-          emblemTapCount = 0;
-          toggleSecretLuckMode();
-        } else {
-          emblemTapTimer = setTimeout(() => { emblemTapCount = 0; }, 1600);
-        }
+        if (emblemTapCount >= 5) { emblemTapCount = 0; toggleSecretLuckMode(); }
+        else { emblemTapTimer = setTimeout(() => { emblemTapCount = 0; }, 1600); }
       };
     }
 
-    // Wyzwalacz Cheatów #2: 3 kliknięcia w pastylkę "Okrążenie #1" na środku planszy
     const roundPill = document.getElementById('hud-round');
     if (roundPill) {
-      let rTaps = 0;
-      let rTimer = null;
+      let rTaps = 0, rTimer = null;
       roundPill.style.cursor = 'pointer';
       roundPill.onclick = () => {
         rTaps += 1;
         if (rTimer) clearTimeout(rTimer);
-        if (rTaps >= 3) {
-          rTaps = 0;
-          toggleSecretLuckMode();
-        } else {
-          rTimer = setTimeout(() => { rTaps = 0; }, 1400);
-        }
+        if (rTaps >= 3) { rTaps = 0; toggleSecretLuckMode(); }
+        else { rTimer = setTimeout(() => { rTaps = 0; }, 1400); }
       };
     }
 
-    // Wyzwalacz Cheatów #3: Wpisanie na klawiaturze słowa "sztygar"
     window.addEventListener('keydown', (e) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
       if (e.key && e.key.length === 1) {
         secretKeyBuffer = (secretKeyBuffer + e.key.toLowerCase()).slice(-7);
-        if (secretKeyBuffer === 'sztygar') {
-          secretKeyBuffer = '';
-          toggleSecretLuckMode();
-        }
+        if (secretKeyBuffer === 'sztygar') { secretKeyBuffer = ''; toggleSecretLuckMode(); }
       }
     });
 
-    // Dolny pasek mobilny
     document.querySelectorAll('.mob-nav-btn').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
@@ -3356,18 +2901,9 @@
         const stageBoard = document.getElementById('mobile-pane-board');
         const sidePanel = document.getElementById('mobile-pane-sidebar');
         if (stageBoard && sidePanel && window.innerWidth <= 1280) {
-          if (tab === 'board') {
-            stageBoard.style.display = 'flex';
-            sidePanel.style.display = 'none';
-          } else if (tab === 'players') {
-            stageBoard.style.display = 'none';
-            sidePanel.style.display = 'flex';
-            document.getElementById('side-panel-players')?.scrollIntoView({ behavior: 'smooth' });
-          } else if (tab === 'chat') {
-            stageBoard.style.display = 'none';
-            sidePanel.style.display = 'flex';
-            document.getElementById('side-panel-chat')?.scrollIntoView({ behavior: 'smooth' });
-          }
+          if (tab === 'board') { stageBoard.style.display = 'flex'; sidePanel.style.display = 'none'; }
+          else if (tab === 'players') { stageBoard.style.display = 'none'; sidePanel.style.display = 'flex'; document.getElementById('side-panel-players')?.scrollIntoView({ behavior: 'smooth' }); }
+          else if (tab === 'chat') { stageBoard.style.display = 'none'; sidePanel.style.display = 'flex'; document.getElementById('side-panel-chat')?.scrollIntoView({ behavior: 'smooth' }); }
         }
       };
     });
@@ -3375,10 +2911,7 @@
     bindClick('btn-show-ranking', showRankingModal);
     bindClick('btn-close-ranking', () => document.getElementById('ranking-modal')?.classList.add('hidden'));
     bindClick('btn-ranking-continue', () => document.getElementById('ranking-modal')?.classList.add('hidden'));
-    bindClick('btn-ranking-rematch', () => {
-      document.getElementById('ranking-modal')?.classList.add('hidden');
-      document.getElementById('btn-reset-board')?.click();
-    });
+    bindClick('btn-ranking-rematch', () => { document.getElementById('ranking-modal')?.classList.add('hidden'); document.getElementById('btn-reset-board')?.click(); });
 
     bindClick('btn-toggle-theme', () => {
       document.body.classList.toggle('theme-light');
@@ -3396,6 +2929,7 @@
     document.querySelectorAll('[data-switch-game]').forEach(btn => {
       btn.onclick = () => {
         if (!gameState) return;
+        if (!isRoomHost()) { alert('🔒 Tylko Admin Pokoju może przełączać tryby gry!'); return; }
         gameState.activeGame = btn.dataset.switchGame;
         pushStateSync();
         checkBotForOtherGames();
@@ -3407,6 +2941,7 @@
     });
 
     const triggerMapRoulette = () => {
+      if (!isRoomHost()) return;
       playMapRouletteAnimation((newMapId) => {
         if (gameState) { gameState.mapId = newMapId; pushStateSync(); }
       });
@@ -3472,7 +3007,7 @@
     });
 
     bindClick('btn-room-add-bot', () => {
-      if (!gameState || gameState.players.length >= 6) return;
+      if (!gameState || !isRoomHost() || gameState.players.length >= 6) return;
       const idx = gameState.players.length + 1;
       const used = gameState.players.map(p => p.color);
       gameState.players.push({
@@ -3486,7 +3021,7 @@
     });
 
     bindClick('btn-launch-room-game', () => {
-      if (!gameState) return;
+      if (!gameState || !isRoomHost()) return;
       if (gameState.players.length < 2) document.getElementById('btn-room-add-bot')?.click();
       document.getElementById('lobby-overlay')?.classList.add('hidden');
       playMapRouletteAnimation((pickedMapId) => {
@@ -3504,24 +3039,14 @@
     bindClick('btn-add-bot', () => {
       if (lobbyOpponents.length >= 5) return;
       const used = [localPickedColor, ...lobbyOpponents.map(o => o.color)];
-      lobbyOpponents.push({
-        name: 'Bot KWK #' + (lobbyOpponents.length + 1),
-        isBot: true,
-        color: getFirstAvailableColor(used),
-        avatar: PAWN_AVATARS[(lobbyOpponents.length + 2) % PAWN_AVATARS.length].id
-      });
+      lobbyOpponents.push({ name: 'Bot KWK #' + (lobbyOpponents.length + 1), isBot: true, color: getFirstAvailableColor(used), avatar: PAWN_AVATARS[(lobbyOpponents.length + 2) % PAWN_AVATARS.length].id });
       renderLobbySetup();
     });
 
     bindClick('btn-add-human', () => {
       if (lobbyOpponents.length >= 5) return;
       const used = [localPickedColor, ...lobbyOpponents.map(o => o.color)];
-      lobbyOpponents.push({
-        name: `Gracz ${lobbyOpponents.length + 2}`,
-        isBot: false,
-        color: getFirstAvailableColor(used),
-        avatar: PAWN_AVATARS[(lobbyOpponents.length + 2) % PAWN_AVATARS.length].id
-      });
+      lobbyOpponents.push({ name: `Gracz ${lobbyOpponents.length + 2}`, isBot: false, color: getFirstAvailableColor(used), avatar: PAWN_AVATARS[(lobbyOpponents.length + 2) % PAWN_AVATARS.length].id });
       renderLobbySetup();
     });
 
@@ -3587,7 +3112,7 @@
     bindClick('btn-liars-play', playLiarsCards);
     bindClick('btn-liars-call', callLiarOnLastPlay);
     bindClick('btn-liars-new-match', () => {
-      if (!gameState) return;
+      if (!gameState || !isRoomHost()) return;
       gameState.liars = createLiarsGameState(gameState.players);
       selectedLiarCardIds = [];
       pushStateSync();
@@ -3601,18 +3126,22 @@
         selectedCasinoChip = Number(btn.dataset.chip) || 25;
       };
     });
+
     const goalSel = document.getElementById('casino-target-select');
     if (goalSel) {
       goalSel.onchange = () => {
-        if (gameState) { gameState.casinoGoal = Number(goalSel.value) || 5000; pushStateSync(); }
+        if (!gameState || !isRoomHost()) return;
+        gameState.casinoGoal = Number(goalSel.value) || 5000;
+        pushStateSync();
       };
     }
+
     bindClick('btn-clear-roulette-bets', clearRouletteBets);
     bindClick('btn-spin-roulette', spinFullGodulaRoulette);
     bindClick('btn-spin-slots', spinGodulaSlots);
 
     bindClick('btn-reset-board', () => {
-      if (!gameState) return;
+      if (!gameState || !isRoomHost()) return;
       isRollingLock = false;
       if (gameState.activeGame === 'MONOPOLY') {
         gameState = createFreshGameState(gameState.players, 2000, gameState.roomCode, gameState.isOnline, 'MONOPOLY', gameState.mapId);
@@ -3629,7 +3158,7 @@
 
     bindClick('btn-bankrupt', () => {
       const viewer = getMyViewerPlayer();
-      if (viewer && confirm(`Ogłosić bankructwo dla swojego konta (${viewer.name})?`)) declareBankruptcy(viewer.id, null);
+      if (viewer && confirm(`Ogłosić bankructwo dla ${viewer.name}?`)) declareBankruptcy(viewer.id, null);
     });
 
     bindClick('btn-open-gift', openGiftModal);
@@ -3692,10 +3221,10 @@
       const pSel = document.getElementById('trade-partner-select');
       pSel.innerHTML = partners.map(p => `<option value="${p.id}">${p.name} ($${p.cash})</option>`).join('');
       const myProps = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === sender.id);
-      document.getElementById('trade-give-props').innerHTML = myProps.map(t => `<label><input type="checkbox" value="${t.index}" class="chk-give-prop"/> ${t.name} ($${t.price})</label>`).join('');
+      document.getElementById('trade-give-props').innerHTML = myProps.map(t => `<label><input type="checkbox" value="${t.index}" class="chk-give-prop"/> ${t.name}</label>`).join('');
       const renderTarget = () => {
         const theirProps = BOARD_TILES.filter(t => gameState.properties[t.index]?.ownerId === pSel.value);
-        document.getElementById('trade-take-props').innerHTML = theirProps.map(t => `<label><input type="checkbox" value="${t.index}" class="chk-take-prop"/> ${t.name} ($${t.price})</label>`).join('');
+        document.getElementById('trade-take-props').innerHTML = theirProps.map(t => `<label><input type="checkbox" value="${t.index}" class="chk-take-prop"/> ${t.name}</label>`).join('');
       };
       pSel.onchange = renderTarget;
       renderTarget();
@@ -3711,18 +3240,8 @@
       const giveProps = Array.from(document.querySelectorAll('.chk-give-prop:checked')).map(el => Number(el.value));
       const takeProps = Array.from(document.querySelectorAll('.chk-take-prop:checked')).map(el => Number(el.value));
 
-      if (giveCash > sender.cash) {
-        document.getElementById('trade-error-msg').textContent = 'Nie masz tyle gotówki!';
-        return;
-      }
-      if (takeCash > target.cash) {
-        document.getElementById('trade-error-msg').textContent = 'Partner nie ma tyle gotówki!';
-        return;
-      }
-      if (takeProps.some(idx => BOARD_TILES[idx].type === 'AIRPORT') && !hasSecretLuck(sender)) {
-        document.getElementById('trade-error-msg').textContent = '✈️ Lotniska są strategiczne i nie podlegają zwykłemu wykupowi!';
-        return;
-      }
+      if (giveCash > sender.cash) { document.getElementById('trade-error-msg').textContent = 'Brak gotówki!'; return; }
+      if (takeCash > target.cash) { document.getElementById('trade-error-msg').textContent = 'Partner nie ma tyle gotówki!'; return; }
 
       if (target.isBot) {
         const giveVal = giveCash + giveProps.reduce((a, i) => a + BOARD_TILES[i].price, 0);
@@ -3738,7 +3257,7 @@
           checkMonopolyVictory();
           pushStateSync();
         } else {
-          document.getElementById('trade-error-msg').textContent = `🤖 ${target.name} odrzuca tę ofertę! Zaproponuj uczciwszą równowartość ($${takeVal}+).`;
+          document.getElementById('trade-error-msg').textContent = `🤖 ${target.name} odrzuca ofertę! Zaproponuj więcej.`;
         }
         return;
       }
