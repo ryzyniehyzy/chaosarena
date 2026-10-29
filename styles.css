@@ -2,7 +2,7 @@
 :root,
 body.theme-dark {
   --bg-obsidian: #07060d;
-  --bg-panel: rgba(20, 16, 35, 0.92);
+  --bg-panel: rgba(20, 16, 35, 0.94);
   --bg-panel-alt: rgba(34, 27, 58, 0.96);
   --bg-tile: rgba(36, 29, 60, 0.96);
   --bg-tile-corner: linear-gradient(145deg, #3b2f60 0%, #211a38 100%);
@@ -62,6 +62,27 @@ body {
   filter: var(--map-filter); transform: scale(1.02); transition: background-image 0.6s ease-in-out; z-index: -2;
 }
 .map-bg-vignette { position: fixed; inset: 0; background: var(--vignette-grad); z-index: -1; pointer-events: none; }
+
+/* EFEKTOWY BANER TRANSAKCJI NA ŚRODKU EKRANU */
+.transaction-flyer-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+}
+.transaction-flyer-box {
+  background: linear-gradient(135deg, rgba(20, 16, 35, 0.96), rgba(45, 30, 75, 0.98));
+  border: 3px solid var(--accent-gold); border-radius: 24px; padding: 22px 36px;
+  text-align: center; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.85);
+  animation: flyerPopIn 1.8s cubic-bezier(0.15, 0.85, 0.25, 1) forwards;
+}
+@keyframes flyerPopIn {
+  0% { transform: scale(0.4) translateY(40px); opacity: 0; }
+  20% { transform: scale(1.08) translateY(0); opacity: 1; }
+  80% { transform: scale(1) translateY(0); opacity: 1; }
+  100% { transform: scale(0.9) translateY(-30px); opacity: 0; }
+}
+.flyer-title { font-size: 0.8rem; text-transform: uppercase; color: var(--accent-gold); font-weight: 900; letter-spacing: 1px; }
+.flyer-amount { font-size: 2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; margin: 4px 0; color: #2ecc71; text-shadow: 0 0 15px rgba(46,204,113,0.5); }
+.flyer-desc { font-size: 0.85rem; color: #b5abd6; font-weight: 700; }
 
 /* RULETKA MAP */
 .map-roulette-overlay {
@@ -249,7 +270,6 @@ body {
 .btn-hub-buy { background: linear-gradient(135deg, #00c853, #2ecc71); }
 .btn-hub-auction { background: linear-gradient(135deg, #ff8f00, #ffb300); color: #110d1e; }
 .btn-hub-build { background: linear-gradient(135deg, #00b0ff, #00e5ff); color: #110d1e; }
-.btn-hub-buyout { background: linear-gradient(135deg, #e040fb, #7c4dff); border: 1.5px solid #fff; }
 .btn-hub-jail { background: linear-gradient(135deg, #ec407a, #d81b60); }
 .btn-hub-end { background: linear-gradient(135deg, #4f4373, #352c4f); border: 1px solid rgba(255,255,255,0.18); }
 .wait-turn-banner { font-size: 0.78rem; color: #dcd6f7; background: rgba(0,0,0,0.6); padding: 6px 14px; border-radius: 20px; }
@@ -275,7 +295,7 @@ body {
 .liars-shell { max-width: 960px !important; width: 100% !important; }
 .liars-rank-badge { background: linear-gradient(135deg, #ff9800, #f57c00); color: #111; padding: 6px 12px; border-radius: 11px; font-size: 0.8rem; font-weight: 900; }
 .liars-opponents-row { width: 100%; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-.liars-opp-card { background: v\ar(--bg-panel-alt); border: 2px solid var(--border-subtle); border-radius: 13px; padding: 8px 12px; min-width: 130px; text-align: center; }
+.liars-opp-card { background: var(--bg-panel-alt); border: 2px solid var(--border-subtle); border-radius: 13px; padding: 8px 12px; min-width: 130px; text-align: center; }
 .liars-opp-card.active-liar { border-color: var(--accent-gold); box-shadow: 0 0 16px rgba(255,202,40,0.4); }
 .liars-table-center {
   width: 100%; flex: 1; margin: 10px 0; background: radial-gradient(circle at center, #1b3b2b 0%, #0d2118 100%);
@@ -384,24 +404,13 @@ body {
 .q-cell.q-goal-top { border-top: 3px dashed #00e5ff; }
 .q-cell.q-goal-bottom { border-bottom: 3px dashed #ff7849; }
 .q-cell.q-valid-step { background: rgba(46, 204, 113, 0.32); border-color: #2ecc71; box-shadow: inset 0 0 12px rgba(46,204,113,0.6); }
-.q-cell.q-wall-hover:hover { border-color: #ffca28; background: rgba(255, 202, 40, 0.2); }
 .q-pawn {
   width: 78%; height: 78%; border-radius: 50%; border: 2.5px solid #fff;
   display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 14px rgba(0,0,0,0.85); z-index: 5;
 }
 .q-pawn svg { width: 70%; height: 70%; }
-.q-wall-h {
-  position: absolute; bottom: -7px; left: 0; width: calc(200% + 8px); height: 6px;
-  background: linear-gradient(90deg, #ff9800, #ffca28); border-radius: 3px; z-index: 12;
-  box-shadow: 0 0 10px rgba(255, 152, 0, 0.9); pointer-events: none;
-}
-.q-wall-v {
-  position: absolute; top: 0; right: -7px; width: 6px; height: calc(200% + 8px);
-  background: linear-gradient(180deg, #ff9800, #ffca28); border-radius: 3px; z-index: 12;
-  box-shadow: 0 0 10px rgba(255, 152, 0, 0.9); pointer-events: none;
-}
 
-/* ==================== POZOSTAŁE GRY ==================== */
+/* POZOSTAŁE GRY */
 .ludo-controls-row { display: flex; align-items: center; gap: 10px; }
 .game-hint-pill { font-size: 0.75rem; color: var(--text-muted); background: rgba(124, 77, 255, 0.12); padding: 5px 11px; border-radius: 10px; font-weight: 700; }
 .ludo-grid { width: min(68vh, 86vw, 660px); height: min(68vh, 86vw, 660px); display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); gap: 4px; background: rgba(11,9,21,0.92); padding: 8px; border-radius: 20px; }
@@ -428,7 +437,7 @@ body {
 .c4-slot { background: #090712; border-radius: 50%; cursor: pointer; display: grid; place-items: center; border: 2px solid rgba(255,255,255,0.08); }
 .c4-disc { width: 86%; height: 86%; border-radius: 50%; border: 2px solid #fff; }
 
-/* ==================== PRAWA STREFA BOCZNA ==================== */
+/* PRAWA STREFA BOCZNA */
 .arena-sidebar { display: flex; flex-direction: column; gap: 10px; height: 100%; overflow: hidden; }
 .side-panel { background: var(--bg-panel); backdrop-filter: blur(14px); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 11px 13px; }
 .panel-head { display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; font-weight: 800; margin-bottom: 7px; }
@@ -485,7 +494,7 @@ body {
 .chat-form input { flex: 1; background: var(--bg-obsidian); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 6px 10px; border-radius: 16px; font-size: 0.75rem; }
 .btn-chat-send { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--accent-purple); color: #fff; cursor: pointer; }
 
-/* ==================== MODALE I LOBBY ==================== */
+/* MODALE I LOBBY */
 .modal-backdrop {
   position: fixed; inset: 0; background: rgba(6, 5, 12, 0.86); backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center; z-index: 200; padding: 14px;
@@ -553,7 +562,6 @@ body {
 .color-picker-row { display: flex; gap: 7px; flex-wrap: wrap; }
 .color-dot-pick { width: 28px; height: 28px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; position: relative; }
 .color-dot-pick.active { border-color: #fff; transform: scale(1.14); box-shadow: 0 0 10px #fff; }
-.color-dot-pick.taken-color { opacity: 0.25; cursor: not-allowed; }
 
 .action-box { background: #0b0914; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; padding: 11px; display: flex; flex-direction: column; gap: 7px; }
 .action-box p { font-size: 0.72rem; color: #b5abd6; }
@@ -587,24 +595,7 @@ body {
 .auction-price-box strong { display: block; font-size: 1.8rem; color: var(--accent-gold); }
 .trade-checklist { max-height: 110px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; font-size: 0.76rem; background: #0b0914; padding: 8px; border-radius: 9px; }
 
-/* PODIUM RANKINGOWE */
-.ranking-champion-spotlight {
-  background: linear-gradient(135deg, rgba(255, 179, 0, 0.22), rgba(124, 77, 255, 0.28));
-  border: 2px solid var(--accent-gold); border-radius: 16px; padding: 14px; text-align: center; margin: 12px 0;
-}
-.champ-crown-icon { font-size: 2rem; display: block; }
-.ranking-table-wrap { max-height: 240px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border-subtle); }
-.ranking-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-.ranking-table th, .ranking-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
-.ranking-table tr.top-winner-row { background: rgba(255, 179, 0, 0.18); font-weight: 800; }
-
-/* ZAKŁADKI ZASAD GRY */
-.rules-tabs-nav { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
-.rule-tab-btn { background: #0b0914; color: #b5abd6; border: 1px solid rgba(255,255,255,0.16); border-radius: 8px; padding: 6px 10px; font-size: 0.74rem; font-weight: 800; cursor: pointer; }
-.rule-tab-btn.active { background: var(--accent-purple); color: #fff; border-color: #fff; }
-.rule-content-box { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; line-height: 1.6; font-size: 0.83rem; }
-
-/* DOLNY PASEK MOBILNY (NA TELEFONY) */
+/* DOLNY PASEK MOBILNY */
 .mobile-bottom-nav {
   display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 58px;
   background: #110d1e; border-top: 1px solid rgba(255,255,255,0.15); z-index: 250;
@@ -617,7 +608,6 @@ body {
 .mob-nav-btn small { font-size: 0.6rem; font-weight: 700; }
 .mob-nav-btn.active { color: var(--accent-gold); }
 
-/* RESPONSYWNOŚĆ MOBILNA (TELEFONY I TABLETY) */
 @media (max-width: 1200px) {
   .arena-workspace {
     grid-template-columns: 1fr;
@@ -635,64 +625,4 @@ body {
   .arena-sidebar { display: none; height: auto; overflow: visible; padding-bottom: 65px; }
   .hide-sm { display: none; }
   :root { --board-size: min(96vw, 680px); }
-}
-
-@media (max-width: 600px) {
-  .monopoly-frame { padding: 10px; width: 98vw; height: 98vw; }
-  .tile-title { font-size: 0.48rem; }
-  .tile-price-tag { font-size: 0.44rem; padding: 0 3px; }
-  .tile-badge-circle { width: 15px; height: 15px; }
-  .custom-pawn-token { width: 19px; height: 19px; }
-  .die-3d { width: 50px; height: 50px; padding: 7px; border-radius: 12px; }
-  .dot { width: 8px; height: 8px; }
-  .hub-feed-log { height: 68px; font-size: 0.66rem; }
-  .btn-hub { padding: 6px 10px; font-size: 0.7rem; }
-  .roulette-numbers-grid { grid-template-columns: 28px repeat(12, 1fr); gap: 2px; }
-  .felt-num-btn { height: 28px; font-size: 0.6rem; }
-  .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
-}
-/* NAPRAWA WYŚWIETLANIA SZTOLNI LABIRYNTU (QUORIDOR 9x9) */
-#stage-QUORIDOR .quoridor-board-wrap {
-  width: 100%;
-  min-height: 440px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0;
-}
-
-#stage-QUORIDOR .quoridor-grid {
-  width: min(62vh, 86vw, 560px) !important;
-  height: min(62vh, 86vw, 560px) !important;
-  min-width: 300px;
-  min-height: 300px;
-  aspect-ratio: 1 / 1;
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(9, 1fr);
-  gap: 8px;
-  background: #120e21;
-  padding: 12px;
-  border-radius: 18px;
-  border: 4px solid #3c3063;
-  position: relative;
-}
-
-.q-cell {
-  background: #261f3d;
-  border: 1.5px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  min-width: 24px;
-  min-height: 24px;
-}
-
-.q-cell.q-valid-step {
-  background: rgba(46, 204, 113, 0.35) !important;
-  border: 2px solid #2ecc71 !important;
-  box-shadow: inset 0 0 10px rgba(46, 204, 113, 0.6);
 }
