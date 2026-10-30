@@ -382,7 +382,10 @@
     st.builtThisTurn = !!st.builtThisTurn;
     if (!st.mapId) st.mapId = selectedMapId;
     if (!st.casinoGoal) st.casinoGoal = 5000;
-    if (!st.properties) st.properties = {};
+    if (!st.properties || typeof st.properties !== 'object') {
+      st.properties = {};
+    }
+   
 
     BOARD_TILES.forEach(t => {
       if (t.type === 'PROPERTY' || t.type === 'AIRPORT' || t.type === 'UTILITY') {
