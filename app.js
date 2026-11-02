@@ -1,19 +1,636 @@
 /**
- * RUDA ŚLĄSKA ARENA ULTIMATE — KOMPLETNY SILNIK 8 GIER (app.js)
- * Wklej ten kod jako CAŁą zawartość pliku app.js!
+ * RUDA ŚLĄSKA ARENA ULTIMATE — POŁĄCZONY SILNIK (3 W 1: board-data + monopoly-engine + app)
+ * Wklej ten kod jako CAŁĄ zawartość pliku app.js!
  */
+
+/* ==================== CZĘŚĆ A: DANE PLANSZY (board-data) ==================== */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.RudaBoard = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const GROUPS = {
+    ORZEGOW:     { name: 'Orzegów / Chebzie',       color: '#7cb342', code: 'ORZ' },
+    GODULA:      { name: 'Godula / Ruda',           color: '#29b6f6', code: 'GOD' },
+    KOCHLOWICE:  { name: 'Kochłowice / Czarny Las', color: '#ab47bc', code: 'KOC' },
+    BYKOWINA:    { name: 'Bykowina',                color: '#ffa726', code: 'BYK' },
+    BIELSZOWICE: { name: 'Bielszowice',             color: '#ef5350', code: 'BIE' },
+    HALEMBA:     { name: 'Halemba',                 color: '#fdd835', code: 'HAL' },
+    WIREK:       { name: 'Wirek (Zagłębie)',        color: '#26a69a', code: 'WIR' },
+    NOWY_BYTOM:  { name: 'Nowy Bytom (Centrum)',    color: '#5c6bc0', code: 'NBY' },
+    AIRPORT:     { name: 'Lotniska — czynsz za komplet', color: '#00e5ff', code: 'LOT' },
+    UTILITY:     { name: 'Huty i Elektrownie',      color: '#ffa000', code: 'HUT' }
+  };
+
+  const AIRPORT_INDICES = [5, 15, 25, 35];
+
+  const BOARD_TILES = [
+    { index: 0,  type: 'START',      name: 'START — Zjazd Szybem', shortName: 'START', subtitle: '+$200 za okrążenie' },
+    { index: 1,  type: 'PROPERTY',   name: 'Orzegów — Burloch Arena', shortName: 'Burloch Arena', district: 'Orzegów', group: 'ORZEGOW', price: 60, buildCost: 50, rents: [2, 10, 30, 90, 160, 250] },
+    { index: 2,  type: 'TREASURE',   name: 'Skarb Skarbnika', shortName: 'Skarb', district: 'Kasa Kopalni' },
+    { index: 3,  type: 'PROPERTY',   name: 'Chebzie — Kolonia Kaufhaus', shortName: 'Kaufhaus', district: 'Chebzie', group: 'ORZEGOW', price: 60, buildCost: 50, rents: [4, 20, 60, 180, 320, 450] },
+    { index: 4,  type: 'TAX',        name: 'Podatek Górniczy', shortName: 'Podatek', district: 'Urząd Miasta', taxAmount: 200 },
+    { index: 5,  type: 'AIRPORT',    name: 'Lotnisko Chebzie-DTŚ (1/4)', shortName: '✈️ Lotnisko DTŚ', district: 'Transport', group: 'AIRPORT', price: 200, rents: [25, 50, 100, 200] },
+    { index: 6,  type: 'PROPERTY',   name: 'Godula — Szyb Godula', shortName: 'Szyb Godula', district: 'Godula', group: 'GODULA', price: 100, buildCost: 50, rents: [6, 30, 90, 270, 400, 550] },
+    { index: 7,  type: 'SURPRISE',   name: 'Szansa na Szychcie', shortName: 'Szansa', district: 'Losowanie' },
+    { index: 8,  type: 'PROPERTY',   name: 'Godula — Kwiaciarnia Godula', shortName: 'Kwiaciarnia Godula', district: 'Godula', group: 'GODULA', price: 100, buildCost: 50, rents: [6, 30, 90, 270, 400, 550] },
+    { index: 9,  type: 'PROPERTY',   name: 'Ruda — KWK Pokój (Szyb)', shortName: 'KWK Pokój', district: 'Ruda', group: 'GODULA', price: 120, buildCost: 50, rents: [8, 40, 100, 300, 450, 600] },
+    { index: 10, type: 'JAIL',       name: 'Izba / Kontrola OUG', shortName: 'Izba OUG', subtitle: 'Kontrola Górnicza' },
+    { index: 11, type: 'PROPERTY',   name: 'Czarny Las — Osiedle', shortName: 'Czarny Las', district: 'Czarny Las', group: 'KOCHLOWICE', price: 140, buildCost: 100, rents: [10, 50, 150, 450, 625, 750] },
+    { index: 12, type: 'UTILITY',    name: 'Elektrociepłownia Mikołaj', shortName: 'EC Mikołaj', district: 'Energetyka', group: 'UTILITY', price: 150 },
+    { index: 13, type: 'PROPERTY',   name: 'Kochłowice — Rynek', shortName: 'Kochłowice', district: 'Kochłowice', group: 'KOCHLOWICE', price: 140, buildCost: 100, rents: [10, 50, 150, 450, 625, 750] },
+    { index: 14, type: 'PROPERTY',   name: 'Kochłowice — Szyb Radoszowy', shortName: 'Szyb Radoszowy', district: 'Kochłowice', group: 'KOCHLOWICE', price: 160, buildCost: 100, rents: [12, 60, 180, 500, 700, 900] },
+    { index: 15, type: 'AIRPORT',    name: 'Lotnisko Ruda Północ (2/4)', shortName: '✈️ Lotnisko Ruda', district: 'Transport', group: 'AIRPORT', price: 200, rents: [25, 50, 100, 200] },
+    { index: 16, type: 'PROPERTY',   name: 'Bykowina — Gwarek', shortName: 'Bykowina', district: 'Bykowina', group: 'BYKOWINA', price: 180, buildCost: 100, rents: [14, 70, 200, 550, 750, 950] },
+    { index: 17, type: 'TREASURE',   name: 'Skarb Skarbnika', shortName: 'Skarb', district: 'Kasa Kopalni' },
+    { index: 18, type: 'PROPERTY',   name: 'Bykowina — ul. Górnośląska', shortName: 'Górnośląska', district: 'Bykowina', group: 'BYKOWINA', price: 180, buildCost: 100, rents: [14, 70, 200, 550, 750, 950] },
+    { index: 19, type: 'PROPERTY',   name: 'Bykowina — Planetarium Skałka', shortName: 'Skałka', district: 'Bykowina', group: 'BYKOWINA', price: 200, buildCost: 100, rents: [16, 80, 220, 600, 800, 1000] },
+    { index: 20, type: 'VACATION',   name: 'Hałda Widokowa', shortName: 'Hałda', subtitle: 'Bezpłatny parking' },
+    { index: 21, type: 'PROPERTY',   name: 'Bielszowice — Dom Kultury', shortName: 'Bielszowice', district: 'Bielszowice', group: 'BIELSZOWICE', price: 220, buildCost: 150, rents: [18, 90, 250, 700, 875, 1050] },
+    { index: 22, type: 'SURPRISE',   name: 'Szansa na Szychcie', shortName: 'Szansa', district: 'Losowanie' },
+    { index: 23, type: 'PROPERTY',   name: 'Bielszowice — ul. Kokota', shortName: 'ul. Kokota', district: 'Bielszowice', group: 'BIELSZOWICE', price: 220, buildCost: 150, rents: [18, 90, 250, 700, 875, 1050] },
+    { index: 24, type: 'PROPERTY',   name: 'Bielszowice — KWK Ruda Ruch', shortName: 'KWK Ruda', district: 'Bielszowice', group: 'BIELSZOWICE', price: 240, buildCost: 150, rents: [20, 100, 300, 750, 925, 1100] },
+    { index: 25, type: 'AIRPORT',    name: 'Lotnisko Halemba-Południe (3/4)', shortName: '✈️ Lotnisko Halemba', district: 'Transport', group: 'AIRPORT', price: 200, rents: [25, 50, 100, 200] },
+    { index: 26, type: 'PROPERTY',   name: 'Halemba — Aquadrom', shortName: 'Aquadrom', district: 'Halemba', group: 'HALEMBA', price: 260, buildCost: 150, rents: [22, 110, 330, 800, 975, 1150] },
+    { index: 27, type: 'PROPERTY',   name: 'Halemba — Elektrownia Halemba', shortName: 'El. Halemba', district: 'Halemba', group: 'HALEMBA', price: 260, buildCost: 150, rents: [22, 110, 330, 800, 975, 1150] },
+    { index: 28, type: 'UTILITY',    name: 'Wodociągi Rudzkie PWiK', shortName: 'Wodociągi', district: 'Infrastruktura', group: 'UTILITY', price: 150 },
+    { index: 29, type: 'PROPERTY',   name: 'Halemba — KWK Halemba', shortName: 'KWK Halemba', district: 'Halemba', group: 'HALEMBA', price: 280, buildCost: 150, rents: [24, 120, 360, 850, 1025, 1200] },
+    { index: 30, type: 'GO_TO_JAIL', name: 'Alarm Metanowy!', shortName: 'Na Izbę!', subtitle: 'Idź na Izbę' },
+    { index: 31, type: 'PROPERTY',   name: 'Wirek — Kolonia Ficinus', shortName: 'Ficinus', district: 'Wirek', group: 'WIREK', price: 300, buildCost: 200, rents: [26, 130, 390, 900, 1100, 1275] },
+    { index: 32, type: 'PROPERTY',   name: 'Wirek — Szyb Andrzej', shortName: 'Szyb Andrzej', district: 'Wirek', group: 'WIREK', price: 300, buildCost: 200, rents: [26, 130, 390, 900, 1100, 1275] },
+    { index: 33, type: 'TREASURE',   name: 'Skarb Skarbnika', shortName: 'Skarb', district: 'Kasa Kopalni' },
+    { index: 34, type: 'PROPERTY',   name: 'Wirek — CH Plaza Ruda Śląska', shortName: 'CH Plaza', district: 'Wirek', group: 'WIREK', price: 320, buildCost: 200, rents: [28, 150, 450, 1000, 1200, 1400] },
+    { index: 35, type: 'AIRPORT',    name: 'Port Lotniczy Wirek-A4 (4/4)', shortName: '✈️ Lotnisko A4', district: 'Transport', group: 'AIRPORT', price: 200, rents: [25, 50, 100, 200] },
+    { index: 36, type: 'SURPRISE',   name: 'Szansa na Szychcie', shortName: 'Szansa', district: 'Losowanie' },
+    { index: 37, type: 'PROPERTY',   name: 'Nowy Bytom — Wielki Piec Huty Pokój', shortName: 'Huta Pokój', district: 'Nowy Bytom', group: 'NOWY_BYTOM', price: 350, buildCost: 200, rents: [35, 175, 500, 1100, 1300, 1500] },
+    { index: 38, type: 'TAX',        name: 'Podatek Węglowy', shortName: 'Podatek', district: 'Opłata Specjalna', taxAmount: 100 },
+    { index: 39, type: 'PROPERTY',   name: 'Nowy Bytom — Plac Jana Pawła II (Ratusz)', shortName: 'Ratusz N.Bytom', district: 'Nowy Bytom', group: 'NOWY_BYTOM', price: 400, buildCost: 200, rents: [50, 200, 600, 1400, 1700, 2000] }
+  ];
+
+  const SURPRISE_CARDS = [
+    { text: 'Premia za szychty. Bank wypłaca Ci $100.', action: 'CASH', amount: 100 },
+    { text: 'Przejdź na START. Pobierz $200.', action: 'MOVE_TO', target: 0 },
+    { text: 'Awaria wentylacji. Zapłać bankowi $50.', action: 'PAY_BANK', amount: 50 },
+    { text: 'Karta wolności z Izby OUG. Zachowaj do użycia.', action: 'PARDON' },
+    { text: 'Kontrola OUG. Idź na Izbę bez premii za START.', action: 'GO_JAIL' },
+    { text: 'Remont dzielnic: $25 za dom i $100 za hotel.', action: 'REPAIRS', house: 25, hotel: 100 },
+    { text: 'Jedź do Huty Pokój. Po drodze pobierz premię za START.', action: 'MOVE_TO', target: 37 },
+    { text: 'Karczma Piwna! Zapłać każdemu rywalowi $50.', action: 'PAY_EACH', amount: 50 }
+  ];
+
+  const TREASURE_CARDS = [
+    { text: 'Premia barbórkowa! Bank wypłaca Ci $100.', action: 'CASH', amount: 100 },
+    { text: 'Zwrot podatku. Otrzymujesz $50.', action: 'CASH', amount: 50 },
+    { text: 'Fundusz rekultywacji. Zapłać bankowi $100.', action: 'PAY_BANK', amount: 100 },
+    { text: 'Urodziny! Każdy rywal płaci Ci $10.', action: 'BIRTHDAY', amount: 10 },
+    { text: 'Karta wolności z Izby OUG. Zachowaj do użycia.', action: 'PARDON' },
+    { text: 'Kontrola OUG. Idź na Izbę bez premii za START.', action: 'GO_JAIL' },
+    { text: 'Przejdź na START. Pobierz $200.', action: 'MOVE_TO', target: 0 },
+    { text: 'Przegląd budynków: $40 za dom i $115 za hotel.', action: 'REPAIRS', house: 40, hotel: 115 }
+  ];
+
+  return { GROUPS, AIRPORT_INDICES, BOARD_TILES, SURPRISE_CARDS, TREASURE_CARDS };
+});
+
+/* ==================== CZĘŚĆ B: SILNIK MONOPOLY (monopoly-engine) ==================== */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.RudaMonopoly = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const RULES_VERSION = 15;
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const check = (condition, message) => { if (!condition) throw new Error(message); };
+  const list = value => Array.isArray(value) ? value : Object.values(value || {});
+
+  function createEngine(data) {
+    const { BOARD_TILES: tiles, AIRPORT_INDICES: airports, SURPRISE_CARDS: chance, TREASURE_CARDS: chest } = data;
+    const player = (s, id) => s.players.find(p => p.id === id);
+    const current = s => s.players[s.turnIndex];
+    const group = tile => tiles.filter(t => t.type === 'PROPERTY' && t.group === tile.group);
+    const ownsSet = (s, t, id) => group(t).every(x => s.properties[x.index]?.ownerId === id);
+    const activePlayers = s => s.players.filter(p => !p.bankrupt);
+    const stamp = s => new Date(s.updatedAt || 0).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' });
+
+    function log(s, text) {
+      s.feed.unshift({ text, time: stamp(s) });
+      s.feed = s.feed.slice(0, 60);
+    }
+
+    function event(s, fromId, toId, amount, reason, status = 'PAID') {
+      if (amount <= 0) return;
+      s.eventSequence += 1;
+      s.moneyEvents.push({ id: s.gameId + ':' + s.eventSequence, sequence: s.eventSequence,
+        fromId: fromId || 'BANK', toId: toId || 'BANK', amount, reason, status, at: s.updatedAt });
+      s.moneyEvents = s.moneyEvents.slice(-40);
+    }
+
+    function normalize(s) {
+      s.moneyEvents = list(s.moneyEvents);
+      s.paymentQueue = list(s.paymentQueue);
+      s.auctionQueue = list(s.auctionQueue);
+      s.feed = list(s.feed);
+      s.eventSequence = s.eventSequence || 0;
+      s.revision = s.revision || 0;
+      if (s.auction) s.auction.passed = list(s.auction.passed);
+      if (s.cards) {
+        s.cards.chance = list(s.cards.chance);
+        s.cards.chest = list(s.cards.chest);
+      }
+      return s;
+    }
+
+    function shuffled(length, seed) {
+      const a = Array.from({ length }, (_, i) => i);
+      let x = (seed >>> 0) || 918273;
+      for (let i = a.length - 1; i > 0; i--) {
+        x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+        const j = (x >>> 0) % (i + 1);
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function initialize(state, options = {}) {
+      const s = clone(state);
+      s.rulesVersion = RULES_VERSION;
+      s.gameId = options.gameId || 'game_' + (options.now || Date.now());
+      s.revision = 0;
+      s.updatedAt = options.now || Date.now();
+      s.startingCash = Number(options.startingCash || 1500);
+      s.roundLimit = [20, 30, 0].includes(Number(options.roundLimit)) ? Number(options.roundLimit) : 30;
+      s.turnIndex = 0; s.turnNumber = 1; s.round = 1;
+      s.turnPhase = 'ROLL'; s.extraRoll = false; s.doublesStreak = 0;
+      s.turnDeadline = s.updatedAt + 120000;
+      s.status = 'PLAYING'; s.winnerAnnouncement = null;
+      s.debt = null; s.continuation = null; s.auction = null;
+      s.paymentQueue = []; s.auctionQueue = []; s.moneyEvents = []; s.eventSequence = 0;
+      s.lastCard = null; s.lastMove = null;
+      s.cards = { chance: shuffled(chance.length, options.seed || s.updatedAt), chest: shuffled(chest.length, (options.seed || s.updatedAt) + 97) };
+      s.players.forEach(p => {
+        p.cash = s.startingCash; p.arcadeCash = 2000; p.bankrupt = false;
+        p.position = 0; p.inJail = false; p.jailTurns = 0; p.pardonCards = 0; p.pardonDecks = [];
+      });
+      Object.values(s.properties).forEach(p => { p.ownerId = null; p.level = 0; p.mortgaged = false; p.history = ['Działka należy do banku.']; });
+      s.feed = [];
+      log(s, `🏭 Rozpoczynamy Monopoly! ${s.roundLimit ? 'Limit: <strong>' + s.roundLimit + ' rund</strong>.' : 'Tryb klasyczny: wygrywa ostatni gracz.'} Zbierz dzielnicę i buduj równomiernie.`);
+      return s;
+    }
+
+    function rent(s, index, diceSum = 7) {
+      const t = tiles[index], p = s.properties[index];
+      if (!p?.ownerId || p.mortgaged) return 0;
+      if (t.type === 'AIRPORT') return t.rents[airports.filter(i => s.properties[i].ownerId === p.ownerId).length - 1];
+      if (t.type === 'UTILITY') return diceSum * (tiles.filter(x => x.type === 'UTILITY' && s.properties[x.index].ownerId === p.ownerId).length === 2 ? 10 : 4);
+      if (t.type === 'PROPERTY') return t.rents[p.level] * (p.level === 0 && ownsSet(s, t, p.ownerId) ? 2 : 1);
+      return 0;
+    }
+
+    function buildingStock(s) {
+      let houses = 32, hotels = 12;
+      Object.values(s.properties).forEach(p => { if (p.level === 5) hotels--; else houses -= p.level || 0; });
+      return { houses, hotels };
+    }
+
+    function netWorth(s, id) {
+      let value = player(s, id)?.cash || 0;
+      tiles.forEach(t => {
+        const p = s.properties[t.index];
+        if (p?.ownerId === id) value += (p.mortgaged ? Math.floor(t.price / 2) : t.price) + p.level * (t.buildCost || 0);
+      });
+      if (s.debt?.playerId === id) value -= s.debt.amount;
+      return value;
+    }
+
+    function buildCheck(s, index, id) {
+      const t = tiles[index], p = s.properties[index], owner = player(s, id);
+      if (s.status !== 'PLAYING' || s.lobbyOpen) return { ok: false, reason: 'Poczekaj na rozpoczęcie partii.' };
+      if (!owner || owner.bankrupt || current(s).id !== id) return { ok: false, reason: 'Buduj w swojej turze.' };
+      if (s.debt || s.auction || !['ROLL', 'END'].includes(s.turnPhase)) return { ok: false, reason: 'Najpierw rozlicz bieżącą akcję.' };
+      if (!t || t.type !== 'PROPERTY' || p?.ownerId !== id) return { ok: false, reason: 'Możesz budować na własnej działce.' };
+      const set = group(t);
+      if (!ownsSet(s, t, id)) return { ok: false, reason: 'Najpierw zbierz wszystkie działki tego koloru.' };
+      if (set.some(x => s.properties[x.index].mortgaged)) return { ok: false, reason: 'Spłać wszystkie hipoteki w tej dzielnicy.' };
+      if (p.level >= 5) return { ok: false, reason: 'Na tej działce stoi już hotel.' };
+      if (p.level > Math.min(...set.map(x => s.properties[x.index].level))) return { ok: false, reason: 'Buduj równomiernie — najpierw na niższych działkach.' };
+      if (owner.cash < t.buildCost) return { ok: false, reason: 'Brakuje gotówki na budowę.' };
+      const stock = buildingStock(s);
+      if (p.level < 4 && stock.houses < 1) return { ok: false, reason: 'Bank nie ma wolnych domów (limit 32).' };
+      if (p.level === 4 && stock.hotels < 1) return { ok: false, reason: 'Bank nie ma wolnych hoteli (limit 12).' };
+      return { ok: true, reason: 'Komplet dzielnicy. Możesz budować bez wchodzenia na pole.' };
+    }
+
+    function sellCheck(s, index, id) {
+      const t = tiles[index], p = s.properties[index];
+      if (!p || p.ownerId !== id || p.level < 1) return { ok: false, reason: 'Brak własnego budynku do sprzedaży.' };
+      if (p.level < Math.max(...group(t).map(x => s.properties[x.index].level))) return { ok: false, reason: 'Sprzedawaj równomiernie, zaczynając od najwyższych budynków.' };
+      if (p.level === 5 && buildingStock(s).houses < 4) return { ok: false, reason: 'Bank nie ma 4 domów na wymianę hotelu. Możesz sprzedać całą zabudowę dzielnicy.' };
+      return { ok: true };
+    }
+
+    function mortgageCheck(s, index, id) {
+      const t = tiles[index], p = s.properties[index], owner = player(s, id);
+      if (!p || p.ownerId !== id) return { ok: false, reason: 'To nie jest Twoja działka.' };
+      if (p.mortgaged) {
+        if (s.debt) return { ok: false, reason: 'Najpierw spłać dług.' };
+        return { ok: owner.cash >= Math.ceil(t.price * 0.55), reason: 'Spłata hipoteki kosztuje 110% jej wartości.' };
+      }
+      if (p.level || (t.type === 'PROPERTY' && group(t).some(x => s.properties[x.index].level > 0))) return { ok: false, reason: 'Najpierw sprzedaj budynki w całej dzielnicy.' };
+      return { ok: true };
+    }
+
+    function finish(s, winners, reason) {
+      s.status = 'FINISHED'; s.turnPhase = 'FINISHED'; s.auction = null; s.debt = null;
+      s.winnerAnnouncement = { winnerId: winners[0]?.id || null, winnerName: winners.map(p => p.name).join(' i '),
+        reason, cash: winners[0]?.cash || 0, worth: winners[0] ? netWorth(s, winners[0].id) : 0, gameId: s.gameId };
+      log(s, `🏆 ${esc(s.winnerAnnouncement.winnerName)} — ${esc(reason)}`);
+    }
+
+    function victory(s) {
+      if (s.status === 'FINISHED') return true;
+      const alive = activePlayers(s);
+      if (s.players.length >= 2 && alive.length === 1) { finish(s, alive, 'Wszyscy rywale zbankrutowali. Ostatni gracz wygrywa!'); return true; }
+      return false;
+    }
+
+    function nextTurn(s) {
+      if (victory(s)) return;
+      const old = s.turnIndex;
+      for (let i = 1; i <= s.players.length; i++) {
+        const idx = (old + i) % s.players.length;
+        if (!s.players[idx].bankrupt) {
+          if (idx <= old) s.round += 1;
+          s.turnIndex = idx;
+          break;
+        }
+      }
+      if (s.roundLimit && s.round > s.roundLimit) {
+        const alive = activePlayers(s);
+        const best = Math.max(...alive.map(p => netWorth(s, p.id)));
+        const leaders = alive.filter(p => netWorth(s, p.id) === best);
+        finish(s, leaders, `Koniec ${s.roundLimit} rund. ${leaders.length > 1 ? 'Wspólna wygrana przy równym majątku' : 'Wygrywa największy majątek netto'}: $${best}.`);
+        return;
+      }
+      s.turnNumber += 1; s.turnPhase = 'ROLL'; s.extraRoll = false; s.doublesStreak = 0;
+      s.turnDeadline = s.updatedAt + 120000; s.lastCard = null;
+    }
+
+    function credit(s, id, amount, reason) {
+      player(s, id).cash += amount;
+      event(s, null, id, amount, reason);
+      log(s, `💰 Bank wypłaca <strong>${esc(player(s, id).name)}</strong> <strong>$${amount}</strong> — ${esc(reason)}.`);
+    }
+
+    function charge(s, fromId, toId, amount, reason) {
+      if (amount > 0) s.paymentQueue.push({ playerId: fromId, creditorId: toId || null, amount, reason });
+    }
+
+    function liquidationValue(s, id) {
+      let cash = player(s, id).cash;
+      tiles.forEach(t => {
+        const p = s.properties[t.index];
+        if (p?.ownerId === id) cash += p.level * Math.floor((t.buildCost || 0) / 2) + (p.mortgaged ? 0 : Math.floor(t.price / 2));
+      });
+      return cash;
+    }
+
+    function bankrupt(s, id, creditorId) {
+      const p = player(s, id), creditor = player(s, creditorId);
+      check(p && !p.bankrupt, 'Ten gracz już odpadł.');
+      tiles.forEach(t => { const prop = s.properties[t.index]; if (prop?.ownerId === id) { p.cash += prop.level * Math.floor((t.buildCost || 0) / 2); prop.level = 0; } });
+      const remaining = p.cash;
+      if (creditor && !creditor.bankrupt) creditor.cash += remaining;
+      if (remaining > 0) event(s, id, creditor?.id, remaining, 'Rozliczenie bankructwa');
+      let interest = 0;
+      tiles.forEach(t => {
+        const prop = s.properties[t.index];
+        if (prop?.ownerId !== id) return;
+        prop.ownerId = creditor && !creditor.bankrupt ? creditor.id : null;
+        if (prop.ownerId) {
+          if (prop.mortgaged) interest += Math.ceil(Math.floor(t.price / 2) * 0.1);
+        } else { prop.mortgaged = false; s.auctionQueue.push(t.index); }
+        prop.history.unshift(`${stamp(s)} — Bankructwo ${p.name}; ${creditor ? 'przejął ' + creditor.name : 'zwrot do banku'}`);
+      });
+      if (creditor) {
+        creditor.pardonCards += p.pardonCards;
+        creditor.pardonDecks = [...list(creditor.pardonDecks), ...list(p.pardonDecks)];
+        if (interest) charge(s, creditor.id, null, interest, 'Odsetki od przejętych hipotek');
+      }
+      p.pardonDecks = [];
+      p.cash = 0; p.bankrupt = true; p.pardonCards = 0; p.inJail = false;
+      s.paymentQueue = s.paymentQueue.filter(q => q.playerId !== id);
+      if (s.debt?.playerId === id) s.debt = null;
+      if (s.continuation?.playerId === id) s.continuation = null;
+      log(s, `🚩 <strong>${esc(p.name)}</strong> bankrutuje. ${creditor ? 'Majątek przejmuje ' + esc(creditor.name) + '.' : 'Działki wracają do banku na licytację.'}`);
+      if (current(s).id === id) s.extraRoll = false;
+    }
+
+    function startAuction(s, index) {
+      s.auction = { tileIndex: index, highBid: 0, leaderId: null, passed: [], deadline: s.updatedAt + 25000 };
+      s.turnPhase = 'AUCTION';
+      log(s, `🔨 Licytacja <strong>${esc(tiles[index].shortName)}</strong> od $1. Każdy aktywny gracz może licytować.`);
+    }
+
+    function settle(s) {
+      if (victory(s)) return;
+      let guard = 0;
+      while (s.paymentQueue.length && guard++ < 50) {
+        const q = s.paymentQueue[0], p = player(s, q.playerId);
+        if (!p || p.bankrupt) { s.paymentQueue.shift(); continue; }
+        if (p.cash < q.amount) {
+          if (!s.debt || s.debt.playerId !== q.playerId || s.debt.amount !== q.amount) { event(s, p.id, q.creditorId, q.amount, q.reason, 'DUE'); s.turnDeadline = s.updatedAt + 120000; }
+          s.debt = clone(q); s.turnPhase = 'DEBT';
+          if (liquidationValue(s, p.id) < q.amount) { bankrupt(s, p.id, q.creditorId); if (victory(s)) return; continue; }
+          return;
+        }
+        p.cash -= q.amount;
+        const creditor = player(s, q.creditorId);
+        if (creditor && !creditor.bankrupt) creditor.cash += q.amount;
+        event(s, p.id, creditor?.id, q.amount, q.reason);
+        log(s, `💸 <strong>${esc(p.name)}</strong> płaci <strong>$${q.amount}</strong> → <strong>${creditor ? esc(creditor.name) : 'Bank'}</strong> (${esc(q.reason)}).`);
+        s.paymentQueue.shift(); s.debt = null;
+      }
+      if (s.status === 'FINISHED') return;
+      if (s.continuation) {
+        const c = s.continuation; s.continuation = null;
+        const p = player(s, c.playerId);
+        if (p && !p.bankrupt) { move(s, p, c.steps); landing(s, p, c.diceSum); settle(s); return; }
+      }
+      if (victory(s)) return;
+      if (s.turnPhase === 'DEBT') s.turnPhase = 'END';
+      if (!s.auction && s.auctionQueue.length) { startAuction(s, s.auctionQueue.shift()); return; }
+      if (current(s).bankrupt && !s.auction) nextTurn(s);
+    }
+
+    function move(s, p, steps) {
+      const from = p.position;
+      p.position = (from + steps) % 40;
+      if (from + steps >= 40) credit(s, p.id, 200, 'Przejście przez START');
+      s.lastMove = { playerId: p.id, from, to: p.position, steps, at: s.updatedAt };
+    }
+
+    function jail(s, p) {
+      p.position = 10; p.inJail = true; p.jailTurns = 0;
+      s.extraRoll = false; s.doublesStreak = 0; s.turnPhase = 'END';
+      log(s, `🔒 <strong>${esc(p.name)}</strong> trafia na Izbę OUG.`);
+    }
+
+    function drawCard(s, type, p) {
+      const key = type === 'SURPRISE' ? 'chance' : 'chest';
+      const deck = key === 'chance' ? chance : chest;
+      const held = s.players.some(x => list(x.pardonDecks).includes(key));
+      let index = s.cards[key].shift();
+      s.cards[key].push(index);
+      if (deck[index].action === 'PARDON' && held) {
+        index = s.cards[key].shift(); s.cards[key].push(index);
+      }
+      const c = deck[index];
+      s.lastCard = { text: c.text, playerId: p.id, at: s.updatedAt };
+      log(s, `🃏 <strong>${esc(p.name)}</strong>: ${esc(c.text)}`);
+      if (c.action === 'CASH') credit(s, p.id, c.amount, c.text);
+      if (c.action === 'PAY_BANK') charge(s, p.id, null, c.amount, c.text);
+      if (c.action === 'PARDON') { p.pardonCards += 1; p.pardonDecks = [...list(p.pardonDecks), key]; }
+      if (c.action === 'GO_JAIL') jail(s, p);
+      if (c.action === 'MOVE_TO') { const steps = (c.target - p.position + 40) % 40; move(s, p, steps); landing(s, p, s.lastDice[0] + s.lastDice[1]); }
+      if (c.action === 'BIRTHDAY') activePlayers(s).filter(x => x.id !== p.id).forEach(x => charge(s, x.id, p.id, c.amount, 'Urodziny gracza ' + p.name));
+      if (c.action === 'PAY_EACH') activePlayers(s).filter(x => x.id !== p.id).forEach(x => charge(s, p.id, x.id, c.amount, 'Karczma Piwna'));
+      if (c.action === 'REPAIRS') {
+        let amount = 0;
+        Object.values(s.properties).filter(x => x.ownerId === p.id).forEach(x => { amount += x.level === 5 ? c.hotel : x.level * c.house; });
+        charge(s, p.id, null, amount, 'Remont budynków');
+      }
+    }
+
+    function landing(s, p, diceSum) {
+      const t = tiles[p.position], prop = s.properties[p.position];
+      s.turnPhase = 'END';
+      log(s, `📍 <strong>${esc(p.name)}</strong> → ${esc(t.name)}.`);
+      if (prop) {
+        if (!prop.ownerId) s.turnPhase = 'DECIDE';
+        else if (prop.ownerId !== p.id) charge(s, p.id, prop.ownerId, rent(s, p.position, diceSum), 'Czynsz: ' + t.shortName);
+      } else if (t.type === 'TAX') charge(s, p.id, null, t.taxAmount, t.name);
+      else if (t.type === 'GO_TO_JAIL') jail(s, p);
+      else if (t.type === 'SURPRISE' || t.type === 'TREASURE') drawCard(s, t.type, p);
+      else if (t.type === 'VACATION') log(s, '🌿 Bezpłatny parking. Odpoczywasz — bank nie wypłaca premii.');
+    }
+
+    function closeAuction(s) {
+      const a = s.auction;
+      if (!a) return;
+      const winner = player(s, a.leaderId), t = tiles[a.tileIndex];
+      if (winner && !winner.bankrupt && winner.cash >= a.highBid) {
+        winner.cash -= a.highBid;
+        const prop = s.properties[t.index];
+        prop.ownerId = winner.id; prop.level = 0; prop.mortgaged = false;
+        prop.history.unshift(`${stamp(s)} — ${winner.name}: licytacja $${a.highBid}`);
+        event(s, winner.id, null, a.highBid, 'Licytacja: ' + t.shortName);
+        log(s, `🔨 <strong>${esc(winner.name)}</strong> wygrywa ${esc(t.shortName)} za $${a.highBid}.`);
+      } else log(s, `🔨 Bez ofert. ${esc(t.shortName)} pozostaje w banku.`);
+      s.auction = null; s.turnPhase = 'END'; s.turnDeadline = s.updatedAt + 60000;
+      settle(s);
+    }
+
+    function manageAllowed(s, actor) {
+      const debtor = s.debt?.playerId || current(s).id;
+      check(actor === debtor, 'Teraz działkami zarządza gracz, którego dotyczy ta tura lub dług.');
+      check(!s.auction && !player(s, actor)?.bankrupt, 'Dokończ licytację.');
+    }
+
+    function reduce(state, action, actor) {
+      check(state.rulesVersion === RULES_VERSION, 'Ten pokój używa poprzednich zasad. Utwórz nową partię.');
+      if (action.expectedRevision !== undefined && action.expectedRevision !== null) {
+        check(action.expectedRevision === state.revision, 'Stan gry się zmienił. Wykonaj ruch ponownie.');
+      }
+      const s = normalize(clone(state));
+      s.updatedAt = Number(action.now) || Date.now();
+      check(s.status === 'PLAYING' && !s.lobbyOpen, 'Partia nie jest teraz aktywna.');
+      const p = current(s), who = player(s, actor);
+      check(who && !who.bankrupt, 'Nie jesteś aktywnym graczem tej partii.');
+      const turnAction = ['ROLL', 'BUY', 'DECLINE', 'END', 'JAIL_PAY', 'JAIL_CARD'];
+      if (turnAction.includes(action.type)) check(actor === p.id && !s.debt && !s.auction, 'Poczekaj na swoją turę i rozliczenie płatności.');
+      switch (action.type) {
+        case 'ROLL': {
+          check(s.turnPhase === 'ROLL', 'Rzut został już wykonany.');
+          const dice = action.dice;
+          check(Array.isArray(dice) && dice.length === 2 && dice.every(x => Number.isInteger(x) && x >= 1 && x <= 6), 'Nieprawidłowe kostki.');
+          s.lastDice = dice; s.lastCard = null;
+          const sum = dice[0] + dice[1], doubles = dice[0] === dice[1], jailed = p.inJail;
+          log(s, `🎲 <strong>${esc(p.name)}</strong>: ${dice[0]} + ${dice[1]}.`);
+          s.turnPhase = 'END'; s.extraRoll = false;
+          if (jailed) {
+            p.jailTurns += 1;
+            if (!doubles && p.jailTurns < 3) break;
+            p.inJail = false; p.jailTurns = 0; s.doublesStreak = 0;
+            if (!doubles) {
+              s.continuation = { playerId: p.id, steps: sum, diceSum: sum };
+              charge(s, p.id, null, 50, 'Kaucja po trzeciej turze na Izbie');
+              break;
+            }
+          } else {
+            s.doublesStreak = doubles ? s.doublesStreak + 1 : 0;
+            if (s.doublesStreak >= 3) { jail(s, p); break; }
+            s.extraRoll = doubles;
+          }
+          move(s, p, sum); landing(s, p, sum);
+          s.turnDeadline = s.updatedAt + 120000;
+          break;
+        }
+        case 'BUY': {
+          check(s.turnPhase === 'DECIDE', 'Kupować możesz tylko pole, na którym właśnie stanąłeś.');
+          const t = tiles[p.position], prop = s.properties[p.position];
+          check(prop && !prop.ownerId && p.cash >= t.price, 'Działka jest zajęta lub brakuje gotówki.');
+          p.cash -= t.price; prop.ownerId = p.id; prop.boughtInRound = s.round;
+          prop.history.unshift(`${stamp(s)} — ${p.name}: zakup od banku $${t.price}`);
+          event(s, p.id, null, t.price, 'Zakup: ' + t.shortName);
+          log(s, `🏘️ <strong>${esc(p.name)}</strong> kupuje ${esc(t.shortName)} za $${t.price}.`);
+          s.turnPhase = 'END';
+          break;
+        }
+        case 'DECLINE':
+          check(s.turnPhase === 'DECIDE', 'Brak działki do wystawienia.'); startAuction(s, p.position); break;
+        case 'END':
+          check(s.turnPhase === 'END', 'Najpierw wykonaj rzut i podejmij decyzję o działce.');
+          if (s.extraRoll && !p.inJail) { s.turnPhase = 'ROLL'; s.extraRoll = false; s.turnDeadline = s.updatedAt + 120000; }
+          else nextTurn(s);
+          break;
+        case 'JAIL_PAY':
+        case 'JAIL_CARD':
+          check(p.inJail && s.turnPhase === 'ROLL', 'Wyjdź z Izby przed rzutem.');
+          if (action.type === 'JAIL_CARD') { check(p.pardonCards > 0, 'Brak karty wolności.'); p.pardonCards--; p.pardonDecks = list(p.pardonDecks); p.pardonDecks.shift(); }
+          else { check(p.cash >= 50, 'Kaucja kosztuje $50.'); p.cash -= 50; event(s, p.id, null, 50, 'Kaucja za Izbę OUG'); }
+          p.inJail = false; p.jailTurns = 0;
+          break;
+        case 'BUILD': {
+          manageAllowed(s, actor); const ok = buildCheck(s, action.index, actor); check(ok.ok, ok.reason);
+          const t = tiles[action.index], prop = s.properties[action.index];
+          who.cash -= t.buildCost; prop.level++;
+          event(s, actor, null, t.buildCost, (prop.level === 5 ? 'Hotel: ' : 'Dom: ') + t.shortName);
+          prop.history.unshift(`${stamp(s)} — Budowa: poziom ${prop.level}`);
+          log(s, `🏗️ <strong>${esc(who.name)}</strong> buduje ${prop.level === 5 ? 'hotel' : 'dom'} — ${esc(t.shortName)}.`);
+          break;
+        }
+        case 'SELL_HOUSE': {
+          manageAllowed(s, actor); const ok = sellCheck(s, action.index, actor); check(ok.ok, ok.reason);
+          const t = tiles[action.index]; s.properties[action.index].level--;
+          credit(s, actor, Math.floor(t.buildCost / 2), 'Sprzedaż budynku: ' + t.shortName);
+          break;
+        }
+        case 'SELL_GROUP': {
+          manageAllowed(s, actor); const t = tiles[action.index];
+          check(t?.type === 'PROPERTY' && ownsSet(s, t, actor), 'Sprzedaj zabudowę własnej dzielnicy.');
+          let refund = 0;
+          group(t).forEach(x => { const prop = s.properties[x.index]; refund += prop.level * Math.floor(x.buildCost / 2); prop.level = 0; });
+          check(refund > 0, 'W tej dzielnicy nie ma budynków.');
+          credit(s, actor, refund, 'Sprzedaż całej zabudowy dzielnicy');
+          break;
+        }
+        case 'MORTGAGE': {
+          manageAllowed(s, actor); const ok = mortgageCheck(s, action.index, actor); check(ok.ok, ok.reason);
+          const t = tiles[action.index], prop = s.properties[action.index];
+          if (prop.mortgaged) { const cost = Math.ceil(t.price * 0.55); who.cash -= cost; prop.mortgaged = false; event(s, actor, null, cost, 'Spłata hipoteki: ' + t.shortName); }
+          else { prop.mortgaged = true; credit(s, actor, Math.floor(t.price / 2), 'Zastaw: ' + t.shortName); }
+          break;
+        }
+        case 'BANKRUPT':
+          manageAllowed(s, actor); bankrupt(s, actor, s.debt?.creditorId || null); break;
+        case 'BID': {
+          const a = s.auction; check(a, 'Licytacja jest już zakończona.');
+          check(!a.passed.includes(actor) && a.leaderId !== actor, 'Prowadzisz lub już spasowałeś.');
+          check(Number.isSafeInteger(action.amount) && action.amount > a.highBid && action.amount <= who.cash, 'Oferta musi być wyższa i mieścić się w Twojej gotówce.');
+          a.highBid = action.amount; a.leaderId = actor; a.deadline = s.updatedAt + 15000;
+          log(s, `🔨 ${esc(who.name)} licytuje $${action.amount}.`);
+          if (activePlayers(s).filter(x => x.id !== a.leaderId && !a.passed.includes(x.id)).length === 0) closeAuction(s);
+          break;
+        }
+        case 'PASS': {
+          const a = s.auction; check(a && a.leaderId !== actor && !a.passed.includes(actor), 'Nie możesz teraz spasować.');
+          a.passed.push(actor);
+          if (activePlayers(s).filter(x => x.id !== a.leaderId && !a.passed.includes(x.id)).length === 0) closeAuction(s);
+          break;
+        }
+        case 'TICK':
+          if (s.auction) { check(s.updatedAt >= s.auction.deadline, 'Licytacja jeszcze trwa.'); closeAuction(s); }
+          else {
+            check(s.updatedAt >= s.turnDeadline, 'Tura jeszcze trwa.');
+            if (s.debt) bankrupt(s, s.debt.playerId, s.debt.creditorId);
+            else if (s.turnPhase === 'DECIDE') startAuction(s, p.position);
+            else nextTurn(s);
+          }
+          break;
+        default: throw new Error('Nieznana akcja.');
+      }
+      settle(s);
+      s.revision += 1;
+      return s;
+    }
+
+    function botAction(s) {
+      if (s.auction) {
+        const a = s.auction;
+        const bot = activePlayers(s).find(p => p.isBot && p.id !== a.leaderId && !a.passed.includes(p.id));
+        if (!bot) return null;
+        const t = tiles[a.tileIndex];
+        const completes = t.type === 'PROPERTY' && group(t).filter(x => x.index !== t.index).every(x => s.properties[x.index].ownerId === bot.id);
+        const limit = Math.min(Math.max(0, bot.cash - 100), Math.floor(t.price * (completes ? 1.6 : 1.05)));
+        const amount = a.highBid ? a.highBid + 10 : 1;
+        return { actor: bot.id, type: amount <= limit ? 'BID' : 'PASS', amount };
+      }
+      const p = s.debt ? player(s, s.debt.playerId) : current(s);
+      if (!p?.isBot || p.bankrupt) return null;
+      if (s.debt) {
+        const improved = tiles.find(t => s.properties[t.index]?.ownerId === p.id && sellCheck(s, t.index, p.id).ok);
+        if (improved) return { actor: p.id, type: 'SELL_HOUSE', index: improved.index };
+        const stuckHotel = tiles.find(t => s.properties[t.index]?.ownerId === p.id && s.properties[t.index].level > 0);
+        if (stuckHotel) return { actor: p.id, type: 'SELL_GROUP', index: stuckHotel.index };
+        const mortgage = tiles.find(t => s.properties[t.index]?.ownerId === p.id && !s.properties[t.index].mortgaged && mortgageCheck(s, t.index, p.id).ok);
+        return mortgage ? { actor: p.id, type: 'MORTGAGE', index: mortgage.index } : { actor: p.id, type: 'BANKRUPT' };
+      }
+      const build = tiles.find(t => buildCheck(s, t.index, p.id).ok && p.cash - t.buildCost >= 180);
+      if (build) return { actor: p.id, type: 'BUILD', index: build.index };
+      if (s.turnPhase === 'ROLL') return { actor: p.id, type: 'ROLL' };
+      if (s.turnPhase === 'DECIDE') return { actor: p.id, type: p.cash >= tiles[p.position].price ? 'BUY' : 'DECLINE' };
+      if (s.turnPhase === 'END') return { actor: p.id, type: 'END' };
+      return null;
+    }
+    return { initialize, normalize, reduce, rent, buildCheck, sellCheck, mortgageCheck, buildingStock, netWorth, botAction, liquidationValue, rulesVersion: RULES_VERSION };
+  }
+  return { createEngine, RULES_VERSION, escapeHTML: esc };
+});
+
+/* ==================== CZĘŚĆ C: GŁÓWNA APLIKACJA I FIREBASE ONLINE ==================== */
 (function () {
   'use strict';
 
-  // Safari w trybie prywatnym i zablokowany magazyn nie mogą zatrzymać gry.
   const storage = (() => {
-    try { const s = window.localStorage; s.setItem('ruda_storage_check', '1'); s.removeItem('ruda_storage_check'); return s; }
-    catch (e) { const memory = new Map(); return { getItem: key => memory.get(key) || null, setItem: (key, value) => memory.set(key, String(value)), removeItem: key => memory.delete(key) }; }
+    try {
+      const s = window.localStorage;
+      s.setItem('ruda_storage_check', '1');
+      s.removeItem('ruda_storage_check');
+      return s;
+    } catch (e) {
+      const memory = new Map();
+      return {
+        getItem: key => memory.get(key) || null,
+        setItem: (key, value) => memory.set(key, String(value)),
+        removeItem: key => memory.delete(key)
+      };
+    }
   })();
 
-  const HARDCODED_FIREBASE_URL = ""; // Opcjonalnie wpisz publiczny databaseURL swojej bazy.
-  const STORAGE_VERSION = "v15_monopoly_mobile";
+  const sessionStore = (() => {
+    try {
+      const s = window.sessionStorage;
+      s.setItem('ruda_session_check', '1');
+      s.removeItem('ruda_session_check');
+      return s;
+    } catch (e) {
+      return storage;
+    }
+  })();
 
+  const HARDCODED_FIREBASE_URL = ""; // Opcjonalnie wpisz tu swój databaseURL
+  const STORAGE_VERSION = "v15_monopoly_mobile";
   storage.setItem('ruda_arena_version', STORAGE_VERSION);
 
   /* ==================== 1. MAPY RUDY ŚLĄSKIEJ ==================== */
@@ -55,7 +672,7 @@
     return found ? found.hex : PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)].hex;
   }
 
-  const { GROUPS, AIRPORT_INDICES, BOARD_TILES, SURPRISE_CARDS, TREASURE_CARDS } = window.RudaBoard;
+  const { GROUPS, AIRPORT_INDICES, BOARD_TILES } = window.RudaBoard;
   const monopoly = window.RudaMonopoly.createEngine(window.RudaBoard);
 
   const SVG_ICONS = {
@@ -106,13 +723,13 @@
   }
   const sfx = new SoundEngine();
 
-  /* ==================== 4. STAN GLOBALNY I UKRYTY TRYB SZTYGARA ==================== */
-  let myClientToken = storage.getItem('ruda_client_token');
+  /* ==================== 4. STAN GLOBALNY ==================== */
+  // Używamy sessionStorage jako priorytetu, żeby można było testować grę Online w 2 kartach tej samej przeglądarki!
+  let myClientToken = sessionStore.getItem('ruda_client_token');
   if (!myClientToken) {
     myClientToken = 'cl_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
-    storage.setItem('ruda_client_token', myClientToken);
+    sessionStore.setItem('ruda_client_token', myClientToken);
   }
-
 
   let gameState = null;
   let selectedGameMode = 'MONOPOLY';
@@ -149,7 +766,7 @@
 
   function nowTime() { return new Date().toTimeString().slice(0, 5); }
 
-  function setBannerStatus(msg, color = '#00e5ff') {
+  function setBannerStatus(msg, color = '#81cfb5') {
     const el = document.getElementById('net-status-banner');
     if (el) { el.textContent = msg; el.style.color = color; }
   }
@@ -250,40 +867,105 @@
         setTimeout(() => {
           overlay.classList.add('hidden');
           if (onFinished) onFinished(finalMap.id);
-        }, 500);
+        }, 450);
       }
-    }, 90);
+    }, 85);
+  }
+
+  /* ==================== NAPRAWIONE POŁĄCZENIE FIREBASE ONLINE ==================== */
+  function extractFirebaseConfig(rawInput) {
+    if (!rawInput) return null;
+    if (typeof rawInput === 'object' && rawInput.databaseURL) {
+      return { ...rawInput, databaseURL: String(rawInput.databaseURL).trim().replace(/\/+$/, '') };
+    }
+    const text = String(rawInput).trim();
+    if (!text) return null;
+
+    // 1. Szukamy dowolnego poprawnego linku https://...firebaseio.com lub ...firebasedatabase.app w tekście (nawet jeśli wklejono cały kod JS z konsoli Firebase!)
+    const urlMatch = text.match(/https:\/\/[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.(?:firebaseio\.com|firebasedatabase\.app)/i);
+    if (urlMatch) {
+      const cleanUrl = urlMatch[0].replace(/\/+$/, '');
+      const apiKeyMatch = text.match(/apiKey\s*:\s*["']([^"']+)["']/);
+      const projectIdMatch = text.match(/projectId\s*:\s*["']([^"']+)["']/);
+      const cfg = { databaseURL: cleanUrl };
+      if (apiKeyMatch) cfg.apiKey = apiKeyMatch[1];
+      if (projectIdMatch) cfg.projectId = projectIdMatch[1];
+      return cfg;
+    }
+
+    // 2. Jeśli użytkownik wkleił sam obiekt z projectId bez databaseURL
+    const projMatch = text.match(/projectId\s*["']?\s*:\s*["']([a-zA-Z0-9-]+)["']/);
+    if (projMatch) {
+      return {
+        projectId: projMatch[1],
+        databaseURL: `https://${projMatch[1]}-default-rtdb.firebaseio.com`
+      };
+    }
+
+    // 3. Próba bezpośredniego URL
+    if (text.startsWith('http://') || text.startsWith('https://')) {
+      const u = new URL(text);
+      return { databaseURL: u.origin };
+    }
+    return null;
   }
 
   function connectFirebaseDatabase(rawInput) {
-    if (!window.firebase) { setBannerStatus('Nie udało się wczytać Firebase. Gra lokalna jest dostępna.', '#ffb454'); return false; }
+    if (!window.firebase) {
+      setBannerStatus('Brak biblioteki Firebase (sprawdź połączenie z internetem). Gra lokalna działa.', '#ffb454');
+      return false;
+    }
     try {
-      const input = typeof rawInput === 'string' ? rawInput.trim() : rawInput;
-      const cfg = typeof input === 'object' ? input : (input.startsWith('https://') ? { databaseURL: input } : JSON.parse(input));
-      const url = new URL(cfg.databaseURL);
-      if (url.protocol !== 'https:' || !/(^|\.)(firebaseio\.com|firebasedatabase\.app)$/.test(url.hostname) || url.username || url.password || url.search || url.hash || !['', '/'].includes(url.pathname)) throw new Error('Adres musi wskazywać główną bazę Realtime Database.');
-      cfg.databaseURL = url.origin;
-      if (firebaseDb && activeFirebaseUrl === cfg.databaseURL) { document.getElementById('firebase-url-input').value = activeFirebaseUrl; return true; }
-      firebaseConnected = false;
-      const appName = 'ruda_' + Array.from(url.origin).reduce((n, c) => ((n * 31 + c.charCodeAt(0)) >>> 0), 0);
-      const app = firebase.apps.find(a => a.name === appName) || firebase.initializeApp(cfg, appName);
+      const cfg = extractFirebaseConfig(rawInput);
+      if (!cfg || !cfg.databaseURL) {
+        throw new Error('Nie znaleziono poprawnego adresu databaseURL.');
+      }
+
+      const urlObj = new URL(cfg.databaseURL);
+      cfg.databaseURL = urlObj.origin;
+
+      if (firebaseDb && activeFirebaseUrl === cfg.databaseURL) {
+        const inputEl = document.getElementById('firebase-url-input');
+        if (inputEl) inputEl.value = activeFirebaseUrl;
+        return true;
+      }
+
+      const appName = 'ruda_' + Array.from(urlObj.origin).reduce((n, c) => ((n * 31 + c.charCodeAt(0)) >>> 0), 0);
+      const existingApp = firebase.apps.find(a => a.name === appName);
+      const app = existingApp || firebase.initializeApp(cfg, appName);
+
       if (firebaseRoomRef) { firebaseRoomRef.off(); firebaseRoomRef = null; }
-      if (connectionRef) connectionRef.off();
-      firebaseDb = app.database(); activeFirebaseUrl = cfg.databaseURL;
+      if (connectionRef) { connectionRef.off(); connectionRef = null; }
+
+      firebaseDb = app.database();
+      activeFirebaseUrl = cfg.databaseURL;
       storage.setItem('ruda_firebase_url', activeFirebaseUrl);
+
       const inputEl = document.getElementById('firebase-url-input');
       if (inputEl) inputEl.value = activeFirebaseUrl;
+
+      const pill = document.getElementById('fb-conn-pill');
+      if (pill) {
+        pill.textContent = 'Firebase: gotowy (' + urlObj.hostname.split('.')[0] + ')';
+        pill.className = 'fb-pill connected';
+      }
+
       connectionRef = firebaseDb.ref('.info/connected');
       connectionRef.on('value', snapshot => {
         firebaseConnected = snapshot.val() === true;
-        const pill = document.getElementById('fb-conn-pill');
-        if (pill) { pill.textContent = firebaseConnected ? 'Firebase: połączono' : 'Łączenie / brak sieci'; pill.className = 'fb-pill ' + (firebaseConnected ? 'connected' : 'disconnected'); }
+        if (pill) {
+          pill.textContent = firebaseConnected ? '🟢 Firebase: Połączono' : '🟡 Firebase: Łączenie...';
+          pill.className = 'fb-pill ' + (firebaseConnected ? 'connected' : 'disconnected');
+        }
         document.getElementById('top-net-dot')?.classList.toggle('firebase', firebaseConnected);
-        if (!firebaseConnected && gameState?.isOnline) showToast('Połączenie przerwane. Ruchy wznowią się po odzyskaniu sieci.');
-      }, error => networkError(error));
-      setBannerStatus('Konfiguracja zapisana. Utworzenie pokoju sprawdzi dostęp do bazy.', '#72d8bd');
+      }, err => networkError(err));
+
+      setBannerStatus('✅ Połączono z bazą: ' + activeFirebaseUrl + '. Możesz teraz utworzyć lub dołączyć do pokoju!', '#72d8bd');
       return true;
-    } catch (error) { setBannerStatus('Nieprawidłowy databaseURL lub JSON konfiguracji Firebase.', '#ff737d'); return false; }
+    } catch (error) {
+      setBannerStatus('❌ Wklej poprawny link https://...-rtdb...firebasedatabase.app lub obiekt firebaseConfig.', '#ff737d');
+      return false;
+    }
   }
 
   function buildShareInviteLink(roomCode) {
@@ -385,7 +1067,6 @@
     if (!st.properties || typeof st.properties !== 'object') {
       st.properties = {};
     }
-   
 
     BOARD_TILES.forEach(t => {
       if (t.type === 'PROPERTY' || t.type === 'AIRPORT' || t.type === 'UTILITY') {
@@ -480,12 +1161,12 @@
       chess: createChessState(),
       connect4: createConnect4State(),
       feed: [{ text: `🗺️ Arena: <strong>${chosenMap.fullTitle}</strong>! Zbieraj dzielnice i doprowadź rywali do bankructwa!`, time: nowTime() }],
-      chat: [{ author: 'Skarbnik', color: '#ffca28', text: `Szczęść Boże! Wszystkie 8 gier (w tym 🧱 Sztolnia Labirynt i 2 Drużyny) są gotowe!`, time: nowTime() }]
+      chat: [{ author: 'Skarbnik', color: '#ffca28', text: `Szczęść Boże! Wszystkie 8 gier jest gotowych!`, time: nowTime() }]
     };
     return monopoly.initialize(fresh, { startingCash, roundLimit: Number(document.getElementById('monopoly-round-limit')?.value ?? 30), gameId: makeId('game'), seed: randomSeed(), now: serverNow() });
   }
 
-  /* ==================== 6. SYNCHRONIZACJA POKOJU ==================== */
+  /* ==================== 6. SYNCHRONIZACJA POKOJU (STABILNY ZAPIS FIREBASE) ==================== */
   let acceptedState = null;
   let syncBusy = false;
   let firebaseConnected = false;
@@ -505,110 +1186,181 @@
   function fairDie() { let n; do { n = randomSeed(); } while (n >= 4294967292); return n % 6 + 1; }
   function cleanName(name) { return String(name || 'Górnik').replace(/[<>&"'`]/g, '').trim().slice(0, 24) || 'Górnik'; }
   function safeRichText(text) { return escapeHTML(text).replace(/&lt;(\/?strong|br\s*\/?)&gt;/g, '<$1>'); }
+
   function showToast(message) {
     const el = document.getElementById('app-toast'); if (!el) return;
     el.textContent = message; el.classList.remove('hidden');
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hidden'), 5000);
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hidden'), 4500);
   }
+
   function networkError(error) {
-    const permission = /permission|denied/i.test(error?.code || error?.message || '');
-    const msg = permission ? 'Firebase odrzucił dostęp do pokoju. Sprawdź uprawnienia swojej bazy.' : 'Nie udało się zapisać ruchu. Sprawdź połączenie i spróbuj ponownie.';
-    setBannerStatus(msg, '#ff737d'); showToast(msg);
+    const codeStr = String(error?.code || error?.message || '');
+    const permission = /permission|denied/i.test(codeStr);
+    const msg = permission
+      ? '❌ Baza Firebase odrzuciła zapis (PERMISSION_DENIED)! W konsoli Firebase wejdź w Realtime Database → Reguły (Rules) i ustaw ".read": true, ".write": true.'
+      : ('⚠️ Problem z połączeniem Firebase: ' + (error?.message || 'Sprawdź adres bazy i internet.'));
+    setBannerStatus(msg, '#ff737d');
+    showToast(msg);
   }
+
   function acceptState(state, first = false) {
     if (!state) return;
-    gameState = normalizeState(copy(state)); acceptedState = copy(gameState);
+    gameState = normalizeState(copy(state));
+    acceptedState = copy(gameState);
     isRollingLock = false;
     syncMyOnlineIdentity();
     if (first || eventGameId !== gameState.gameId) {
-      eventGameId = gameState.gameId; lastEventSequence = gameState.eventSequence || 0;
-      paymentQueueUI = []; lastWinnerShown = null;
+      eventGameId = gameState.gameId;
+      lastEventSequence = gameState.eventSequence || 0;
+      paymentQueueUI = [];
+      lastWinnerShown = null;
     }
-    if (gameState.isOnline && !gameState.lobbyOpen) document.getElementById('lobby-overlay')?.classList.add('hidden');
-    renderAll(); updateLobbyWaitingRoom(); scheduleMonopolyBot();
+    if (gameState.isOnline && !gameState.lobbyOpen) {
+      document.getElementById('lobby-overlay')?.classList.add('hidden');
+    }
+    renderAll();
+    updateLobbyWaitingRoom();
+    scheduleMonopolyBot();
     if (gameState.activeGame !== 'MONOPOLY' && !syncBusy) checkBotForOtherGames();
   }
+
   function subscribeToRoom(roomCode) {
     if (firebaseRoomRef) { firebaseRoomRef.off(); firebaseRoomRef = null; }
     if (broadcastChannel) { broadcastChannel.close(); broadcastChannel = null; }
     currentRoomCode = roomCode;
-    document.getElementById('top-room-label').textContent = roomCode;
+    const lbl = document.getElementById('top-room-label');
+    if (lbl) lbl.textContent = roomCode;
+
     if (firebaseDb && roomCode !== 'LOKALNY') {
       firebaseRoomRef = firebaseDb.ref('rooms/' + roomCode);
       let first = true;
-      firebaseRoomRef.on('value', snap => { if (snap.val()) { acceptState(snap.val(), first); first = false; } }, networkError);
+      firebaseRoomRef.on('value', snap => {
+        const val = snap.val();
+        if (val) {
+          acceptState(val, first);
+          first = false;
+        }
+      }, networkError);
       firebaseDb.ref('.info/serverTimeOffset').once('value').then(s => { serverOffset = Number(s.val()) || 0; }).catch(() => {});
     }
   }
+
   function syncMyOnlineIdentity() {
     if (!gameState) return;
     if (gameState.isOnline) {
       const me = gameState.players.find(p => p.clientToken === myClientToken);
       myOnlinePlayerId = me?.id || null;
       activePerspectiveId = me?.id || null;
-    } else activePerspectiveId = getMyViewerPlayer()?.id || 'p1';
-  }
-  function saveLocalState() {
-    if (gameState && !gameState.isOnline) {
-      try { storage.setItem('ruda_local_save_v15', JSON.stringify(gameState)); } catch (e) { showToast('Brak miejsca na zapis. Partia działa do zamknięcia tej karty.'); }
+    } else {
+      activePerspectiveId = getMyViewerPlayer()?.id || 'p1';
     }
   }
+
+  function saveLocalState() {
+    if (gameState && !gameState.isOnline) {
+      try { storage.setItem('ruda_local_save_v15', JSON.stringify(gameState)); } catch (e) {}
+    }
+  }
+
   async function pushStateSync() {
     if (!gameState) return false;
-    if (!gameState.isOnline) { gameState.revision = (gameState.revision || 0) + 1; acceptedState = copy(gameState); saveLocalState(); renderAll(); scheduleMonopolyBot(); return true; }
-    if (syncBusy || !firebaseRoomRef || !firebaseConnected || !myOnlinePlayerId) { if (acceptedState) gameState = copy(acceptedState); renderAll(); return false; }
-    const candidate = copy(gameState), revision = acceptedState?.revision || 0;
-    candidate.revision = revision + 1;
+    if (!gameState.isOnline) {
+      gameState.revision = (gameState.revision || 0) + 1;
+      acceptedState = copy(gameState);
+      saveLocalState();
+      renderAll();
+      scheduleMonopolyBot();
+      return true;
+    }
+    if (syncBusy || !firebaseRoomRef || !myOnlinePlayerId) {
+      if (acceptedState) gameState = copy(acceptedState);
+      renderAll();
+      return false;
+    }
+    const candidate = copy(gameState);
+    candidate.revision = (acceptedState?.revision || 0) + 1;
     syncBusy = true;
     try {
-      const result = await firebaseRoomRef.transaction(remote => remote && remote.gameId === candidate.gameId && (remote.revision || 0) === revision ? candidate : undefined, undefined, false);
-      if (result.snapshot.val()) acceptState(result.snapshot.val());
-      if (!result.committed) showToast('Inny gracz wykonał ruch w tym samym momencie. Spróbuj ponownie.');
-      return result.committed;
-    } catch (error) { if (acceptedState) acceptState(acceptedState); networkError(error); return false; }
-    finally { syncBusy = false; if (gameState) { renderCenterHUD(); renderAuction(); } scheduleMonopolyBot(); }
+      await firebaseRoomRef.set(candidate);
+      acceptState(candidate);
+      return true;
+    } catch (error) {
+      if (acceptedState) acceptState(acceptedState);
+      networkError(error);
+      return false;
+    } finally {
+      syncBusy = false;
+      if (gameState) { renderCenterHUD(); renderAuction(); }
+      scheduleMonopolyBot();
+    }
   }
+
   async function commitMonopoly(type, extra = {}, actorId = null, quiet = false) {
     if (!gameState || syncBusy || gameState.activeGame !== 'MONOPOLY') return false;
     const localActor = actorId || (gameState.isOnline ? myOnlinePlayerId : (gameState.debt?.playerId || currentTurnPlayer()?.id));
-    const action = { ...extra, type, expectedRevision: gameState.revision || 0, now: serverNow() };
+    const action = { ...extra, type, now: serverNow() };
     if (type === 'ROLL') action.dice = [fairDie(), fairDie()];
     syncBusy = true;
-    if (type === 'ROLL') { sfx.dice(); document.querySelectorAll('.die-3d').forEach(el => el.classList.add('rolling')); }
+    if (type === 'ROLL') {
+      sfx.dice();
+      document.querySelectorAll('.die-3d').forEach(el => el.classList.add('rolling'));
+    }
     try {
       if (gameState.isOnline) {
-        if (!firebaseRoomRef || !firebaseConnected) throw new Error('Brak połączenia z Firebase.');
+        if (!firebaseRoomRef) throw new Error('Brak aktywnego pokoju Firebase.');
         let reason = '';
         const gameId = gameState.gameId;
         const result = await firebaseRoomRef.transaction(raw => {
-          if (!raw || raw.gameId !== gameId) return;
-          const member = Object.values(raw.players || {}).find(p => p.clientToken === myClientToken);
+          if (!raw) return raw; // Ważne: w pierwszej fazie transakcji Firebase raw bywa null, zwracamy raw by SDK pobrało stan z serwera
+          if (raw.gameId && raw.gameId !== gameId) return;
+          const norm = normalizeState(raw);
+          const member = norm.players.find(p => p.clientToken === myClientToken);
           if (!member) { reason = 'Dołącz do tego pokoju, aby wykonać ruch.'; return; }
-          const target = Object.values(raw.players).find(p => p.id === localActor);
-          if (type !== 'TICK' && localActor !== member.id && !target?.isBot) { reason = 'Możesz sterować tylko swoim graczem.'; return; }
-          try { return monopoly.reduce(normalizeState(raw), action, localActor); } catch (err) { reason = err.message; return; }
-        }, undefined, false);
-        if (result.snapshot.val()) acceptState(result.snapshot.val());
-        if (!result.committed && !quiet) showToast(reason || 'Stan gry się zmienił. Wykonaj ruch ponownie.');
+          const target = norm.players.find(p => p.id === localActor);
+          if (type !== 'TICK' && localActor !== member.id && !target?.isBot) {
+            reason = 'Możesz sterować tylko swoim graczem.';
+            return;
+          }
+          try {
+            return monopoly.reduce(norm, { ...action, expectedRevision: norm.revision }, localActor);
+          } catch (err) {
+            reason = err.message;
+            return;
+          }
+        });
+        if (result.snapshot?.val()) acceptState(result.snapshot.val());
+        if (!result.committed && !quiet && reason) showToast(reason);
         return result.committed;
       }
-      acceptState(monopoly.reduce(gameState, action, localActor)); saveLocalState(); return true;
-    } catch (error) { if (!quiet) showToast(error.message); return false; }
-    finally { syncBusy = false; if (gameState) { renderCenterHUD(); renderAuction(); } setTimeout(() => document.querySelectorAll('.die-3d').forEach(el => el.classList.remove('rolling')), 450); scheduleMonopolyBot(); }
+      acceptState(monopoly.reduce(gameState, { ...action, expectedRevision: gameState.revision }, localActor));
+      saveLocalState();
+      return true;
+    } catch (error) {
+      if (!quiet) showToast(error.message || 'Nie udało się wykonać ruchu.');
+      return false;
+    } finally {
+      syncBusy = false;
+      if (gameState) { renderCenterHUD(); renderAuction(); }
+      setTimeout(() => document.querySelectorAll('.die-3d').forEach(el => el.classList.remove('rolling')), 420);
+      scheduleMonopolyBot();
+    }
   }
+
   function scheduleMonopolyBot() {
     clearTimeout(engineBotTimer);
-    if (!gameState || gameState.activeGame !== 'MONOPOLY' || gameState.status !== 'PLAYING' || gameState.lobbyOpen || syncBusy || (!gameState.isOnline && !document.getElementById('lobby-overlay').classList.contains('hidden')) || (gameState.isOnline && (!myOnlinePlayerId || !firebaseConnected))) return;
+    if (!gameState || gameState.activeGame !== 'MONOPOLY' || gameState.status !== 'PLAYING' || gameState.lobbyOpen || syncBusy) return;
+    if (!gameState.isOnline && !document.getElementById('lobby-overlay').classList.contains('hidden')) return;
+    if (gameState.isOnline && !myOnlinePlayerId) return;
     const next = monopoly.botAction(gameState);
     if (!next) return;
     const revision = gameState.revision;
     engineBotTimer = setTimeout(() => {
-      if (gameState.revision !== revision) return;
+      if (!gameState || gameState.revision !== revision) return;
       commitMonopoly(next.type, next, next.actor, true);
-    }, 950);
+    }, 900);
   }
 
-  /* ==================== MONOPOLY: INTERFEJS CZYSTEGO SILNIKA ==================== */
+  /* ==================== 7. MONOPOLY DOM ==================== */
   function getGridPosition(index) {
     if (index === 0) return { row: 1, col: 1, edge: 'corner' };
     if (index > 0 && index < 10) return { row: 1, col: index + 1, edge: 'edge-top' };
@@ -634,7 +1386,9 @@
       cell.style.gridColumn = pos.col;
       cell.dataset.index = tile.index;
       cell.title = tile.name;
-      cell.tabIndex = 0; cell.setAttribute('role', 'button'); cell.setAttribute('aria-label', tile.name + (tile.price ? ', cena $' + tile.price : ''));
+      cell.tabIndex = 0;
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('aria-label', tile.name + (tile.price ? ', cena $' + tile.price : ''));
       cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cell.click(); } });
 
       if (pos.edge === 'corner') {
@@ -731,7 +1485,7 @@
           <div class="liars-opp-card ${idx === liars.turnIndex ? 'active-liar' : ''}">
             <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;">
               <span class="player-pawn-inline" style="background:${p.color};width:20px;height:20px;">${getAvatarSvg(p.avatar)}</span>
-              <strong>${p.name} ${p.isBot ? '🤖' : ''}</strong>
+              <strong>${escapeHTML(p.name)} ${p.isBot ? '🤖' : ''}</strong>
             </div>
             <div style="font-size:0.78rem;color:#ffca28;">🂠 Kart: <strong>${cnt}</strong></div>
           </div>
@@ -745,7 +1499,7 @@
     const claimEl = document.getElementById('liars-last-claim');
     if (claimEl) {
       claimEl.innerHTML = liars.lastPlay
-        ? `🗣️ <strong>${liars.lastPlay.playerName}</strong> deklaruje: <strong>${liars.lastPlay.count}× ${liars.lastPlay.claimedRank}</strong>`
+        ? `🗣️ <strong>${escapeHTML(liars.lastPlay.playerName)}</strong> deklaruje: <strong>${liars.lastPlay.count}× ${escapeHTML(liars.lastPlay.claimedRank)}</strong>`
         : `Stół jest pusty. Wyłóż od 1 do 4 zakrytych kart!`;
     }
 
@@ -777,9 +1531,9 @@
         const isSel = selectedLiarCardIds.includes(c.id);
         return `
           <div class="playing-card ${isRed ? 'red-suit' : ''} ${isSel ? 'selected-card' : ''}" data-cid="${c.id}">
-            <span style="align-self:flex-start;font-size:0.82rem;">${c.rank}${c.suit}</span>
-            <span style="font-size:1.5rem;">${c.suit}</span>
-            <span style="align-self:flex-end;font-size:0.82rem;">${c.rank}</span>
+            <span style="align-self:flex-start;font-size:0.78rem;">${c.rank}${c.suit}</span>
+            <span style="font-size:1.35rem;">${c.suit}</span>
+            <span style="align-self:flex-end;font-size:0.78rem;">${c.rank}</span>
           </div>
         `;
       }).join('');
@@ -809,7 +1563,7 @@
     const myHand = hands[activeP.id] || [];
     const chosenCards = myHand.filter(c => selectedLiarCardIds.includes(c.id));
     if (chosenCards.length === 0) {
-      alert('Zaznacz od 1 do 4 swoich kart na dole ekranu!');
+      showToast('Zaznacz od 1 do 4 swoich kart na dole ekranu!');
       return;
     }
 
@@ -847,11 +1601,11 @@
 
     if (wasTruth) {
       hands[caller.id].push(...liars.pile);
-      liars.lastRevealMsg = `✅ PRAWDA! <strong>${accused?.name}</strong> położył [${actualStr}]! Sprawdzający <strong>${caller.name}</strong> zabiera całą pulę!`;
+      liars.lastRevealMsg = `✅ PRAWDA! <strong>${escapeHTML(accused?.name)}</strong> położył [${actualStr}]! Sprawdzający <strong>${escapeHTML(caller.name)}</strong> zabiera całą pulę!`;
       sfx.rent();
     } else {
       hands[accused.id].push(...liars.pile);
-      liars.lastRevealMsg = `🚨 KŁAMSTWO! <strong>${accused?.name}</strong> deklarował ${liars.lastPlay.claimedRank}, a położył [${actualStr}]! Zabiera całą pulę!`;
+      liars.lastRevealMsg = `🚨 KŁAMSTWO! <strong>${escapeHTML(accused?.name)}</strong> deklarował ${liars.lastPlay.claimedRank}, a położył [${actualStr}]! Zabiera całą pulę!`;
       sfx.buy();
     }
 
@@ -863,7 +1617,7 @@
       if ((hands[p.id] || []).length === 0) {
         liars.winnerName = p.name;
         p.arcadeCash += 500;
-        addFeedEvent(`🃏 <strong>${p.name}</strong> wygrał rozdanie w Szynku Kłamców (+$500)!`);
+        addFeedEvent(`🃏 <strong>${escapeHTML(p.name)}</strong> wygrał rozdanie w Szynku Kłamców (+$500)!`);
         sfx.win();
       }
     }
@@ -873,7 +1627,7 @@
     checkBotForOtherGames();
   }
 
-  /* ==================== 9. KWIACIARNIA GODULA (PEŁNY STÓŁ 0-36 + CEL GRY) ==================== */
+  /* ==================== 9. KWIACIARNIA GODULA ==================== */
   const RED_NUMS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
   let selectedCasinoChip = 25;
   let currentRouletteBets = {};
@@ -965,14 +1719,13 @@
 
   function checkCasinoGoalReached(player) {
     const goal = Number(gameState.casinoGoal || 5000);
-    if (player.arcadeCash >= goal) {
+    if (player && player.arcadeCash >= goal) {
       sfx.win();
-
       showGenericModal(
         `🌸 KRÓL KWIACIARNI GODULA: ${player.name}!`,
         `<div style="text-align:center;padding:14px;">
           <div style="font-size:3rem;">🎰👑</div>
-          <h3 style="color:#ffca28;margin:8px 0;">${player.name} osiągnął cel majątkowy $${goal}!</h3>
+          <h3 style="color:#ffca28;margin:8px 0;">${escapeHTML(player.name)} osiągnął cel majątkowy $${goal}!</h3>
           <p>Aktualny stan konta: <strong style="color:#2ecc71;">$${player.arcadeCash}</strong></p>
         </div>`
       );
@@ -999,39 +1752,26 @@
 
   async function commitArcadeWallet(id, stake, payout, reason, gameId) {
     if (!Number.isSafeInteger(stake) || !Number.isSafeInteger(payout) || stake < 0 || payout < 0 || gameState.gameId !== gameId) return false;
-    if (!gameState.isOnline) {
-      const p = getPlayerById(id); if (!p || p.arcadeCash < stake) return false;
-      p.arcadeCash = p.arcadeCash - stake + payout; addFeedEvent(escapeHTML(reason));
-      return pushStateSync();
-    }
-    if (!firebaseRoomRef || !firebaseConnected) { showToast('Połączenie przerwane. Zakład nie został rozliczony.'); return false; }
-    try {
-      const result = await firebaseRoomRef.transaction(raw => {
-        if (!raw || raw.gameId !== gameId) return;
-        const p = Object.values(raw.players || {}).find(x => x.id === id && x.clientToken === myClientToken);
-        if (!p || !Number.isFinite(p.arcadeCash) || p.arcadeCash < stake) return;
-        p.arcadeCash = p.arcadeCash - stake + payout;
-        raw.feed = [{ text: escapeHTML(reason), time: nowTime() }, ...Object.values(raw.feed || {})].slice(0, 60);
-        raw.revision = (raw.revision || 0) + 1;
-        return raw;
-      }, undefined, false);
-      if (result.snapshot.val()) acceptState(result.snapshot.val());
-      if (!result.committed) showToast('Zakład nie został rozliczony: zmienił się stan konta lub partia.');
-      return result.committed;
-    } catch (e) { networkError(e); return false; }
+    const p = getPlayerById(id);
+    if (!p || p.arcadeCash < stake) return false;
+    p.arcadeCash = p.arcadeCash - stake + payout;
+    addFeedEvent(escapeHTML(reason));
+    return pushStateSync();
   }
+
   function spinFullGodulaRoulette() {
     if (isCasinoBusy || !gameState || gameState.activeGame !== 'CASINO') return;
     const player = getMyViewerPlayer(), totalBet = getTotalRouletteStaked(), msg = document.getElementById('roulette-msg');
-    if (!player || totalBet <= 0) { msg.textContent = 'Najpierw połóż żetony na stole.'; return; }
-    if (player.arcadeCash < totalBet) { msg.textContent = 'Brakuje gotówki w portfelu gier towarzyskich.'; return; }
+    if (!player || totalBet <= 0) { if (msg) msg.textContent = 'Najpierw połóż żetony na stole.'; return; }
+    if (player.arcadeCash < totalBet) { if (msg) msg.textContent = 'Brakuje gotówki w portfelu gier towarzyskich.'; return; }
     const gameId = gameState.gameId, id = player.id, bets = copy(currentRouletteBets);
     const outcome = Math.floor(Math.random() * 37), payout = evaluateRoulettePayout(bets, outcome);
     currentRouletteBets = {}; isCasinoBusy = true; sfx.dice();
     const wheel = document.getElementById('godula-roulette-wheel'), orbit = document.getElementById('roulette-ball-orbit');
     rouletteSpinAngle += 1440 + Math.floor(Math.random() * 360);
     if (wheel) wheel.style.transform = `rotate(${rouletteSpinAngle}deg)`;
-    orbit?.classList.add('spinning'); msg.textContent = 'Kulki w ruch! Trwa losowanie…';
+    orbit?.classList.add('spinning');
+    if (msg) msg.textContent = 'Kulka w ruch! Trwa losowanie…';
     setTimeout(async () => {
       orbit?.classList.remove('spinning');
       try {
@@ -1039,7 +1779,7 @@
         document.getElementById('roulette-result-num').textContent = outcome;
         rouletteHistory.unshift(outcome);
         const ok = await commitArcadeWallet(id, totalBet, payout, `Ruletka: ${player.name}, wynik ${outcome}, stawka $${totalBet}, zwrot $${payout}.`, gameId);
-        msg.textContent = ok ? `Wypadło ${outcome}. Stawka $${totalBet}, zwrot $${payout}.` : 'Zakład nie został zapisany. Sprawdź połączenie.';
+        if (msg) msg.textContent = ok ? `Wypadło ${outcome}. Stawka $${totalBet}, zwrot $${payout}.` : 'Zakład nie został zapisany.';
         if (ok && payout) { sfx.win(); checkCasinoGoalReached(getPlayerById(id)); }
       } finally { isCasinoBusy = false; renderCasinoGame(); }
     }, 2200);
@@ -1053,8 +1793,7 @@
     const symbols = ['7️⃣', '💎', '🍒', '🔔', '🍋', '⛏️'];
     const gameId = gameState.gameId, id = player.id;
     const reels = ['slot-r1', 'slot-r2', 'slot-r3'].map(key => document.getElementById(key));
-    // Zachowane identyfikatory starego automatu.
-    if (reels.some(x => !x)) { showToast('Nie znaleziono bębnów automatu.'); return; }
+    if (reels.some(x => !x)) return;
     isCasinoBusy = true; if (msg) msg.textContent = 'Bębny w ruch…'; let ticks = 0;
     const timer = setInterval(async () => {
       const result = reels.map(el => { const symbol = symbols[Math.floor(Math.random() * symbols.length)]; el.textContent = symbol; return symbol; }); sfx.step();
@@ -1072,85 +1811,15 @@
     }, 85);
   }
 
-  /* ==================== 10. SZTOLNIA LABIRYNT (QUORIDOR 9x9 + ŚCIANY + BFS) ==================== */
+  /* ==================== 10. SZTOLNIA LABIRYNT (QUORIDOR 9x9) ==================== */
   let quoridorActionMode = 'MOVE';
-
-  function ensureQuoridorDOMExists() {
-    if (!document.querySelector('link[rel="icon"]')) {
-      const link = document.createElement('link');
-      link.rel = 'icon';
-      link.type = 'image/svg+xml';
-      link.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23ff9800'/><text x='50%25' y='54%25' dominant-baseline='central' text-anchor='middle' font-size='64'>⚒️</text></svg>";
-      document.head.appendChild(link);
-    }
-
-
-
-    const nav = document.getElementById('games-nav');
-    if (nav && !nav.querySelector('[data-switch-game="QUORIDOR"]')) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'game-nav-btn';
-      btn.dataset.switchGame = 'QUORIDOR';
-      btn.innerHTML = `<span class="g-icon">🧱</span><span>Sztolnia Labirynt</span>`;
-      btn.onclick = () => {
-        if (!gameState) return;
-        gameState.activeGame = 'QUORIDOR';
-        pushStateSync();
-        checkBotForOtherGames();
-      };
-      nav.appendChild(btn);
-    }
-
-    const mainStage = document.getElementById('mobile-pane-board');
-    if (mainStage && !document.getElementById('stage-QUORIDOR')) {
-      const sec = document.createElement('section');
-      sec.id = 'stage-QUORIDOR';
-      sec.className = 'stage-view hidden';
-      sec.innerHTML = `
-        <div class="board-card-shell quoridor-shell" style="max-width:900px;width:100%;">
-          <div class="game-top-bar">
-            <div>
-              <span class="game-tag" id="quoridor-teams-tag">WYŚCIG PRZEZ CHODNIK GÓRNICZY — QUORIDOR 9×9</span>
-              <h2 id="quoridor-turn-text">Ruch: Sztygar</h2>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <div id="quoridor-walls-info" style="background:rgba(255,152,0,0.18);border:1px solid #ffca28;color:#ffca28;padding:6px 10px;border-radius:9px;font-size:0.76rem;font-weight:900;">🧱 Ściany: 10 vs 10</div>
-              <button type="button" id="btn-q-mode-move" class="btn-hub btn-hub-buy">🚶 Ruch Pionkiem</button>
-              <button type="button" id="btn-q-mode-wall-h" class="btn-ghost">➖ Ściana Pozioma</button>
-              <button type="button" id="btn-q-mode-wall-v" class="btn-ghost">❕ Ściana Pionowa</button>
-            </div>
-          </div>
-          <div style="width:100%;background:rgba(124,77,255,0.14);border:1px solid rgba(124,77,255,0.4);border-radius:11px;padding:7px 12px;font-size:0.76rem;text-align:center;margin:6px 0;">
-            🎯 <strong>Cel:</strong> Dojdź pionkiem na przeciwległy koniec planszy! W swojej turze kliknij zielone pole ruchu LUB wybierz powyżej tryb ściany i postaw tamę przed rywalem.
-          </div>
-          <div style="width:100%;flex:1;min-height:420px;display:flex;align-items:center;justify-content:center;padding:8px 0;">
-            <div id="quoridor-grid"></div>
-          </div>
-        </div>
-      `;
-      mainStage.appendChild(sec);
-
-      bindClick('btn-q-mode-move', () => { quoridorActionMode = 'MOVE'; renderQuoridorGame(); });
-      bindClick('btn-q-mode-wall-h', () => { quoridorActionMode = 'WALL_H'; renderQuoridorGame(); });
-      bindClick('btn-q-mode-wall-v', () => { quoridorActionMode = 'WALL_V'; renderQuoridorGame(); });
-    }
-  }
 
   function isQuoridorStepOpen(r1, c1, r2, c2, hWalls, vWalls) {
     if (r2 < 0 || r2 > 8 || c2 < 0 || c2 > 8) return false;
-    if (r2 === r1 - 1 && c2 === c1) {
-      return !hWalls.includes(`${r2},${c1}`) && !hWalls.includes(`${r2},${c1 - 1}`);
-    }
-    if (r2 === r1 + 1 && c2 === c1) {
-      return !hWalls.includes(`${r1},${c1}`) && !hWalls.includes(`${r1},${c1 - 1}`);
-    }
-    if (c2 === c1 - 1 && r2 === r1) {
-      return !vWalls.includes(`${r1},${c2}`) && !vWalls.includes(`${r1 - 1},${c2}`);
-    }
-    if (c2 === c1 + 1 && r2 === r1) {
-      return !vWalls.includes(`${r1},${c1}`) && !vWalls.includes(`${r1 - 1},${c1}`);
-    }
+    if (r2 === r1 - 1 && c2 === c1) return !hWalls.includes(`${r2},${c1}`) && !hWalls.includes(`${r2},${c1 - 1}`);
+    if (r2 === r1 + 1 && c2 === c1) return !hWalls.includes(`${r1},${c1}`) && !hWalls.includes(`${r1},${c1 - 1}`);
+    if (c2 === c1 - 1 && r2 === r1) return !vWalls.includes(`${r1},${c2}`) && !vWalls.includes(`${r1 - 1},${c2}`);
+    if (c2 === c1 + 1 && r2 === r1) return !vWalls.includes(`${r1},${c1}`) && !vWalls.includes(`${r1 - 1},${c1}`);
     return false;
   }
 
@@ -1225,7 +1894,7 @@
       q.winner = side;
       sfx.win();
       const winPlayer = getTeamActivePlayer(side, q);
-      addFeedEvent(`🧱 <strong>${winPlayer?.name}</strong> przeszedł na drugą stronę Sztolni Labiryntu i wygrał mecz!`);
+      addFeedEvent(`🧱 <strong>${escapeHTML(winPlayer?.name)}</strong> przeszedł na drugą stronę Sztolni Labiryntu i wygrał mecz!`);
     } else {
       advance2PGameTurn(q);
     }
@@ -1238,11 +1907,11 @@
     if (!q || q.winner !== null) return;
     const side = q.turn;
     if (q.wallsLeft[side] <= 0) {
-      alert('Nie masz już więcej ścian do postawienia!');
+      showToast('Nie masz już więcej ścian do postawienia!');
       return;
     }
     if (!canPlaceQuoridorWall(orient, r, c, q)) {
-      alert('Nie można tu postawić ściany (nachodzi na inną lub całkowicie odcina rywalowi jedyną drogę do mety)!');
+      showToast('Nie można tu postawić ściany (nachodzi na inną lub całkowicie odcina drogę)!');
       return;
     }
 
@@ -1257,7 +1926,6 @@
   }
 
   function renderQuoridorGame() {
-    ensureQuoridorDOMExists();
     if (!gameState) return;
     if (!gameState.quoridor || !Array.isArray(gameState.quoridor.pos)) {
       gameState.quoridor = createQuoridorState();
@@ -1265,7 +1933,7 @@
 
     const grid = document.getElementById('quoridor-grid');
     if (!grid) return;
-    grid.style.cssText = 'width:min(62vh,86vw,540px);height:min(62vh,86vw,540px);min-width:290px;min-height:290px;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);gap:8px;background:#120e21;padding:12px;border-radius:18px;border:4px solid #3c3063;position:relative;';
+    grid.style.cssText = 'width:min(58dvh,82vw,520px);height:min(58dvh,82vw,520px);min-width:270px;min-height:270px;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);gap:7px;background:#0d1f1e;padding:10px;border-radius:16px;border:3px solid #35584b;position:relative;';
 
     const q = gameState.quoridor;
     const activePlayer = getTeamActivePlayer(q.turn, q);
@@ -1302,7 +1970,7 @@
       for (let c = 0; c < 9; c++) {
         const cell = document.createElement('div');
         const isStep = validMoves.some(m => m.r === r && m.c === c);
-        cell.style.cssText = `background:${isStep ? 'rgba(46,204,113,0.34)' : '#261f3d'};border:${isStep ? '2px solid #2ecc71' : '1px solid rgba(255,255,255,0.14)'};border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;`;
+        cell.style.cssText = `background:${isStep ? 'rgba(46,204,113,0.34)' : '#1c3633'};border:${isStep ? '2px solid #2ecc71' : '1px solid rgba(255,255,255,0.12)'};border-radius:7px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;`;
         if (r === 0) cell.style.borderTop = '3px solid #ff7849';
         if (r === 8) cell.style.borderBottom = '3px solid #00e5ff';
 
@@ -1310,7 +1978,7 @@
           if (q.pos[side] && q.pos[side].r === r && q.pos[side].c === c) {
             const pObj = getTeamActivePlayer(side, q) || gameState.players[side] || gameState.players[0];
             const pawn = document.createElement('div');
-            pawn.style.cssText = `width:78%;height:78%;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;background:${side === 0 ? (pObj?.color || '#ff7849') : (pObj?.color || '#00e5ff')};box-shadow:0 4px 12px rgba(0,0,0,0.85);z-index:4;`;
+            pawn.style.cssText = `width:78%;height:78%;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;background:${side === 0 ? (pObj?.color || '#ff7849') : (pObj?.color || '#00e5ff')};box-shadow:0 4px 10px rgba(0,0,0,0.8);z-index:4;`;
             pawn.innerHTML = getAvatarSvg(pObj?.avatar || 'helmet');
             const svgEl = pawn.querySelector('svg');
             if (svgEl) { svgEl.style.width = '70%'; svgEl.style.height = '70%'; }
@@ -1320,12 +1988,12 @@
 
         if (q.hWalls.includes(`${r},${c}`)) {
           const hw = document.createElement('div');
-          hw.style.cssText = 'position:absolute;left:0;bottom:-7px;width:calc(200% + 8px);height:6px;background:linear-gradient(90deg,#ff9800,#ffca28);border-radius:4px;box-shadow:0 0 10px rgba(255,152,0,0.9);z-index:9;pointer-events:none;';
+          hw.style.cssText = 'position:absolute;left:0;bottom:-6px;width:calc(200% + 7px);height:5px;background:linear-gradient(90deg,#ff9800,#ffca28);border-radius:3px;z-index:9;pointer-events:none;';
           cell.appendChild(hw);
         }
         if (q.vWalls.includes(`${r},${c}`)) {
           const vw = document.createElement('div');
-          vw.style.cssText = 'position:absolute;top:0;right:-7px;width:6px;height:calc(200% + 8px);background:linear-gradient(180deg,#ff9800,#ffca28);border-radius:4px;box-shadow:0 0 10px rgba(255,152,0,0.9);z-index:9;pointer-events:none;';
+          vw.style.cssText = 'position:absolute;top:0;right:-6px;width:5px;height:calc(200% + 7px);background:linear-gradient(180deg,#ff9800,#ffca28);border-radius:3px;z-index:9;pointer-events:none;';
           cell.appendChild(vw);
         }
 
@@ -1375,10 +2043,7 @@
     setTimeout(() => {
       dieEl?.classList.remove('rolling');
       const allInBase = ludo.pawns[ludo.turn].every(s => s === -1);
-      const luckBoost = 0.38;
-      const d = (allInBase && Math.random() < luckBoost)
-        ? 6
-        : (Math.floor(Math.random() * 6) + 1);
+      const d = (allInBase && Math.random() < 0.38) ? 6 : (Math.floor(Math.random() * 6) + 1);
 
       ludo.dice = d;
       ludo.rolled = true;
@@ -1774,7 +2439,7 @@
     }
   }
 
-  /* ==================== CENTRALNY STEROWNIK BOTÓW WE WSZYSTKICH 8 GRACH ==================== */
+  /* ==================== CENTRALNY STEROWNIK BOTÓW ==================== */
   function checkBotForOtherGames() {
     if (!gameState) return;
     if (botActionTimeout) {
@@ -1916,7 +2581,6 @@
   /* ==================== 12. RENDEROWANIE INTERFEJSU ==================== */
   function renderAll() {
     if (!gameState) return;
-    ensureQuoridorDOMExists();
     syncMyOnlineIdentity();
     if (gameState.mapId) applyMapTheme(gameState.mapId);
 
@@ -1970,7 +2634,7 @@
           const owner = getPlayerById(prop.ownerId);
           capEl.classList.remove('hidden');
           capEl.style.background = owner ? owner.color : '#888';
-          capEl.textContent = prop.mortgaged ? '🔒' : (prop.level === 5 ? '🏨 HOTEL' : (prop.level > 0 ? `🏠×${prop.level}` : '✓'));
+          capEl.textContent = prop.mortgaged ? '🔒' : (prop.level === 5 ? '🏨' : (prop.level > 0 ? `🏠${prop.level}` : '✓'));
           if (cellEl && owner) cellEl.style.borderColor = owner.color;
         } else {
           capEl.classList.add('hidden');
@@ -2043,9 +2707,9 @@
     visible('btn-jail-card', active.inJail && phase === 'ROLL' && active.pardonCards > 0);
     const card = document.getElementById('center-card-alert'); card.classList.toggle('hidden', !gameState.lastCard);
     if (gameState.lastCard) card.textContent = gameState.lastCard.text;
-    document.getElementById('center-feed-log').innerHTML = gameState.feed.slice(0, 5).map(x => `<div class="feed-line">${safeRichText(x.text)}</div>`).join('');
+    document.getElementById('center-feed-log').innerHTML = gameState.feed.slice(0, 4).map(x => `<div class="feed-line">${safeRichText(x.text)}</div>`).join('');
     const hint = document.getElementById('turn-hint');
-    const hints = { ROLL: active.inJail ? 'Izba OUG: dublet, karta lub kaucja $50.' : 'Rzuć kostkami i ruszaj po swoje dzielnice.', DECIDE: 'Wolna działka. Kupujesz czy oddajesz na licytację?', END: gameState.extraRoll ? 'Dublet! Możesz rzucić ponownie.' : 'Zarządzaj dzielnicami lub zakończ turę.', AUCTION: 'Trwa wspólna licytacja działki.', DEBT: 'Rozlicz dług w zakładce „Majątek”.', FINISHED: 'Mecz zakończony. Sprawdź podium lub zagraj rewanż.' };
+    const hints = { ROLL: active.inJail ? 'Izba OUG: dublet, karta lub kaucja $50.' : 'Rzuć kostkami i ruszaj po swoje dzielnice.', DECIDE: 'Wolna działka. Kupujesz czy oddajesz na licytację?', END: gameState.extraRoll ? 'Dublet! Możesz rzucić ponownie.' : 'Zarządzaj dzielnicami lub zakończ turę.', AUCTION: 'Trwa wspólna licytacja działki.', DEBT: 'Rozlicz dług w panelu „Twoje dzielnice”.', FINISHED: 'Mecz zakończony. Sprawdź podium lub zagraj rewanż.' };
     if (hint) hint.textContent = hints[phase] || '';
     document.getElementById('btn-bankrupt').disabled = gameState.activeGame !== 'MONOPOLY' || gameState.status !== 'PLAYING' || !!gameState.auction || (gameState.isOnline && (debt?.playerId || active.id) !== myOnlinePlayerId);
   }
@@ -2092,19 +2756,21 @@
         <div class="owned-prop-left"><span class="owned-dot" style="background:${GROUPS[t.group].color}"></span><div><span class="owned-name">${t.shortName}</span><small class="property-meta">${pr.mortgaged ? '🔒 Zastawiona' : t.type === 'PROPERTY' ? (pr.level === 5 ? '🏨 Hotel' : pr.level + ' / 4 domów') : t.type === 'AIRPORT' ? '✈️ Lotnisko' : '⚡ Zakład'}</small></div></div>
         <div class="owned-prop-right">${build.ok ? `<button class="btn-quick-up" data-build-idx="${t.index}" aria-label="Zbuduj na ${t.shortName}">+🏠 $${t.buildCost}</button>` : ''}
         ${pr.level > 0 ? `<button class="btn-quick-sell" data-sell-house-idx="${t.index}" ${!canManage || !sale.ok ? 'disabled' : ''}>−🏠</button>` : `<button class="btn-quick-sell" data-mortgage-idx="${t.index}" ${!canManage || !mort.ok ? 'disabled' : ''}>${pr.mortgaged ? 'Spłać $' + Math.ceil(t.price * .55) : 'Zastaw +$' + Math.floor(t.price / 2)}</button>`}</div></div>`;
-    }).join('') : '<div class="empty-state">🏘️<p>Tu pojawią się Twoje działki.</p><small>Zbierz kolor, aby odblokować budowę.</small></div>';
+    }).join('') : '<div class="empty-state">🏘️<p>Brak własnych działek.</p><small>Zbierz kolor, aby budować domy.</small></div>';
     listEl.querySelectorAll('[data-open-idx]').forEach(row => { row.onclick = e => { if (!e.target.closest('button')) openPropertyModal(Number(row.dataset.openIdx)); }; });
     listEl.querySelectorAll('[data-build-idx]').forEach(btn => { btn.onclick = () => buildHouseOnProperty(Number(btn.dataset.buildIdx), viewer.id); });
     listEl.querySelectorAll('[data-sell-house-idx]').forEach(btn => { btn.onclick = () => sellHouseOnProperty(Number(btn.dataset.sellHouseIdx), viewer.id); });
     listEl.querySelectorAll('[data-mortgage-idx]').forEach(btn => { btn.onclick = () => toggleMortgageProperty(Number(btn.dataset.mortgageIdx), viewer.id); });
   }
+
   function renderInspector(index) {
     const t = BOARD_TILES[index]; if (!t) return;
     const prop = gameState.properties[index], owner = getPlayerById(prop?.ownerId);
     document.getElementById('spotlight-tag').textContent = t.group ? GROUPS[t.group].name : 'POLE SPECJALNE';
     document.getElementById('spotlight-title').textContent = t.name;
-    document.getElementById('spotlight-content').innerHTML = prop ? `<div class="spot-grid"><div class="spot-stat"><span>Wartość</span><strong>$${t.price}</strong></div><div class="spot-stat"><span>Właściciel</span><strong>${owner ? escapeHTML(owner.name) : 'Bank'}</strong></div><div class="spot-stat"><span>Czynsz</span><strong>$${calculateRent(index)}</strong></div><div class="spot-stat"><span>Zastaw</span><strong>$${Math.floor(t.price / 2)}</strong></div></div>` : `<p>${escapeHTML(t.subtitle || 'Pole specjalne')}</p>`;
+    document.getElementById('spotlight-content').innerHTML = prop ? `<div class="spot-grid"><div class="spot-stat"><span>Wartość</span><strong>$${t.price}</strong></div><div class="spot-stat"><span>Właściciel</span><strong>${owner ? escapeHTML(owner.name) : 'Bank'}</strong></div><div class="spot-stat"><span>Czynsz</span><strong>$${calculateRent(index)}</strong></div><div class="spot-stat"><span>Zastaw</span><strong>$${Math.floor(t.price / 2)}</strong></div></div>` : `<p style="font-size:0.65rem;color:var(--text-muted);">${escapeHTML(t.subtitle || 'Pole specjalne')}</p>`;
   }
+
   function openPropertyModal(index) {
     selectedTileIndex = index;
     const t = BOARD_TILES[index], prop = gameState.properties[index], viewer = getMyViewerPlayer();
@@ -2135,6 +2801,7 @@
     document.getElementById('pm-history-list').innerHTML = prop.history.map(h => '<li>' + escapeHTML(h) + '</li>').join('');
     modal.classList.remove('hidden');
   }
+
   function renderMatchSummary() {
     const alive = gameState.players.filter(p => !p.bankrupt);
     const leader = [...alive].sort((a, b) => monopoly.netWorth(gameState, b.id) - monopoly.netWorth(gameState, a.id))[0];
@@ -2153,6 +2820,7 @@
     }).join('');
     document.getElementById('btn-show-ledger').classList.toggle('has-new', !!gameState.debt);
   }
+
   function renderMoneyEvents() {
     if (eventGameId !== gameState.gameId) { eventGameId = gameState.gameId; lastEventSequence = gameState.eventSequence || 0; }
     const recent = (gameState.moneyEvents || []).filter(e => e.sequence > lastEventSequence);
@@ -2162,6 +2830,7 @@
     const ledger = document.getElementById('money-ledger');
     ledger.innerHTML = (gameState.moneyEvents || []).slice(-10).reverse().map(e => `<div class="ledger-row"><span>${escapeHTML(getPlayerById(e.fromId)?.name || 'Bank')} → ${escapeHTML(getPlayerById(e.toId)?.name || 'Bank')}<small>${escapeHTML(e.reason)}</small></span><strong class="${e.status === 'DUE' ? 'negative' : ''}">${e.status === 'DUE' ? 'Dług ' : ''}$${e.amount}</strong></div>`).join('') || '<p class="muted">Tu pojawią się rozliczenia partii.</p>';
   }
+
   let paymentDismissTimer;
   function showNextPayment() {
     if (!paymentQueueUI.length) { paymentUIBusy = false; return; }
@@ -2175,12 +2844,14 @@
     document.getElementById('payment-reason').textContent = e.reason;
     document.getElementById('payment-icon').textContent = e.status === 'DUE' ? '⚠' : e.fromId === 'BANK' ? '↗' : '↔';
     sfx.rent();
-    clearTimeout(paymentDismissTimer); paymentDismissTimer = setTimeout(dismissPayment, e.status === 'DUE' ? 4500 : 2800);
+    clearTimeout(paymentDismissTimer); paymentDismissTimer = setTimeout(dismissPayment, e.status === 'DUE' ? 4000 : 2400);
   }
+
   function dismissPayment() {
     clearTimeout(paymentDismissTimer); document.getElementById('payment-overlay').classList.add('hidden');
     paymentUIBusy = false; if (paymentQueueUI.length) setTimeout(showNextPayment, 160);
   }
+
   function renderAuction() {
     const modal = document.getElementById('auction-modal'), a = gameState.auction;
     modal.classList.toggle('hidden', !a || gameState.activeGame !== 'MONOPOLY');
@@ -2203,7 +2874,7 @@
     if (!stream) return;
     stream.innerHTML = gameState.chat.map(m => `
       <div class="chat-bubble-row">
-        <span class="player-pawn-inline" style="background:${/^#[0-9a-f]{6}$/i.test(m.color || '') ? m.color : '#549f8b'};width:16px;height:16px;flex-shrink:0;margin-top:3px;"></span>
+        <span class="player-pawn-inline" style="background:${/^#[0-9a-f]{6}$/i.test(m.color || '') ? m.color : '#549f8b'};width:14px;height:14px;flex-shrink:0;margin-top:2px;"></span>
         <div class="chat-msg-bubble"><span class="chat-msg-author">${escapeHTML(m.author)} • ${escapeHTML(m.time)}</span><div>${escapeHTML(m.text)}</div></div>
       </div>
     `).join('');
@@ -2215,15 +2886,20 @@
     const sender = getMyViewerPlayer(); if (!sender) return;
     const message = { author: sender.name, color: sender.color, text: text.trim().slice(0, 140), time: nowTime() };
     if (gameState.isOnline) {
-      if (!firebaseRoomRef || !firebaseConnected) { showToast('Poczekaj na połączenie z pokojem.'); return; }
+      if (!firebaseRoomRef) { showToast('Najpierw dołącz do pokoju.'); return; }
       try {
         await firebaseRoomRef.transaction(raw => {
-          if (!raw || raw.gameId !== gameState.gameId || !Object.values(raw.players || {}).some(p => p.clientToken === myClientToken)) return;
-          raw.chat = [...Object.values(raw.chat || {}), message].slice(-80); raw.revision = (raw.revision || 0) + 1;
+          if (!raw) return raw;
+          raw.chat = [...Object.values(raw.chat || {}), message].slice(-80);
+          raw.revision = (raw.revision || 0) + 1;
           return raw;
-        }, undefined, false);
+        });
       } catch (e) { networkError(e); }
-    } else { gameState.chat.push(message); gameState.chat = gameState.chat.slice(-80); pushStateSync(); }
+    } else {
+      gameState.chat.push(message);
+      gameState.chat = gameState.chat.slice(-80);
+      pushStateSync();
+    }
   }
 
   /* ==================== LOBBY Z UNIKALNYMI KOLORAMI ==================== */
@@ -2239,22 +2915,6 @@
 
   function renderLobbySetup() {
     ensureUniqueLobbyColors();
-
-    // Dynamiczne dodanie kafelka Sztolnia Labirynt w Lobby, jeśli brakowało go w HTML
-    const lobbyGrid = document.getElementById('lobby-game-picker');
-    if (lobbyGrid && !lobbyGrid.querySelector('[data-game="QUORIDOR"]')) {
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'game-pick-card';
-      card.dataset.game = 'QUORIDOR';
-      card.innerHTML = `<span class="gp-icon">🧱</span><strong>Sztolnia Labirynt</strong><small>Ściany & Ścieżka</small>`;
-      card.onclick = () => {
-        document.querySelectorAll('.game-pick-card').forEach(c => c.classList.remove('active'));
-        card.classList.add('active');
-        selectedGameMode = 'QUORIDOR';
-      };
-      lobbyGrid.appendChild(card);
-    }
 
     const mapCardsEl = document.getElementById('lobby-map-cards');
     if (mapCardsEl) {
@@ -2315,8 +2975,8 @@
         <div class="opp-row">
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="player-pawn-inline" style="background:${o.color};">${getAvatarSvg(o.avatar)}</span>
-            <strong>${o.name}</strong>
-            <span style="font-size:0.68rem;color:#b5abd6;">(${o.isBot ? 'Bot AI' : 'Człowiek'})</span>
+            <strong>${escapeHTML(o.name)}</strong>
+            <span style="font-size:0.66rem;color:var(--text-muted);">(${o.isBot ? 'Bot AI' : 'Człowiek'})</span>
           </div>
           ${lobbyOpponents.length > 1 ? `<button type="button" class="btn-ghost" data-rm-opp="${idx}">Usuń</button>` : ''}
         </div>
@@ -2340,7 +3000,7 @@
       plBox.innerHTML = gameState.players.map(p => `
         <div class="btn-ghost" style="border-left:4px solid ${p.color};display:flex;align-items:center;gap:6px;">
           <span class="player-pawn-inline" style="background:${p.color};width:18px;height:18px;">${getAvatarSvg(p.avatar)}</span>
-          <span>${p.name} ${p.isBot ? '🤖' : '👤'} ${p.clientToken === myClientToken ? '(Ty)' : ''}</span>
+          <span>${escapeHTML(p.name)} ${p.isBot ? '🤖' : '👤'} ${p.clientToken === myClientToken ? '(Ty)' : ''}</span>
         </div>
       `).join('');
     }
@@ -2350,11 +3010,28 @@
     roomState = normalizeState(roomState);
     if (roomState.rulesVersion !== monopoly.rulesVersion) throw new Error('Pokój używa starszej wersji. Utwórz nowy pokój.');
     const existing = roomState.players.find(p => p.clientToken === tokenToUse);
-    if (existing) return roomState;
-    if (!roomState.lobbyOpen) throw new Error('Mecz już trwa. Można wrócić tylko z przeglądarki użytej do dołączenia.');
+    if (existing) {
+      existing.name = cleanName(myName);
+      return roomState;
+    }
+    if (!roomState.lobbyOpen) throw new Error('Mecz już trwa.');
     if (roomState.players.length >= 6) throw new Error('Pokój ma komplet 6 graczy.');
     const color = roomState.players.some(p => p.color === myColor) ? getFirstAvailableColor(roomState.players.map(p => p.color)) : myColor;
-    roomState.players.push({ id: 'p' + (roomState.players.length + 1), clientToken: tokenToUse, name: cleanName(myName), color, avatar: myAvatar || 'cool', isBot: false, cash: roomState.startingCash || 1500, arcadeCash: 2000, position: 0, inJail: false, jailTurns: 0, pardonCards: 0, bankrupt: false });
+    roomState.players.push({
+      id: 'p' + (roomState.players.length + 1),
+      clientToken: tokenToUse,
+      name: cleanName(myName),
+      color,
+      avatar: myAvatar || 'cool',
+      isBot: false,
+      cash: roomState.startingCash || 1500,
+      arcadeCash: 2000,
+      position: 0,
+      inJail: false,
+      jailTurns: 0,
+      pardonCards: 0,
+      bankrupt: false
+    });
     roomState.liars = createLiarsGameState(roomState.players);
     roomState.revision = (roomState.revision || 0) + 1;
     return roomState;
@@ -2373,9 +3050,9 @@
     const spot = document.getElementById('ranking-champion-spotlight');
     if (spot && winner) {
       spot.innerHTML = `
-        <span class="champ-crown-icon">👑</span>
-        <h3 style="color:#ffca28;font-size:1.3rem;margin:4px 0;">Lider Monopoly: ${winner.name}</h3>
-        <p style="font-size:0.84rem;color:#b5abd6;">Łączny majątek: <strong>$${getNetWorth(winner)}</strong> (Gotówka: $${winner.cash})</p>
+        <span class="champ-crown-icon" style="font-size:2rem;">👑</span>
+        <h3 style="color:#ffca28;font-size:1.2rem;margin:4px 0;">Lider Monopoly: ${escapeHTML(winner.name)}</h3>
+        <p style="font-size:0.8rem;color:var(--text-muted);">Łączny majątek: <strong>$${getNetWorth(winner)}</strong> (Gotówka: $${winner.cash})</p>
       `;
     }
 
@@ -2387,11 +3064,11 @@
           <tr class="${idx === 0 ? 'top-winner-row' : ''}">
             <td><strong>#${idx + 1}</strong></td>
             <td style="display:flex;align-items:center;gap:7px;">
-              <span class="player-pawn-inline" style="background:${p.color};width:20px;height:20px;">${getAvatarSvg(p.avatar)}</span>
-              ${p.name} ${idx === 0 ? '👑' : ''} ${p.isBot ? '🤖' : ''}
+              <span class="player-pawn-inline" style="background:${p.color};width:18px;height:18px;">${getAvatarSvg(p.avatar)}</span>
+              ${escapeHTML(p.name)} ${idx === 0 ? '👑' : ''} ${p.isBot ? '🤖' : ''}
             </td>
             <td>${p.bankrupt ? '❌ Bankrut' : `🟢 Aktywny • ✈️×${airCnt}`}</td>
-            <td><strong>$${getNetWorth(p)}</strong> <small style="color:#b5abd6;">($${p.cash})</small></td>
+            <td><strong>$${getNetWorth(p)}</strong> <small style="color:var(--text-muted);">($${p.cash})</small></td>
           </tr>
         `;
       }).join('');
@@ -2399,80 +3076,56 @@
     document.getElementById('ranking-modal')?.classList.remove('hidden');
   }
 
-  /* ==================== KSIĘGA ZASAD WSZYSTKICH 8 GIER ==================== */
+  /* ==================== KSIĘGA ZASAD ==================== */
   function openRulesModal(initialTab = null) {
     const activeTab = initialTab || (gameState ? gameState.activeGame : 'MONOPOLY');
     const rulesData = {
       MONOPOLY: {
         title: '🏭 Monopoly Ruda Śląska',
-        body: `<p><strong>Cel:</strong> zostań ostatnim wypłacalnym graczem. W trybie 20 lub 30 rund po ostatniej pełnej rundzie wygrywa największy majątek netto. Remis majątku oznacza wspólną wygraną.</p>
-          <p><strong>Zakupy i licytacje:</strong> kupujesz wyłącznie wolne pole po wejściu na nie. Odmowa zakupu uruchamia licytację dla wszystkich. Nie ma wykupów, wymian ani darowizn działek. Cztery lotniska dają czynsz $200, nie zwycięstwo.</p>
-          <p><strong>Budowanie:</strong> zbierz całą dzielnicę w jednym kolorze. W swojej turze buduj równomiernie na dowolnym jej polu, bez wchodzenia na nie. Maksimum 4 domy, potem hotel. Bank ma 32 domy i 12 hoteli. Wszystkie hipoteki dzielnicy muszą być spłacone.</p>
-          <p><strong>Gotówka:</strong> START daje $200. Postój na Hałdzie jest bezpłatny, podatki trafiają do banku. Pełna dzielnica podwaja czynsz niezabudowanych pól. Zastawione pole nie pobiera czynszu. Gry towarzyskie mają osobny portfel i nie zasilają Monopoly.</p>
-          <p><strong>Długi:</strong> najpierw sprzedaj budynki za połowę ceny lub zastaw działki za 50% ceny. Spłata hipoteki kosztuje 55% ceny działki. Budynki sprzedaje się równomiernie. Gdy bank nie ma domów do wymiany hotelu, dostępna jest sprzedaż całej zabudowy dzielnicy.</p>
-          <p><strong>Bankructwo:</strong> jeśli majątek nie wystarcza na zapłatę, odpadasz. Wierzyciel otrzymuje pozostałą gotówkę i działki; przy długu wobec banku działki wracają na licytację. Wierzyciel płaci bankowi 10% wartości przejętych hipotek.</p>
-          <p><strong>Kostki i Izba:</strong> dublet daje dodatkowy rzut, trzeci dublet wysyła do Izby. Wyjście: $50, karta albo dublet; po trzeciej nieudanej próbie płacisz $50 i ruszasz. Dublet wychodzący z Izby nie daje dodatkowego rzutu.</p>
-          <p><strong>Tempo:</strong> 2 minuty na turę. Brak decyzji o zakupie uruchamia licytację. Licytacja trwa 25 sekund, a po ofercie 15 sekund. Po upływie czasu na dług następuje bankructwo. Są to jawne zasady tempa tej wersji, podobnie jak limit rund i zakaz handlu działkami.</p>`
+        body: `<p><strong>Cel:</strong> zostań ostatnim wypłacalnym graczem lub miej największy majątek netto po limicie rund.</p>
+          <p><strong>Zakupy i licytacje:</strong> kupujesz wolne pole po wejściu na nie. Odmowa zakupu uruchamia licytację dla wszystkich.</p>
+          <p><strong>Budowanie:</strong> zbierz całą dzielnicę w jednym kolorze. W swojej turze buduj równomiernie na dowolnym jej polu.</p>`
       },
       LIARS: {
-        title: '🃏 Szynk Kłamców (Blef Karciany)',
-        body: `
-          <p><strong>🎯 Cel gry:</strong> Pozbądź się wszystkich swoich kart z ręki jako pierwszy (+$500 nagrody).</p>
-          <p><strong>🂠 Rozgrywka:</strong> Pierwszy gracz wybiera figurę (A, K, Q, J, 10) i wykłada od 1 do 4 zakrytych kart. Kolejni gracze dokładają karty albo klikają <strong>„SPRAWDZAM!”</strong>.</p>
-          <p><strong>🚨 Sprawdzanie:</strong> Jeśli poprzednik kłamał — zabiera całą pulę ze stołu. Jeśli mówił prawdę — pulę zabiera sprawdzający!</p>
-        `
+        title: '🃏 Szynk Kłamców',
+        body: `<p><strong>Cel:</strong> pozbądź się wszystkich swoich kart jako pierwszy (+$500 do portfela gier).</p>`
       },
       CASINO: {
-        title: '🌸 Kwiaciarnia Godula (Ruletka 0–36 & Automat 777)',
-        body: `
-          <p><strong>🏆 Cel zwycięstwa:</strong> Jako pierwszy osiągnij wybrany cel majątkowy ($5 000, $10 000 lub $25 000).</p>
-          <p><strong>🎡 Stół Ruletki (0–36):</strong> Wybierz żeton ($10–$500), klikaj na liczby (wypłata <strong>x36</strong>), tuziny (<strong>x3</strong>) lub kolory (<strong>x2</strong>) i zakręć kołem!</p>
-        `
+        title: '🌸 Kwiaciarnia Godula',
+        body: `<p><strong>Cel:</strong> osiągnij wybrany cel majątkowy na stole ruletki (0–36) lub automacie 777.</p>`
       },
       QUORIDOR: {
-        title: '🧱 Sztolnia Labirynt (Quoridor 9×9)',
-        body: `
-          <p><strong>🎯 Cel gry:</strong> Przeprowadź swojego górnika na przeciwległy koniec planszy 9×9 jako pierwszy!</p>
-          <p><strong>🧱 Stawianie ścian:</strong> W swojej turze przesuń pionek o 1 pole ALBO postaw jedną ze swoich 10 ścian (poziomą lub pionową), aby zablokować rywala.</p>
-          <p><strong>⚠️ Zakaz zamurowania:</strong> Nie wolno zamknąć przeciwnikowi ostatniej możliwej drogi do mety.</p>
-        `
+        title: '🧱 Sztolnia Labirynt',
+        body: `<p><strong>Cel:</strong> przeprowadź pionek na przeciwległy koniec planszy 9×9, stawiając ściany blokujące rywala.</p>`
       },
       LUDO: {
-        title: '🎲 Chińczyk (Wyścig 4 Dzielnic)',
-        body: `
-          <p><strong>🎯 Cel gry:</strong> Wprowadź wszystkie 4 swoje pionki z bazy do domku na środku. Wyjście z bazy wymaga wyrzucenia <strong>6</strong>.</p>
-        `
+        title: '🎲 Chińczyk',
+        body: `<p><strong>Cel:</strong> wprowadź wszystkie 4 pionki z bazy do domku na środku.</p>`
       },
       CHECKERS: {
-        title: '⚫ Warcaby (2 Graczy lub 2 Drużyny)',
-        body: `
-          <p><strong>🎯 Zasady:</strong> Ruch po ciemnych polach na ukos. Przy >2 graczach przy stole tworzone są 2 drużyny wykonujące ruchy rotacyjnie.</p>
-        `
+        title: '⚫ Warcaby',
+        body: `<p><strong>Zasady:</strong> ruch po ciemnych polach na ukos. Przy >2 graczach działają 2 drużyny.</p>`
       },
       CHESS: {
-        title: '♟️ Szachy (2 Graczy lub 2 Drużyny)',
-        body: `
-          <p><strong>🎯 Zasady:</strong> Kliknij swoją figurę, a następnie zielone pole. Zbicie Króla rywala kończy partię. Przy >2 graczach działa tryb 2 drużyn.</p>
-        `
+        title: '♟️ Szachy',
+        body: `<p><strong>Zasady:</strong> zbicie Króla rywala kończy partię. Przy >2 graczach działają 2 drużyny.</p>`
       },
       CONNECT4: {
-        title: '🪙 Sztolnia 4 w Rzędzie',
-        body: `
-          <p><strong>🎯 Zasady:</strong> Ułóż 4 krążki swojego koloru w linii poziomej, pionowej lub ukośnej.</p>
-        `
+        title: '🪙 4 w Rzędzie',
+        body: `<p><strong>Zasady:</strong> ułóż 4 krążki swojego koloru w linii poziomej, pionowej lub ukośnej.</p>`
       }
     };
 
     const tabsHtml = Object.keys(rulesData).map(k => `
-      <button type="button" class="btn-ghost rules-tab-btn" style="${k === activeTab ? 'background:#ffca28;color:#111;font-weight:900;' : ''}" data-rtab="${k}">${rulesData[k].title.split(' ')[0]} ${k}</button>
+      <button type="button" class="btn-ghost rules-tab-btn" style="${k === activeTab ? 'background:var(--accent-gold);color:#111;font-weight:900;' : ''}" data-rtab="${k}">${rulesData[k].title.split(' ')[0]} ${k}</button>
     `).join('');
 
     const cur = rulesData[activeTab] || rulesData.MONOPOLY;
     showGenericModal(
       '❓ Księga Zasad — 8 Gier Ruda Śląska Arena',
       `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">${tabsHtml}</div>
-       <div class="action-box" style="line-height:1.65;font-size:0.86rem;">
-         <h3 style="color:#ffca28;margin-bottom:6px;">${cur.title}</h3>
+       <div class="action-box" style="line-height:1.6;font-size:0.84rem;">
+         <h3 style="color:var(--accent-gold);margin-bottom:6px;">${cur.title}</h3>
          ${cur.body}
        </div>`
     );
@@ -2490,8 +3143,17 @@
     document.getElementById('generic-modal')?.classList.remove('hidden');
   }
 
-  /* ==================== 13. OBSŁUGA KLAWIATURY, DOTYKU I POKOJU ==================== */
+  /* ==================== 13. INICJALIZACJA ZDARZEŃ ==================== */
   function initEvents() {
+    // Obsługa przycisku Pełnego Ekranu
+    bindClick('btn-fullscreen', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    });
+
     document.querySelectorAll('.mob-nav-btn').forEach(btn => {
       btn.onclick = () => {
         const tab = btn.dataset.mobTab;
@@ -2500,31 +3162,54 @@
         setMobileTab(tab);
       };
     });
+
     const controlAnchor = document.createComment('miejsce panelu sterowania');
-    const controls = document.getElementById('monopoly-controls'); controls.before(controlAnchor);
+    const controls = document.getElementById('monopoly-controls');
+    controls.before(controlAnchor);
     const phoneQuery = window.matchMedia('(max-width: 700px)');
-    const moveControls = () => { if (phoneQuery.matches) document.getElementById('mobile-action-dock').appendChild(controls); else controlAnchor.after(controls); };
-    phoneQuery.addEventListener('change', moveControls); moveControls();
+    const moveControls = () => {
+      if (phoneQuery.matches) document.getElementById('mobile-action-dock').appendChild(controls);
+      else controlAnchor.after(controls);
+    };
+    phoneQuery.addEventListener('change', moveControls);
+    moveControls();
+
     bindClick('mobile-current-field', () => openPropertyModal((gameState.debt ? getPlayerById(gameState.debt.playerId) : currentTurnPlayer()).position));
-    bindClick('btn-board-zoom', e => { const enlarged = document.getElementById('board-scroll').classList.toggle('zoomed'); e.currentTarget.setAttribute('aria-pressed', String(enlarged)); e.currentTarget.textContent = enlarged ? '⤡ Zmniejsz' : '⤢ Powiększ'; });
+    bindClick('btn-board-zoom', e => {
+      const enlarged = document.getElementById('board-scroll').classList.toggle('zoomed');
+      e.currentTarget.setAttribute('aria-pressed', String(enlarged));
+      e.currentTarget.textContent = enlarged ? '⤡ Dopasuj' : '⤢ Powiększ';
+    });
     bindClick('btn-payment-dismiss', dismissPayment);
-    bindClick('btn-show-ledger', () => { setMobileTab('players'); document.getElementById('ledger-panel').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    bindClick('btn-show-ledger', () => {
+      setMobileTab('players');
+      document.getElementById('ledger-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
     bindClick('btn-resume-local', () => {
       try {
         const saved = JSON.parse(storage.getItem('ruda_local_save_v15'));
         if (!saved || saved.rulesVersion !== monopoly.rulesVersion || saved.isOnline) throw new Error('Brak zgodnego zapisu.');
-        saved.turnDeadline = serverNow() + 120000; if (saved.auction) saved.auction.deadline = serverNow() + 25000;
-        subscribeToRoom('LOKALNY'); acceptState(saved, true);
+        saved.turnDeadline = serverNow() + 120000;
+        if (saved.auction) saved.auction.deadline = serverNow() + 25000;
+        subscribeToRoom('LOKALNY');
+        acceptState(saved, true);
         document.getElementById('lobby-overlay').classList.add('hidden');
         showToast('Wznowiono zapisaną partię.');
       } catch (e) { showToast(e.message); }
     });
+
     window.addEventListener('keydown', e => {
       const modal = [...document.querySelectorAll('.modal-backdrop:not(.hidden)')].pop();
-      if (e.key === 'Escape' && modal && modal.id !== 'auction-modal') { modal.classList.add('hidden'); if (modal.id === 'lobby-overlay') scheduleMonopolyBot(); }
-      if (e.key === ' ' && !['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName) && !modal) { e.preventDefault(); handleRollDice(); }
+      if (e.key === 'Escape' && modal && modal.id !== 'auction-modal') {
+        modal.classList.add('hidden');
+        if (modal.id === 'lobby-overlay') scheduleMonopolyBot();
+      }
+      if (e.key === ' ' && !['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName) && !modal) {
+        e.preventDefault();
+        handleRollDice();
+      }
     });
-    window.addEventListener('offline', () => showToast('Brak sieci. Gra lokalna nadal działa.'));
 
     bindClick('btn-show-ranking', showRankingModal);
     bindClick('btn-close-ranking', () => document.getElementById('ranking-modal')?.classList.add('hidden'));
@@ -2551,15 +3236,20 @@
     document.querySelectorAll('[data-switch-game]').forEach(btn => {
       btn.onclick = async () => {
         if (!gameState || syncBusy) return;
-        if (gameState.isOnline && gameState.hostToken !== myClientToken) { showToast('Grę dla pokoju wybiera gospodarz.'); return; }
+        if (gameState.isOnline && gameState.hostToken !== myClientToken) {
+          showToast('Grę dla pokoju wybiera gospodarz.');
+          return;
+        }
         if (gameState.activeGame === 'MONOPOLY' && btn.dataset.switchGame !== 'MONOPOLY') gameState.monopolyPausedAt = serverNow();
         if (btn.dataset.switchGame === 'MONOPOLY' && gameState.monopolyPausedAt) {
           const pause = serverNow() - gameState.monopolyPausedAt;
-          gameState.turnDeadline += pause; if (gameState.auction) gameState.auction.deadline += pause;
+          gameState.turnDeadline += pause;
+          if (gameState.auction) gameState.auction.deadline += pause;
           gameState.monopolyPausedAt = null;
         }
         gameState.activeGame = btn.dataset.switchGame;
-        await pushStateSync(); checkBotForOtherGames();
+        await pushStateSync();
+        checkBotForOtherGames();
       };
     });
 
@@ -2585,79 +3275,139 @@
     });
 
     bindClick('btn-save-firebase', () => {
-      if (!connectFirebaseDatabase(document.getElementById('firebase-url-input')?.value)) {
-        setBannerStatus('❌ Nieprawidłowy adres URL Firebase.', '#ff5252');
+      const val = document.getElementById('firebase-url-input')?.value;
+      if (connectFirebaseDatabase(val)) {
+        showToast('✅ Połączono z bazą Firebase!');
       }
     });
 
-    const requireFirebase = () => {
-      const typed = document.getElementById('firebase-url-input').value.trim();
-      if (typed && (!firebaseDb || typed !== activeFirebaseUrl)) connectFirebaseDatabase(typed);
-      if (!firebaseDb || !firebaseConnected) { showToast('Podaj adres swojej bazy Firebase i poczekaj na połączenie.'); return false; }
+    const ensureFirebaseReady = () => {
+      const typed = document.getElementById('firebase-url-input')?.value?.trim();
+      if (typed) connectFirebaseDatabase(typed);
+      if (!firebaseDb) {
+        showToast('Najpierw wklej link do swojej bazy Firebase Realtime Database w Kroku 1!');
+        setBannerStatus('❌ Brak podpiętego adresu Firebase w Kroku 1.', '#ff737d');
+        return false;
+      }
       return true;
     };
-    const roomCode = () => {
-      const code = document.getElementById('join-code-input').value.trim().toUpperCase();
-      if (code && !/^[A-Z0-9-]{4,12}$/.test(code)) throw new Error('Kod pokoju: 4–12 liter, cyfr lub myślników.');
-      return code;
+
+    const parseRoomCode = () => {
+      const raw = document.getElementById('join-code-input')?.value?.trim().toUpperCase() || '';
+      const clean = raw.replace(/[^A-Z0-9-]/g, '').slice(0, 12);
+      return clean;
     };
+
     bindClick('btn-create-room', async () => {
-      if (syncBusy || !requireFirebase()) return;
+      if (syncBusy || !ensureFirebaseReady()) return;
       syncBusy = true;
+      setBannerStatus('⏳ Tworzenie pokoju w bazie Firebase...', '#edc681');
       try {
-        const code = roomCode() || ('RUDA' + randomSeed().toString(36).slice(0, 6).toUpperCase());
-        const players = [{ id: 'p1', clientToken: myClientToken, name: cleanName(document.getElementById('online-name-input').value), color: onlinePickedColor, avatar: onlinePickedAvatar, isBot: false }];
+        const code = parseRoomCode() || ('RUDA' + randomSeed().toString(36).slice(0, 4).toUpperCase());
+        const myName = cleanName(document.getElementById('online-name-input')?.value || 'Hanys');
+        const players = [{ id: 'p1', clientToken: myClientToken, name: myName, color: onlinePickedColor, avatar: onlinePickedAvatar, isBot: false }];
         const fresh = createFreshGameState(players, 1500, code, true, selectedGameMode, selectedMapId);
         const ref = firebaseDb.ref('rooms/' + code);
-        await ref.once('value');
-        const result = await ref.transaction(existing => existing === null ? fresh : undefined, undefined, false);
-        if (!result.committed) throw new Error('Ten kod jest zajęty. Wybierz inny lub dołącz do pokoju.');
-        acceptState(result.snapshot.val(), true); subscribeToRoom(code); updateLobbyWaitingRoom();
-        setBannerStatus('Pokój gotowy. Wyślij link znajomym i rozpocznij mecz.', '#72d8bd');
-      } catch (e) { if (e.code) networkError(e); else showToast(e.message); }
-      finally { syncBusy = false; if (gameState) { renderCenterHUD(); renderAuction(); } }
+
+        await ref.set(fresh);
+        acceptState(fresh, true);
+        subscribeToRoom(code);
+        updateLobbyWaitingRoom();
+        setBannerStatus(`✅ Pokój ${code} utworzony! Skopiuj link zaproszenia lub kliknij „Rozpocznij Mecz”.`, '#72d8bd');
+        showToast(`Utworzono pokój: ${code}`);
+      } catch (e) {
+        networkError(e);
+      } finally {
+        syncBusy = false;
+        if (gameState) { renderCenterHUD(); renderAuction(); }
+      }
     });
+
     bindClick('btn-join-room', async () => {
-      if (syncBusy || !requireFirebase()) return;
+      if (syncBusy || !ensureFirebaseReady()) return;
       syncBusy = true;
       try {
-        const code = roomCode(); if (!code) throw new Error('Wpisz kod pokoju.');
-        const ref = firebaseDb.ref('rooms/' + code); const snap = await ref.once('value');
-        if (!snap.val()) throw new Error('Taki pokój nie istnieje. Sprawdź kod i adres bazy.');
-        let reason = '';
-        const result = await ref.transaction(raw => {
-          if (!raw) return;
-          try { return addOrReconnectPlayerToRoom(raw, document.getElementById('online-name-input').value, onlinePickedColor, onlinePickedAvatar); }
-          catch (e) { reason = e.message; return; }
-        }, undefined, false);
-        if (!result.committed) throw new Error(reason || 'Nie udało się dołączyć. Spróbuj ponownie.');
-        acceptState(result.snapshot.val(), true); subscribeToRoom(code); updateLobbyWaitingRoom();
+        const code = parseRoomCode();
+        if (!code) throw new Error('Wpisz kod pokoju (np. RUDA500).');
+        setBannerStatus(`⏳ Dołączanie do pokoju ${code}...`, '#edc681');
+        const ref = firebaseDb.ref('rooms/' + code);
+        const snap = await ref.once('value');
+        const currentData = snap.val();
+        if (!currentData) throw new Error(`Pokój „${code}” nie istnieje w tej bazie Firebase.`);
+
+        const myName = document.getElementById('online-name-input')?.value || 'Górnik';
+        const updatedRoom = addOrReconnectPlayerToRoom(currentData, myName, onlinePickedColor, onlinePickedAvatar, myClientToken);
+        await ref.set(updatedRoom);
+
+        acceptState(updatedRoom, true);
+        subscribeToRoom(code);
+        updateLobbyWaitingRoom();
         if (gameState.lobbyOpen) document.getElementById('lobby-overlay').classList.remove('hidden');
-        setBannerStatus('Dołączono jako ' + getMyViewerPlayer().name + '.', '#72d8bd');
-      } catch (e) { if (e.code) networkError(e); else showToast(e.message); }
-      finally { syncBusy = false; if (gameState) { renderCenterHUD(); renderAuction(); } scheduleMonopolyBot(); }
+        setBannerStatus(`✅ Dołączono do pokoju ${code} jako ${getMyViewerPlayer()?.name || myName}!`, '#72d8bd');
+        showToast(`Dołączono do pokoju ${code}!`);
+      } catch (e) {
+        if (e.code) networkError(e);
+        else {
+          setBannerStatus('❌ ' + e.message, '#ff737d');
+          showToast(e.message);
+        }
+      } finally {
+        syncBusy = false;
+        if (gameState) { renderCenterHUD(); renderAuction(); }
+        scheduleMonopolyBot();
+      }
     });
+
     bindClick('btn-room-add-bot', async () => {
       if (!gameState?.isOnline || gameState.hostToken !== myClientToken || !gameState.lobbyOpen || gameState.players.length >= 6 || syncBusy) return;
       const idx = gameState.players.length + 1;
-      gameState.players.push({ id: 'p' + idx, clientToken: '', name: 'Bot Górnik #' + idx, color: getFirstAvailableColor(gameState.players.map(p => p.color)), avatar: PAWN_AVATARS[idx % PAWN_AVATARS.length].id, isBot: true, cash: gameState.startingCash, arcadeCash: 2000, position: 0, inJail: false, jailTurns: 0, pardonCards: 0, bankrupt: false });
-      gameState.liars = createLiarsGameState(gameState.players); await pushStateSync(); updateLobbyWaitingRoom();
+      gameState.players.push({
+        id: 'p' + idx,
+        clientToken: '',
+        name: 'Bot Górnik #' + idx,
+        color: getFirstAvailableColor(gameState.players.map(p => p.color)),
+        avatar: PAWN_AVATARS[idx % PAWN_AVATARS.length].id,
+        isBot: true,
+        cash: gameState.startingCash,
+        arcadeCash: 2000,
+        position: 0,
+        inJail: false,
+        jailTurns: 0,
+        pardonCards: 0,
+        bankrupt: false
+      });
+      gameState.liars = createLiarsGameState(gameState.players);
+      await pushStateSync();
+      updateLobbyWaitingRoom();
     });
+
     bindClick('btn-launch-room-game', async () => {
       if (!gameState?.isOnline || gameState.hostToken !== myClientToken || !gameState.lobbyOpen || syncBusy) return;
-      if (gameState.players.length < 2) { showToast('Dodaj bota albo poczekaj na drugiego gracza.'); return; }
-      gameState.lobbyOpen = false; gameState.activeGame = selectedGameMode;
+      if (gameState.players.length < 2) {
+        showToast('Dodaj przynajmniej jednego Bota AI albo poczekaj na drugiego gracza!');
+        return;
+      }
+      gameState.lobbyOpen = false;
+      gameState.activeGame = selectedGameMode;
       gameState.turnDeadline = serverNow() + 120000;
-      if (await pushStateSync()) { document.getElementById('lobby-overlay').classList.add('hidden'); checkBotForOtherGames(); }
+      if (await pushStateSync()) {
+        document.getElementById('lobby-overlay').classList.add('hidden');
+        checkBotForOtherGames();
+      }
     });
+
     const copyInvite = async () => {
       if (!gameState?.isOnline) { showToast('Najpierw utwórz pokój online.'); return; }
-      if (!/^https?:$/.test(window.location.protocol)) { showToast('Aby udostępnić pokój, uruchom stronę pod adresem HTTP lub HTTPS.'); return; }
       const link = buildShareInviteLink(currentRoomCode);
-      try { await navigator.clipboard.writeText(link); showToast('Link do pokoju skopiowany.'); }
-      catch (e) { showGenericModal('Link do pokoju', `<p>Skopiuj adres i wyślij go znajomym:</p><input readonly value="${escapeHTML(link)}" onclick="this.select()" />`); }
+      try {
+        await navigator.clipboard.writeText(link);
+        showToast('📋 Skopiowano link zaproszenia do pokoju ' + currentRoomCode + '!');
+      } catch (e) {
+        showGenericModal('Link do pokoju ' + currentRoomCode, `<p>Skopiuj poniższy link i wyślij znajomym:</p><input readonly value="${escapeHTML(link)}" onclick="this.select()" style="width:100%;margin-top:8px;" />`);
+      }
     };
-    bindClick('btn-copy-invite-lobby', copyInvite); bindClick('btn-copy-invite-top', copyInvite);
+    bindClick('btn-copy-invite-lobby', copyInvite);
+    bindClick('btn-copy-invite-top', copyInvite);
 
     bindClick('btn-add-bot', () => {
       if (lobbyOpponents.length >= 5) return;
@@ -2722,7 +3472,7 @@
       const active = currentTurnPlayer(), t = BOARD_TILES.find(t => canUpgradeProperty(t.index, active.id).ok);
       if (t) openPropertyModal(t.index);
     });
-    bindClick('btn-sell-emergency', () => { setMobileTab('players'); document.getElementById('side-panel-props').scrollIntoView({ behavior: 'smooth' }); });
+    bindClick('btn-sell-emergency', () => { setMobileTab('players'); document.getElementById('side-panel-props')?.scrollIntoView({ behavior: 'smooth' }); });
     bindClick('btn-jail-pay', () => commitMonopoly('JAIL_PAY'));
     bindClick('btn-jail-card', () => commitMonopoly('JAIL_CARD'));
 
@@ -2759,19 +3509,17 @@
       if (gameState.activeGame === 'MONOPOLY') {
         const previous = gameState;
         gameState = createFreshGameState(previous.players, previous.startingCash || 1500, previous.roomCode, previous.isOnline, 'MONOPOLY', previous.mapId);
-        gameState.roundLimit = previous.roundLimit; gameState.lobbyOpen = false; gameState.hostToken = previous.hostToken;
-        // Rewanż jest atomową zmianą tego samego pokoju. Ochronę rewizji sprawdza poniższa transakcja.
-        if (previous.isOnline) {
-          const fresh = copy(gameState); fresh.revision = previous.revision + 1; syncBusy = true;
-          try {
-            const result = await firebaseRoomRef.transaction(raw => raw && raw.gameId === previous.gameId && raw.revision === previous.revision && raw.hostToken === myClientToken ? fresh : undefined, undefined, false);
-            acceptState(result.snapshot.val() || previous, true);
-            if (!result.committed) showToast('Stan pokoju się zmienił. Spróbuj rozpocząć rewanż ponownie.');
-          } catch (e) { acceptState(previous); networkError(e); }
-          finally { syncBusy = false; if (gameState) { renderCenterHUD(); renderAuction(); } scheduleMonopolyBot(); }
+        gameState.roundLimit = previous.roundLimit;
+        gameState.lobbyOpen = false;
+        gameState.hostToken = previous.hostToken;
+        if (previous.isOnline && firebaseRoomRef) {
+          gameState.revision = (previous.revision || 0) + 1;
+          await pushStateSync();
           return;
         }
-        acceptState(gameState, true); saveLocalState(); return;
+        acceptState(gameState, true);
+        saveLocalState();
+        return;
       }
       if (gameState.activeGame === 'LIARS') gameState.liars = createLiarsGameState(gameState.players);
       if (gameState.activeGame === 'QUORIDOR') gameState.quoridor = createQuoridorState();
@@ -2779,9 +3527,14 @@
       if (gameState.activeGame === 'CHECKERS') gameState.checkers = createCheckersState();
       if (gameState.activeGame === 'CHESS') gameState.chess = createChessState();
       if (gameState.activeGame === 'CONNECT4') gameState.connect4 = createConnect4State();
-      await pushStateSync(); checkBotForOtherGames();
+      await pushStateSync();
+      checkBotForOtherGames();
     });
-    bindClick('btn-bankrupt', () => { const viewer = getMyViewerPlayer(); if (viewer && confirm(`Zakończyć udział gracza ${viewer.name}? Pozostały majątek zostanie rozliczony.`)) declareBankruptcy(viewer.id); });
+
+    bindClick('btn-bankrupt', () => {
+      const viewer = getMyViewerPlayer();
+      if (viewer && confirm(`Zakończyć udział gracza ${viewer.name}? Pozostały majątek zostanie rozliczony.`)) declareBankruptcy(viewer.id);
+    });
     bindClick('btn-auction', () => commitMonopoly('DECLINE'));
     document.querySelectorAll('.btn-auc-add').forEach(btn => {
       btn.onclick = () => {
@@ -2812,26 +3565,34 @@
     if (turnTimerInterval) clearInterval(turnTimerInterval);
     turnTimerInterval = setInterval(() => {
       if (!gameState || gameState.activeGame !== 'MONOPOLY' || gameState.lobbyOpen || gameState.status !== 'PLAYING') return;
-      if (!gameState.isOnline && !document.getElementById('lobby-overlay').classList.contains('hidden')) { gameState.turnDeadline += 1000; if (gameState.auction) gameState.auction.deadline += 1000; return; }
+      if (!gameState.isOnline && !document.getElementById('lobby-overlay').classList.contains('hidden')) {
+        gameState.turnDeadline += 1000;
+        if (gameState.auction) gameState.auction.deadline += 1000;
+        return;
+      }
       const now = serverNow(), deadline = gameState.auction?.deadline || gameState.turnDeadline;
       const left = Math.max(0, Math.ceil((deadline - now) / 1000));
-      const timer = document.getElementById('hud-timer'); timer.textContent = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
+      const timer = document.getElementById('hud-timer');
+      timer.textContent = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
       timer.classList.toggle('timer-urgent', left <= 15);
       document.getElementById('auc-time-left').textContent = left + ' s';
-      if (left === 0 && !syncBusy && (!gameState.isOnline || (firebaseConnected && myOnlinePlayerId))) {
+      if (left === 0 && !syncBusy && (!gameState.isOnline || myOnlinePlayerId)) {
         const actor = gameState.isOnline ? myOnlinePlayerId : gameState.players.find(p => !p.bankrupt)?.id;
         commitMonopoly('TICK', {}, actor, true);
       }
     }, 1000);
   }
+
   function setMobileTab(tab) {
     document.body.dataset.mobileView = tab === 'chat' ? 'chat' : tab === 'players' ? 'players' : 'board';
     document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.mobTab === tab));
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    if (storage.getItem('ruda_theme') === 'light') { document.body.classList.remove('theme-dark'); document.body.classList.add('theme-light'); }
-    ensureQuoridorDOMExists();
+    if (storage.getItem('ruda_theme') === 'light') {
+      document.body.classList.remove('theme-dark');
+      document.body.classList.add('theme-light');
+    }
     buildMonopolyBoardDOM();
     buildRouletteFeltGrid();
     applyMapTheme(selectedMapId);
