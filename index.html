@@ -12,7 +12,7 @@
   <!-- Oficjalny SDK Firebase Realtime Database -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body class="theme-dark" data-mobile-view="board">
 
@@ -73,6 +73,9 @@
 
     <!-- Akcje górnego paska -->
     <div class="topbar-actions">
+      <button type="button" id="btn-fullscreen" class="btn-top-action" title="Pełny ekran (F11)">
+        ⛶ <span class="hide-sm">Pełny ekran</span>
+      </button>
       <button type="button" id="btn-show-ranking" class="btn-top-action" title="Tabela Rankingowa">
         🏆 <span class="hide-sm">Ranking</span>
       </button>
@@ -101,67 +104,89 @@
 
       <!-- 1. MONOPOLY RUDY ŚLĄSKIEJ -->
       <section id="stage-MONOPOLY" class="stage-view">
-        <div class="match-heading"><div><span class="eyebrow">WIECZÓR PRZY PLANSZY</span><h1>Monopoly <em>Ruda.</em></h1></div><div class="match-heading-actions"><button type="button" id="btn-show-ledger" class="btn-ghost">↔ Rozliczenia</button><button type="button" id="btn-board-zoom" class="btn-ghost" aria-pressed="false">⤢ Powiększ</button></div></div>
-        <div class="match-summary"><div><span>Twoja gotówka</span><strong id="summary-balance">$1 500</strong></div><div><span>Przy stole</span><strong id="summary-active">4 / 4</strong></div><div><span>Lider majątku</span><strong id="summary-leader">Sztygar</strong></div><div><span>Tryb partii</span><strong id="summary-mode">30 rund</strong></div><div class="round-progress-track"><span id="round-progress"></span></div></div>
-        <div class="board-scroll" id="board-scroll">
-        <div class="monopoly-frame">
-          <div id="monopoly-board" class="monopoly-board">
-            <div class="monopoly-center-hub">
-              <div class="hub-map-photo" id="hub-map-photo"></div>
-              <div class="hub-map-overlay"></div>
-              <div class="hub-wordmark"><span>RUDA ŚLĄSKA</span><strong>FORTUNA<br>NA SZYCHCIE<span>.</span></strong><small>ZBIERAJ DZIELNICE · BUDUJ IMPERIUM</small></div>
-
-              <div class="hub-status-bar">
-                <div class="hub-pill"><span class="pulse-ring"></span><span id="hud-timer">02:00</span></div>
-                <div class="hub-pill" id="hud-round">Okrążenie #1</div>
-                <div class="hub-pill quota-ready" id="hud-build-quota">Bank: 32 domy · 12 hoteli</div>
-              </div>
-
-              <div id="center-card-alert" class="hub-card-toast hidden"></div>
-              <div id="debt-warning-banner" class="debt-warning-banner hidden">
-                Masz dług. Sprzedaj budynki lub zastaw działki w panelu majątku.
-              </div>
-
-              <div class="dice-arena" id="dice-stage" title="Dotknij, aby rzucić kostkami">
-                <div id="die-box-1" class="die-3d" data-val="6">
-                  <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
-                  <span class="dot d4"></span><span class="dot d5"></span><span class="dot d6"></span>
-                  <span class="dot d7"></span><span class="dot d8"></span><span class="dot d9"></span>
-                </div>
-                <div id="die-box-2" class="die-3d" data-val="5">
-                  <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
-                  <span class="dot d4"></span><span class="dot d5"></span><span class="dot d6"></span>
-                  <span class="dot d7"></span><span class="dot d8"></span><span class="dot d9"></span>
-                </div>
-              </div>
-
-              <div class="hub-controls" id="monopoly-controls">
-                <p class="turn-hint" id="turn-hint">Rzuć kostkami i ruszaj po swoje dzielnice.</p>
-                <div class="active-player-banner">
-                  <span id="playing-now-avatar" class="player-pawn-inline"></span>
-                  <span id="playing-now-label">Kolej gracza: Sztygar</span>
-                </div>
-
-                <div id="wait-turn-notice" class="wait-turn-banner hidden">
-                  ⏳ Czekasz na ruch aktualnego gracza...
-                </div>
-
-                <div id="action-buttons-wrap" class="hub-btn-group">
-                  <button type="button" id="btn-roll" class="btn-hub btn-hub-roll">🎲 Rzuć kostkami</button>
-                  <button type="button" id="btn-buy" class="btn-hub btn-hub-buy hidden">💰 Kup Pole</button>
-                  <button type="button" id="btn-auction" class="btn-hub btn-hub-auction hidden">🔨 Oddaj na licytację</button>
-                  <button type="button" id="btn-build-quick" class="btn-hub btn-hub-build hidden">🏠 Zbuduj Dom!</button>
-                  <button type="button" id="btn-sell-emergency" class="btn-hub btn-hub-auction hidden">🏦 Zarządzaj majątkiem</button>
-                  <button type="button" id="btn-jail-pay" class="btn-hub btn-hub-jail hidden">🔓 Kaucja $50</button>
-                  <button type="button" id="btn-jail-card" class="btn-hub btn-hub-jail hidden">🕊️ Karta Wolności</button>
-                  <button type="button" id="btn-end-turn" class="btn-hub btn-hub-end hidden">⏭️ Zakończ Turę</button>
-                </div>
-              </div>
-
-              <div id="center-feed-log" class="hub-feed-log"></div>
+        <div class="monopoly-top-strip">
+          <div class="match-heading">
+            <div>
+              <span class="eyebrow">WIECZÓR PRZY PLANSZY</span>
+              <h1>Monopoly <em>Ruda.</em></h1>
+            </div>
+            <div class="match-heading-actions">
+              <button type="button" id="btn-show-ledger" class="btn-ghost">↔ Rozliczenia</button>
+              <button type="button" id="btn-board-zoom" class="btn-ghost" aria-pressed="false">⤢ Powiększ</button>
             </div>
           </div>
+          <div class="match-summary">
+            <div><span>Twoja gotówka</span><strong id="summary-balance">$1 500</strong></div>
+            <div><span>Przy stole</span><strong id="summary-active">4 / 4</strong></div>
+            <div><span>Lider majątku</span><strong id="summary-leader">Sztygar</strong></div>
+            <div><span>Tryb partii</span><strong id="summary-mode">30 rund</strong></div>
+            <div class="round-progress-track"><span id="round-progress"></span></div>
+          </div>
         </div>
+
+        <div class="board-scroll" id="board-scroll">
+          <div class="monopoly-frame">
+            <div id="monopoly-board" class="monopoly-board">
+              <div class="monopoly-center-hub">
+                <div class="hub-map-photo" id="hub-map-photo"></div>
+                <div class="hub-map-overlay"></div>
+                <div class="hub-wordmark">
+                  <span>RUDA ŚLĄSKA</span>
+                  <strong>FORTUNA<br>NA SZYCHCIE<span>.</span></strong>
+                  <small>ZBIERAJ DZIELNICE · BUDUJ IMPERIUM</small>
+                </div>
+
+                <div class="hub-status-bar">
+                  <div class="hub-pill"><span class="pulse-ring"></span><span id="hud-timer">02:00</span></div>
+                  <div class="hub-pill" id="hud-round">Okrążenie #1</div>
+                  <div class="hub-pill quota-ready" id="hud-build-quota">Bank: 32 domy · 12 hoteli</div>
+                </div>
+
+                <div id="center-card-alert" class="hub-card-toast hidden"></div>
+                <div id="debt-warning-banner" class="debt-warning-banner hidden">
+                  Masz dług. Sprzedaj budynki lub zastaw działki w panelu majątku.
+                </div>
+
+                <div class="dice-arena" id="dice-stage" title="Dotknij, aby rzucić kostkami">
+                  <div id="die-box-1" class="die-3d" data-val="6">
+                    <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+                    <span class="dot d4"></span><span class="dot d5"></span><span class="dot d6"></span>
+                    <span class="dot d7"></span><span class="dot d8"></span><span class="dot d9"></span>
+                  </div>
+                  <div id="die-box-2" class="die-3d" data-val="5">
+                    <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+                    <span class="dot d4"></span><span class="dot d5"></span><span class="dot d6"></span>
+                    <span class="dot d7"></span><span class="dot d8"></span><span class="dot d9"></span>
+                  </div>
+                </div>
+
+                <div class="hub-controls" id="monopoly-controls">
+                  <p class="turn-hint" id="turn-hint">Rzuć kostkami i ruszaj po swoje dzielnice.</p>
+                  <div class="active-player-banner">
+                    <span id="playing-now-avatar" class="player-pawn-inline"></span>
+                    <span id="playing-now-label">Kolej gracza: Sztygar</span>
+                  </div>
+
+                  <div id="wait-turn-notice" class="wait-turn-banner hidden">
+                    ⏳ Czekasz na ruch aktualnego gracza...
+                  </div>
+
+                  <div id="action-buttons-wrap" class="hub-btn-group">
+                    <button type="button" id="btn-roll" class="btn-hub btn-hub-roll">🎲 Rzuć kostkami</button>
+                    <button type="button" id="btn-buy" class="btn-hub btn-hub-buy hidden">💰 Kup Pole</button>
+                    <button type="button" id="btn-auction" class="btn-hub btn-hub-auction hidden">🔨 Oddaj na licytację</button>
+                    <button type="button" id="btn-build-quick" class="btn-hub btn-hub-build hidden">🏠 Zbuduj Dom!</button>
+                    <button type="button" id="btn-sell-emergency" class="btn-hub btn-hub-auction hidden">🏦 Zarządzaj majątkiem</button>
+                    <button type="button" id="btn-jail-pay" class="btn-hub btn-hub-jail hidden">🔓 Kaucja $50</button>
+                    <button type="button" id="btn-jail-card" class="btn-hub btn-hub-jail hidden">🕊️ Karta Wolności</button>
+                    <button type="button" id="btn-end-turn" class="btn-hub btn-hub-end hidden">⏭️ Zakończ Turę</button>
+                  </div>
+                </div>
+
+                <div id="center-feed-log" class="hub-feed-log"></div>
+              </div>
+            </div>
+          </div>
         </div>
         <button type="button" id="mobile-current-field" class="mobile-current-field"><span>📍 Pole gracza</span><strong id="mobile-field-name">START</strong><span>Podgląd →</span></button>
         <div id="mobile-action-dock" class="mobile-action-dock"></div>
@@ -217,7 +242,7 @@
         </div>
       </section>
 
-      <!-- 3. KWIACIARNIA GODULA (PEŁNY STÓŁ RULETKI 0-36, AUTOMAT 777 I CEL ZWYCIĘSTWA) -->
+      <!-- 3. KWIACIARNIA GODULA -->
       <section id="stage-CASINO" class="stage-view hidden">
         <div class="board-card-shell casino-shell">
           <div class="game-top-bar casino-top-bar">
@@ -267,7 +292,7 @@
                 </div>
 
                 <div id="roulette-msg" class="casino-result-msg">
-                  Połóż żetony na planszy po prawej stronie (na konkretne liczby lub sektory) i zakręć kołem!
+                  Połóż żetony na planszy po prawej stronie i zakręć kołem!
                 </div>
               </div>
 
@@ -294,7 +319,7 @@
               <div class="roulette-felt-header">
                 <div>
                   <strong>🟢 Stół Ruletki Europejskiej (0–36)</strong>
-                  <small style="display:block;color:#b5abd6;font-size:0.72rem;">Trafienie pojedynczej liczby płaci <strong>x36</strong>! Tuziny płacą <strong>x3</strong>, kolory i parzystość <strong>x2</strong>.</small>
+                  <small style="display:block;color:#b5abd6;font-size:0.72rem;">Liczba płaci <strong>x36</strong>, tuziny <strong>x3</strong>, kolory i parzystość <strong>x2</strong>.</small>
                 </div>
                 <div class="felt-bet-summary">
                   <span>Postawiono: <strong id="roulette-total-staked" style="color:#ffca28;">$0</strong></span>
@@ -322,7 +347,7 @@
 
               <div class="roulette-table-actions">
                 <button type="button" id="btn-clear-roulette-bets" class="btn-ghost">🗑️ Wyczyść Żetony</button>
-                <button type="button" id="btn-spin-roulette" class="btn-hub btn-hub-buy" style="flex:1;padding:12px;font-size:0.95rem;">
+                <button type="button" id="btn-spin-roulette" class="btn-hub btn-hub-buy" style="flex:1;padding:10px;font-size:0.9rem;">
                   🎡 ZAKRĘĆ KOŁEM I PUŚĆ KULKĘ!
                 </button>
               </div>
@@ -331,7 +356,7 @@
         </div>
       </section>
 
-      <!-- 4. SZTOLNIA LABIRYNT (QUORIDOR — PRZEJDŹ NA DRUGĄ STRONĘ I STAWIAJ ŚCIANY) -->
+      <!-- 4. SZTOLNIA LABIRYNT (QUORIDOR) -->
       <section id="stage-QUORIDOR" class="stage-view hidden">
         <div class="board-card-shell quoridor-shell">
           <div class="game-top-bar">
@@ -341,15 +366,15 @@
             </div>
             <div class="quoridor-controls-bar">
               <div class="quoridor-walls-pill" id="quoridor-walls-info">🧱 Ściany: 10 vs 10</div>
-              <button type="button" id="btn-q-mode-move" class="btn-hub btn-hub-buy">🚶 Tryb: Ruch Pionkiem</button>
-              <button type="button" id="btn-q-mode-wall-h" class="btn-ghost">➖ Postaw Ścianę Poziomą</button>
-              <button type="button" id="btn-q-mode-wall-v" class="btn-ghost">❕ Postaw Ścianę Pionową</button>
+              <button type="button" id="btn-q-mode-move" class="btn-hub btn-hub-buy">🚶 Ruch Pionkiem</button>
+              <button type="button" id="btn-q-mode-wall-h" class="btn-ghost">➖ Ściana Pozioma</button>
+              <button type="button" id="btn-q-mode-wall-v" class="btn-ghost">❕ Ściana Pionowa</button>
               <button type="button" class="btn-ghost" data-rules-jump="QUORIDOR">❓ Zasady</button>
             </div>
           </div>
 
           <div class="quoridor-goal-banner" id="quoridor-hint-banner">
-            🎯 <strong>Cel:</strong> Dojdź swoim pionkiem na przeciwległy koniec planszy! W swojej turze przesuń pionek o 1 pole LUB postaw ścianę blokującą rywala (nie wolno zamknąć mu ostatniej możliwej drogi!).
+            🎯 <strong>Cel:</strong> Dojdź swoim pionkiem na przeciwległy koniec planszy! W swojej turze przesuń pionek o 1 pole LUB postaw ścianę blokującą rywala.
           </div>
 
           <div class="quoridor-board-wrap">
@@ -377,7 +402,7 @@
         </div>
       </section>
 
-      <!-- 6. WARCABY (Z TRYBEM 2 DRUŻYN) -->
+      <!-- 6. WARCABY -->
       <section id="stage-CHECKERS" class="stage-view hidden">
         <div class="board-card-shell">
           <div class="game-top-bar">
@@ -392,7 +417,7 @@
         </div>
       </section>
 
-      <!-- 7. SZACHY (NAPRAWIONE + TRYB 2 DRUŻYN) -->
+      <!-- 7. SZACHY -->
       <section id="stage-CHESS" class="stage-view hidden">
         <div class="board-card-shell">
           <div class="game-top-bar">
@@ -407,7 +432,7 @@
         </div>
       </section>
 
-      <!-- 8. SZTOLNIA 4 W RZĘDZIE (Z TRYBEM 2 DRUŻYN) -->
+      <!-- 8. SZTOLNIA 4 W RZĘDZIE -->
       <section id="stage-CONNECT4" class="stage-view hidden">
         <div class="board-card-shell">
           <div class="game-top-bar">
@@ -444,7 +469,7 @@
           <div id="spotlight-content" class="spot-mini-body"></div>
         </div>
 
-        <div class="panel-head" style="margin-top:8px;">
+        <div class="panel-head" style="margin-top:6px;">
           <span id="my-props-header-text">🏘️ Twoje dzielnice</span>
           <span id="my-networth-badge" class="worth-tag">Majątek: $1500</span>
         </div>
@@ -455,7 +480,10 @@
         <div id="my-properties-scroll" class="my-properties-scroll"></div>
       </div>
 
-      <div class="side-panel" id="ledger-panel"><div class="panel-head"><span>↔ Ostatnie rozliczenia</span><span class="live-badge">NA ŻYWO</span></div><div id="money-ledger" class="money-ledger"></div></div>
+      <div class="side-panel" id="ledger-panel">
+        <div class="panel-head"><span>↔ Ostatnie rozliczenia</span><span class="live-badge">NA ŻYWO</span></div>
+        <div id="money-ledger" class="money-ledger"></div>
+      </div>
 
       <div class="side-panel chat-panel" id="side-panel-chat">
         <div class="panel-head">
@@ -553,7 +581,17 @@
         <button type="button" class="game-pick-card" data-game="CONNECT4"><span class="gp-icon">🪙</span><strong>4 w Rzędzie</strong><small>2 Graczy / 2 Drużyny</small></button>
       </div>
 
-      <div class="match-settings"><div><label for="monopoly-round-limit">Długość Monopoly</label><select id="monopoly-round-limit"><option value="20">Szybka · 20 rund</option><option value="30" selected>Strategiczna · 30 rund</option><option value="0">Klasyczna · do ostatniego gracza</option></select></div><p>Po limicie rund wygrywa największy majątek netto. Wcześniej możesz wygrać przez bankructwo rywali.</p></div>
+      <div class="match-settings">
+        <div>
+          <label for="monopoly-round-limit">Długość Monopoly</label>
+          <select id="monopoly-round-limit">
+            <option value="20">Szybka · 20 rund</option>
+            <option value="30" selected>Strategiczna · 30 rund</option>
+            <option value="0">Klasyczna · do ostatniego gracza</option>
+          </select>
+        </div>
+        <p>Po limicie rund wygrywa największy majątek netto. Wcześniej możesz wygrać przez bankructwo rywali.</p>
+      </div>
       <button type="button" id="btn-resume-local" class="btn-resume hidden">↩ Wznów zapisaną partię lokalną</button>
       <div class="map-selector-bar">
         <div class="row-between">
@@ -618,10 +656,10 @@
             <span id="fb-conn-pill" class="fb-pill disconnected">Brak podpiętego URL Firebase</span>
           </div>
           <div class="fb-input-row">
-            <input type="text" id="firebase-url-input" placeholder="https://twoja-baza-default-rtdb.europe-west1.firebasedatabase.app" />
+            <input type="text" id="firebase-url-input" placeholder="Wklej link https://...-rtdb.europe-west1.firebasedatabase.app lub cały obiekt firebaseConfig" />
             <button type="button" id="btn-save-firebase" class="btn-side-purple" style="flex:0 0 auto;padding:8px 16px;">Połącz Firebase</button>
           </div>
-          <p class="firebase-help">Wklej databaseURL swojej istniejącej bazy lub konfigurację w formacie JSON. Wspólna gra wymaga dostępu do ścieżki rooms. Link zaproszenia zawiera adres bazy.</p>
+          <p class="firebase-help">Wklej sam adres <code>https://...firebaseio.com</code> / <code>...firebasedatabase.app</code> albo cały blok <code>firebaseConfig</code> z konsoli Firebase. Upewnij się, że w zakładce <strong>Realtime Database → Reguły (Rules)</strong> masz ustawione <code>".read": true, ".write": true</code>.</p>
         </div>
 
         <div class="form-2col">
@@ -704,7 +742,7 @@
     </div>
   </div>
 
-  <!-- Licytacja wspólna dla wszystkich urządzeń w pokoju. -->
+  <!-- LICYTACJA -->
   <div id="auction-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="auc-title">
     <div class="modal-card auction-card">
       <div class="row-between"><span class="eyebrow">LICYTACJA OTWARTA</span><span class="auction-clock" id="auc-time-left">25 s</span></div>
@@ -735,8 +773,8 @@
     <div class="payment-card"><button type="button" id="btn-payment-dismiss" aria-label="Zamknij komunikat">×</button><div class="payment-symbol" id="payment-icon">↔</div><span id="payment-eyebrow">ROZLICZENIE</span><strong id="payment-amount">$0</strong><h2 id="payment-description"></h2><p id="payment-reason"></p><div class="payment-countdown"></div></div>
   </div>
   <div id="app-toast" class="app-toast hidden" role="status" aria-live="polite"></div>
-  <script src="board-data.js"></script>
-  <script src="monopoly-engine.js"></script>
+
+  <!-- JEDYNY PLIK JAVASCRIPT (ZAWIERA DANE PLANSZY, SILNIK MONOPOLY I CAŁĄ APLIKACJĘ) -->
   <script src="app.js"></script>
 </body>
 </html>
