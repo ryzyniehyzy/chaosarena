@@ -126,11 +126,21 @@
       s.moneyEvents = s.moneyEvents.slice(-40);
     }
 
-    function normalize(s) {
-      s.moneyEvents = list(s.moneyEvents);
-      s.paymentQueue = list(s.paymentQueue);
-      s.auctionQueue = list(s.auctionQueue);
-      s.feed = list(s.feed);
+function normalize(s) {
+      if (!s || typeof s !== 'object') return s;
+      // NAPRAWA: jeśli Firebase zamienił properties na tablicę z nullami, przywracamy czysty obiekt bez nulli
+      const cleanProps = {};
+      if (s.properties && typeof s.properties === 'object') {
+        Object.entries(s.properties).forEach(([k, v]) => {
+          if (v && typeof v === 'object') cleanProps[k] = v;
+        });
+      }
+      s.properties = cleanProps;
+
+      s.moneyEvents = list(s.moneyEvents).filter(Boolean);
+      s.paymentQueue = list(s.paymentQueue).filter(Boolean);
+      s.auctionQueue = list(s.auctionQueue).filter(x => x !== null && x !== undefined);
+      s.feed = list(s.feed).filter(Boolean);
       s.eventSequence = s.eventSequence || 0;
       s.revision = s.revision || 0;
       s.debt = (s.debt && s.debt.playerId) ? s.debt : null;
@@ -138,7 +148,7 @@
       s.winnerAnnouncement = (s.winnerAnnouncement && s.winnerAnnouncement.winnerName) ? s.winnerAnnouncement : null;
       s.lastCard = (s.lastCard && s.lastCard.text) ? s.lastCard : null;
       if (s.auction && typeof s.auction.tileIndex === 'number') {
-        s.auction.passed = list(s.auction.passed);
+        s.auction.passed = list(s.auction.passed).filter(Boolean);
         s.auction.leaderId = s.auction.leaderId || null;
       } else {
         s.auction = null;
@@ -201,9 +211,13 @@
       return 0;
     }
 
-    function buildingStock(s) {
+function buildingStock(s) {
       let houses = 32, hotels = 12;
-      Object.values(s.properties).forEach(p => { if (p.level === 5) hotels--; else houses -= p.level || 0; });
+      Object.values(s.properties || {}).forEach(p => {
+        if (!p) return;
+        if (p.level === 5) hotels--;
+        else houses -= p.level || 0;
+      });
       return { houses, hotels };
     }
 
@@ -1106,11 +1120,11 @@
     return { turn: 0, teamRot: [0, 0], boardJson: JSON.stringify(Array(6).fill(null).map(() => Array(7).fill(null))), winner: null };
   }
 
-  const validWinIdx = w => (typeof w === 'number' && w >= 0) ? w : null;
+const validWinIdx = w => (typeof w === 'number' && w >= 0) ? w : null;
 
   function normalizeState(st) {
-    if (!st) return null;
-    st.players = Array.isArray(st.players) ? st.players : Object.values(st.players || {});
+    if (!st || typeof st !== 'object') return null;
+    st.players = (Array.isArray(st.players) ? st.players : Object.values(st.players || {})).filter(Boolean);
     const usedColors = [];
     st.players.forEach((p, idx) => {
       p.id = p.id || ('p' + (idx + 1));
@@ -1122,7 +1136,7 @@
       p.inJail = !!p.inJail;
       p.jailTurns = Number(p.jailTurns) || 0;
       p.pardonCards = Number(p.pardonCards) || 0;
-      p.pardonDecks = Array.isArray(p.pardonDecks) ? p.pardonDecks : Object.values(p.pardonDecks || {});
+      p.pardonDecks = (Array.isArray(p.pardonDecks) ? p.pardonDecks : Object.values(p.pardonDecks || {})).filter(Boolean);
       p.bankrupt = !!p.bankrupt;
       p.isBot = !!p.isBot;
       if (!/^#[0-9a-f]{6}$/i.test(p.color || '')) p.color = null;
@@ -1134,89 +1148,99 @@
     });
 
     st.twoPlayerMode = st.twoPlayerMode === '2V2' ? '2V2' : '1V1';
-    st.trades = Array.isArray(st.trades) ? st.trades : Object.values(st.trades || {});
-    st.feed   = Array.isArray(st.feed)   ? st.feed   : Object.values(st.feed || {});
-    st.chat   = Array.isArray(st.chat)   ? st.chat   : Object.values(st.chat || {});
-    st.lastDice = Array.isArray(st.lastDice) ? st.lastDice : Object.values(st.lastDice || [6, 5]);
+    st.trades = (Array.isArray(st.trades) ? st.trades : Object.values(st.trades || {})).filter(Boolean);
+    st.feed   = (Array.isArray(st.feed)   ? st.feed   : Object.values(st.feed || {})).filter(Boolean);
+    st.chat   = (Array.isArray(st.chat)   ? st.chat   : Object.values(st.chat || {})).filter(Boolean);
+    st.lastDice = (Array.isArray(st.lastDice) ? st.lastDice : Object.values(st.lastDice || [6, 5])).filter(Boolean);
     if (st.lastDice.length < 2) st.lastDice = [6, 5];
     st.builtThisTurn = !!st.builtThisTurn;
     if (!st.mapId) st.mapId = selectedMapId;
     if (!st.casinoGoal) st.casinoGoal = 5000;
-    if (!st.properties || typeof st.properties !== 'object') {
-      st.properties = {};
-    }
 
+    // Zawsze wymuszamy czysty obiekt słownikowy dla properties (nigdy tablicę z nullami!)
+    const rawProps = (st.properties && typeof st.properties === 'object') ? st.properties : {};
+    const cleanProps = {};
     BOARD_TILES.forEach(t => {
       if (t.type === 'PROPERTY' || t.type === 'AIRPORT' || t.type === 'UTILITY') {
-        if (!st.properties[t.index]) {
-          st.properties[t.index] = { ownerId: null, level: 0, boughtInRound: 0, mortgaged: false, history: ['Dostępne w zasobach Miasta'] };
+        const existing = rawProps[t.index] || rawProps['tile_' + t.index];
+        if (!existing || typeof existing !== 'object') {
+          cleanProps[t.index] = { ownerId: null, level: 0, boughtInRound: 0, mortgaged: false, history: ['Dostępne w zasobach Miasta'] };
         } else {
-          const p = st.properties[t.index];
-          p.ownerId = p.ownerId || null;
-          if (typeof p.level !== 'number') p.level = 0;
-          if (typeof p.boughtInRound !== 'number') p.boughtInRound = 0;
-          p.mortgaged = !!p.mortgaged;
-          p.history = Array.isArray(p.history) ? p.history : Object.values(p.history || ['Dostępne']);
+          cleanProps[t.index] = {
+            ownerId: existing.ownerId || null,
+            level: typeof existing.level === 'number' ? existing.level : 0,
+            boughtInRound: typeof existing.boughtInRound === 'number' ? existing.boughtInRound : 0,
+            mortgaged: !!existing.mortgaged,
+            history: (Array.isArray(existing.history) ? existing.history : Object.values(existing.history || ['Dostępne'])).filter(Boolean)
+          };
         }
       }
     });
+    st.properties = cleanProps;
 
-    if (!st.liars || !st.liars.handsJson) st.liars = createLiarsGameState(st.players);
-    else {
+    if (!st.liars || typeof st.liars !== 'object' || !st.liars.handsJson) {
+      st.liars = createLiarsGameState(st.players);
+    } else {
       st.liars.turnIndex = Number(st.liars.turnIndex) || 0;
       st.liars.requiredRank = st.liars.requiredRank || null;
       st.liars.winnerName = st.liars.winnerName || null;
       st.liars.lastRevealMsg = st.liars.lastRevealMsg || '';
-      st.liars.pile = Array.isArray(st.liars.pile) ? st.liars.pile : Object.values(st.liars.pile || {});
-      if (st.liars.lastPlay && st.liars.lastPlay.playerId) {
-        st.liars.lastPlay.actualCards = Array.isArray(st.liars.lastPlay.actualCards) ? st.liars.lastPlay.actualCards : Object.values(st.liars.lastPlay.actualCards || {});
+      st.liars.pile = (Array.isArray(st.liars.pile) ? st.liars.pile : Object.values(st.liars.pile || {})).filter(Boolean);
+      if (st.liars.lastPlay && typeof st.liars.lastPlay === 'object' && st.liars.lastPlay.playerId) {
+        st.liars.lastPlay.actualCards = (Array.isArray(st.liars.lastPlay.actualCards) ? st.liars.lastPlay.actualCards : Object.values(st.liars.lastPlay.actualCards || {})).filter(Boolean);
       } else {
         st.liars.lastPlay = null;
       }
     }
 
-    if (!st.quoridor || !st.quoridor.pos) st.quoridor = createQuoridorState();
-    else {
+    if (!st.quoridor || typeof st.quoridor !== 'object' || !st.quoridor.pos) {
+      st.quoridor = createQuoridorState();
+    } else {
       st.quoridor.turn = Number(st.quoridor.turn) || 0;
-      st.quoridor.pos = Array.isArray(st.quoridor.pos) ? st.quoridor.pos : Object.values(st.quoridor.pos);
+      st.quoridor.pos = (Array.isArray(st.quoridor.pos) ? st.quoridor.pos : Object.values(st.quoridor.pos)).filter(Boolean);
+      if (st.quoridor.pos.length < 2) st.quoridor.pos = [{ r: 8, c: 4 }, { r: 0, c: 4 }];
       st.quoridor.wallsLeft = Array.isArray(st.quoridor.wallsLeft) ? st.quoridor.wallsLeft : Object.values(st.quoridor.wallsLeft || [10, 10]);
-      st.quoridor.hWalls = Array.isArray(st.quoridor.hWalls) ? st.quoridor.hWalls : Object.values(st.quoridor.hWalls || {});
-      st.quoridor.vWalls = Array.isArray(st.quoridor.vWalls) ? st.quoridor.vWalls : Object.values(st.quoridor.vWalls || {});
+      st.quoridor.hWalls = (Array.isArray(st.quoridor.hWalls) ? st.quoridor.hWalls : Object.values(st.quoridor.hWalls || {})).filter(Boolean);
+      st.quoridor.vWalls = (Array.isArray(st.quoridor.vWalls) ? st.quoridor.vWalls : Object.values(st.quoridor.vWalls || {})).filter(Boolean);
       st.quoridor.teamRot = Array.isArray(st.quoridor.teamRot) ? st.quoridor.teamRot : Object.values(st.quoridor.teamRot || [0, 0]);
       st.quoridor.winner = validWinIdx(st.quoridor.winner);
     }
 
-    if (!st.ludo || !st.ludo.pawns) st.ludo = createLudoState();
-    else {
+    if (!st.ludo || typeof st.ludo !== 'object' || !st.ludo.pawns) {
+      st.ludo = createLudoState();
+    } else {
       st.ludo.turn = Number(st.ludo.turn) || 0;
       st.ludo.dice = Number(st.ludo.dice) || 6;
       st.ludo.rolled = !!st.ludo.rolled;
       st.ludo.pawns = [0,1,2,3].map(i => {
-        const row = st.ludo.pawns[i];
+        const row = st.ludo.pawns ? st.ludo.pawns[i] : null;
         const arr = Array.isArray(row) ? row : Object.values(row || [-1,-1,-1,-1]);
         return [0,1,2,3].map(k => typeof arr[k] === 'number' ? arr[k] : -1);
       });
       st.ludo.winner = validWinIdx(st.ludo.winner);
     }
 
-    if (!st.checkers || !st.checkers.boardJson) st.checkers = createCheckersState();
-    else {
+    if (!st.checkers || typeof st.checkers !== 'object' || !st.checkers.boardJson) {
+      st.checkers = createCheckersState();
+    } else {
       st.checkers.turn = Number(st.checkers.turn) || 0;
       st.checkers.teamRot = Array.isArray(st.checkers.teamRot) ? st.checkers.teamRot : Object.values(st.checkers.teamRot || [0, 0]);
       st.checkers.captured = Array.isArray(st.checkers.captured) ? st.checkers.captured : Object.values(st.checkers.captured || [0, 0]);
       st.checkers.winner = validWinIdx(st.checkers.winner);
     }
 
-    if (!st.chess || !st.chess.boardJson) st.chess = createChessState();
-    else {
+    if (!st.chess || typeof st.chess !== 'object' || !st.chess.boardJson) {
+      st.chess = createChessState();
+    } else {
       st.chess.turn = Number(st.chess.turn) || 0;
       st.chess.teamRot = Array.isArray(st.chess.teamRot) ? st.chess.teamRot : Object.values(st.chess.teamRot || [0, 0]);
       st.chess.winner = validWinIdx(st.chess.winner);
       st.chess.lastMove = st.chess.lastMove || 'Kliknij swoją figurę, aby zobaczyć dozwolone ruchy.';
     }
 
-    if (!st.connect4 || !st.connect4.boardJson) st.connect4 = createConnect4State();
-    else {
+    if (!st.connect4 || typeof st.connect4 !== 'object' || !st.connect4.boardJson) {
+      st.connect4 = createConnect4State();
+    } else {
       st.connect4.turn = Number(st.connect4.turn) || 0;
       st.connect4.teamRot = Array.isArray(st.connect4.teamRot) ? st.connect4.teamRot : Object.values(st.connect4.teamRot || [0, 0]);
       st.connect4.winner = validWinIdx(st.connect4.winner);
@@ -1224,10 +1248,17 @@
 
     return monopoly.normalize(st);
   }
-
-  // Zabezpiecza obiekt przed usunięciem kluczy o wartości undefined w Firebase Realtime Database
+ // Zabezpiecza obiekt przed skasowaniem kluczy przez Firebase Realtime Database
   function sanitizeForFirebase(obj) {
-    return JSON.parse(JSON.stringify(obj, (_, val) => val === undefined ? null : val));
+    return JSON.parse(JSON.stringify(obj, (key, val) => {
+      if (val === undefined) return '';
+      if (val === null) {
+        if (key === 'winner') return -1;
+        if (key === 'ownerId' || key === 'leaderId' || key === 'requiredRank' || key === 'winnerName') return '';
+        if (key === 'debt' || key === 'auction' || key === 'continuation' || key === 'lastCard' || key === 'lastPlay' || key === 'winnerAnnouncement') return false;
+      }
+      return val;
+    }));
   }
 
   function createFreshGameState(playersList, startingCash, roomCode = 'LOKALNY', isOnline = false, initialGame = 'MONOPOLY', mapId = selectedMapId) {
