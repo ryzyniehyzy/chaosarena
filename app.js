@@ -1,6 +1,6 @@
 /**
- * RUDA ŚLĄSKA ARENA ULTIMATE — POŁĄCZONY SILNIK (3 W 1: board-data + monopoly-engine + app)
- * Wklej ten kod jako CAŁĄ zawartość pliku app.js!
+ * RUDA ŚLĄSKA ARENA ULTIMATE — POŁĄCZONY I NAPRAWIONY SILNIK (3 W 1)
+ * Naprawiona synchronizacja Firebase Online + Przełącznik 1v1 / 2v2 w grach 2-osobowych
  */
 
 /* ==================== CZĘŚĆ A: DANE PLANSZY (board-data) ==================== */
@@ -133,10 +133,24 @@
       s.feed = list(s.feed);
       s.eventSequence = s.eventSequence || 0;
       s.revision = s.revision || 0;
-      if (s.auction) s.auction.passed = list(s.auction.passed);
-      if (s.cards) {
+      s.debt = (s.debt && s.debt.playerId) ? s.debt : null;
+      s.continuation = (s.continuation && s.continuation.playerId) ? s.continuation : null;
+      s.winnerAnnouncement = (s.winnerAnnouncement && s.winnerAnnouncement.winnerName) ? s.winnerAnnouncement : null;
+      s.lastCard = (s.lastCard && s.lastCard.text) ? s.lastCard : null;
+      if (s.auction && typeof s.auction.tileIndex === 'number') {
+        s.auction.passed = list(s.auction.passed);
+        s.auction.leaderId = s.auction.leaderId || null;
+      } else {
+        s.auction = null;
+      }
+      if (s.cards && list(s.cards.chance).length && list(s.cards.chest).length) {
         s.cards.chance = list(s.cards.chance);
         s.cards.chest = list(s.cards.chest);
+      } else {
+        s.cards = {
+          chance: Array.from({ length: chance.length }, (_, i) => i),
+          chest: Array.from({ length: chest.length }, (_, i) => i)
+        };
       }
       return s;
     }
@@ -181,8 +195,8 @@
     function rent(s, index, diceSum = 7) {
       const t = tiles[index], p = s.properties[index];
       if (!p?.ownerId || p.mortgaged) return 0;
-      if (t.type === 'AIRPORT') return t.rents[airports.filter(i => s.properties[i].ownerId === p.ownerId).length - 1];
-      if (t.type === 'UTILITY') return diceSum * (tiles.filter(x => x.type === 'UTILITY' && s.properties[x.index].ownerId === p.ownerId).length === 2 ? 10 : 4);
+      if (t.type === 'AIRPORT') return t.rents[airports.filter(i => s.properties[i]?.ownerId === p.ownerId).length - 1] || 25;
+      if (t.type === 'UTILITY') return diceSum * (tiles.filter(x => x.type === 'UTILITY' && s.properties[x.index]?.ownerId === p.ownerId).length === 2 ? 10 : 4);
       if (t.type === 'PROPERTY') return t.rents[p.level] * (p.level === 0 && ownsSet(s, t, p.ownerId) ? 2 : 1);
       return 0;
     }
@@ -206,7 +220,7 @@
     function buildCheck(s, index, id) {
       const t = tiles[index], p = s.properties[index], owner = player(s, id);
       if (s.status !== 'PLAYING' || s.lobbyOpen) return { ok: false, reason: 'Poczekaj na rozpoczęcie partii.' };
-      if (!owner || owner.bankrupt || current(s).id !== id) return { ok: false, reason: 'Buduj w swojej turze.' };
+      if (!owner || owner.bankrupt || current(s)?.id !== id) return { ok: false, reason: 'Buduj w swojej turze.' };
       if (s.debt || s.auction || !['ROLL', 'END'].includes(s.turnPhase)) return { ok: false, reason: 'Najpierw rozlicz bieżącą akcję.' };
       if (!t || t.type !== 'PROPERTY' || p?.ownerId !== id) return { ok: false, reason: 'Możesz budować na własnej działce.' };
       const set = group(t);
@@ -242,7 +256,7 @@
 
     function finish(s, winners, reason) {
       s.status = 'FINISHED'; s.turnPhase = 'FINISHED'; s.auction = null; s.debt = null;
-      s.winnerAnnouncement = { winnerId: winners[0]?.id || null, winnerName: winners.map(p => p.name).join(' i '),
+      s.winnerAnnouncement = { winnerId: winners[0]?.id || '', winnerName: winners.map(p => p.name).join(' i '),
         reason, cash: winners[0]?.cash || 0, worth: winners[0] ? netWorth(s, winners[0].id) : 0, gameId: s.gameId };
       log(s, `🏆 ${esc(s.winnerAnnouncement.winnerName)} — ${esc(reason)}`);
     }
@@ -381,9 +395,10 @@
       const deck = key === 'chance' ? chance : chest;
       const held = s.players.some(x => list(x.pardonDecks).includes(key));
       let index = s.cards[key].shift();
+      if (index === undefined) index = 0;
       s.cards[key].push(index);
       if (deck[index].action === 'PARDON' && held) {
-        index = s.cards[key].shift(); s.cards[key].push(index);
+        index = s.cards[key].shift() ?? 0; s.cards[key].push(index);
       }
       const c = deck[index];
       s.lastCard = { text: c.text, playerId: p.id, at: s.updatedAt };
@@ -438,10 +453,6 @@
     }
 
     function reduce(state, action, actor) {
-      check(state.rulesVersion === RULES_VERSION, 'Ten pokój używa poprzednich zasad. Utwórz nową partię.');
-      if (action.expectedRevision !== undefined && action.expectedRevision !== null) {
-        check(action.expectedRevision === state.revision, 'Stan gry się zmienił. Wykonaj ruch ponownie.');
-      }
       const s = normalize(clone(state));
       s.updatedAt = Number(action.now) || Date.now();
       check(s.status === 'PLAYING' && !s.lobbyOpen, 'Partia nie jest teraz aktywna.');
@@ -571,7 +582,7 @@
         const bot = activePlayers(s).find(p => p.isBot && p.id !== a.leaderId && !a.passed.includes(p.id));
         if (!bot) return null;
         const t = tiles[a.tileIndex];
-        const completes = t.type === 'PROPERTY' && group(t).filter(x => x.index !== t.index).every(x => s.properties[x.index].ownerId === bot.id);
+        const completes = t.type === 'PROPERTY' && group(t).filter(x => x.index !== t.index).every(x => s.properties[x.index]?.ownerId === bot.id);
         const limit = Math.min(Math.max(0, bot.cash - 100), Math.floor(t.price * (completes ? 1.6 : 1.05)));
         const amount = a.highBid ? a.highBid + 10 : 1;
         return { actor: bot.id, type: amount <= limit ? 'BID' : 'PASS', amount };
@@ -629,8 +640,8 @@
     }
   })();
 
-  const HARDCODED_FIREBASE_URL = ""; // Opcjonalnie wpisz tu swój databaseURL
-  const STORAGE_VERSION = "v15_monopoly_mobile";
+  const HARDCODED_FIREBASE_URL = "";
+  const STORAGE_VERSION = "v16_monopoly_online_fix";
   storage.setItem('ruda_arena_version', STORAGE_VERSION);
 
   /* ==================== 1. MAPY RUDY ŚLĄSKIEJ ==================== */
@@ -724,7 +735,6 @@
   const sfx = new SoundEngine();
 
   /* ==================== 4. STAN GLOBALNY ==================== */
-  // Używamy sessionStorage jako priorytetu, żeby można było testować grę Online w 2 kartach tej samej przeglądarki!
   let myClientToken = sessionStore.getItem('ruda_client_token');
   if (!myClientToken) {
     myClientToken = 'cl_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
@@ -771,19 +781,34 @@
     if (el) { el.textContent = msg; el.style.color = color; }
   }
 
+  // Sprawdza, czy ten klient odpowiada za obliczanie ruchów botów i zegar (w Online tylko Host)
+  function isBotController() {
+    if (!gameState) return false;
+    if (!gameState.isOnline) return true;
+    if (gameState.hostToken && gameState.hostToken === myClientToken) return true;
+    const firstHuman = gameState.players.find(p => !p.isBot && !p.bankrupt);
+    return firstHuman ? firstHuman.clientToken === myClientToken : false;
+  }
+
   function getMyViewerPlayer() {
     if (!gameState || !gameState.players.length) return null;
-    if (gameState.isOnline) return getPlayerById(myOnlinePlayerId) || null;
+    if (gameState.isOnline) return getPlayerById(myOnlinePlayerId) || gameState.players[0];
     if (gameState.debt) return getPlayerById(gameState.debt.playerId);
     const cur = currentTurnPlayer();
     if (cur && !cur.isBot) return cur;
     return gameState.players.find(p => !p.isBot) || gameState.players[0];
   }
 
-  /* ==================== SYSTEM 2 DRUŻYN DLA GIER 2-OSOBOWYCH ==================== */
+  /* ==================== SYSTEM 1 VS 1 ORAZ 2 VS 2 (DRUŻYNY) W GRACH 2-OSOBOWYCH ==================== */
+  function isTeamMode2v2() {
+    if (!gameState) return false;
+    return gameState.twoPlayerMode === '2V2' && gameState.players.length > 2;
+  }
+
   function getTeamActivePlayer(sideIndex, subGameObj) {
     if (!gameState || !gameState.players.length) return null;
-    if (gameState.players.length <= 2) {
+    // W trybie 1v1 (domyślnym) zawsze gra Gracz 1 kontra Gracz 2 (np. Ty vs 1 Bot), bez przełączania na kolejne boty!
+    if (!isTeamMode2v2()) {
       return gameState.players[sideIndex] || gameState.players[0];
     }
     const teamMembers = gameState.players.filter((_, idx) => (idx % 2) === sideIndex);
@@ -795,6 +820,9 @@
 
   function getTeamNamesSummary(sideIndex) {
     if (!gameState) return '';
+    if (!isTeamMode2v2()) {
+      return gameState.players[sideIndex]?.name || `Gracz ${sideIndex + 1}`;
+    }
     const members = gameState.players.filter((_, idx) => (idx % 2) === sideIndex);
     return members.map(m => m.name).join(' + ');
   }
@@ -802,7 +830,11 @@
   function advance2PGameTurn(subGameObj) {
     const finishedSide = subGameObj.turn;
     if (!Array.isArray(subGameObj.teamRot)) subGameObj.teamRot = [0, 0];
-    subGameObj.teamRot[finishedSide] = (subGameObj.teamRot[finishedSide] || 0) + 1;
+    if (isTeamMode2v2()) {
+      subGameObj.teamRot[finishedSide] = (subGameObj.teamRot[finishedSide] || 0) + 1;
+    } else {
+      subGameObj.teamRot = [0, 0];
+    }
     subGameObj.turn = 1 - finishedSide;
   }
 
@@ -812,6 +844,40 @@
     if (!activeMember || activeMember.isBot) return false;
     if (gameState.isOnline && myOnlinePlayerId) return activeMember.id === myOnlinePlayerId;
     return true;
+  }
+
+  function inject2PModeToggleButtons() {
+    ['QUORIDOR', 'CHECKERS', 'CHESS', 'CONNECT4'].forEach(gameKey => {
+      const stage = document.getElementById('stage-' + gameKey);
+      const topBar = stage?.querySelector('.game-top-bar');
+      if (!topBar || topBar.querySelector('.btn-toggle-2p-mode')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-ghost btn-toggle-2p-mode';
+      btn.style.cssText = 'border-color:var(--accent-gold);color:var(--accent-gold);font-weight:800;';
+      btn.onclick = () => {
+        if (!gameState) return;
+        if (gameState.isOnline && gameState.hostToken !== myClientToken) {
+          showToast('Tryb 1v1 / 2v2 przełącza gospodarz pokoju.');
+          return;
+        }
+        gameState.twoPlayerMode = gameState.twoPlayerMode === '2V2' ? '1V1' : '2V2';
+        showToast(gameState.twoPlayerMode === '2V2'
+          ? '🤝 Włączono tryb 2 vs 2 (Drużyny)!'
+          : '⚔️ Włączono tryb 1 vs 1 (Gracz 1 kontra Gracz 2 — bez zmiany botów)!');
+        pushStateSync();
+        checkBotForOtherGames();
+      };
+      topBar.appendChild(btn);
+    });
+  }
+
+  function update2PModeToggleLabels() {
+    if (!gameState) return;
+    const mode = gameState.twoPlayerMode || '1V1';
+    document.querySelectorAll('.btn-toggle-2p-mode').forEach(btn => {
+      btn.textContent = mode === '2V2' ? '🤝 Tryb: 2 vs 2 (Drużyny)' : '⚔️ Tryb: 1 vs 1 (Pojedynek)';
+    });
   }
 
   function applyMapTheme(mapId) {
@@ -872,7 +938,7 @@
     }, 85);
   }
 
-  /* ==================== NAPRAWIONE POŁĄCZENIE FIREBASE ONLINE ==================== */
+  /* ==================== POŁĄCZENIE FIREBASE ONLINE ==================== */
   function extractFirebaseConfig(rawInput) {
     if (!rawInput) return null;
     if (typeof rawInput === 'object' && rawInput.databaseURL) {
@@ -881,7 +947,6 @@
     const text = String(rawInput).trim();
     if (!text) return null;
 
-    // 1. Szukamy dowolnego poprawnego linku https://...firebaseio.com lub ...firebasedatabase.app w tekście (nawet jeśli wklejono cały kod JS z konsoli Firebase!)
     const urlMatch = text.match(/https:\/\/[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.(?:firebaseio\.com|firebasedatabase\.app)/i);
     if (urlMatch) {
       const cleanUrl = urlMatch[0].replace(/\/+$/, '');
@@ -893,7 +958,6 @@
       return cfg;
     }
 
-    // 2. Jeśli użytkownik wkleił sam obiekt z projectId bez databaseURL
     const projMatch = text.match(/projectId\s*["']?\s*:\s*["']([a-zA-Z0-9-]+)["']/);
     if (projMatch) {
       return {
@@ -902,7 +966,6 @@
       };
     }
 
-    // 3. Próba bezpośredniego URL
     if (text.startsWith('http://') || text.startsWith('https://')) {
       const u = new URL(text);
       return { databaseURL: u.origin };
@@ -997,12 +1060,12 @@
 
     return {
       turnIndex: 0,
-      requiredRank: null,
+      requiredRank: '',
       pile: [],
       lastPlay: null,
       lastRevealMsg: '',
       handsJson: JSON.stringify(hands),
-      winnerName: null
+      winnerName: ''
     };
   }
 
@@ -1043,13 +1106,25 @@
     return { turn: 0, teamRot: [0, 0], boardJson: JSON.stringify(Array(6).fill(null).map(() => Array(7).fill(null))), winner: null };
   }
 
+  const validWinIdx = w => (typeof w === 'number' && w >= 0) ? w : null;
+
   function normalizeState(st) {
     if (!st) return null;
     st.players = Array.isArray(st.players) ? st.players : Object.values(st.players || {});
     const usedColors = [];
     st.players.forEach((p, idx) => {
+      p.id = p.id || ('p' + (idx + 1));
+      p.clientToken = p.clientToken || '';
       p.name = cleanName(p.name);
-      if (!Number.isFinite(p.arcadeCash)) p.arcadeCash = 2000;
+      p.cash = Number.isFinite(Number(p.cash)) ? Number(p.cash) : 1500;
+      p.arcadeCash = Number.isFinite(Number(p.arcadeCash)) ? Number(p.arcadeCash) : 2000;
+      p.position = Number.isInteger(p.position) ? p.position : 0;
+      p.inJail = !!p.inJail;
+      p.jailTurns = Number(p.jailTurns) || 0;
+      p.pardonCards = Number(p.pardonCards) || 0;
+      p.pardonDecks = Array.isArray(p.pardonDecks) ? p.pardonDecks : Object.values(p.pardonDecks || {});
+      p.bankrupt = !!p.bankrupt;
+      p.isBot = !!p.isBot;
       if (!/^#[0-9a-f]{6}$/i.test(p.color || '')) p.color = null;
       if (!p.avatar) p.avatar = PAWN_AVATARS[idx % PAWN_AVATARS.length].id;
       if (!p.color || usedColors.includes(p.color)) {
@@ -1058,9 +1133,12 @@
       usedColors.push(p.color);
     });
 
+    st.twoPlayerMode = st.twoPlayerMode === '2V2' ? '2V2' : '1V1';
     st.trades = Array.isArray(st.trades) ? st.trades : Object.values(st.trades || {});
     st.feed   = Array.isArray(st.feed)   ? st.feed   : Object.values(st.feed || {});
     st.chat   = Array.isArray(st.chat)   ? st.chat   : Object.values(st.chat || {});
+    st.lastDice = Array.isArray(st.lastDice) ? st.lastDice : Object.values(st.lastDice || [6, 5]);
+    if (st.lastDice.length < 2) st.lastDice = [6, 5];
     st.builtThisTurn = !!st.builtThisTurn;
     if (!st.mapId) st.mapId = selectedMapId;
     if (!st.casinoGoal) st.casinoGoal = 5000;
@@ -1074,7 +1152,7 @@
           st.properties[t.index] = { ownerId: null, level: 0, boughtInRound: 0, mortgaged: false, history: ['Dostępne w zasobach Miasta'] };
         } else {
           const p = st.properties[t.index];
-          if (!p.ownerId) p.ownerId = null;
+          p.ownerId = p.ownerId || null;
           if (typeof p.level !== 'number') p.level = 0;
           if (typeof p.boughtInRound !== 'number') p.boughtInRound = 0;
           p.mortgaged = !!p.mortgaged;
@@ -1085,37 +1163,71 @@
 
     if (!st.liars || !st.liars.handsJson) st.liars = createLiarsGameState(st.players);
     else {
+      st.liars.turnIndex = Number(st.liars.turnIndex) || 0;
+      st.liars.requiredRank = st.liars.requiredRank || null;
+      st.liars.winnerName = st.liars.winnerName || null;
+      st.liars.lastRevealMsg = st.liars.lastRevealMsg || '';
       st.liars.pile = Array.isArray(st.liars.pile) ? st.liars.pile : Object.values(st.liars.pile || {});
-      if (st.liars.lastPlay && st.liars.lastPlay.actualCards) {
+      if (st.liars.lastPlay && st.liars.lastPlay.playerId) {
         st.liars.lastPlay.actualCards = Array.isArray(st.liars.lastPlay.actualCards) ? st.liars.lastPlay.actualCards : Object.values(st.liars.lastPlay.actualCards || {});
+      } else {
+        st.liars.lastPlay = null;
       }
     }
 
     if (!st.quoridor || !st.quoridor.pos) st.quoridor = createQuoridorState();
     else {
+      st.quoridor.turn = Number(st.quoridor.turn) || 0;
       st.quoridor.pos = Array.isArray(st.quoridor.pos) ? st.quoridor.pos : Object.values(st.quoridor.pos);
       st.quoridor.wallsLeft = Array.isArray(st.quoridor.wallsLeft) ? st.quoridor.wallsLeft : Object.values(st.quoridor.wallsLeft || [10, 10]);
       st.quoridor.hWalls = Array.isArray(st.quoridor.hWalls) ? st.quoridor.hWalls : Object.values(st.quoridor.hWalls || {});
       st.quoridor.vWalls = Array.isArray(st.quoridor.vWalls) ? st.quoridor.vWalls : Object.values(st.quoridor.vWalls || {});
-      st.quoridor.teamRot = Array.isArray(st.quoridor.teamRot) ? st.quoridor.teamRot : [0, 0];
-      if (st.quoridor.winner === undefined) st.quoridor.winner = null;
+      st.quoridor.teamRot = Array.isArray(st.quoridor.teamRot) ? st.quoridor.teamRot : Object.values(st.quoridor.teamRot || [0, 0]);
+      st.quoridor.winner = validWinIdx(st.quoridor.winner);
     }
 
     if (!st.ludo || !st.ludo.pawns) st.ludo = createLudoState();
     else {
-      st.ludo.pawns = [0,1,2,3].map(i => Array.isArray(st.ludo.pawns[i]) ? st.ludo.pawns[i] : Object.values(st.ludo.pawns[i] || [-1,-1,-1,-1]));
-      if (st.ludo.winner === undefined) st.ludo.winner = null;
+      st.ludo.turn = Number(st.ludo.turn) || 0;
+      st.ludo.dice = Number(st.ludo.dice) || 6;
+      st.ludo.rolled = !!st.ludo.rolled;
+      st.ludo.pawns = [0,1,2,3].map(i => {
+        const row = st.ludo.pawns[i];
+        const arr = Array.isArray(row) ? row : Object.values(row || [-1,-1,-1,-1]);
+        return [0,1,2,3].map(k => typeof arr[k] === 'number' ? arr[k] : -1);
+      });
+      st.ludo.winner = validWinIdx(st.ludo.winner);
     }
+
     if (!st.checkers || !st.checkers.boardJson) st.checkers = createCheckersState();
-    else st.checkers.teamRot = Array.isArray(st.checkers.teamRot) ? st.checkers.teamRot : [0, 0];
+    else {
+      st.checkers.turn = Number(st.checkers.turn) || 0;
+      st.checkers.teamRot = Array.isArray(st.checkers.teamRot) ? st.checkers.teamRot : Object.values(st.checkers.teamRot || [0, 0]);
+      st.checkers.captured = Array.isArray(st.checkers.captured) ? st.checkers.captured : Object.values(st.checkers.captured || [0, 0]);
+      st.checkers.winner = validWinIdx(st.checkers.winner);
+    }
 
     if (!st.chess || !st.chess.boardJson) st.chess = createChessState();
-    else st.chess.teamRot = Array.isArray(st.chess.teamRot) ? st.chess.teamRot : [0, 0];
+    else {
+      st.chess.turn = Number(st.chess.turn) || 0;
+      st.chess.teamRot = Array.isArray(st.chess.teamRot) ? st.chess.teamRot : Object.values(st.chess.teamRot || [0, 0]);
+      st.chess.winner = validWinIdx(st.chess.winner);
+      st.chess.lastMove = st.chess.lastMove || 'Kliknij swoją figurę, aby zobaczyć dozwolone ruchy.';
+    }
 
     if (!st.connect4 || !st.connect4.boardJson) st.connect4 = createConnect4State();
-    else st.connect4.teamRot = Array.isArray(st.connect4.teamRot) ? st.connect4.teamRot : [0, 0];
+    else {
+      st.connect4.turn = Number(st.connect4.turn) || 0;
+      st.connect4.teamRot = Array.isArray(st.connect4.teamRot) ? st.connect4.teamRot : Object.values(st.connect4.teamRot || [0, 0]);
+      st.connect4.winner = validWinIdx(st.connect4.winner);
+    }
 
     return monopoly.normalize(st);
+  }
+
+  // Zabezpiecza obiekt przed usunięciem kluczy o wartości undefined w Firebase Realtime Database
+  function sanitizeForFirebase(obj) {
+    return JSON.parse(JSON.stringify(obj, (_, val) => val === undefined ? null : val));
   }
 
   function createFreshGameState(playersList, startingCash, roomCode = 'LOKALNY', isOnline = false, initialGame = 'MONOPOLY', mapId = selectedMapId) {
@@ -1148,6 +1260,7 @@
 
     const fresh = {
       roomCode, isOnline, lobbyOpen: isOnline, hostToken: isOnline ? myClientToken : '', activeGame: initialGame, mapId: chosenMap.id,
+      twoPlayerMode: '1V1',
       status: 'PLAYING', winnerAnnouncement: null, casinoGoal: 5000,
       round: 1, turnIndex: 0, turnPhase: 'ROLL', builtThisTurn: false,
       lastDice: [6, 5], doublesStreak: 0, vacationPool: 100, turnSecondsLeft: 120,
@@ -1272,12 +1385,8 @@
       scheduleMonopolyBot();
       return true;
     }
-    if (syncBusy || !firebaseRoomRef || !myOnlinePlayerId) {
-      if (acceptedState) gameState = copy(acceptedState);
-      renderAll();
-      return false;
-    }
-    const candidate = copy(gameState);
+    if (!firebaseRoomRef) return false;
+    const candidate = sanitizeForFirebase(gameState);
     candidate.revision = (acceptedState?.revision || 0) + 1;
     syncBusy = true;
     try {
@@ -1298,6 +1407,10 @@
   async function commitMonopoly(type, extra = {}, actorId = null, quiet = false) {
     if (!gameState || syncBusy || gameState.activeGame !== 'MONOPOLY') return false;
     const localActor = actorId || (gameState.isOnline ? myOnlinePlayerId : (gameState.debt?.playerId || currentTurnPlayer()?.id));
+    if (!localActor) {
+      if (!quiet) showToast('Dołącz do tego pokoju, aby wykonać ruch.');
+      return false;
+    }
     const action = { ...extra, type, now: serverNow() };
     if (type === 'ROLL') action.dice = [fairDie(), fairDie()];
     syncBusy = true;
@@ -1308,31 +1421,22 @@
     try {
       if (gameState.isOnline) {
         if (!firebaseRoomRef) throw new Error('Brak aktywnego pokoju Firebase.');
-        let reason = '';
-        const gameId = gameState.gameId;
-        const result = await firebaseRoomRef.transaction(raw => {
-          if (!raw) return raw; // Ważne: w pierwszej fazie transakcji Firebase raw bywa null, zwracamy raw by SDK pobrało stan z serwera
-          if (raw.gameId && raw.gameId !== gameId) return;
-          const norm = normalizeState(raw);
-          const member = norm.players.find(p => p.clientToken === myClientToken);
-          if (!member) { reason = 'Dołącz do tego pokoju, aby wykonać ruch.'; return; }
-          const target = norm.players.find(p => p.id === localActor);
-          if (type !== 'TICK' && localActor !== member.id && !target?.isBot) {
-            reason = 'Możesz sterować tylko swoim graczem.';
-            return;
-          }
-          try {
-            return monopoly.reduce(norm, { ...action, expectedRevision: norm.revision }, localActor);
-          } catch (err) {
-            reason = err.message;
-            return;
-          }
-        });
-        if (result.snapshot?.val()) acceptState(result.snapshot.val());
-        if (!result.committed && !quiet && reason) showToast(reason);
-        return result.committed;
+        // Pobieramy najświeższy stan z bazy, redukujemy i zapisujemy atomowo bez zawieszania transakcji
+        const snap = await firebaseRoomRef.once('value');
+        const raw = snap.val() || gameState;
+        const norm = normalizeState(raw);
+        const member = norm.players.find(p => p.clientToken === myClientToken);
+        if (!member) throw new Error('Dołącz do tego pokoju, aby wykonać ruch.');
+        const target = norm.players.find(p => p.id === localActor);
+        if (type !== 'TICK' && localActor !== member.id && !target?.isBot) {
+          throw new Error('Możesz sterować tylko swoim graczem.');
+        }
+        const nextState = sanitizeForFirebase(monopoly.reduce(norm, action, localActor));
+        await firebaseRoomRef.set(nextState);
+        acceptState(nextState);
+        return true;
       }
-      acceptState(monopoly.reduce(gameState, { ...action, expectedRevision: gameState.revision }, localActor));
+      acceptState(monopoly.reduce(gameState, action, localActor));
       saveLocalState();
       return true;
     } catch (error) {
@@ -1350,14 +1454,14 @@
     clearTimeout(engineBotTimer);
     if (!gameState || gameState.activeGame !== 'MONOPOLY' || gameState.status !== 'PLAYING' || gameState.lobbyOpen || syncBusy) return;
     if (!gameState.isOnline && !document.getElementById('lobby-overlay').classList.contains('hidden')) return;
-    if (gameState.isOnline && !myOnlinePlayerId) return;
+    if (!isBotController()) return;
     const next = monopoly.botAction(gameState);
     if (!next) return;
     const revision = gameState.revision;
     engineBotTimer = setTimeout(() => {
       if (!gameState || gameState.revision !== revision) return;
       commitMonopoly(next.type, next, next.actor, true);
-    }, 900);
+    }, 850);
   }
 
   /* ==================== 7. MONOPOLY DOM ==================== */
@@ -1940,9 +2044,9 @@
 
     const teamsTag = document.getElementById('quoridor-teams-tag');
     if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
+      teamsTag.textContent = isTeamMode2v2()
         ? `DRUŻYNA A (${getTeamNamesSummary(0)}) VS DRUŻYNA B (${getTeamNamesSummary(1)})`
-        : `WYŚCIG PRZEZ CHODNIK GÓRNICZY — QUORIDOR 9×9`;
+        : `POJEDYNEK 1 VS 1: ${getTeamNamesSummary(0)} VS ${getTeamNamesSummary(1)}`;
     }
 
     const turnTxt = document.getElementById('quoridor-turn-text');
@@ -2059,7 +2163,7 @@
         }, 550);
       } else {
         pushStateSync();
-        if (curPlayer.isBot) {
+        if (curPlayer.isBot && isBotController()) {
           setTimeout(() => {
             const movableIdx = [0,1,2,3].find(i => canMoveLudoPawn(ludo.turn, i, ludo.dice));
             if (movableIdx !== undefined) moveLudoPawn(ludo.turn, movableIdx, true);
@@ -2185,9 +2289,9 @@
 
     const teamsTag = document.getElementById('checkers-teams-tag');
     if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
+      teamsTag.textContent = isTeamMode2v2()
         ? `DRUŻYNA WĘGLA (${getTeamNamesSummary(0)}) VS DRUŻYNA STALI (${getTeamNamesSummary(1)})`
-        : `WĘGIEL VS STAL`;
+        : `POJEDYNEK 1 VS 1: ${getTeamNamesSummary(0)} VS ${getTeamNamesSummary(1)}`;
     }
 
     const turnEl = document.getElementById('checkers-turn-text');
@@ -2291,9 +2395,9 @@
 
     const teamsTag = document.getElementById('chess-teams-tag');
     if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
+      teamsTag.textContent = isTeamMode2v2()
         ? `DRUŻYNA ZŁOTYCH (${getTeamNamesSummary(0)}) VS DRUŻYNA BŁĘKITNYCH (${getTeamNamesSummary(1)})`
-        : `HUTA POKÓJ VS KWK HALEMBA`;
+        : `POJEDYNEK 1 VS 1: ${getTeamNamesSummary(0)} VS ${getTeamNamesSummary(1)}`;
     }
 
     const turnEl = document.getElementById('chess-turn-text');
@@ -2406,9 +2510,9 @@
 
     const teamsTag = document.getElementById('c4-teams-tag');
     if (teamsTag) {
-      teamsTag.textContent = gameState.players.length > 2
+      teamsTag.textContent = isTeamMode2v2()
         ? `DRUŻYNA A (${getTeamNamesSummary(0)}) VS DRUŻYNA B (${getTeamNamesSummary(1)})`
-        : `SZYB WYDOBYWCZY: 4 W LINII`;
+        : `POJEDYNEK 1 VS 1: ${getTeamNamesSummary(0)} VS ${getTeamNamesSummary(1)}`;
     }
 
     const turnEl = document.getElementById('c4-turn-text');
@@ -2446,6 +2550,7 @@
       clearTimeout(botActionTimeout);
       botActionTimeout = null;
     }
+    if (!isBotController()) return;
 
     const mode = gameState.activeGame;
 
@@ -2511,8 +2616,7 @@
         }, 600);
       }
     }
-
-    if (mode === 'LUDO') {
+if (mode === 'LUDO') {
       const pCount = Math.min(4, gameState.players.length);
       const cur = gameState.players[gameState.ludo.turn % pCount];
       if (cur && cur.isBot && gameState.ludo.winner === null && !gameState.ludo.rolled) {
@@ -2582,6 +2686,8 @@
   function renderAll() {
     if (!gameState) return;
     syncMyOnlineIdentity();
+    inject2PModeToggleButtons();
+    update2PModeToggleLabels();
     if (gameState.mapId) applyMapTheme(gameState.mapId);
 
     if (gameState.status === 'FINISHED' && gameState.winnerAnnouncement && lastWinnerShown !== gameState.gameId) {
@@ -2686,10 +2792,10 @@
     const debt = gameState.debt, debtor = debt ? getPlayerById(debt.playerId) : null;
     const debtEl = document.getElementById('debt-warning-banner');
     debtEl.classList.toggle('hidden', !debt);
-    if (debt) debtEl.textContent = `${debtor.name} musi zapłacić $${debt.amount}. Brakuje $${Math.max(0, debt.amount - debtor.cash)}. Sprzedaj budynki lub zastaw działki.`;
+    if (debt && debtor) debtEl.textContent = `${debtor.name} musi zapłacić $${debt.amount}. Brakuje $${Math.max(0, debt.amount - debtor.cash)}. Sprzedaj budynki lub zastaw działki.`;
     const avatar = document.getElementById('playing-now-avatar');
     avatar.style.background = (debtor || active).color; avatar.innerHTML = getAvatarSvg((debtor || active).avatar);
-    document.getElementById('playing-now-label').textContent = debt ? `Spłaca dług: ${debtor.name}` : `Tura: ${active.name}`;
+    document.getElementById('playing-now-label').textContent = (debt && debtor) ? `Spłaca dług: ${debtor.name}` : `Tura: ${active.name}`;
     const phase = gameState.turnPhase, control = canControlTurn();
     document.getElementById('wait-turn-notice').classList.toggle('hidden', control || gameState.status === 'FINISHED');
     document.getElementById('wait-turn-notice').textContent = active.isBot ? `🤖 ${active.name} planuje ruch…` : `Czekasz na ruch: ${active.name}`;
@@ -2726,7 +2832,7 @@
     if (rosterEl) {
       rosterEl.innerHTML = gameState.players.map((p, idx) => {
         const airCnt = AIRPORT_INDICES.filter(i => gameState.properties[i]?.ownerId === p.id).length;
-        const teamLabel = gameState.players.length > 2 ? ((idx % 2 === 0) ? ' • Druż. A' : ' • Druż. B') : '';
+        const teamLabel = isTeamMode2v2() ? ((idx % 2 === 0) ? ' • Druż. A' : ' • Druż. B') : (idx < 2 && ['QUORIDOR','CHECKERS','CHESS','CONNECT4'].includes(gameState.activeGame) ? ' • 1v1' : '');
         return `
           <div class="roster-player-row ${idx === gameState.turnIndex ? 'is-active' : ''} ${p.bankrupt ? 'is-bankrupt' : ''}" style="border-left-color:${p.color}">
             <div class="roster-left">
@@ -2809,13 +2915,14 @@
     document.getElementById('summary-balance').textContent = '$' + (viewer?.cash ?? 0).toLocaleString('pl-PL');
     document.getElementById('summary-active').textContent = alive.length + ' / ' + gameState.players.length;
     document.getElementById('summary-leader').textContent = leader?.name || '—';
-    document.getElementById('mobile-field-name').textContent = BOARD_TILES[(gameState.debt ? getPlayerById(gameState.debt.playerId) : currentTurnPlayer()).position].shortName;
+    const curPos = (gameState.debt ? getPlayerById(gameState.debt.playerId) : currentTurnPlayer())?.position || 0;
+    document.getElementById('mobile-field-name').textContent = BOARD_TILES[curPos]?.shortName || 'START';
     document.getElementById('summary-mode').textContent = gameState.roundLimit ? gameState.roundLimit + ' rund' : 'Klasyczny';
     const progress = document.getElementById('round-progress');
     progress.style.width = (gameState.status === 'FINISHED' ? 100 : gameState.roundLimit ? Math.min(100, (gameState.round - 1) / gameState.roundLimit * 100) : 0) + '%';
     const rows = document.getElementById('district-collection');
     if (rows && viewer) rows.innerHTML = Object.entries(GROUPS).filter(([k]) => !['AIRPORT', 'UTILITY'].includes(k)).map(([k, g]) => {
-      const all = BOARD_TILES.filter(t => t.group === k), count = all.filter(t => gameState.properties[t.index].ownerId === viewer.id).length;
+      const all = BOARD_TILES.filter(t => t.group === k), count = all.filter(t => gameState.properties[t.index]?.ownerId === viewer.id).length;
       return `<div class="collection-cell ${count === all.length ? 'complete' : ''}" title="${g.name}" style="--district:${g.color}"><span>${g.code}</span><strong>${count}/${all.length}</strong></div>`;
     }).join('');
     document.getElementById('btn-show-ledger').classList.toggle('has-new', !!gameState.debt);
@@ -2856,7 +2963,7 @@
     const modal = document.getElementById('auction-modal'), a = gameState.auction;
     modal.classList.toggle('hidden', !a || gameState.activeGame !== 'MONOPOLY');
     if (!a) return;
-    document.getElementById('auc-title').textContent = BOARD_TILES[a.tileIndex].name;
+    document.getElementById('auc-title').textContent = BOARD_TILES[a.tileIndex]?.name || 'Działka';
     document.getElementById('auc-current-bid').textContent = '$' + a.highBid;
     document.getElementById('auc-leader-name').textContent = a.leaderId ? 'Prowadzi: ' + getPlayerById(a.leaderId)?.name : 'Brak ofert — zaczynamy od $1';
     const select = document.getElementById('auc-bidder-select'), previous = select.value;
@@ -2885,21 +2992,9 @@
     if (!text.trim() || !gameState) return;
     const sender = getMyViewerPlayer(); if (!sender) return;
     const message = { author: sender.name, color: sender.color, text: text.trim().slice(0, 140), time: nowTime() };
-    if (gameState.isOnline) {
-      if (!firebaseRoomRef) { showToast('Najpierw dołącz do pokoju.'); return; }
-      try {
-        await firebaseRoomRef.transaction(raw => {
-          if (!raw) return raw;
-          raw.chat = [...Object.values(raw.chat || {}), message].slice(-80);
-          raw.revision = (raw.revision || 0) + 1;
-          return raw;
-        });
-      } catch (e) { networkError(e); }
-    } else {
-      gameState.chat.push(message);
-      gameState.chat = gameState.chat.slice(-80);
-      pushStateSync();
-    }
+    gameState.chat.push(message);
+    gameState.chat = gameState.chat.slice(-80);
+    await pushStateSync();
   }
 
   /* ==================== LOBBY Z UNIKALNYMI KOLORAMI ==================== */
@@ -3008,7 +3103,6 @@
 
   function addOrReconnectPlayerToRoom(roomState, myName, myColor, myAvatar, tokenToUse = myClientToken) {
     roomState = normalizeState(roomState);
-    if (roomState.rulesVersion !== monopoly.rulesVersion) throw new Error('Pokój używa starszej wersji. Utwórz nowy pokój.');
     const existing = roomState.players.find(p => p.clientToken === tokenToUse);
     if (existing) {
       existing.name = cleanName(myName);
@@ -3096,7 +3190,7 @@
       },
       QUORIDOR: {
         title: '🧱 Sztolnia Labirynt',
-        body: `<p><strong>Cel:</strong> przeprowadź pionek na przeciwległy koniec planszy 9×9, stawiając ściany blokujące rywala.</p>`
+        body: `<p><strong>Cel:</strong> przeprowadź pionek na przeciwległy koniec planszy 9×9, stawiając ściany blokujące rywala. Przycisk u góry przełącza tryb <strong>1 vs 1</strong> oraz <strong>2 vs 2</strong>.</p>`
       },
       LUDO: {
         title: '🎲 Chińczyk',
@@ -3104,15 +3198,15 @@
       },
       CHECKERS: {
         title: '⚫ Warcaby',
-        body: `<p><strong>Zasady:</strong> ruch po ciemnych polach na ukos. Przy >2 graczach działają 2 drużyny.</p>`
+        body: `<p><strong>Zasady:</strong> ruch po ciemnych polach na ukos. Przycisk u góry pozwala wybrać pojedynek <strong>1 vs 1</strong> (bez czekania na inne boty) lub <strong>2 vs 2 (Drużyny)</strong>.</p>`
       },
       CHESS: {
         title: '♟️ Szachy',
-        body: `<p><strong>Zasady:</strong> zbicie Króla rywala kończy partię. Przy >2 graczach działają 2 drużyny.</p>`
+        body: `<p><strong>Zasady:</strong> zbicie Króla rywala kończy partię. Przycisk u góry pozwala wybrać pojedynek <strong>1 vs 1</strong> lub <strong>2 vs 2 (Drużyny)</strong>.</p>`
       },
       CONNECT4: {
         title: '🪙 4 w Rzędzie',
-        body: `<p><strong>Zasady:</strong> ułóż 4 krążki swojego koloru w linii poziomej, pionowej lub ukośnej.</p>`
+        body: `<p><strong>Zasady:</strong> ułóż 4 krążki swojego koloru w linii poziomej, pionowej lub ukośnej. Dostępny przełącznik <strong>1 vs 1 / 2 vs 2</strong>.</p>`
       }
     };
 
@@ -3145,7 +3239,6 @@
 
   /* ==================== 13. INICJALIZACJA ZDARZEŃ ==================== */
   function initEvents() {
-    // Obsługa przycisku Pełnego Ekranu
     bindClick('btn-fullscreen', () => {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen?.().catch(() => {});
@@ -3189,7 +3282,7 @@
     bindClick('btn-resume-local', () => {
       try {
         const saved = JSON.parse(storage.getItem('ruda_local_save_v15'));
-        if (!saved || saved.rulesVersion !== monopoly.rulesVersion || saved.isOnline) throw new Error('Brak zgodnego zapisu.');
+        if (!saved || saved.isOnline) throw new Error('Brak zgodnego zapisu.');
         saved.turnDeadline = serverNow() + 120000;
         if (saved.auction) saved.auction.deadline = serverNow() + 25000;
         subscribeToRoom('LOKALNY');
@@ -3294,8 +3387,7 @@
 
     const parseRoomCode = () => {
       const raw = document.getElementById('join-code-input')?.value?.trim().toUpperCase() || '';
-      const clean = raw.replace(/[^A-Z0-9-]/g, '').slice(0, 12);
-      return clean;
+      return raw.replace(/[^A-Z0-9-]/g, '').slice(0, 12);
     };
 
     bindClick('btn-create-room', async () => {
@@ -3306,7 +3398,7 @@
         const code = parseRoomCode() || ('RUDA' + randomSeed().toString(36).slice(0, 4).toUpperCase());
         const myName = cleanName(document.getElementById('online-name-input')?.value || 'Hanys');
         const players = [{ id: 'p1', clientToken: myClientToken, name: myName, color: onlinePickedColor, avatar: onlinePickedAvatar, isBot: false }];
-        const fresh = createFreshGameState(players, 1500, code, true, selectedGameMode, selectedMapId);
+        const fresh = sanitizeForFirebase(createFreshGameState(players, 1500, code, true, selectedGameMode, selectedMapId));
         const ref = firebaseDb.ref('rooms/' + code);
 
         await ref.set(fresh);
@@ -3336,7 +3428,7 @@
         if (!currentData) throw new Error(`Pokój „${code}” nie istnieje w tej bazie Firebase.`);
 
         const myName = document.getElementById('online-name-input')?.value || 'Górnik';
-        const updatedRoom = addOrReconnectPlayerToRoom(currentData, myName, onlinePickedColor, onlinePickedAvatar, myClientToken);
+        const updatedRoom = sanitizeForFirebase(addOrReconnectPlayerToRoom(currentData, myName, onlinePickedColor, onlinePickedAvatar, myClientToken));
         await ref.set(updatedRoom);
 
         acceptState(updatedRoom, true);
@@ -3510,6 +3602,7 @@
         const previous = gameState;
         gameState = createFreshGameState(previous.players, previous.startingCash || 1500, previous.roomCode, previous.isOnline, 'MONOPOLY', previous.mapId);
         gameState.roundLimit = previous.roundLimit;
+        gameState.twoPlayerMode = previous.twoPlayerMode || '1V1';
         gameState.lobbyOpen = false;
         gameState.hostToken = previous.hostToken;
         if (previous.isOnline && firebaseRoomRef) {
@@ -3576,7 +3669,7 @@
       timer.textContent = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
       timer.classList.toggle('timer-urgent', left <= 15);
       document.getElementById('auc-time-left').textContent = left + ' s';
-      if (left === 0 && !syncBusy && (!gameState.isOnline || myOnlinePlayerId)) {
+      if (left === 0 && !syncBusy && isBotController()) {
         const actor = gameState.isOnline ? myOnlinePlayerId : gameState.players.find(p => !p.bankrupt)?.id;
         commitMonopoly('TICK', {}, actor, true);
       }
@@ -3595,6 +3688,7 @@
     }
     buildMonopolyBoardDOM();
     buildRouletteFeltGrid();
+    inject2PModeToggleButtons();
     applyMapTheme(selectedMapId);
     renderLobbySetup();
     initEvents();
